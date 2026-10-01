@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../components/garden_field.dart';
 import '../components/demo_account_button.dart';
-import '../components/onboarding_footer.dart';
+import '../components/garden_button.dart';
+import '../components/account_form_links.dart';
 
 class AccountForm extends StatefulWidget {
   const AccountForm({
@@ -54,52 +55,55 @@ class _AccountFormState extends State<AccountForm> {
   }
 
   @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      Expanded(
-        child: Center(
-          child: SizedBox(
-            width: 340,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                GardenField(
-                  label: 'Email',
-                  controller: email,
-                  enabled: !widget.busy,
-                  autofocus: true,
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                const SizedBox(height: 18),
-                GardenField(
-                  label: 'Password',
-                  controller: password,
-                  obscure: true,
-                  enabled: !widget.busy,
-                  onSubmitted: (_) => submit(),
-                ),
-                if (widget.showDemo)
-                  DemoAccountButton(onFill: widget.busy ? null : fillDemo),
-                if (widget.onCreateAccount != null)
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: TextButton(
-                      onPressed: widget.busy ? null : widget.onCreateAccount,
-                      child: const Text('Create account'),
-                    ),
-                  ),
-              ],
+  Widget build(BuildContext context) => Center(
+    child: SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: SizedBox(
+        width: 340,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            GardenField(
+              label: 'Email',
+              controller: email,
+              enabled: !widget.busy,
+              autofocus: true,
+              keyboardType: TextInputType.emailAddress,
             ),
-          ),
+            const SizedBox(height: 20),
+            GardenField(
+              label: 'Password',
+              controller: password,
+              obscure: true,
+              enabled: !widget.busy,
+              onSubmitted: (_) => submit(),
+            ),
+            if (widget.showDemo || widget.onCreateAccount != null) ...[
+              const SizedBox(height: 12),
+              AccountFormLinks(
+                showDemo: widget.showDemo,
+                onFillDemo: widget.busy ? null : fillDemo,
+                onCreateAccount: widget.busy ? null : widget.onCreateAccount,
+                showCreateAccount: widget.onCreateAccount != null,
+              ),
+            ],
+            const SizedBox(height: 24),
+            GardenButton(
+              label: widget.busy ? 'Please wait' : widget.submitLabel,
+              onPressed: canSubmit ? submit : null,
+            ),
+            if (widget.onBack != null) ...[
+              const SizedBox(height: 12),
+              GardenButton(
+                label: 'Back',
+                secondary: true,
+                onPressed: widget.busy ? null : widget.onBack,
+              ),
+            ],
+          ],
         ),
       ),
-      OnboardingFooter(
-        action: widget.submitLabel,
-        busy: widget.busy,
-        onBack: widget.busy ? null : widget.onBack,
-        onAction: canSubmit ? submit : null,
-      ),
-    ],
+    ),
   );
 }
