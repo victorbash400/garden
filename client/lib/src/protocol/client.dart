@@ -474,6 +474,12 @@ class EndpointGarden extends _isc.EndpointRef {
         {'name': name},
       );
 
+  _ida.Future<String> invite(int gardenId) => caller.callServerEndpoint<String>(
+    'garden',
+    'invite',
+    {'gardenId': gardenId},
+  );
+
   _ida.Future<_iwcj6pye.GardenSummary> join(String invitationCode) =>
       caller.callServerEndpoint<_iwcj6pye.GardenSummary>(
         'garden',

@@ -33,20 +33,18 @@ void run(List<String> args) async {
     ],
   );
 
-  // Configure cloud storage.
-  // This setup works with Serverpod Cloud without extra configuration.
-  // If you want to use a custom provider for cloud storage, replace these
-  // with your preferred provider.
-  pod.addCloudStorage(
-    await ServerpodCloudProvider.private(
-      fallback: () => DatabaseCloudStorage('private'),
-    ),
-  );
-  pod.addCloudStorage(
-    await ServerpodCloudProvider.public(
-      fallback: () => DatabaseCloudStorage('public'),
-    ),
-  );
+  if (pod.runMode == ServerpodRunMode.development ||
+      pod.runMode == ServerpodRunMode.test) {
+    pod.addCloudStorage(DatabaseCloudStorage('private'));
+  } else {
+    pod.addCloudStorage(
+      await ServerpodCloudProvider.private(
+        fallback: () => throw StateError(
+          'Serverpod Cloud private storage is not configured.',
+        ),
+      ),
+    );
+  }
 
   // Start the server.
   await pod.start();

@@ -31,6 +31,8 @@ import 'files/file_lease.dart' as _ifu05pz5;
 import 'files/file_node.dart' as _iqxechne;
 import 'files/file_version.dart' as _inq2edz5;
 import 'files/node_kind.dart' as _idxfoob7;
+import 'future_calls_generated_models/upload_cleanup_future_call_expire_model.dart'
+    as _i4nkt2dm;
 import 'gardens/account_details.dart' as _i4muwn5e;
 import 'gardens/garden_exception.dart' as _icsgmcpa;
 import 'gardens/garden_member.dart' as _icenu3t8;
@@ -110,7 +112,18 @@ class Protocol extends _is.DatabaseSerializationManager {
           dartType: 'DateTime',
         ),
       ],
-      foreignKeys: [],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'drive_event_fk_0',
+          columns: ['gardenId'],
+          referenceTable: 'garden_record',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+      ],
       indexes: [
         _isp.IndexDefinition(
           indexName: 'event_revision_unique',
@@ -170,7 +183,18 @@ class Protocol extends _is.DatabaseSerializationManager {
           dartType: 'String',
         ),
       ],
-      foreignKeys: [],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'file_chunk_fk_0',
+          columns: ['versionId'],
+          referenceTable: 'file_version',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+      ],
       indexes: [
         _isp.IndexDefinition(
           indexName: 'chunk_unique',
@@ -230,7 +254,18 @@ class Protocol extends _is.DatabaseSerializationManager {
           dartType: 'DateTime',
         ),
       ],
-      foreignKeys: [],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'file_comment_fk_0',
+          columns: ['nodeId'],
+          referenceTable: 'file_node',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+      ],
       indexes: [
         _isp.IndexDefinition(
           indexName: 'comment_node',
@@ -290,7 +325,18 @@ class Protocol extends _is.DatabaseSerializationManager {
           dartType: 'DateTime',
         ),
       ],
-      foreignKeys: [],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'file_lease_fk_0',
+          columns: ['nodeId'],
+          referenceTable: 'file_node',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+      ],
       indexes: [
         _isp.IndexDefinition(
           indexName: 'lease_node_unique',
@@ -379,7 +425,18 @@ class Protocol extends _is.DatabaseSerializationManager {
           dartType: 'DateTime',
         ),
       ],
-      foreignKeys: [],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'file_node_fk_0',
+          columns: ['gardenId'],
+          referenceTable: 'garden_record',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+      ],
       indexes: [
         _isp.IndexDefinition(
           indexName: 'node_sibling_unique',
@@ -477,13 +534,31 @@ class Protocol extends _is.DatabaseSerializationManager {
           columnDefault: 'false',
         ),
         _isp.ColumnDefinition(
+          name: 'aborted',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
+        ),
+        _isp.ColumnDefinition(
           name: 'createdAt',
           columnType: _isp.ColumnType.timestampWithoutTimeZone,
           isNullable: false,
           dartType: 'DateTime',
         ),
       ],
-      foreignKeys: [],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'file_version_fk_0',
+          columns: ['nodeId'],
+          referenceTable: 'file_node',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+      ],
       indexes: [
         _isp.IndexDefinition(
           indexName: 'version_node',
@@ -682,6 +757,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _idxfoob7.NodeKind) {
       return _idxfoob7.NodeKind.fromJson(data) as T;
     }
+    if (t == _i4nkt2dm.UploadCleanupFutureCallExpireModel) {
+      return _i4nkt2dm.UploadCleanupFutureCallExpireModel.fromJson(data) as T;
+    }
     if (t == _i4muwn5e.AccountDetails) {
       return _i4muwn5e.AccountDetails.fromJson(data) as T;
     }
@@ -724,6 +802,12 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (t == _is.getType<_idxfoob7.NodeKind?>()) {
       return (data != null ? _idxfoob7.NodeKind.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i4nkt2dm.UploadCleanupFutureCallExpireModel?>()) {
+      return (data != null
+              ? _i4nkt2dm.UploadCleanupFutureCallExpireModel.fromJson(data)
+              : null)
+          as T;
     }
     if (t == _is.getType<_i4muwn5e.AccountDetails?>()) {
       return (data != null ? _i4muwn5e.AccountDetails.fromJson(data) : null)
@@ -792,6 +876,8 @@ class Protocol extends _is.DatabaseSerializationManager {
       _iqxechne.FileNode => 'FileNode',
       _inq2edz5.FileVersion => 'FileVersion',
       _idxfoob7.NodeKind => 'NodeKind',
+      _i4nkt2dm.UploadCleanupFutureCallExpireModel =>
+        'UploadCleanupFutureCallExpireModel',
       _i4muwn5e.AccountDetails => 'AccountDetails',
       _icsgmcpa.GardenException => 'GardenException',
       _icenu3t8.GardenMember => 'GardenMember',
@@ -828,6 +914,8 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'FileVersion';
       case _idxfoob7.NodeKind():
         return 'NodeKind';
+      case _i4nkt2dm.UploadCleanupFutureCallExpireModel():
+        return 'UploadCleanupFutureCallExpireModel';
       case _i4muwn5e.AccountDetails():
         return 'AccountDetails';
       case _icsgmcpa.GardenException():
@@ -889,6 +977,11 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (dataClassName == 'NodeKind') {
       return deserialize<_idxfoob7.NodeKind>(data['data']);
+    }
+    if (dataClassName == 'UploadCleanupFutureCallExpireModel') {
+      return deserialize<_i4nkt2dm.UploadCleanupFutureCallExpireModel>(
+        data['data'],
+      );
     }
     if (dataClassName == 'AccountDetails') {
       return deserialize<_i4muwn5e.AccountDetails>(data['data']);

@@ -30,6 +30,7 @@ garden:
   - account:
   - list:
   - create:
+  - invite:
   - join:
   - connect:
 greeting:

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
 
@@ -40,14 +41,15 @@ class DriveAccess {
   static Future<GardenRecord> lock(
     Session session,
     int gardenId,
-    Transaction transaction,
-  ) async {
+    Transaction transaction, {
+    LockMode mode = LockMode.forUpdate,
+  }) async {
     await require(session, gardenId, transaction: transaction);
     final drive = await GardenRecord.db.findById(
       session,
       gardenId,
       transaction: transaction,
-      lockMode: LockMode.forUpdate,
+      lockMode: mode,
     );
     if (drive == null) {
       throw GardenException(message: 'This drive no longer exists.');
@@ -71,7 +73,7 @@ class DriveAccess {
   static String name(String value) {
     final name = value.trim();
     if (name.isEmpty ||
-        name.length > 255 ||
+        utf8.encode(name).length > 255 ||
         name == '.' ||
         name == '..' ||
         name.contains('/') ||
@@ -79,10 +81,27 @@ class DriveAccess {
         name.codeUnits.any((unit) => unit < 32)) {
       throw GardenException(
         message:
-            'Use a file name of 1–255 characters without slashes, colons, or control characters.',
+            'Use a file name of 1–255 bytes without slashes, colons, or control characters.',
       );
     }
     return name;
+  }
+
+  static String conflictName(String name, int versionId, int attempt) {
+    final suffix = attempt == 0
+        ? ' (conflict $versionId)'
+        : ' (conflict $versionId-$attempt)';
+    final limit = 255 - utf8.encode(suffix).length;
+    final prefix = StringBuffer();
+    var length = 0;
+    for (final rune in name.runes) {
+      final character = String.fromCharCode(rune);
+      final size = utf8.encode(character).length;
+      if (length + size > limit) break;
+      prefix.write(character);
+      length += size;
+    }
+    return '$prefix$suffix';
   }
 
   static Future<void> available(

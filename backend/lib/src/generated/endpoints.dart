@@ -12,6 +12,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:typed_data' as _idt;
 import 'package:garden_server/src/generated/files/node_kind.dart' as _iso8aj7z;
+import 'package:garden_server/src/generated/future_calls.dart' as _id1va6nu;
 import 'package:serverpod/serverpod.dart' as _is;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _iacs;
@@ -24,6 +25,7 @@ import '../files/content_endpoint.dart' as _iqqtuyco;
 import '../files/files_endpoint.dart' as _idx8vriz;
 import '../gardens/garden_endpoint.dart' as _isd11de7;
 import '../greetings/greeting_endpoint.dart' as _il624ik7;
+export 'future_calls.dart' show ServerpodFutureCallsGetter;
 
 class Endpoints extends _is.EndpointDispatch {
   @override
@@ -708,6 +710,25 @@ class Endpoints extends _is.EndpointDispatch {
                     params['name'],
                   ),
         ),
+        'invite': _is.MethodConnector(
+          name: 'invite',
+          params: {
+            'gardenId': _is.ParameterDescription(
+              name: 'gardenId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['garden'] as _isd11de7.GardenEndpoint).invite(
+                    session,
+                    params['gardenId'],
+                  ),
+        ),
         'join': _is.MethodConnector(
           name: 'join',
           params: {
@@ -776,5 +797,10 @@ class Endpoints extends _is.EndpointDispatch {
       ..initializeEndpoints(server);
     modules['serverpod_auth_core'] = _iacs.Endpoints()
       ..initializeEndpoints(server);
+  }
+
+  @override
+  _is.FutureCallDispatch? get futureCalls {
+    return _id1va6nu.FutureCalls();
   }
 }

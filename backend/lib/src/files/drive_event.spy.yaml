@@ -1,7 +1,7 @@
 class: DriveEvent
 table: drive_event
 fields:
-  gardenId: int
+  gardenId: int, relation(parent=garden_record)
   revision: int
   operation: String
   authorId: String

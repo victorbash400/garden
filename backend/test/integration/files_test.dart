@@ -186,6 +186,51 @@ void main() {
     );
 
     test(
+      'invitations are owner-only and rotation invalidates the old code',
+      () async {
+        final drive = await endpoints.garden.create(owner, 'Invitations');
+        await endpoints.garden.join(guest, drive.invitationCode!);
+        await expectLater(
+          endpoints.garden.invite(guest, drive.id),
+          throwsA(isA<GardenException>()),
+        );
+        final code = await endpoints.garden.invite(owner, drive.id);
+        await expectLater(
+          endpoints.garden.join(guest, drive.invitationCode!),
+          throwsA(isA<GardenException>()),
+        );
+        expect((await endpoints.garden.join(guest, code)).id, drive.id);
+      },
+    );
+    test(
+      'upload cleanup is idempotent and preserves committed versions',
+      () async {
+        final drive = await endpoints.garden.create(owner, 'Cleanup');
+        final node = await endpoints.files.create(
+          owner,
+          drive.id,
+          0,
+          'notes.txt',
+          NodeKind.file,
+        );
+        final pending = await endpoints.content.begin(owner, node.id!, 0, 1);
+        await endpoints.content.writeChunk(owner, pending.id!, 0, ByteData(1));
+        await endpoints.futureCalls.uploadCleanup.expire(owner, pending.id!);
+        await endpoints.futureCalls.uploadCleanup.expire(owner, pending.id!);
+        await expectLater(
+          endpoints.content.finish(owner, pending.id!),
+          throwsA(isA<GardenException>()),
+        );
+        final complete = await endpoints.content.begin(owner, node.id!, 0, 0);
+        await endpoints.content.finish(owner, complete.id!);
+        await endpoints.futureCalls.uploadCleanup.expire(owner, complete.id!);
+        expect(
+          (await endpoints.content.versions(owner, node.id!)).single.id,
+          complete.id,
+        );
+      },
+    );
+    test(
       'live stream and replay are ordered and contain committed node state',
       () async {
         final drive = await endpoints.garden.create(owner, 'Events');

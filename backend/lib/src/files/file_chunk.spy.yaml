@@ -1,7 +1,7 @@
 class: FileChunk
 table: file_chunk
 fields:
-  versionId: int
+  versionId: int, relation(parent=file_version)
   chunkIndex: int
   size: int
   checksum: String

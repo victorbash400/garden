@@ -22,8 +22,10 @@ abstract class FileVersion
     required this.size,
     required this.chunkCount,
     bool? committed,
+    bool? aborted,
     required this.createdAt,
-  }) : committed = committed ?? false;
+  }) : committed = committed ?? false,
+       aborted = aborted ?? false;
 
   factory FileVersion({
     int? id,
@@ -33,6 +35,7 @@ abstract class FileVersion
     required int size,
     required int chunkCount,
     bool? committed,
+    bool? aborted,
     required DateTime createdAt,
   }) = _FileVersionImpl;
 
@@ -47,6 +50,9 @@ abstract class FileVersion
       committed: jsonSerialization['committed'] == null
           ? null
           : _is.BoolJsonExtension.fromJson(jsonSerialization['committed']),
+      aborted: jsonSerialization['aborted'] == null
+          ? null
+          : _is.BoolJsonExtension.fromJson(jsonSerialization['aborted']),
       createdAt: _is.DateTimeJsonExtension.fromJson(
         jsonSerialization['createdAt'],
       ),
@@ -72,6 +78,8 @@ abstract class FileVersion
 
   bool committed;
 
+  bool aborted;
+
   DateTime createdAt;
 
   @override
@@ -88,6 +96,7 @@ abstract class FileVersion
     int? size,
     int? chunkCount,
     bool? committed,
+    bool? aborted,
     DateTime? createdAt,
   });
   @override
@@ -101,6 +110,7 @@ abstract class FileVersion
       'size': size,
       'chunkCount': chunkCount,
       'committed': committed,
+      'aborted': aborted,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -116,6 +126,7 @@ abstract class FileVersion
       'size': size,
       'chunkCount': chunkCount,
       'committed': committed,
+      'aborted': aborted,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -159,6 +170,7 @@ class _FileVersionImpl extends FileVersion {
     required int size,
     required int chunkCount,
     bool? committed,
+    bool? aborted,
     required DateTime createdAt,
   }) : super._(
          id: id,
@@ -168,6 +180,7 @@ class _FileVersionImpl extends FileVersion {
          size: size,
          chunkCount: chunkCount,
          committed: committed,
+         aborted: aborted,
          createdAt: createdAt,
        );
 
@@ -183,6 +196,7 @@ class _FileVersionImpl extends FileVersion {
     int? size,
     int? chunkCount,
     bool? committed,
+    bool? aborted,
     DateTime? createdAt,
   }) {
     return FileVersion(
@@ -193,6 +207,7 @@ class _FileVersionImpl extends FileVersion {
       size: size ?? this.size,
       chunkCount: chunkCount ?? this.chunkCount,
       committed: committed ?? this.committed,
+      aborted: aborted ?? this.aborted,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -231,6 +246,11 @@ class FileVersionUpdateTable extends _is.UpdateTable<FileVersionTable> {
     value,
   );
 
+  _is.ColumnValue<bool, bool> aborted(bool value) => _is.ColumnValue(
+    table.aborted,
+    value,
+  );
+
   _is.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
       _is.ColumnValue(
         table.createdAt,
@@ -266,6 +286,11 @@ class FileVersionTable extends _is.Table<int?> {
       this,
       hasDefault: true,
     );
+    aborted = _is.ColumnBool(
+      'aborted',
+      this,
+      hasDefault: true,
+    );
     createdAt = _is.ColumnDateTime(
       'createdAt',
       this,
@@ -286,6 +311,8 @@ class FileVersionTable extends _is.Table<int?> {
 
   late final _is.ColumnBool committed;
 
+  late final _is.ColumnBool aborted;
+
   late final _is.ColumnDateTime createdAt;
 
   @override
@@ -297,6 +324,7 @@ class FileVersionTable extends _is.Table<int?> {
     size,
     chunkCount,
     committed,
+    aborted,
     createdAt,
   ];
 }

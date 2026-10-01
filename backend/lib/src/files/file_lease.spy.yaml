@@ -1,7 +1,7 @@
 class: FileLease
 table: file_lease
 fields:
-  nodeId: int
+  nodeId: int, relation(parent=file_node)
   holderId: String
   token: String
   expiresAt: DateTime

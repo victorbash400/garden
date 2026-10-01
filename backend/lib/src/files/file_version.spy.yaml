@@ -1,12 +1,13 @@
 class: FileVersion
 table: file_version
 fields:
-  nodeId: int
+  nodeId: int, relation(parent=file_node)
   authorId: String
   baseVersion: int
   size: int
   chunkCount: int
   committed: bool, default=false
+  aborted: bool, default=false
   createdAt: DateTime
 indexes:
   version_node:

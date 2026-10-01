@@ -9,7 +9,12 @@ class FilesEndpoint extends Endpoint {
 
   Future<DirectoryListing> list(Session session, int gardenId, int parentId) =>
       session.db.transaction((transaction) async {
-        final drive = await DriveAccess.lock(session, gardenId, transaction);
+        final drive = await DriveAccess.lock(
+          session,
+          gardenId,
+          transaction,
+          mode: LockMode.forShare,
+        );
         await DriveAccess.parent(session, gardenId, parentId, transaction);
         final nodes = await FileNode.db.find(
           session,

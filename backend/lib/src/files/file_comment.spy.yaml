@@ -1,7 +1,7 @@
 class: FileComment
 table: file_comment
 fields:
-  nodeId: int
+  nodeId: int, relation(parent=file_node)
   authorId: String
   text: String
   createdAt: DateTime

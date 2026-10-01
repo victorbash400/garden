@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
+import '../generated/future_calls.dart';
 import 'drive_access.dart';
 import 'drive_journal.dart';
 
@@ -22,12 +23,15 @@ class ContentEndpoint extends Endpoint {
     if (node.kind != NodeKind.file || size < 0 || size > 1 << 40) {
       throw GardenException(message: 'Invalid file size or type.');
     }
-    if (baseVersion != node.version) {
-      throw GardenException(
-        message: 'This file changed. Reopen it before saving.',
-      );
+    if (baseVersion != 0 && baseVersion != node.version) {
+      final base = await FileVersion.db.findById(session, baseVersion);
+      if (base == null || base.nodeId != nodeId || !base.committed) {
+        throw GardenException(
+          message: 'This base file version is unavailable.',
+        );
+      }
     }
-    return FileVersion.db.insertRow(
+    final upload = await FileVersion.db.insertRow(
       session,
       FileVersion(
         nodeId: nodeId,
@@ -38,6 +42,11 @@ class ContentEndpoint extends Endpoint {
         createdAt: DateTime.now().toUtc(),
       ),
     );
+    await session.serverpod.futureCalls
+        .callWithDelay(const Duration(hours: 24))
+        .uploadCleanup
+        .expire(upload.id!);
+    return upload;
   }
 
   Future<FileVersion> _upload(
@@ -53,6 +62,7 @@ class ContentEndpoint extends Endpoint {
     );
     if (version == null ||
         version.committed ||
+        version.aborted ||
         version.authorId != DriveAccess.user(session)) {
       throw GardenException(message: 'This upload is unavailable.');
     }
@@ -140,7 +150,19 @@ class ContentEndpoint extends Endpoint {
       }
       var operation = 'write';
       if (node.version != version.baseVersion) {
-        final name = '${node.name} (conflict $versionId)';
+        var attempt = 0;
+        var name = DriveAccess.conflictName(node.name, versionId, attempt);
+        while (await FileNode.db.count(
+              session,
+              where: (row) =>
+                  row.gardenId.equals(node.gardenId) &
+                  row.parentId.equals(node.parentId) &
+                  row.activeName.equals(name.toLowerCase()),
+              transaction: transaction,
+            ) !=
+            0) {
+          name = DriveAccess.conflictName(node.name, versionId, ++attempt);
+        }
         node = await FileNode.db.insertRow(
           session,
           FileNode(

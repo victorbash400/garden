@@ -1,7 +1,7 @@
 class: FileNode
 table: file_node
 fields:
-  gardenId: int
+  gardenId: int, relation(parent=garden_record)
   parentId: int
   name: String
   activeName: String?

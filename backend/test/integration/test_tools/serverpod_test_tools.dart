@@ -25,6 +25,9 @@ import 'package:garden_server/src/generated/files/file_node.dart' as _il49blua;
 import 'package:garden_server/src/generated/files/file_version.dart'
     as _iwzwya1z;
 import 'package:garden_server/src/generated/files/node_kind.dart' as _iso8aj7z;
+import 'package:garden_server/src/generated/future_calls.dart' as _id1va6nu;
+import 'package:garden_server/src/generated/future_calls_generated_models/upload_cleanup_future_call_expire_model.dart'
+    as _izf17ijw;
 import 'package:garden_server/src/generated/gardens/account_details.dart'
     as _i83iryap;
 import 'package:garden_server/src/generated/gardens/garden_summary.dart'
@@ -168,6 +171,8 @@ void withServerpod(
 }
 
 class TestEndpoints {
+  late final futureCalls = _FutureCalls();
+
   late final _EmailIdpEndpoint emailIdp;
 
   late final _JwtRefreshEndpoint jwtRefresh;
@@ -219,6 +224,10 @@ class _InternalTestEndpoints extends TestEndpoints
       serializationManager,
     );
   }
+}
+
+class _FutureCalls {
+  late final uploadCleanup = _UploadCleanupFutureCall();
 }
 
 class _EmailIdpEndpoint {
@@ -1159,6 +1168,37 @@ class _GardenEndpoint {
     });
   }
 
+  _ida.Future<String> invite(
+    _ist.TestSessionBuilder sessionBuilder,
+    int gardenId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'garden',
+            method: 'invite',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'garden',
+          methodName: 'invite',
+          parameters: _ist.testObjectToJson({'gardenId': gardenId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<String>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _ida.Future<_itk3qnhp.GardenSummary> join(
     _ist.TestSessionBuilder sessionBuilder,
     String invitationCode,
@@ -1261,5 +1301,26 @@ class _GreetingEndpoint {
         await _localUniqueSession.close();
       }
     });
+  }
+}
+
+class _UploadCleanupFutureCall {
+  Future<void> expire(
+    _ist.TestSessionBuilder sessionBuilder,
+    int versionId,
+  ) async {
+    var object = _izf17ijw.UploadCleanupFutureCallExpireModel(
+      versionId: versionId,
+    );
+    var _localUniqueSession =
+        (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild();
+    try {
+      await _id1va6nu.UploadCleanupExpireFutureCall().invoke(
+        _localUniqueSession,
+        object,
+      );
+    } finally {
+      await _localUniqueSession.close();
+    }
   }
 }

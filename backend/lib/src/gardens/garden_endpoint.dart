@@ -98,6 +98,33 @@ class GardenEndpoint extends Endpoint {
     });
   }
 
+  Future<String> invite(Session session, int gardenId) async {
+    final random = Random.secure();
+    final code = base64Url.encode(
+      List.generate(24, (_) => random.nextInt(256)),
+    );
+    await session.db.transaction((transaction) async {
+      final record = await GardenRecord.db.findById(
+        session,
+        gardenId,
+        transaction: transaction,
+        lockMode: LockMode.forUpdate,
+      );
+      if (record == null || record.ownerId != _user(session)) {
+        throw GardenException(
+          message: 'Only the drive owner can create invitations.',
+        );
+      }
+      record.invitationHash = _hash(code);
+      await GardenRecord.db.updateRow(
+        session,
+        record,
+        transaction: transaction,
+      );
+    });
+    return code;
+  }
+
   Future<GardenSummary> join(Session session, String invitationCode) async {
     final record = await GardenRecord.db.findFirstRow(
       session,
