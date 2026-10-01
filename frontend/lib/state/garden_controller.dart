@@ -24,7 +24,13 @@ enum GardenPage {
 }
 
 class GardenController extends ChangeNotifier {
-  GardenController(this.gateway, this.preferences, {this.files});
+  GardenController(
+    this.gateway,
+    this.preferences, {
+    this.files,
+    this.localServer = false,
+  });
+  final bool localServer;
   final FilesController? files;
   final GardenGateway gateway;
   final PreferencesStore preferences;
@@ -108,6 +114,13 @@ class GardenController extends ChangeNotifier {
     registrationId = null;
     page = GardenPage.gardens;
     gardens = await gateway.listGardens();
+  });
+
+  Future<void> resendVerification() => _request(() async {
+    if (registrationEmail.isEmpty) {
+      throw StateError('Registration has not started.');
+    }
+    registrationId = await gateway.beginRegistration(registrationEmail);
   });
 
   Future<void> refresh() => _request(() async {

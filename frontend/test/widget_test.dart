@@ -164,7 +164,7 @@ void main() {
       await tester.tap(find.text('Create account'));
       await tester.pumpAndSettle();
       expect(find.text('Email verification code'), findsOneWidget);
-      await tester.enterText(find.byType(TextField), '123456');
+      await tester.enterText(find.byType(TextField).first, '12345678');
       await tester.pump();
       await tester.tap(find.text('Verify'));
       await tester.pumpAndSettle();

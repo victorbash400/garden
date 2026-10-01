@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'src/auth/demo_account.dart';
+import 'src/auth/garden_email_config.dart';
 import 'package:serverpod_auth_idp_server/core.dart';
-import 'package:serverpod_auth_idp_server/providers/email.dart';
 import 'src/files/file_storage.dart';
 import 'src/files/upload_cleanup_tasks.dart';
 
@@ -22,15 +22,7 @@ void run(List<String> args) async {
       JwtConfigFromPasswords(),
     ],
     identityProviderBuilders: [
-      // Configure the email identity provider for email/password authentication.
-      // The default setup works with Serverpod Cloud without configuration. In
-      // development the verification codes are logged to the console, and in
-      // staging and production they are sent through the Serverpod Cloud email
-      // service. If you want to use a custom provider for sending emails, use
-      // `EmailIdpConfigFromPasswords`.
-      ServerpodCloudEmailIdpConfig(
-        appDisplayName: 'garden',
-      ),
+      gardenEmailConfig(pod),
     ],
   );
 

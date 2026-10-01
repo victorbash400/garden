@@ -31,6 +31,11 @@ Future<void> main() async {
   final controller = GardenController(
     gateway,
     LocalPreferences(),
+    localServer: const [
+      'localhost',
+      '127.0.0.1',
+      '::1',
+    ].contains(Uri.parse(serverUrl).host),
     files: FilesController(ServerpodFilesGateway(gateway.client)),
   );
   runApp(GardenApp(controller: controller));

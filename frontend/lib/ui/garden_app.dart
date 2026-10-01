@@ -12,6 +12,7 @@ import '../views/files_view.dart';
 import '../views/gardens_view.dart';
 import '../views/settings_view.dart';
 import '../views/value_form.dart';
+import '../views/verification_view.dart';
 import '../views/welcome_view.dart';
 import 'garden_theme.dart';
 
@@ -106,16 +107,7 @@ class GardenApp extends StatelessWidget {
         onBack: controller.back,
       ),
     ),
-    GardenPage.verify => Center(
-      child: ValueForm(
-        key: const ValueKey('verify'),
-        label: 'Email verification code',
-        action: 'Verify',
-        busy: controller.busy,
-        onSubmit: controller.verify,
-        onBack: controller.back,
-      ),
-    ),
+    GardenPage.verify => VerificationView(controller: controller),
     GardenPage.gardens => GardensView(controller: controller),
     GardenPage.create => Center(
       child: ValueForm(
