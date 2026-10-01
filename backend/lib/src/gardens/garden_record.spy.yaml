@@ -6,6 +6,7 @@ fields:
   invitationHash: String
   createdAt: DateTime
   revision: int, default=0
+  deleted: bool, default=false
 indexes:
   invitation_hash_unique:
     fields: invitationHash

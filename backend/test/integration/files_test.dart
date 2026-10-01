@@ -20,6 +20,37 @@ void main() {
       session.server.serverpod.addCloudStorage(DatabaseCloudStorage('private'));
     });
 
+    test(
+      'drive deletion is owner-only, hides membership and blocks files',
+      () async {
+        final drive = await endpoints.garden.create(owner, 'Disposable');
+        await endpoints.garden.join(guest, drive.invitationCode!);
+        final node = await endpoints.files.create(
+          owner,
+          drive.id,
+          0,
+          'Keep.txt',
+          NodeKind.file,
+        );
+        await expectLater(
+          endpoints.garden.delete(guest, drive.id),
+          throwsA(isA<GardenException>()),
+        );
+        await endpoints.garden.delete(owner, drive.id);
+        expect(await endpoints.garden.list(owner), isEmpty);
+        expect(await endpoints.garden.list(guest), isEmpty);
+        await expectLater(
+          endpoints.files.list(owner, drive.id, 0),
+          throwsA(isA<GardenException>()),
+        );
+        await expectLater(
+          endpoints.garden.connect(guest, drive.id),
+          throwsA(isA<GardenException>()),
+        );
+        expect(await FileNode.db.findById(owner.build(), node.id!), isNotNull);
+      },
+    );
+
     test('permissions, hierarchy, and duplicate names are enforced', () async {
       final drive = await endpoints.garden.create(owner, 'Files');
       final folder = await endpoints.files.create(

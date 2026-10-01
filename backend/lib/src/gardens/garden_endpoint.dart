@@ -32,7 +32,7 @@ class GardenEndpoint extends Endpoint {
     final ids = memberships.map((member) => member.gardenId).toSet();
     final records = await GardenRecord.db.find(
       session,
-      where: (row) => row.id.inSet(ids),
+      where: (row) => row.id.inSet(ids) & row.deleted.equals(false),
     );
     final members = await GardenMember.db.find(
       session,
@@ -45,9 +45,6 @@ class GardenEndpoint extends Endpoint {
     final roles = {
       for (final member in memberships) member.gardenId: member.role,
     };
-    if (records.length != memberships.length) {
-      throw GardenException(message: 'A drive membership is invalid.');
-    }
     return records
         .map(
           (record) => GardenSummary(
@@ -110,7 +107,9 @@ class GardenEndpoint extends Endpoint {
         transaction: transaction,
         lockMode: LockMode.forUpdate,
       );
-      if (record == null || record.ownerId != _user(session)) {
+      if (record == null ||
+          record.deleted ||
+          record.ownerId != _user(session)) {
         throw GardenException(
           message: 'Only the drive owner can create invitations.',
         );
@@ -130,16 +129,21 @@ class GardenEndpoint extends Endpoint {
       session,
       where: (row) => row.invitationHash.equals(_hash(invitationCode.trim())),
     );
-    if (record == null) {
+    if (record == null || record.deleted) {
       throw GardenException(message: 'The invitation code is invalid.');
     }
     await session.db.transaction((transaction) async {
-      await GardenRecord.db.findById(
+      final locked = await GardenRecord.db.findById(
         session,
         record.id!,
         transaction: transaction,
         lockMode: LockMode.forUpdate,
       );
+      if (locked == null ||
+          locked.deleted ||
+          locked.invitationHash != _hash(invitationCode.trim())) {
+        throw GardenException(message: 'The invitation code is invalid.');
+      }
       final existing = await GardenMember.db.findFirstRow(
         session,
         where: (row) =>
@@ -171,10 +175,34 @@ class GardenEndpoint extends Endpoint {
       throw GardenException(message: 'You do not have access to this drive.');
     }
     final record = await GardenRecord.db.findById(session, gardenId);
-    if (record == null) {
+    if (record == null || record.deleted) {
       throw GardenException(message: 'This drive no longer exists.');
     }
     return _summary(session, record, membership.role);
+  }
+
+  Future<void> delete(Session session, int gardenId) async {
+    await session.db.transaction((transaction) async {
+      final record = await GardenRecord.db.findById(
+        session,
+        gardenId,
+        transaction: transaction,
+        lockMode: LockMode.forUpdate,
+      );
+      if (record == null ||
+          record.deleted ||
+          record.ownerId != _user(session)) {
+        throw GardenException(
+          message: 'Only the drive owner can delete this drive.',
+        );
+      }
+      record.deleted = true;
+      await GardenRecord.db.updateRow(
+        session,
+        record,
+        transaction: transaction,
+      );
+    });
   }
 
   Future<GardenSummary> _summary(

@@ -21,7 +21,9 @@ abstract class GardenRecord
     required this.invitationHash,
     required this.createdAt,
     int? revision,
-  }) : revision = revision ?? 0;
+    bool? deleted,
+  }) : revision = revision ?? 0,
+       deleted = deleted ?? false;
 
   factory GardenRecord({
     int? id,
@@ -30,6 +32,7 @@ abstract class GardenRecord
     required String invitationHash,
     required DateTime createdAt,
     int? revision,
+    bool? deleted,
   }) = _GardenRecordImpl;
 
   factory GardenRecord.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -42,6 +45,9 @@ abstract class GardenRecord
         jsonSerialization['createdAt'],
       ),
       revision: jsonSerialization['revision'] as int?,
+      deleted: jsonSerialization['deleted'] == null
+          ? null
+          : _is.BoolJsonExtension.fromJson(jsonSerialization['deleted']),
     );
   }
 
@@ -62,6 +68,8 @@ abstract class GardenRecord
 
   int revision;
 
+  bool deleted;
+
   @override
   _is.Table<int?> get table => t;
 
@@ -75,6 +83,7 @@ abstract class GardenRecord
     String? invitationHash,
     DateTime? createdAt,
     int? revision,
+    bool? deleted,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -86,6 +95,7 @@ abstract class GardenRecord
       'invitationHash': invitationHash,
       'createdAt': createdAt.toJson(),
       'revision': revision,
+      'deleted': deleted,
     };
   }
 
@@ -99,6 +109,7 @@ abstract class GardenRecord
       'invitationHash': invitationHash,
       'createdAt': createdAt.toJson(),
       'revision': revision,
+      'deleted': deleted,
     };
   }
 
@@ -140,6 +151,7 @@ class _GardenRecordImpl extends GardenRecord {
     required String invitationHash,
     required DateTime createdAt,
     int? revision,
+    bool? deleted,
   }) : super._(
          id: id,
          name: name,
@@ -147,6 +159,7 @@ class _GardenRecordImpl extends GardenRecord {
          invitationHash: invitationHash,
          createdAt: createdAt,
          revision: revision,
+         deleted: deleted,
        );
 
   /// Returns a shallow copy of this [GardenRecord]
@@ -160,6 +173,7 @@ class _GardenRecordImpl extends GardenRecord {
     String? invitationHash,
     DateTime? createdAt,
     int? revision,
+    bool? deleted,
   }) {
     return GardenRecord(
       id: id is int? ? id : this.id,
@@ -168,6 +182,7 @@ class _GardenRecordImpl extends GardenRecord {
       invitationHash: invitationHash ?? this.invitationHash,
       createdAt: createdAt ?? this.createdAt,
       revision: revision ?? this.revision,
+      deleted: deleted ?? this.deleted,
     );
   }
 }
@@ -201,6 +216,11 @@ class GardenRecordUpdateTable extends _is.UpdateTable<GardenRecordTable> {
     table.revision,
     value,
   );
+
+  _is.ColumnValue<bool, bool> deleted(bool value) => _is.ColumnValue(
+    table.deleted,
+    value,
+  );
 }
 
 class GardenRecordTable extends _is.Table<int?> {
@@ -227,6 +247,11 @@ class GardenRecordTable extends _is.Table<int?> {
       this,
       hasDefault: true,
     );
+    deleted = _is.ColumnBool(
+      'deleted',
+      this,
+      hasDefault: true,
+    );
   }
 
   late final GardenRecordUpdateTable updateTable;
@@ -241,6 +266,8 @@ class GardenRecordTable extends _is.Table<int?> {
 
   late final _is.ColumnInt revision;
 
+  late final _is.ColumnBool deleted;
+
   @override
   List<_is.Column> get columns => [
     id,
@@ -249,6 +276,7 @@ class GardenRecordTable extends _is.Table<int?> {
     invitationHash,
     createdAt,
     revision,
+    deleted,
   ];
 }
 

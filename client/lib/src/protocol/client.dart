@@ -493,6 +493,12 @@ class EndpointGarden extends _isc.EndpointRef {
         'connect',
         {'gardenId': gardenId},
       );
+
+  _ida.Future<void> delete(int gardenId) => caller.callServerEndpoint<void>(
+    'garden',
+    'delete',
+    {'gardenId': gardenId},
+  );
 }
 
 /// This is an example endpoint that returns a greeting message through

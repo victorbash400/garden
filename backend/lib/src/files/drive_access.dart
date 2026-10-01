@@ -16,7 +16,12 @@ class DriveAccess {
           row.gardenId.equals(gardenId) & row.userId.equals(user(session)),
       transaction: transaction,
     );
-    if (member == null) {
+    final drive = await GardenRecord.db.findById(
+      session,
+      gardenId,
+      transaction: transaction,
+    );
+    if (member == null || drive == null || drive.deleted) {
       throw GardenException(message: 'You do not have access to this drive.');
     }
   }
@@ -51,7 +56,7 @@ class DriveAccess {
       transaction: transaction,
       lockMode: mode,
     );
-    if (drive == null) {
+    if (drive == null || drive.deleted) {
       throw GardenException(message: 'This drive no longer exists.');
     }
     return drive;

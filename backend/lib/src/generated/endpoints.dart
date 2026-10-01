@@ -766,6 +766,25 @@ class Endpoints extends _is.EndpointDispatch {
                     params['gardenId'],
                   ),
         ),
+        'delete': _is.MethodConnector(
+          name: 'delete',
+          params: {
+            'gardenId': _is.ParameterDescription(
+              name: 'gardenId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['garden'] as _isd11de7.GardenEndpoint).delete(
+                    session,
+                    params['gardenId'],
+                  ),
+        ),
       },
     );
     connectors['greeting'] = _is.EndpointConnector(

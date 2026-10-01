@@ -33,5 +33,6 @@ garden:
   - invite:
   - join:
   - connect:
+  - delete:
 greeting:
   - hello:
