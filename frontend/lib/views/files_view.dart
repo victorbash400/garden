@@ -36,7 +36,6 @@ class FilesView extends StatelessWidget {
               onInvite: actions.invite,
               onBackToDrives: onBackToDrives,
             ),
-            const Divider(height: 1, color: Color(0xFFE8E8EB)),
             SizedBox(
               height: 2,
               child: controller.busy

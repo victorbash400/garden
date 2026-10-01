@@ -6,9 +6,6 @@ class DirectoryHeader extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     height: 28,
     padding: const EdgeInsets.only(left: 19, right: 58),
-    decoration: const BoxDecoration(
-      border: Border(bottom: BorderSide(color: Color(0xFFE6E6E6))),
-    ),
     child: LayoutBuilder(
       builder: (context, constraints) => Row(
         children: [
