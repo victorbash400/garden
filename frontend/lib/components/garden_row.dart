@@ -17,7 +17,11 @@ class GardenRow extends StatelessWidget {
     ),
     child: Row(
       children: [
-        const Icon(LucideIcons.folder, size: 30, color: GardenTheme.blue),
+        const Icon(
+          LucideIcons.hardDrive,
+          size: 30,
+          color: GardenTheme.secondary,
+        ),
         const SizedBox(width: 14),
         Expanded(
           child: Column(
