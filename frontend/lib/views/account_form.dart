@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../components/garden_field.dart';
+import '../components/demo_account_button.dart';
 import '../components/onboarding_footer.dart';
 
 class AccountForm extends StatefulWidget {
@@ -9,12 +10,16 @@ class AccountForm extends StatefulWidget {
     required this.busy,
     required this.onSubmit,
     required this.submitLabel,
-    required this.onBack,
+    this.onBack,
+    this.onCreateAccount,
+    this.showDemo = false,
   });
   final bool busy;
+  final bool showDemo;
   final String submitLabel;
   final void Function(String email, String password) onSubmit;
-  final VoidCallback onBack;
+  final VoidCallback? onBack;
+  final VoidCallback? onCreateAccount;
   @override
   State<AccountForm> createState() => _AccountFormState();
 }
@@ -37,6 +42,11 @@ class _AccountFormState extends State<AccountForm> {
     email.dispose();
     password.dispose();
     super.dispose();
+  }
+
+  void fillDemo() {
+    email.text = DemoAccountButton.email;
+    password.text = DemoAccountButton.password;
   }
 
   void submit() {
@@ -69,6 +79,16 @@ class _AccountFormState extends State<AccountForm> {
                   enabled: !widget.busy,
                   onSubmitted: (_) => submit(),
                 ),
+                if (widget.showDemo)
+                  DemoAccountButton(onFill: widget.busy ? null : fillDemo),
+                if (widget.onCreateAccount != null)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton(
+                      onPressed: widget.busy ? null : widget.onCreateAccount,
+                      child: const Text('Create account'),
+                    ),
+                  ),
               ],
             ),
           ),

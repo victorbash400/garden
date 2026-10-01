@@ -27,7 +27,7 @@ class ConnectionView extends StatelessWidget {
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 12),
-          const Text('Connected to Garden'),
+          const Text('Connected to drive'),
           const SizedBox(height: 8),
           const Text(
             'Finder mounting is not available yet.',

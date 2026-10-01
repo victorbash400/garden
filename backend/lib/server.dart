@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'src/auth/demo_account.dart';
 import 'package:serverpod_auth_idp_server/core.dart';
 import 'package:serverpod_auth_idp_server/providers/email.dart';
 import 'package:serverpod_cloud_storage/serverpod_cloud_storage.dart';
@@ -48,4 +50,7 @@ void run(List<String> args) async {
 
   // Start the server.
   await pod.start();
+  if (Platform.environment['GARDEN_SEED_DEMO'] == 'true') {
+    await seedDemoAccount(pod);
+  }
 }

@@ -21,7 +21,7 @@ class GardenController extends ChangeNotifier {
   GardenController(this.gateway, this.preferences);
   final GardenGateway gateway;
   final PreferencesStore preferences;
-  GardenPage page = GardenPage.welcome;
+  GardenPage page = GardenPage.signIn;
   AccountInfo? account;
   List<GardenInfo> gardens = [];
   GardenInfo? selected;
@@ -51,14 +51,14 @@ class GardenController extends ChangeNotifier {
   void back() {
     if (busy) return;
     navigate(switch (page) {
-      GardenPage.signIn || GardenPage.register => GardenPage.welcome,
+      GardenPage.signIn || GardenPage.register => GardenPage.signIn,
       GardenPage.verify => GardenPage.register,
       GardenPage.create ||
       GardenPage.join ||
       GardenPage.connected => GardenPage.gardens,
       GardenPage.settings =>
-        account == null ? GardenPage.welcome : GardenPage.gardens,
-      _ => GardenPage.welcome,
+        account == null ? GardenPage.signIn : GardenPage.gardens,
+      _ => GardenPage.signIn,
     });
   }
 
@@ -113,7 +113,7 @@ class GardenController extends ChangeNotifier {
     selected = null;
     registrationPassword = '';
     registrationId = null;
-    page = GardenPage.welcome;
+    page = GardenPage.signIn;
   });
   Future<void> setCacheLimit(int gib) => _request(() async {
     if (gib < 1 || gib > 100) {

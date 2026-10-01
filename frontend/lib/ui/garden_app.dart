@@ -25,7 +25,8 @@ class GardenApp extends StatelessWidget {
       builder: (context, _) => Scaffold(
         body: Row(
           children: [
-            GardenSidebar(controller: controller),
+            if (controller.account != null)
+              GardenSidebar(controller: controller),
             Expanded(
               child: Column(
                 children: [
@@ -43,7 +44,7 @@ class GardenApp extends StatelessWidget {
                   if (controller.page == GardenPage.connected ||
                       controller.page == GardenPage.settings)
                     OnboardingFooter(
-                      action: 'Gardens',
+                      action: 'Drives',
                       busy: controller.busy,
                       onBack: controller.busy ? null : controller.back,
                       onAction: controller.account == null || controller.busy
@@ -66,10 +67,11 @@ class GardenApp extends StatelessWidget {
     GardenPage.signIn => Center(
       child: AccountForm(
         key: const ValueKey('signin'),
+        showDemo: true,
+        onCreateAccount: () => controller.navigate(GardenPage.register),
         busy: controller.busy,
         submitLabel: 'Sign in',
         onSubmit: controller.signIn,
-        onBack: controller.back,
       ),
     ),
     GardenPage.register => Center(
@@ -95,8 +97,8 @@ class GardenApp extends StatelessWidget {
     GardenPage.create => Center(
       child: ValueForm(
         key: const ValueKey('create'),
-        label: 'Garden name',
-        action: 'Create Garden',
+        label: 'Drive name',
+        action: 'Create drive',
         busy: controller.busy,
         onSubmit: controller.create,
         onBack: controller.back,
@@ -106,7 +108,7 @@ class GardenApp extends StatelessWidget {
       child: ValueForm(
         key: const ValueKey('join'),
         label: 'Invitation code',
-        action: 'Join Garden',
+        action: 'Join drive',
         busy: controller.busy,
         onSubmit: controller.join,
         onBack: controller.back,

@@ -33,7 +33,7 @@ class GardenSidebar extends StatelessWidget {
         const SizedBox(height: 28),
         SidebarItem(
           icon: LucideIcons.folder,
-          label: 'Gardens',
+          label: 'Drives',
           selected: controller.page != GardenPage.settings,
           onTap: controller.busy
               ? null

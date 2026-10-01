@@ -8,6 +8,7 @@ import 'package:garden_flutter/services/garden_gateway.dart';
 import 'package:garden_flutter/services/preferences_store.dart';
 import 'package:garden_flutter/state/garden_controller.dart';
 import 'package:garden_flutter/ui/garden_app.dart';
+import 'package:garden_flutter/components/garden_sidebar.dart';
 
 class MemoryPreferences implements PreferencesStore {
   int limit = 20;
@@ -76,6 +77,38 @@ class PendingGateway extends TestGateway {
 }
 
 void main() {
+  testWidgets('Signed-out launch shows sign-in without a sidebar', (
+    tester,
+  ) async {
+    final controller = GardenController(TestGateway(), MemoryPreferences());
+    await tester.pumpWidget(GardenApp(controller: controller));
+    expect(find.byType(TextField), findsNWidgets(2));
+    expect(find.byType(GardenSidebar), findsNothing);
+    expect(find.text('Use demo account'), findsOneWidget);
+    expect(find.text('Create account'), findsOneWidget);
+  });
+
+  testWidgets('Demo button fills credentials without signing in', (
+    tester,
+  ) async {
+    final gateway = TestGateway();
+    final controller = GardenController(gateway, MemoryPreferences());
+    controller.navigate(GardenPage.signIn);
+    await tester.pumpWidget(GardenApp(controller: controller));
+    await tester.tap(find.text('Use demo account'));
+    await tester.pump();
+    final fields = tester
+        .widgetList<TextField>(find.byType(TextField))
+        .toList();
+    expect(fields[0].controller!.text, 'demo@garden.local');
+    expect(fields[1].controller!.text, 'garden-demo');
+    expect(gateway.calls, 0);
+    await tester.tap(find.text('Sign in'));
+    await tester.pumpAndSettle();
+    expect(gateway.calls, 1);
+    expect(controller.account!.email, 'demo@garden.local');
+  });
+
   test('Pending requests reject duplicate actions', () async {
     final gateway = PendingGateway();
     final controller = GardenController(gateway, MemoryPreferences());
@@ -109,7 +142,7 @@ void main() {
       await tester.pump();
       await tester.tap(find.text('Verify'));
       await tester.pumpAndSettle();
-      expect(find.text('Join Garden'), findsOneWidget);
+      expect(find.text('Join drive'), findsOneWidget);
       expect(controller.registrationPassword, isEmpty);
     },
   );
@@ -120,14 +153,14 @@ void main() {
       final controller = GardenController(TestGateway(), MemoryPreferences());
       await controller.signIn('garden@example.com', 'password');
       await tester.pumpWidget(GardenApp(controller: controller));
-      await tester.tap(find.text('Create Garden'));
+      await tester.tap(find.text('Create drive'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), 'Projects');
       await tester.pump();
-      await tester.tap(find.text('Create Garden'));
+      await tester.tap(find.text('Create drive'));
       await tester.pumpAndSettle();
       expect(find.text('Projects'), findsOneWidget);
-      expect(find.text('Connected to Garden'), findsOneWidget);
+      expect(find.text('Connected to drive'), findsOneWidget);
       expect(
         find.text('Finder mounting is not available yet.'),
         findsOneWidget,
@@ -141,15 +174,15 @@ void main() {
     final controller = GardenController(TestGateway(), MemoryPreferences());
     await controller.signIn('garden@example.com', 'password');
     await tester.pumpWidget(GardenApp(controller: controller));
-    await tester.tap(find.text('Join Garden'));
+    await tester.tap(find.text('Join drive'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'invite');
     await tester.pump();
-    await tester.tap(find.text('Join Garden'));
+    await tester.tap(find.text('Join drive'));
     await tester.pumpAndSettle();
     expect(controller.selected!.role, 'Member');
     expect(find.text('Shared'), findsOneWidget);
-    expect(find.text('Connected to Garden'), findsOneWidget);
+    expect(find.text('Connected to drive'), findsOneWidget);
   });
 
   test('A failed refresh does not reopen a successful creation', () async {
@@ -184,8 +217,8 @@ void main() {
     await tester.tap(find.text('Sign in'));
     await tester.pumpAndSettle();
     expect(gateway.calls, 1);
-    expect(find.text('Create Garden'), findsOneWidget);
-    expect(find.text('Join Garden'), findsOneWidget);
+    expect(find.text('Create drive'), findsOneWidget);
+    expect(find.text('Join drive'), findsOneWidget);
   });
   testWidgets('Connection failure remains visible without advancing', (
     tester,
@@ -219,7 +252,7 @@ void main() {
       await controller.signOut();
       expect(controller.account, isNull);
       expect(controller.selected, isNull);
-      expect(controller.page, GardenPage.welcome);
+      expect(controller.page, GardenPage.signIn);
     },
   );
 }

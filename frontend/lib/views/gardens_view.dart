@@ -17,7 +17,7 @@ class GardensView extends StatelessWidget {
         Row(
           children: [
             GardenButton(
-              label: 'Create Garden',
+              label: 'Create drive',
               icon: LucideIcons.plus,
               onPressed: controller.busy
                   ? null
@@ -25,7 +25,7 @@ class GardensView extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             GardenButton(
-              label: 'Join Garden',
+              label: 'Join drive',
               secondary: true,
               onPressed: controller.busy
                   ? null
@@ -33,7 +33,7 @@ class GardensView extends StatelessWidget {
             ),
             const Spacer(),
             IconButton(
-              tooltip: 'Refresh Gardens',
+              tooltip: 'Refresh drives',
               onPressed: controller.busy ? null : controller.refresh,
               icon: const Icon(LucideIcons.refreshCw, size: 17),
             ),
@@ -42,7 +42,7 @@ class GardensView extends StatelessWidget {
         const SizedBox(height: 24),
         Expanded(
           child: controller.gardens.isEmpty
-              ? const Center(child: Text('No Gardens connected.'))
+              ? const Center(child: Text('No drives connected.'))
               : ListView(
                   children: [
                     for (final garden in controller.gardens)
