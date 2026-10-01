@@ -9,9 +9,15 @@ import '../components/files/files_toolbar.dart';
 import '../state/files_controller.dart';
 
 class FilesView extends StatelessWidget {
-  const FilesView({super.key, required this.controller, required this.userId});
+  const FilesView({
+    super.key,
+    required this.controller,
+    required this.userId,
+    required this.onBackToDrives,
+  });
   final FilesController controller;
   final String userId;
+  final VoidCallback onBackToDrives;
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: controller,
@@ -27,6 +33,7 @@ class FilesView extends StatelessWidget {
               onCreate: actions.create,
               onImport: actions.import,
               onInvite: actions.invite,
+              onBackToDrives: onBackToDrives,
             ),
             const Divider(height: 1, color: Color(0xFFE8E8EB)),
             if (controller.busy)

@@ -133,6 +133,7 @@ class GardenApp extends StatelessWidget {
     GardenPage.files => FilesView(
       controller: controller.files!,
       userId: controller.account!.id,
+      onBackToDrives: controller.back,
     ),
     GardenPage.settings => SettingsView(controller: controller),
   };

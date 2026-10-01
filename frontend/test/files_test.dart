@@ -130,6 +130,12 @@ void main() {
     await tester.tap(find.text('Open drive'));
     await tester.pumpAndSettle();
     expect(find.text('This folder is empty'), findsOneWidget);
+    await tester.tap(find.byTooltip('Back to drives'));
+    await tester.pumpAndSettle();
+    expect(controller.page, GardenPage.gardens);
+    await controller.openDrive(drive);
+    await tester.pumpAndSettle();
+    expect(controller.page, GardenPage.files);
     await tester.tap(find.byTooltip('Create'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('New text file…'));

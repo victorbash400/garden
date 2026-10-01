@@ -10,11 +10,13 @@ class FilesToolbar extends StatelessWidget {
     required this.onCreate,
     required this.onImport,
     required this.onInvite,
+    required this.onBackToDrives,
   });
   final FilesController controller;
   final ValueChanged<String> onCreate;
   final VoidCallback onImport;
   final VoidCallback onInvite;
+  final VoidCallback onBackToDrives;
   @override
   Widget build(BuildContext context) => SizedBox(
     height: 62,
@@ -23,9 +25,13 @@ class FilesToolbar extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            tooltip: 'Parent folder',
-            onPressed: controller.busy || controller.path.isEmpty
+            tooltip: controller.path.isEmpty
+                ? 'Back to drives'
+                : 'Parent folder',
+            onPressed: controller.busy
                 ? null
+                : controller.path.isEmpty
+                ? onBackToDrives
                 : () => controller.goTo(controller.path.length - 1),
             icon: const Icon(LucideIcons.chevronLeft, size: 18),
           ),
