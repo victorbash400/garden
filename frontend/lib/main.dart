@@ -25,7 +25,7 @@ Future<void> main() async {
   });
   const serverUrl = String.fromEnvironment(
     'SERVER_URL',
-    defaultValue: 'http://localhost:8080/',
+    defaultValue: 'https://garden.api.serverpod.space/',
   );
   final gateway = ServerpodGateway(serverUrl);
   final controller = GardenController(
