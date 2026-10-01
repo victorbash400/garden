@@ -7,11 +7,17 @@ class SettingsToolbar extends StatelessWidget {
   final VoidCallback? onBack;
   @override
   Widget build(BuildContext context) => SizedBox(
-    height: 64,
+    height: 62,
     child: Row(
       children: [
         IconButton(
           tooltip: 'Back to drives',
+          style: IconButton.styleFrom(
+            backgroundColor: const Color(0xFFF5F5F7),
+            minimumSize: const Size(44, 32),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            shape: const StadiumBorder(),
+          ),
           onPressed: onBack,
           icon: const Icon(LucideIcons.chevronLeft, size: 21),
         ),

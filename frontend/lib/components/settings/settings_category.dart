@@ -19,26 +19,25 @@ class SettingsCategory extends StatelessWidget {
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
     child: Material(
       color: selected ? GardenTheme.blue : Colors.transparent,
+      animationDuration: MediaQuery.disableAnimationsOf(context)
+          ? Duration.zero
+          : const Duration(milliseconds: 140),
       borderRadius: BorderRadius.circular(8),
       child: ListTile(
         dense: true,
-        minTileHeight: 42,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+        horizontalTitleGap: 10,
+        minTileHeight: 38,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         onTap: onTap,
         leading: Container(
           width: 26,
           height: 26,
           decoration: BoxDecoration(
-            color: selected
-                ? Colors.white.withValues(alpha: .18)
-                : const Color(0xFFE0E0E4),
+            color: const Color(0xFF35353A),
             borderRadius: BorderRadius.circular(6),
           ),
-          child: Icon(
-            icon,
-            size: 17,
-            color: selected ? Colors.white : GardenTheme.ink,
-          ),
+          child: Icon(icon, size: 17, color: Colors.white),
         ),
         title: Text(
           label,

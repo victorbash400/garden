@@ -4,6 +4,7 @@ import '../state/garden_controller.dart';
 import '../components/error_notice.dart';
 import '../components/garden_sidebar.dart';
 import '../components/settings/settings_sidebar.dart';
+import '../components/settings/settings_transition.dart';
 import '../components/onboarding_footer.dart';
 import '../views/account_form.dart';
 import '../views/connection_view.dart';
@@ -27,9 +28,16 @@ class GardenApp extends StatelessWidget {
         body: Row(
           children: [
             if (controller.account != null)
-              controller.page == GardenPage.settings
-                  ? SettingsSidebar(controller: controller)
-                  : GardenSidebar(controller: controller),
+              AnimatedSize(
+                duration: MediaQuery.disableAnimationsOf(context)
+                    ? Duration.zero
+                    : const Duration(milliseconds: 200),
+                curve: Curves.easeOutCubic,
+                alignment: Alignment.centerLeft,
+                child: controller.page == GardenPage.settings
+                    ? SettingsSidebar(controller: controller)
+                    : GardenSidebar(controller: controller),
+              ),
             Expanded(
               child: Column(
                 children: [
@@ -43,7 +51,14 @@ class GardenApp extends StatelessWidget {
                     ),
                   if (controller.busy)
                     const LinearProgressIndicator(minHeight: 2),
-                  Expanded(child: _content()),
+                  Expanded(
+                    child: SettingsTransition(
+                      child: KeyedSubtree(
+                        key: ValueKey(controller.page),
+                        child: _content(),
+                      ),
+                    ),
+                  ),
                   if (controller.page == GardenPage.connected)
                     OnboardingFooter(
                       action: 'Drives',
