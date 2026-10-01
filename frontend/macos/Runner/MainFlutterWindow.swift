@@ -10,6 +10,7 @@ class MainFlutterWindow: NSWindow {
 
     RegisterGeneratedPlugins(registry: flutterViewController)
 
+    appearance = NSAppearance(named: .aqua)
     super.awakeFromNib()
   }
 }

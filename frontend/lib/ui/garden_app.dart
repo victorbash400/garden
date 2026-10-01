@@ -1,0 +1,116 @@
+import 'package:flutter/material.dart';
+
+import '../state/garden_controller.dart';
+import '../components/error_notice.dart';
+import '../components/garden_sidebar.dart';
+import '../components/onboarding_footer.dart';
+import '../views/account_form.dart';
+import '../views/connection_view.dart';
+import '../views/gardens_view.dart';
+import '../views/settings_view.dart';
+import '../views/value_form.dart';
+import '../views/welcome_view.dart';
+import 'garden_theme.dart';
+
+class GardenApp extends StatelessWidget {
+  const GardenApp({super.key, required this.controller});
+  final GardenController controller;
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+    title: 'Garden',
+    debugShowCheckedModeBanner: false,
+    theme: GardenTheme.light,
+    home: ListenableBuilder(
+      listenable: controller,
+      builder: (context, _) => Scaffold(
+        body: Row(
+          children: [
+            GardenSidebar(controller: controller),
+            Expanded(
+              child: Column(
+                children: [
+                  if (controller.error != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 28),
+                      child: ErrorNotice(
+                        message: controller.error!,
+                        onDismiss: () => controller.navigate(controller.page),
+                      ),
+                    ),
+                  Expanded(child: _content()),
+                  if (controller.page == GardenPage.connected ||
+                      controller.page == GardenPage.settings)
+                    OnboardingFooter(
+                      action: 'Gardens',
+                      busy: controller.busy,
+                      onBack: controller.busy ? null : controller.back,
+                      onAction: controller.account == null || controller.busy
+                          ? null
+                          : () => controller.navigate(GardenPage.gardens),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+  Widget _content() => switch (controller.page) {
+    GardenPage.welcome => WelcomeView(
+      onSignIn: () => controller.navigate(GardenPage.signIn),
+      onRegister: () => controller.navigate(GardenPage.register),
+    ),
+    GardenPage.signIn => Center(
+      child: AccountForm(
+        key: const ValueKey('signin'),
+        busy: controller.busy,
+        submitLabel: 'Sign in',
+        onSubmit: controller.signIn,
+        onBack: controller.back,
+      ),
+    ),
+    GardenPage.register => Center(
+      child: AccountForm(
+        key: const ValueKey('register'),
+        busy: controller.busy,
+        submitLabel: 'Create account',
+        onSubmit: controller.register,
+        onBack: controller.back,
+      ),
+    ),
+    GardenPage.verify => Center(
+      child: ValueForm(
+        key: const ValueKey('verify'),
+        label: 'Email verification code',
+        action: 'Verify',
+        busy: controller.busy,
+        onSubmit: controller.verify,
+        onBack: controller.back,
+      ),
+    ),
+    GardenPage.gardens => GardensView(controller: controller),
+    GardenPage.create => Center(
+      child: ValueForm(
+        key: const ValueKey('create'),
+        label: 'Garden name',
+        action: 'Create Garden',
+        busy: controller.busy,
+        onSubmit: controller.create,
+        onBack: controller.back,
+      ),
+    ),
+    GardenPage.join => Center(
+      child: ValueForm(
+        key: const ValueKey('join'),
+        label: 'Invitation code',
+        action: 'Join Garden',
+        busy: controller.busy,
+        onSubmit: controller.join,
+        onBack: controller.back,
+      ),
+    ),
+    GardenPage.connected => ConnectionView(garden: controller.selected!),
+    GardenPage.settings => SettingsView(controller: controller),
+  };
+}
