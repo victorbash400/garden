@@ -5,6 +5,14 @@ import FlutterMacOS
 class AppDelegate: FlutterAppDelegate {
   override func applicationDidFinishLaunching(_ notification: Notification) {
     super.applicationDidFinishLaunching(notification)
+    updateDockIcon()
+  }
+
+  override func applicationDidBecomeActive(_ notification: Notification) {
+    updateDockIcon()
+  }
+
+  private func updateDockIcon() {
     if let iconURL = Bundle.main.url(forResource: "GardenIcon", withExtension: "icns"),
        let icon = NSImage(contentsOf: iconURL) {
       NSApplication.shared.applicationIconImage = icon
