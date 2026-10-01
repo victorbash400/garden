@@ -1,19 +1,19 @@
 # .scloudignore
 #
-# This file specifies which files and directories should be ignored when 
-# uploading to Serverpod Cloud. It functions similarly to a .gitignore file, 
+# This file specifies which files and directories should be ignored when
+# uploading to Serverpod Cloud. It functions similarly to a .gitignore file,
 # preventing listed files from being included in deployments.
 #
-# Serverpod Cloud also respects .gitignore, meaning any files ignored by Git 
-# will not be uploaded unless explicitly opted back in. 
-# For example, generated files that are gitignored must be included if they 
+# Serverpod Cloud also respects .gitignore, meaning any files ignored by Git
+# will not be uploaded unless explicitly opted back in.
+# For example, generated files that are gitignored must be included if they
 # need to be uploaded.
 #
-# Note: All hidden files and folders (those starting with a dot ".") are 
+# Note: All hidden files and folders (those starting with a dot ".") are
 # ignored by default unless explicitly included.
 #
 
-# Ignoring all passwords, service passwords such as for the database are 
+# Ignoring all passwords, service passwords such as for the database are
 # automatically managed by Serverpod Cloud.
 # If you need to configure custom api keys or other passwords, you can do so by
 # using the `scloud password set <name> <value>` command.
