@@ -25,16 +25,18 @@ Future<void> main() async {
     );
     await auth.updateSignedInUser(result);
     final account = await client.garden.account();
-    if (account.email != 'demo@garden.local')
+    if (account.email != 'demo@garden.local') {
       throw StateError('Unexpected demo account.');
+    }
     final gardens = await client.garden.list();
     for (final drive in gardens) {
       final connected = await client.garden.connect(drive.id);
-      if (connected.id != drive.id)
+      if (connected.id != drive.id) {
         throw StateError('Drive connection mismatch.');
+      }
     }
     print(
-      'Demo login verified; authenticated membership list returned ${gardens.length} Gardens.',
+      'Demo login verified; authenticated membership list returned ${gardens.length} drives.',
     );
     await auth.signOutDevice();
   } finally {

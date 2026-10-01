@@ -35,7 +35,7 @@ class GardenEndpoint extends Endpoint {
         membership.gardenId,
       );
       if (record == null) {
-        throw GardenException(message: 'A Garden membership is invalid.');
+        throw GardenException(message: 'A drive membership is invalid.');
       }
       result.add(await _summary(session, record, membership.role));
     }
@@ -46,7 +46,7 @@ class GardenEndpoint extends Endpoint {
     final trimmed = name.trim();
     if (trimmed.isEmpty || trimmed.length > 80) {
       throw GardenException(
-        message: 'Use a Garden name between 1 and 80 characters.',
+        message: 'Use a drive name between 1 and 80 characters.',
       );
     }
     final random = Random.secure();
@@ -117,11 +117,11 @@ class GardenEndpoint extends Endpoint {
           row.gardenId.equals(gardenId) & row.userId.equals(_user(session)),
     );
     if (membership == null) {
-      throw GardenException(message: 'You do not have access to this Garden.');
+      throw GardenException(message: 'You do not have access to this drive.');
     }
     final record = await GardenRecord.db.findById(session, gardenId);
     if (record == null) {
-      throw GardenException(message: 'This Garden no longer exists.');
+      throw GardenException(message: 'This drive no longer exists.');
     }
     return _summary(session, record, membership.role);
   }
