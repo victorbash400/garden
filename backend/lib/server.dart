@@ -2,7 +2,8 @@ import 'dart:io';
 import 'src/auth/demo_account.dart';
 import 'package:serverpod_auth_idp_server/core.dart';
 import 'package:serverpod_auth_idp_server/providers/email.dart';
-import 'package:serverpod_cloud_storage/serverpod_cloud_storage.dart';
+import 'src/files/file_storage.dart';
+import 'src/files/upload_cleanup_tasks.dart';
 
 import 'src/generated/serverpod.dart';
 
@@ -33,18 +34,8 @@ void run(List<String> args) async {
     ],
   );
 
-  if (pod.runMode == ServerpodRunMode.development ||
-      pod.runMode == ServerpodRunMode.test) {
-    pod.addCloudStorage(DatabaseCloudStorage('private'));
-  } else {
-    pod.addCloudStorage(
-      await ServerpodCloudProvider.private(
-        fallback: () => throw StateError(
-          'Serverpod Cloud private storage is not configured.',
-        ),
-      ),
-    );
-  }
+  await configureFileStorage(pod);
+  await UploadCleanupTasks.configure(pod);
 
   // Start the server.
   await pod.start();

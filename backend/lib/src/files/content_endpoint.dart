@@ -1,9 +1,9 @@
+import 'upload_cleanup_tasks.dart';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
-import '../generated/future_calls.dart';
 import 'drive_access.dart';
 import 'drive_journal.dart';
 
@@ -42,10 +42,7 @@ class ContentEndpoint extends Endpoint {
         createdAt: DateTime.now().toUtc(),
       ),
     );
-    await session.serverpod.futureCalls
-        .callWithDelay(const Duration(hours: 24))
-        .uploadCleanup
-        .expire(upload.id!);
+    await UploadCleanupTasks.schedule(session, upload.id!);
     return upload;
   }
 

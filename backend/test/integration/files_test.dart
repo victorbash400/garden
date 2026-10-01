@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 import 'package:serverpod/serverpod.dart';
 import 'package:test/test.dart';
 import 'package:garden_server/src/generated/protocol.dart';
 import 'test_tools/serverpod_test_tools.dart';
+import 'package:garden_server/src/files/upload_cleanup_route.dart';
 
 void main() {
   withServerpod('Drive filesystem', (builder, endpoints) {
@@ -231,6 +233,41 @@ void main() {
       },
     );
     test(
+      'cleanup callback rejects invalid credentials and premature expiry',
+      () async {
+        final drive = await endpoints.garden.create(owner, 'Task cleanup');
+        final node = await endpoints.files.create(
+          owner,
+          drive.id,
+          0,
+          'task.txt',
+          NodeKind.file,
+        );
+        final pending = await endpoints.content.begin(owner, node.id!, 0, 1);
+        await endpoints.content.writeChunk(owner, pending.id!, 0, ByteData(1));
+        final session = owner.build();
+        final route = UploadCleanupRoute('test-cleanup-token');
+        Future<int> call(String token) async =>
+            (await route.handleCall(
+                      session,
+                      _CleanupRequest(token, '${pending.id}'),
+                    )
+                    as Response)
+                .statusCode;
+        expect(await call('wrong-token'), 401);
+        expect(await call('test-cleanup-token'), 409);
+        final version = await FileVersion.db.findById(session, pending.id!);
+        version!.createdAt = DateTime.now().toUtc().subtract(
+          const Duration(days: 2),
+        );
+        await FileVersion.db.updateRow(session, version);
+        expect(await call('test-cleanup-token'), 200);
+        expect(await call('test-cleanup-token'), 200);
+        expect(await FileVersion.db.findById(session, pending.id!), isNull);
+        await session.close();
+      },
+    );
+    test(
       'live stream and replay are ordered and contain committed node state',
       () async {
         final drive = await endpoints.garden.create(owner, 'Events');
@@ -268,4 +305,19 @@ void main() {
       },
     );
   }, rollbackDatabase: RollbackDatabase.disabled);
+}
+
+class _CleanupRequest implements Request {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  final String token;
+  final String value;
+  _CleanupRequest(this.token, this.value);
+  @override
+  Headers get headers => Headers.fromMap({
+    'authorization': ['Bearer $token'],
+  });
+  @override
+  Future<String> readAsString({Encoding? encoding, int? maxLength}) async =>
+      value;
 }
