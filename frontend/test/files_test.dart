@@ -87,6 +87,9 @@ void main() {
       'Nested',
     ]);
     await controller.goTo(0);
+    await controller.loadFolderChildren(folder.id!);
+    expect(controller.path, isEmpty);
+    expect(controller.folders.children(folder.id!).single.id, nested.id);
     await controller.openFolder(nested);
     expect(controller.path.map((node) => node.name), ['Work', 'Nested']);
     await controller.goTo(1);

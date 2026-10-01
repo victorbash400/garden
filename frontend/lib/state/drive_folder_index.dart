@@ -2,9 +2,23 @@ import 'package:garden_client/garden_client.dart';
 
 class DriveFolderIndex {
   final Map<int, FileNode> _folders = {};
-  void clear() => _folders.clear();
-  void remove(int id) => _folders.remove(id);
+  final Map<int, FileNode> _files = {};
+  void clear() {
+    _folders.clear();
+    _files.clear();
+  }
+
+  void remove(int id) {
+    _folders.remove(id);
+    _files.remove(id);
+  }
+
   void update(FileNode node) {
+    if (node.kind == NodeKind.file && !node.deleted) {
+      _files[node.id!] = node;
+    } else {
+      _files.remove(node.id);
+    }
     if (node.kind == NodeKind.folder && !node.deleted) {
       _folders[node.id!] = node;
     } else {
@@ -14,6 +28,7 @@ class DriveFolderIndex {
 
   void replaceDirectory(int parentId, List<FileNode> nodes) {
     _folders.removeWhere((_, node) => node.parentId == parentId);
+    _files.removeWhere((_, node) => node.parentId == parentId);
     for (final node in nodes) {
       update(node);
     }
@@ -21,6 +36,9 @@ class DriveFolderIndex {
 
   List<FileNode> children(int parentId) =>
       _folders.values.where((node) => node.parentId == parentId).toList()
+        ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+  List<FileNode> files(int parentId) =>
+      _files.values.where((node) => node.parentId == parentId).toList()
         ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
   List<FileNode> pathTo(FileNode folder) {
     final path = <FileNode>[];

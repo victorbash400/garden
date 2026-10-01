@@ -3,7 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../state/garden_controller.dart';
 import '../ui/garden_theme.dart';
-import 'garden_mark.dart';
+import 'sidebar_account.dart';
 import 'sidebar_item.dart';
 import 'sidebar_drives.dart';
 
@@ -18,32 +18,8 @@ class GardenSidebar extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 30),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            children: [
-              GardenMark(size: 19),
-              SizedBox(width: 9),
-              Text(
-                'Garden',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 28),
-        SidebarItem(
-          icon: LucideIcons.folder,
-          label: 'Drives',
-          selected: controller.page == GardenPage.gardens,
-          onTap: controller.busy
-              ? null
-              : () => controller.navigate(
-                  controller.account == null
-                      ? GardenPage.welcome
-                      : GardenPage.gardens,
-                ),
-        ),
+        SidebarAccount(controller: controller),
+        const SizedBox(height: 16),
         const SizedBox(height: 8),
         Expanded(child: SidebarDrives(controller: controller)),
         SidebarItem(

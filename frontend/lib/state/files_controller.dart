@@ -26,6 +26,7 @@ class FilesController extends ChangeNotifier {
   double? progress;
   StreamSubscription<DriveEvent>? _subscription;
   List<DriveEvent>? _buffer;
+  List<DriveEvent>? _treeBuffer;
   int _generation = 0;
   int get parentId => path.isEmpty ? 0 : path.last.id!;
 
@@ -63,6 +64,7 @@ class FilesController extends ChangeNotifier {
   }
 
   void _event(DriveEvent event) {
+    _treeBuffer?.add(event);
     if (event.operation == 'ready') {
       live = true;
       notifyListeners();
@@ -129,6 +131,25 @@ class FilesController extends ChangeNotifier {
       rethrow;
     }
   });
+  Future<void> loadFolderChildren(int folderId) => _request(() async {
+    final generation = _generation;
+    _treeBuffer = [];
+    try {
+      final listing = await gateway.list(drive!.id, folderId);
+      if (generation != _generation) return;
+      folders.replaceDirectory(folderId, listing.nodes);
+      for (final event in _treeBuffer!) {
+        if (event.revision > listing.revision &&
+            event.node != null &&
+            event.operation != 'comment') {
+          folders.update(event.node!);
+        }
+      }
+    } finally {
+      _treeBuffer = null;
+    }
+  });
+
   Future<void> openFolder(FileNode folder) => _request(() async {
     final previous = path;
     path = folders.pathTo(folder);
