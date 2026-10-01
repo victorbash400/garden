@@ -80,6 +80,7 @@ class TreeRow extends StatelessWidget {
                               icon == LucideIcons.hardDrive
                           ? TreeFolderIcon(
                               connected: connected,
+                              open: expanded || selected,
                               drive: icon == LucideIcons.hardDrive,
                             )
                           : SizedBox(

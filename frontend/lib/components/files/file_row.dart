@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../ui/garden_theme.dart';
 import '../list_row.dart';
+import '../folder_icon.dart';
 import 'file_row_values.dart';
 
 class FileRow extends StatelessWidget {
@@ -35,15 +36,14 @@ class FileRow extends StatelessWidget {
           builder: (context, constraints) => Row(
             children: [
               const SizedBox(width: 9),
-              Icon(
-                node.kind == NodeKind.folder
-                    ? LucideIcons.folder
-                    : LucideIcons.file,
-                size: 17,
-                color: node.kind == NodeKind.folder
-                    ? GardenTheme.blue
-                    : GardenTheme.secondary,
-              ),
+              if (node.kind == NodeKind.folder)
+                const FolderIcon(size: 24)
+              else
+                const Icon(
+                  LucideIcons.file,
+                  size: 17,
+                  color: GardenTheme.secondary,
+                ),
               const SizedBox(width: 7),
               Expanded(
                 child: Text(
