@@ -72,6 +72,29 @@ void main() {
     editor.dispose();
     await gateway.events.close();
   });
+  test('folder navigation, rename, move and delete keep the visible directory correct', () async {
+    final gateway = FilesFixture();
+    final controller = FilesController(gateway);
+    await controller.open(drive);
+    await controller.create('Work', NodeKind.folder);
+    final folder = controller.selected!;
+    await controller.create('notes.txt', NodeKind.file);
+    final file = controller.selected!;
+    await controller.move(file, folder.id!, 'renamed.txt');
+    expect(controller.nodes.map((node) => node.name), ['Work']);
+    await controller.enter(folder);
+    expect(controller.nodes.single.name, 'renamed.txt');
+    await controller.delete(controller.nodes.single);
+    expect(controller.nodes, isEmpty);
+    await controller.goTo(0);
+    await controller.delete(folder);
+    expect(controller.nodes, isEmpty);
+    await controller.close();
+    expect(gateway.events.hasListener, isFalse);
+    await gateway.events.close();
+    controller.dispose();
+  });
+
   testWidgets('open drive, create and edit text, then post a comment', (
     tester,
   ) async {
