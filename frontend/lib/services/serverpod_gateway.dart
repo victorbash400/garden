@@ -4,15 +4,12 @@ import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 import '../model/account_info.dart';
 import '../model/garden_info.dart';
 import 'garden_gateway.dart';
+import 'memory_auth_storage.dart';
 
 class ServerpodGateway implements GardenGateway {
   ServerpodGateway(String serverUrl) : client = Client(serverUrl) {
     client.authSessionManager = FlutterAuthSessionManager(
-      storage: SecureClientAuthSuccessStorage(
-        secureStorage: const FlutterSecureStorage(
-          mOptions: MacOsOptions(usesDataProtectionKeychain: false),
-        ),
-      ),
+      storage: MemoryAuthStorage(),
     );
   }
   final Client client;
