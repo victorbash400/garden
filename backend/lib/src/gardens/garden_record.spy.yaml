@@ -1,0 +1,11 @@
+class: GardenRecord
+table: garden_record
+fields:
+  name: String
+  ownerId: String
+  invitationHash: String
+  createdAt: DateTime
+indexes:
+  invitation_hash_unique:
+    fields: invitationHash
+    unique: true

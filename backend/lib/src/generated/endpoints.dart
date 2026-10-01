@@ -17,6 +17,7 @@ import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _iais;
 import '../auth/email_idp_endpoint.dart' as _iuc1hd5t;
 import '../auth/jwt_refresh_endpoint.dart' as _inwq3ztq;
+import '../gardens/garden_endpoint.dart' as _isd11de7;
 import '../greetings/greeting_endpoint.dart' as _il624ik7;
 
 class Endpoints extends _is.EndpointDispatch {
@@ -33,6 +34,12 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'jwtRefresh',
+          null,
+        ),
+      'garden': _isd11de7.GardenEndpoint()
+        ..initialize(
+          server,
+          'garden',
           null,
         ),
       'greeting': _il624ik7.GreetingEndpoint()
@@ -245,6 +252,89 @@ class Endpoints extends _is.EndpointDispatch {
                         session,
                         refreshToken: params['refreshToken'],
                       ),
+        ),
+      },
+    );
+    connectors['garden'] = _is.EndpointConnector(
+      name: 'garden',
+      endpoint: endpoints['garden']!,
+      methodConnectors: {
+        'account': _is.MethodConnector(
+          name: 'account',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['garden'] as _isd11de7.GardenEndpoint)
+                  .account(session),
+        ),
+        'list': _is.MethodConnector(
+          name: 'list',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['garden'] as _isd11de7.GardenEndpoint).list(
+                session,
+              ),
+        ),
+        'create': _is.MethodConnector(
+          name: 'create',
+          params: {
+            'name': _is.ParameterDescription(
+              name: 'name',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['garden'] as _isd11de7.GardenEndpoint).create(
+                    session,
+                    params['name'],
+                  ),
+        ),
+        'join': _is.MethodConnector(
+          name: 'join',
+          params: {
+            'invitationCode': _is.ParameterDescription(
+              name: 'invitationCode',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['garden'] as _isd11de7.GardenEndpoint).join(
+                session,
+                params['invitationCode'],
+              ),
+        ),
+        'connect': _is.MethodConnector(
+          name: 'connect',
+          params: {
+            'gardenId': _is.ParameterDescription(
+              name: 'gardenId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['garden'] as _isd11de7.GardenEndpoint).connect(
+                    session,
+                    params['gardenId'],
+                  ),
         ),
       },
     );

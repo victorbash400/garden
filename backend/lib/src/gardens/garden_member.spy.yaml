@@ -1,0 +1,10 @@
+class: GardenMember
+table: garden_member
+fields:
+  gardenId: int
+  userId: String
+  role: String
+indexes:
+  garden_user_unique:
+    fields: gardenId, userId
+    unique: true

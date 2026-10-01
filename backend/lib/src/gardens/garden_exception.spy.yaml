@@ -1,0 +1,3 @@
+exception: GardenException
+fields:
+  message: String

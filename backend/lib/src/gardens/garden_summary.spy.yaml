@@ -1,0 +1,7 @@
+class: GardenSummary
+fields:
+  id: int
+  name: String
+  role: String
+  members: int
+  invitationCode: String?

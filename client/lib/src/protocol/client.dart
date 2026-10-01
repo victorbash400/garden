@@ -11,6 +11,10 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _ida;
+import 'package:garden_client/src/protocol/gardens/account_details.dart'
+    as _i7n7hin1;
+import 'package:garden_client/src/protocol/gardens/garden_summary.dart'
+    as _iwcj6pye;
 import 'package:garden_client/src/protocol/greetings/greeting.dart'
     as _iz66whiu;
 import 'package:http/http.dart' as _i85jenna;
@@ -246,6 +250,49 @@ class EndpointJwtRefresh extends _iacc.EndpointRefreshJwtTokens {
       );
 }
 
+/// {@category Endpoint}
+class EndpointGarden extends _isc.EndpointRef {
+  EndpointGarden(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'garden';
+
+  _ida.Future<_i7n7hin1.AccountDetails> account() =>
+      caller.callServerEndpoint<_i7n7hin1.AccountDetails>(
+        'garden',
+        'account',
+        {},
+      );
+
+  _ida.Future<List<_iwcj6pye.GardenSummary>> list() =>
+      caller.callServerEndpoint<List<_iwcj6pye.GardenSummary>>(
+        'garden',
+        'list',
+        {},
+      );
+
+  _ida.Future<_iwcj6pye.GardenSummary> create(String name) =>
+      caller.callServerEndpoint<_iwcj6pye.GardenSummary>(
+        'garden',
+        'create',
+        {'name': name},
+      );
+
+  _ida.Future<_iwcj6pye.GardenSummary> join(String invitationCode) =>
+      caller.callServerEndpoint<_iwcj6pye.GardenSummary>(
+        'garden',
+        'join',
+        {'invitationCode': invitationCode},
+      );
+
+  _ida.Future<_iwcj6pye.GardenSummary> connect(int gardenId) =>
+      caller.callServerEndpoint<_iwcj6pye.GardenSummary>(
+        'garden',
+        'connect',
+        {'gardenId': gardenId},
+      );
+}
+
 /// This is an example endpoint that returns a greeting message through
 /// its [hello] method.
 /// {@category Endpoint}
@@ -304,6 +351,7 @@ class Client extends _isc.ServerpodClientShared {
        ) {
     emailIdp = EndpointEmailIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
+    garden = EndpointGarden(this);
     greeting = EndpointGreeting(this);
     modules = Modules(this);
   }
@@ -311,6 +359,8 @@ class Client extends _isc.ServerpodClientShared {
   late final EndpointEmailIdp emailIdp;
 
   late final EndpointJwtRefresh jwtRefresh;
+
+  late final EndpointGarden garden;
 
   late final EndpointGreeting greeting;
 
@@ -320,6 +370,7 @@ class Client extends _isc.ServerpodClientShared {
   Map<String, _isc.EndpointRef> get endpointRefLookup => {
     'emailIdp': emailIdp,
     'jwtRefresh': jwtRefresh,
+    'garden': garden,
     'greeting': greeting,
   };
 
