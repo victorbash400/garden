@@ -12,6 +12,7 @@ class FilesFixture implements FilesGateway {
   final chunks = <int, List<Uint8List>>{};
   final notes = <FileComment>[];
   int revision = 0;
+  int listCalls = 0;
   int next = 1;
   bool failList = false;
   bool failSave = false;
@@ -33,6 +34,7 @@ class FilesFixture implements FilesGateway {
   Future<String> invite(int driveId) async => 'invitation';
   @override
   Future<DirectoryListing> list(int driveId, int parentId) async {
+    listCalls++;
     if (failList) throw StateError('Cannot open folder.');
     if (pending != null) return pending!.future;
     return DirectoryListing(

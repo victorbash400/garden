@@ -29,11 +29,33 @@ class TestGateway implements GardenGateway {
   bool fail = false;
   bool failList = false;
   int calls = 0;
+  int restoreCalls = 0;
+  String? savedEmail;
+  bool remembered = false;
   @override
-  Future<AccountInfo?> restoreAccount() async => null;
+  Future<String?> savedLogin() async => savedEmail;
   @override
-  Future<AccountInfo> signIn(String email, String password) async {
+  Future<void> forgetSavedLogin() async {
+    savedEmail = null;
+  }
+
+  @override
+  Future<AccountInfo?> restoreAccount() async {
+    restoreCalls++;
+    return savedEmail == null
+        ? null
+        : AccountInfo(id: 'account', email: savedEmail!);
+  }
+
+  @override
+  Future<AccountInfo> signIn(
+    String email,
+    String password, {
+    bool remember = false,
+  }) async {
     calls++;
+    remembered = remember;
+    if (remember) savedEmail = email;
     if (fail) throw StateError('Cannot connect to the server.');
     return AccountInfo(id: 'account', email: email);
   }
@@ -77,13 +99,37 @@ class TestGateway implements GardenGateway {
 class PendingGateway extends TestGateway {
   final result = Completer<AccountInfo>();
   @override
-  Future<AccountInfo> signIn(String email, String password) {
+  Future<AccountInfo> signIn(
+    String email,
+    String password, {
+    bool remember = false,
+  }) {
     calls++;
     return result.future;
   }
 }
 
 void main() {
+  testWidgets('saved login waits for Continue and remember is optional', (
+    tester,
+  ) async {
+    final gateway = TestGateway()..savedEmail = 'saved@example.com';
+    final controller = GardenController(gateway, MemoryPreferences());
+    await controller.initialize();
+    expect(gateway.restoreCalls, 0);
+    await tester.pumpWidget(GardenApp(controller: controller));
+    expect(find.text('Continue as saved@example.com'), findsOneWidget);
+    await tester.tap(find.text('Continue as saved@example.com'));
+    await tester.pumpAndSettle();
+    expect(gateway.restoreCalls, 1);
+    expect(controller.account!.email, 'saved@example.com');
+    await controller.signOut();
+    controller.setRememberLogin(true);
+    await controller.signIn('new@example.com', 'password');
+    expect(gateway.remembered, isTrue);
+    expect(gateway.savedEmail, 'new@example.com');
+  });
+
   testWidgets(
     'Settings replaces the sidebar and Back restores the previous drive view',
     (tester) async {

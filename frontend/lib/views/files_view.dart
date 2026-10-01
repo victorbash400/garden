@@ -37,8 +37,15 @@ class FilesView extends StatelessWidget {
               onBackToDrives: onBackToDrives,
             ),
             const Divider(height: 1, color: Color(0xFFE8E8EB)),
-            if (controller.busy)
-              LinearProgressIndicator(minHeight: 2, value: controller.progress),
+            SizedBox(
+              height: 2,
+              child: controller.busy
+                  ? LinearProgressIndicator(
+                      minHeight: 2,
+                      value: controller.progress,
+                    )
+                  : null,
+            ),
             if (controller.error != null)
               ErrorNotice(
                 message: controller.error!,

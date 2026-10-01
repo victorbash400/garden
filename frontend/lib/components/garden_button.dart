@@ -31,14 +31,17 @@ class GardenButton extends StatelessWidget {
               ? const BorderSide(color: Color(0xFFDADADD))
               : BorderSide.none,
         ),
-        textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+        textStyle: Theme.of(context).textTheme.labelLarge!
+            .copyWith(fontSize: 14, fontWeight: FontWeight.w500),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (icon != null) ...[Icon(icon, size: 16), const SizedBox(width: 8)],
-          Text(label),
+          Flexible(
+            child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+          ),
         ],
       ),
     ),

@@ -4,8 +4,8 @@ class DirectoryHeader extends StatelessWidget {
   const DirectoryHeader({super.key});
   @override
   Widget build(BuildContext context) => Container(
-    height: 32,
-    padding: const EdgeInsets.only(left: 20, right: 48),
+    height: 28,
+    padding: const EdgeInsets.only(left: 19, right: 58),
     decoration: const BoxDecoration(
       border: Border(bottom: BorderSide(color: Color(0xFFE6E6E6))),
     ),

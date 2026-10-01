@@ -12,3 +12,6 @@ PRODUCT_BUNDLE_IDENTIFIER = com.victorbash.garden
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2026 Victor Bash. All rights reserved.
+
+// Stable development identity for Keychain access across local rebuilds.
+DEVELOPMENT_TEAM = 387H4ZZF2K

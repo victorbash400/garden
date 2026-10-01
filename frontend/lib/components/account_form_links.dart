@@ -33,7 +33,8 @@ class AccountFormLinks extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(6),
             ),
-            textStyle: const TextStyle(fontSize: 12),
+            textStyle: Theme.of(context).textTheme.labelLarge!
+                .copyWith(fontSize: 12),
           ),
           child: const Text('Create account'),
         ),

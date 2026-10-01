@@ -4,17 +4,32 @@ import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 import '../model/account_info.dart';
 import '../model/garden_info.dart';
 import 'garden_gateway.dart';
-import 'memory_auth_storage.dart';
+import 'session_auth_storage.dart';
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ServerpodGateway implements GardenGateway {
-  ServerpodGateway(String serverUrl) : client = Client(serverUrl) {
-    client.authSessionManager = FlutterAuthSessionManager(
-      storage: MemoryAuthStorage(),
-    );
+  ServerpodGateway(String serverUrl)
+    : client = Client(serverUrl),
+      storage = SessionAuthStorage(serverUrl),
+      savedEmailKey = 'garden.savedEmail.$serverUrl' {
+    client.authSessionManager = FlutterAuthSessionManager(storage: storage);
   }
   final Client client;
+  final SessionAuthStorage storage;
+  final String savedEmailKey;
+  final preferences = SharedPreferencesAsync();
+  @override
+  Future<String?> savedLogin() => preferences.getString(savedEmailKey);
+  @override
+  Future<void> forgetSavedLogin() async {
+    await storage.forget();
+    await preferences.remove(savedEmailKey);
+  }
+
   @override
   Future<AccountInfo?> restoreAccount() async {
+    storage.remember = true;
     await client.auth.initialize();
     if (!client.auth.isAuthenticated) return null;
     return _account();
@@ -26,13 +41,23 @@ class ServerpodGateway implements GardenGateway {
   }
 
   @override
-  Future<AccountInfo> signIn(String email, String password) async {
+  Future<AccountInfo> signIn(
+    String email,
+    String password, {
+    bool remember = false,
+  }) async {
+    storage.remember = remember;
     final result = await client.emailIdp.login(
       email: email,
       password: password,
     );
     await client.auth.updateSignedInUser(result);
-    return _account();
+    final account = AccountInfo(
+      id: result.authUserId.toString(),
+      email: email.trim(),
+    );
+    if (remember) await preferences.setString(savedEmailKey, email);
+    return account;
   }
 
   @override
@@ -59,7 +84,11 @@ class ServerpodGateway implements GardenGateway {
   @override
   Future<void> deleteDrive(int driveId) => client.garden.delete(driveId);
   @override
-  Future<void> signOut() => client.auth.signOutDevice();
+  Future<void> signOut() async {
+    await client.auth.signOutDevice();
+    await forgetSavedLogin();
+  }
+
   GardenInfo _garden(GardenSummary summary) => GardenInfo(
     id: summary.id,
     name: summary.name,

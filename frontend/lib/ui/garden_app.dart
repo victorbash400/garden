@@ -49,8 +49,6 @@ class GardenApp extends StatelessWidget {
                         onDismiss: () => controller.navigate(controller.page),
                       ),
                     ),
-                  if (controller.busy)
-                    const LinearProgressIndicator(minHeight: 2),
                   Expanded(
                     child: SettingsTransition(
                       enabled: controller.account != null,
@@ -76,6 +74,11 @@ class GardenApp extends StatelessWidget {
     GardenPage.signIn => Center(
       child: AccountForm(
         key: const ValueKey('signin'),
+        savedEmail: controller.savedEmail,
+        onContinueSaved: controller.continueSavedLogin,
+        onForgetSaved: controller.forgetSavedLogin,
+        remember: controller.rememberLogin,
+        onRememberChanged: controller.setRememberLogin,
         showDemo: true,
         onCreateAccount: () => controller.navigate(GardenPage.register),
         busy: controller.busy,

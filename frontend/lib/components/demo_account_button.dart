@@ -14,7 +14,7 @@ class DemoAccountButton extends StatelessWidget {
       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
       foregroundColor: const Color(0xFF737373),
-      textStyle: const TextStyle(fontSize: 12),
+      textStyle: Theme.of(context).textTheme.labelLarge!.copyWith(fontSize: 12),
     ),
     child: const Text('Use demo account'),
   );

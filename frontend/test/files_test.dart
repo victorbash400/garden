@@ -35,6 +35,39 @@ void main() {
     await gateway.events.close();
     controller.dispose();
   });
+  test(
+    'empty folders open and live directory revisits avoid network calls',
+    () async {
+      final gateway = FilesFixture();
+      final files = FilesController(gateway);
+      await files.open(drive);
+      await Future<void>.delayed(Duration.zero);
+      expect(files.live, isTrue);
+      await files.create('Empty', NodeKind.folder);
+      final empty = files.selected!;
+      final calls = gateway.listCalls;
+      await files.openFolder(empty);
+      expect(files.nodes, isEmpty);
+      expect(files.path.single.id, empty.id);
+      expect(gateway.listCalls, calls);
+      await files.goTo(0);
+      expect(files.nodes.single.name, 'Empty');
+      expect(gateway.listCalls, calls);
+      await gateway.create(1, empty.id!, 'Remote.txt', NodeKind.file);
+      await Future<void>.delayed(Duration.zero);
+      await files.openFolder(empty);
+      expect(files.nodes.single.name, 'Remote.txt');
+      expect(gateway.listCalls, calls);
+      await files.goTo(0);
+      files.live = false;
+      await files.openFolder(empty);
+      expect(gateway.listCalls, calls + 1);
+      await files.close();
+      await gateway.events.close();
+      files.dispose();
+    },
+  );
+
   test('bounded transfers and failed saves preserve text', () async {
     final gateway = FilesFixture();
     final node = await gateway.create(1, 0, 'notes.txt', NodeKind.file);

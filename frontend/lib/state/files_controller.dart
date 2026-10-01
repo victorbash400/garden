@@ -53,12 +53,17 @@ class FilesController extends ChangeNotifier {
     if (generation != _generation) return;
     nodes = listing.nodes;
     folders.replaceDirectory(parentId, nodes);
-    revision = listing.revision;
+    if (_subscription == null) revision = listing.revision;
     selected = null;
     final events = _buffer!;
     _buffer = null;
     for (final event in events) {
-      _event(event);
+      if (event.revision <= listing.revision &&
+          event.node?.parentId == parentId) {
+        if (event.revision > revision) revision = event.revision;
+      } else {
+        _event(event);
+      }
     }
     _sort();
   }
@@ -111,55 +116,67 @@ class FilesController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> enter(FileNode folder) => _request(() async {
-    final previous = path;
-    path = [...path, folder];
-    try {
-      await _load();
-    } catch (_) {
-      path = previous;
-      rethrow;
-    }
-  });
-  Future<void> goTo(int depth) => _request(() async {
-    final previous = path;
-    path = path.take(depth).toList();
-    try {
-      await _load();
-    } catch (_) {
-      path = previous;
-      rethrow;
-    }
-  });
-  Future<void> loadFolderChildren(int folderId) => _request(() async {
-    final generation = _generation;
-    _treeBuffer = [];
-    try {
-      final listing = await gateway.list(drive!.id, folderId);
-      if (generation != _generation) return;
-      folders.replaceDirectory(folderId, listing.nodes);
-      for (final event in _treeBuffer!) {
-        if (event.revision > listing.revision &&
-            event.node != null &&
-            event.operation != 'comment') {
-          folders.update(event.node!);
-        }
-      }
-    } finally {
-      _treeBuffer = null;
-    }
-  });
+  Future<void> enter(FileNode folder) => openFolder(folder);
 
-  Future<void> openFolder(FileNode folder) => _request(() async {
-    final previous = path;
-    path = folders.pathTo(folder);
-    try {
-      await _load();
-    } catch (_) {
-      path = previous;
-      rethrow;
+  Future<void> goTo(int depth) {
+    if (depth < 0 || depth > path.length) {
+      throw ArgumentError.value(depth, 'depth', 'Invalid folder depth.');
     }
-  });
+    if (depth == path.length) return Future.value();
+    return _navigate(path.take(depth).toList());
+  }
+
+  Future<void> openFolder(FileNode folder) => _navigate(folders.pathTo(folder));
+
+  Future<void> _navigate(List<FileNode> destination) {
+    final parent = destination.isEmpty ? 0 : destination.last.id!;
+    if (busy) return Future.value();
+    if (folders.isLoaded(parent) && live) {
+      path = destination;
+      nodes = folders.directory(parent);
+      selected = null;
+      error = null;
+      notifyListeners();
+      return Future.value();
+    }
+    return _request(() async {
+      final previous = path;
+      final previousNodes = nodes;
+      path = destination;
+      nodes = [];
+      selected = null;
+      notifyListeners();
+      try {
+        await _load();
+      } catch (_) {
+        path = previous;
+        nodes = previousNodes;
+        rethrow;
+      }
+    });
+  }
+
+  Future<void> loadFolderChildren(int folderId) async {
+    if (folders.isLoaded(folderId) && live) return;
+    await _request(() async {
+      final generation = _generation;
+      _treeBuffer = [];
+      try {
+        final listing = await gateway.list(drive!.id, folderId);
+        if (generation != _generation) return;
+        folders.replaceDirectory(folderId, listing.nodes);
+        for (final event in _treeBuffer!) {
+          if (event.revision > listing.revision &&
+              event.node != null &&
+              event.operation != 'comment') {
+            folders.update(event.node!);
+          }
+        }
+      } finally {
+        _treeBuffer = null;
+      }
+    });
+  }
 
   void _subscribe(int id, int cursor) {
     final generation = _generation;
@@ -172,12 +189,14 @@ class FilesController extends ChangeNotifier {
           onError: (Object failure) {
             if (generation != _generation) return;
             live = false;
+            folders.invalidate();
             error = errorMessage(failure);
             notifyListeners();
           },
           onDone: () {
             if (generation != _generation) return;
             live = false;
+            folders.invalidate();
             notifyListeners();
           },
         );
@@ -195,6 +214,7 @@ class FilesController extends ChangeNotifier {
   Future<void> create(String name, NodeKind kind) => _request(() async {
     final node = await gateway.create(drive!.id, parentId, name, kind);
     _upsert(node);
+    if (kind == NodeKind.folder) folders.markEmpty(node.id!);
     selected = node;
   });
   Future<void> move(FileNode node, int destination, String name) =>

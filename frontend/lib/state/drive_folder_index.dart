@@ -1,6 +1,14 @@
 import 'package:garden_client/garden_client.dart';
 
 class DriveFolderIndex {
+  final Set<int> _loaded = {};
+  bool isLoaded(int parentId) => _loaded.contains(parentId);
+  void invalidate() => _loaded.clear();
+  void markEmpty(int parentId) => _loaded.add(parentId);
+  List<FileNode> directory(int parentId) => [
+    ...children(parentId),
+    ...files(parentId),
+  ];
   final Map<int, FileNode> _folders = {};
   final Map<int, FileNode> _files = {};
   bool hasChildren(int parentId) =>
@@ -9,11 +17,13 @@ class DriveFolderIndex {
       ) ||
       _files.values.any((node) => node.parentId == parentId && !node.deleted);
   void clear() {
+    _loaded.clear();
     _folders.clear();
     _files.clear();
   }
 
   void remove(int id) {
+    _loaded.remove(id);
     _folders.remove(id);
     _files.remove(id);
   }
@@ -32,6 +42,7 @@ class DriveFolderIndex {
   }
 
   void replaceDirectory(int parentId, List<FileNode> nodes) {
+    _loaded.add(parentId);
     _folders.removeWhere((_, node) => node.parentId == parentId);
     _files.removeWhere((_, node) => node.parentId == parentId);
     for (final node in nodes) {

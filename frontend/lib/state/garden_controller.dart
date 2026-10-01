@@ -37,6 +37,8 @@ class GardenController extends ChangeNotifier {
   SettingsSection settingsSection = SettingsSection.account;
   GardenPage _settingsReturn = GardenPage.gardens;
   AccountInfo? account;
+  String? savedEmail;
+  bool rememberLogin = false;
   List<GardenInfo> gardens = [];
   GardenInfo? selected;
   bool _busy = false;
@@ -49,11 +51,7 @@ class GardenController extends ChangeNotifier {
 
   Future<void> initialize() => _request(() async {
     cacheLimit = await preferences.readCacheLimit();
-    account = await gateway.restoreAccount();
-    if (account != null) {
-      gardens = await gateway.listGardens();
-      page = GardenPage.gardens;
-    }
+    savedEmail = await gateway.savedLogin();
   });
 
   void navigate(GardenPage destination) {
@@ -87,8 +85,29 @@ class GardenController extends ChangeNotifier {
     });
   }
 
+  void setRememberLogin(bool value) {
+    rememberLogin = value;
+    notifyListeners();
+  }
+
+  Future<void> continueSavedLogin() => _request(() async {
+    account = await gateway.restoreAccount();
+    if (account == null) {
+      throw StateError('Saved login expired. Sign in again.');
+    }
+    gardens = await gateway.listGardens();
+    page = GardenPage.gardens;
+  });
+  Future<void> forgetSavedLogin() => _request(() async {
+    await gateway.forgetSavedLogin();
+    savedEmail = null;
+  });
   Future<void> signIn(String email, String password) => _request(() async {
-    account = await gateway.signIn(email.trim(), password);
+    account = await gateway.signIn(
+      email.trim(),
+      password,
+      remember: rememberLogin,
+    );
     page = GardenPage.gardens;
     gardens = await gateway.listGardens();
   });

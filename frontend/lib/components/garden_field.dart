@@ -13,6 +13,7 @@ class GardenField extends StatefulWidget {
     this.autofocus = false,
     this.onSubmitted,
     this.keyboardType,
+    this.autofillHints,
   });
   final String label;
   final TextEditingController controller;
@@ -21,6 +22,7 @@ class GardenField extends StatefulWidget {
   final bool autofocus;
   final ValueChanged<String>? onSubmitted;
   final TextInputType? keyboardType;
+  final Iterable<String>? autofillHints;
   @override
   State<GardenField> createState() => _GardenFieldState();
 }
@@ -48,6 +50,7 @@ class _GardenFieldState extends State<GardenField> {
       const SizedBox(height: 8),
       TextField(
         controller: widget.controller,
+        autofillHints: widget.autofillHints,
         obscureText: widget.obscure && !passwordVisible,
         autocorrect: !widget.obscure,
         enableSuggestions: !widget.obscure,

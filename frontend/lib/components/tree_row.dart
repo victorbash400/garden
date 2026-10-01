@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'tree_folder_icon.dart';
+import 'list_row.dart';
 
 class TreeRow extends StatelessWidget {
   const TreeRow({
@@ -35,9 +36,9 @@ class TreeRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     padding: EdgeInsets.only(left: depth * 20, top: 1),
-    child: Material(
-      color: selected ? const Color(0xFFE8E8E8) : Colors.transparent,
-      borderRadius: BorderRadius.circular(8),
+    child: ListRow(
+      selected: selected,
+      onTap: onOpen,
       child: SizedBox(
         height: 34,
         child: Row(
