@@ -17,11 +17,6 @@ class WelcomeView extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         const AppTile(),
-        const SizedBox(height: 24),
-        const Text(
-          'Garden',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
-        ),
         const SizedBox(height: 32),
         GardenButton(label: 'Sign in', onPressed: onSignIn),
         const SizedBox(height: 12),

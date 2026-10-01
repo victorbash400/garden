@@ -37,6 +37,8 @@ class GardenApp extends StatelessWidget {
                         onDismiss: () => controller.navigate(controller.page),
                       ),
                     ),
+                  if (controller.busy)
+                    const LinearProgressIndicator(minHeight: 2),
                   Expanded(child: _content()),
                   if (controller.page == GardenPage.connected ||
                       controller.page == GardenPage.settings)

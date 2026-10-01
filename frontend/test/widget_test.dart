@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_flutter/model/account_info.dart';
@@ -19,6 +21,7 @@ class MemoryPreferences implements PreferencesStore {
 
 class TestGateway implements GardenGateway {
   bool fail = false;
+  bool failList = false;
   int calls = 0;
   @override
   Future<AccountInfo?> restoreAccount() async => null;
@@ -40,7 +43,11 @@ class TestGateway implements GardenGateway {
   @override
   Future<void> signOut() async {}
   @override
-  Future<List<GardenInfo>> listGardens() async => [];
+  Future<List<GardenInfo>> listGardens() async {
+    if (failList) throw StateError('Cannot refresh Gardens.');
+    return [];
+  }
+
   @override
   Future<GardenInfo> createGarden(String name) async => GardenInfo(
     id: 1,
@@ -59,7 +66,110 @@ class TestGateway implements GardenGateway {
   void dispose() {}
 }
 
+class PendingGateway extends TestGateway {
+  final result = Completer<AccountInfo>();
+  @override
+  Future<AccountInfo> signIn(String email, String password) {
+    calls++;
+    return result.future;
+  }
+}
+
 void main() {
+  test('Pending requests reject duplicate actions', () async {
+    final gateway = PendingGateway();
+    final controller = GardenController(gateway, MemoryPreferences());
+    final first = controller.signIn('garden@example.com', 'password');
+    await controller.signIn('garden@example.com', 'password');
+    expect(gateway.calls, 1);
+    expect(controller.busy, isTrue);
+    gateway.result.complete(
+      const AccountInfo(id: 'account', email: 'garden@example.com'),
+    );
+    await first;
+    expect(controller.busy, isFalse);
+  });
+  testWidgets(
+    'Account creation accepts an email code and opens Garden selection',
+    (tester) async {
+      final controller = GardenController(TestGateway(), MemoryPreferences());
+      await tester.pumpWidget(GardenApp(controller: controller));
+      await tester.tap(find.text('Create account'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byType(TextField).at(0),
+        'garden@example.com',
+      );
+      await tester.enterText(find.byType(TextField).at(1), 'password');
+      await tester.pump();
+      await tester.tap(find.text('Create account'));
+      await tester.pumpAndSettle();
+      expect(find.text('Email verification code'), findsOneWidget);
+      await tester.enterText(find.byType(TextField), '123456');
+      await tester.pump();
+      await tester.tap(find.text('Verify'));
+      await tester.pumpAndSettle();
+      expect(find.text('Join Garden'), findsOneWidget);
+      expect(controller.registrationPassword, isEmpty);
+    },
+  );
+
+  testWidgets(
+    'Create Garden opens API readiness and identifies unavailable Finder mounting',
+    (tester) async {
+      final controller = GardenController(TestGateway(), MemoryPreferences());
+      await controller.signIn('garden@example.com', 'password');
+      await tester.pumpWidget(GardenApp(controller: controller));
+      await tester.tap(find.text('Create Garden'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'Projects');
+      await tester.pump();
+      await tester.tap(find.text('Create Garden'));
+      await tester.pumpAndSettle();
+      expect(find.text('Projects'), findsOneWidget);
+      expect(find.text('Connected to Garden'), findsOneWidget);
+      expect(
+        find.text('Finder mounting is not available yet.'),
+        findsOneWidget,
+      );
+      expect(find.text('Copy invitation code'), findsOneWidget);
+    },
+  );
+  testWidgets('Join Garden submits the invitation and shows its membership', (
+    tester,
+  ) async {
+    final controller = GardenController(TestGateway(), MemoryPreferences());
+    await controller.signIn('garden@example.com', 'password');
+    await tester.pumpWidget(GardenApp(controller: controller));
+    await tester.tap(find.text('Join Garden'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'invite');
+    await tester.pump();
+    await tester.tap(find.text('Join Garden'));
+    await tester.pumpAndSettle();
+    expect(controller.selected!.role, 'Member');
+    expect(find.text('Shared'), findsOneWidget);
+    expect(find.text('Connected to Garden'), findsOneWidget);
+  });
+
+  test('A failed refresh does not reopen a successful creation', () async {
+    final gateway = TestGateway()..failList = true;
+    final controller = GardenController(gateway, MemoryPreferences());
+    await controller.create('Projects');
+    expect(controller.page, GardenPage.connected);
+    expect(controller.selected!.name, 'Projects');
+    expect(controller.selected!.invitationCode, 'invite');
+    expect(controller.error, contains('Cannot refresh Gardens.'));
+  });
+  test('A failed list refresh retains the authenticated state', () async {
+    final gateway = TestGateway()..failList = true;
+    final controller = GardenController(gateway, MemoryPreferences());
+    await controller.signIn('garden@example.com', 'password');
+    expect(controller.account!.email, 'garden@example.com');
+    expect(controller.page, GardenPage.gardens);
+    expect(controller.error, contains('Cannot refresh Gardens.'));
+  });
+
   testWidgets('Sign in submits credentials and opens Garden actions', (
     tester,
   ) async {

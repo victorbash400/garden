@@ -11,7 +11,7 @@ abstract final class GardenTheme {
     useMaterial3: true,
     brightness: Brightness.light,
     scaffoldBackgroundColor: canvas,
-    fontFamily: '.AppleSystemUIFont',
+    fontFamily: 'GoogleSans',
     colorScheme: ColorScheme.fromSeed(
       seedColor: blue,
       brightness: Brightness.light,

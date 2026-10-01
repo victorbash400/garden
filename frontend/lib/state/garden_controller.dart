@@ -64,8 +64,8 @@ class GardenController extends ChangeNotifier {
 
   Future<void> signIn(String email, String password) => _request(() async {
     account = await gateway.signIn(email.trim(), password);
-    gardens = await gateway.listGardens();
     page = GardenPage.gardens;
+    gardens = await gateway.listGardens();
   });
 
   Future<void> register(String email, String password) => _request(() async {
@@ -85,8 +85,8 @@ class GardenController extends ChangeNotifier {
     );
     registrationPassword = '';
     registrationId = null;
-    gardens = await gateway.listGardens();
     page = GardenPage.gardens;
+    gardens = await gateway.listGardens();
   });
 
   Future<void> refresh() => _request(() async {
@@ -94,13 +94,13 @@ class GardenController extends ChangeNotifier {
   });
   Future<void> create(String name) => _request(() async {
     selected = await gateway.createGarden(name.trim());
-    gardens = await gateway.listGardens();
     page = GardenPage.connected;
+    gardens = await gateway.listGardens();
   });
   Future<void> join(String code) => _request(() async {
     selected = await gateway.joinGarden(code.trim());
-    gardens = await gateway.listGardens();
     page = GardenPage.connected;
+    gardens = await gateway.listGardens();
   });
   Future<void> connect(GardenInfo garden) => _request(() async {
     selected = await gateway.connect(garden.id);

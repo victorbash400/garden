@@ -24,3 +24,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/garden.svg
+  fonts:
+    - family: GoogleSans
+      fonts:
+        - asset: assets/fonts/GoogleSans.ttf

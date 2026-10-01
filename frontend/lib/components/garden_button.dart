@@ -24,6 +24,7 @@ class GardenButton extends StatelessWidget {
         foregroundColor: secondary ? GardenTheme.ink : Colors.white,
         disabledBackgroundColor: GardenTheme.selection,
         disabledForegroundColor: GardenTheme.secondary,
+        minimumSize: const Size(108, 42),
         padding: EdgeInsets.symmetric(horizontal: secondary ? 17 : 24),
         shape: StadiumBorder(
           side: secondary
