@@ -57,6 +57,8 @@ class ServerpodGateway implements GardenGateway {
   }
 
   @override
+  Future<void> deleteDrive(int driveId) => client.garden.delete(driveId);
+  @override
   Future<void> signOut() => client.auth.signOutDevice();
   GardenInfo _garden(GardenSummary summary) => GardenInfo(
     id: summary.id,

@@ -5,7 +5,7 @@ import '../state/garden_controller.dart';
 import 'drive_folder_branch.dart';
 import 'tree_row.dart';
 import 'drive_section_header.dart';
-import 'drive_dialog.dart';
+import 'drive_row_actions.dart';
 
 class SidebarDrives extends StatefulWidget {
   const SidebarDrives({super.key, required this.controller});
@@ -24,10 +24,6 @@ class _SidebarDrivesState extends State<SidebarDrives> {
       children: [
         DriveSectionHeader(
           label: 'Drives',
-          actionLabel: 'Create drive',
-          onAdd: controller.busy
-              ? null
-              : () => showDriveDialog(context, controller),
           onOpen: controller.busy
               ? null
               : () => controller.navigate(GardenPage.gardens),
@@ -35,6 +31,7 @@ class _SidebarDrivesState extends State<SidebarDrives> {
         for (final drive in controller.gardens) ...[
           TreeRow(
             label: drive.name,
+            actions: DriveRowActions(drive: drive, controller: controller),
             icon: LucideIcons.hardDrive,
             connected: drive.role != 'Owner',
             depth: 0,

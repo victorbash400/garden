@@ -38,7 +38,9 @@ class _DriveDialogState extends State<DriveDialog> {
     } else {
       await widget.controller.create(value.text.trim());
     }
-    if (mounted && widget.controller.page == GardenPage.connected) {
+    if (mounted &&
+        widget.controller.error == null &&
+        widget.controller.page == GardenPage.files) {
       Navigator.of(context).pop();
     }
   }

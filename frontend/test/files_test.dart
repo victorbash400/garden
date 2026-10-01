@@ -113,6 +113,59 @@ void main() {
     controller.dispose();
   });
 
+  testWidgets('sidebar folder creation and drive deletion work directly', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1100, 740);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final gateway = FilesFixture();
+    final files = FilesController(gateway);
+    final controller = GardenController(
+      auth.TestGateway(),
+      auth.MemoryPreferences(),
+      files: files,
+    );
+    await controller.signIn('demo@garden.local', 'garden-demo');
+    await controller.create('Projects');
+    await tester.pumpWidget(GardenApp(controller: controller));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Create drive'), findsNothing);
+    await tester.tap(find.byTooltip('New folder in Projects'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'Work');
+    await tester.tap(find.text('Create'));
+    await tester.pumpAndSettle();
+    expect(files.nodes.single.name, 'Work');
+    expect(files.path, isEmpty);
+    await tester.tap(find.byTooltip('Actions for Projects'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Delete drive'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(controller.gardens, hasLength(1));
+    await tester.tap(find.byTooltip('Actions for Projects'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Delete drive'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Delete drive'));
+    await tester.pump();
+    await tester.runAsync(() async {
+      await Future<void>.delayed(Duration.zero);
+    });
+    await tester.pumpAndSettle();
+    expect(controller.gardens, isEmpty);
+    expect(controller.page, GardenPage.gardens);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+    files.dispose();
+    controller.dispose();
+    unawaited(gateway.events.close());
+    await tester.pump();
+  });
+
   testWidgets('open drive, create and edit text, then post a comment', (
     tester,
   ) async {
@@ -128,11 +181,10 @@ void main() {
       files: files,
     );
     await controller.signIn('demo@garden.local', 'garden-demo');
-    await controller.connect(drive);
+    await controller.openDrive(drive);
     await tester.pumpWidget(GardenApp(controller: controller));
-    await tester.tap(find.text('Open drive'));
     await tester.pumpAndSettle();
-    expect(find.text('This folder is empty'), findsOneWidget);
+    expect(find.bySemanticsLabel('This folder is empty'), findsOneWidget);
     await tester.tap(find.byTooltip('Back to drives'));
     await tester.pumpAndSettle();
     expect(controller.page, GardenPage.gardens);

@@ -3,6 +3,7 @@ import 'package:garden_client/garden_client.dart';
 
 import '../components/error_notice.dart';
 import '../components/files/directory_list.dart';
+import '../components/files/directory_header.dart';
 import '../components/files/file_actions.dart';
 import '../components/files/file_details.dart';
 import '../components/files/files_toolbar.dart';
@@ -46,7 +47,20 @@ class FilesView extends StatelessWidget {
             Expanded(
               child: Row(
                 children: [
-                  Expanded(child: DirectoryList(controller: controller)),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        DefaultTextStyle.merge(
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey,
+                          ),
+                          child: const DirectoryHeader(),
+                        ),
+                        Expanded(child: DirectoryList(controller: controller)),
+                      ],
+                    ),
+                  ),
                   if (selected != null && selected.kind == NodeKind.file)
                     FileDetails(
                       key: ValueKey(selected.id),

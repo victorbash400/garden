@@ -51,7 +51,7 @@ class GardensView extends StatelessWidget {
                         garden: garden,
                         onConnect: controller.busy
                             ? null
-                            : () => controller.connect(garden),
+                            : () => controller.openDrive(garden),
                       ),
                   ],
                 ),

@@ -14,7 +14,9 @@ class TreeRow extends StatelessWidget {
     this.expanded = false,
     this.depth = 0,
     this.connected = false,
+    this.actions,
   });
+  final Widget? actions;
   final String label;
   final IconData icon;
   final bool selected;
@@ -107,6 +109,7 @@ class TreeRow extends StatelessWidget {
                 ),
               ),
             ),
+            ?actions,
           ],
         ),
       ),

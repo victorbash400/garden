@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../components/settings/settings_group.dart';
-import '../components/settings/account_identity.dart';
+import '../components/settings/settings_row.dart';
 import '../components/settings/settings_action_row.dart';
 import '../state/garden_controller.dart';
 
@@ -11,9 +11,12 @@ class AccountSettings extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(
     children: [
-      AccountIdentity(email: controller.account!.email),
       SettingsGroup(
         children: [
+          SettingsRow(
+            label: 'Email',
+            value: SelectableText(controller.account!.email),
+          ),
           SettingsActionRow(
             label: 'Sign out',
             onTap: controller.busy ? null : controller.signOut,

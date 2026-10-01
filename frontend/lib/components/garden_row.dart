@@ -42,7 +42,7 @@ class GardenRow extends StatelessWidget {
             ],
           ),
         ),
-        GardenButton(label: 'Connect', secondary: true, onPressed: onConnect),
+        GardenButton(label: 'Open', secondary: true, onPressed: onConnect),
       ],
     ),
   );

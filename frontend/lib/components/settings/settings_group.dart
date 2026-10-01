@@ -5,9 +5,12 @@ class SettingsGroup extends StatelessWidget {
   final List<Widget> children;
   @override
   Widget build(BuildContext context) => Material(
-    color: const Color(0xFFF5F5F7),
+    color: const Color(0xFFFAFAFA),
     clipBehavior: Clip.antiAlias,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+      side: const BorderSide(color: Color(0xFFE5E5E5)),
+    ),
     child: Column(
       children: [
         for (int i = 0; i < children.length; i++) ...[

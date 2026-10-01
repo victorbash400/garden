@@ -11,6 +11,7 @@ abstract interface class GardenGateway {
     String password,
   );
   Future<void> signOut();
+  Future<void> deleteDrive(int driveId);
   Future<List<GardenInfo>> listGardens();
   Future<GardenInfo> createGarden(String name);
   Future<GardenInfo> joinGarden(String code);

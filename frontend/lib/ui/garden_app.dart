@@ -5,9 +5,7 @@ import '../components/error_notice.dart';
 import '../components/garden_sidebar.dart';
 import '../components/settings/settings_sidebar.dart';
 import '../components/settings/settings_transition.dart';
-import '../components/onboarding_footer.dart';
 import '../views/account_form.dart';
-import '../views/connection_view.dart';
 import '../views/files_view.dart';
 import '../views/gardens_view.dart';
 import '../views/settings_view.dart';
@@ -62,19 +60,6 @@ class GardenApp extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (controller.page == GardenPage.connected)
-                    OnboardingFooter(
-                      action: controller.files == null
-                          ? 'Drives'
-                          : 'Open drive',
-                      busy: controller.busy,
-                      onBack: controller.busy ? null : controller.back,
-                      onAction: controller.account == null || controller.busy
-                          ? null
-                          : controller.files == null
-                          ? () => controller.navigate(GardenPage.gardens)
-                          : controller.openFiles,
-                    ),
                 ],
               ),
             ),
@@ -129,7 +114,6 @@ class GardenApp extends StatelessWidget {
         onBack: controller.back,
       ),
     ),
-    GardenPage.connected => ConnectionView(garden: controller.selected!),
     GardenPage.files => FilesView(
       controller: controller.files!,
       userId: controller.account!.id,

@@ -33,6 +33,12 @@ class FilesToolbar extends StatelessWidget {
                 : controller.path.isEmpty
                 ? onBackToDrives
                 : () => controller.goTo(controller.path.length - 1),
+            style: IconButton.styleFrom(
+              backgroundColor: const Color(0xFFF5F5F5),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
             icon: const Icon(LucideIcons.chevronLeft, size: 18),
           ),
           Expanded(
@@ -44,7 +50,14 @@ class FilesToolbar extends StatelessWidget {
                     onPressed: controller.busy
                         ? null
                         : () => controller.goTo(0),
-                    child: Text(controller.drive!.name),
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color(0xFF333330),
+                      overlayColor: Colors.transparent,
+                    ),
+                    child: Text(
+                      controller.drive!.name,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
                   ),
                   for (var i = 0; i < controller.path.length; i++) ...[
                     const Icon(
@@ -56,6 +69,10 @@ class FilesToolbar extends StatelessWidget {
                       onPressed: controller.busy
                           ? null
                           : () => controller.goTo(i + 1),
+                      style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFF333330),
+                        overlayColor: Colors.transparent,
+                      ),
                       child: Text(controller.path[i].name),
                     ),
                   ],

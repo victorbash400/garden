@@ -18,7 +18,6 @@ enum GardenPage {
   gardens,
   create,
   join,
-  connected,
   settings,
   files,
 }
@@ -81,8 +80,7 @@ class GardenController extends ChangeNotifier {
       GardenPage.verify => GardenPage.register,
       GardenPage.create ||
       GardenPage.join ||
-      GardenPage.files ||
-      GardenPage.connected => GardenPage.gardens,
+      GardenPage.files => GardenPage.gardens,
       GardenPage.settings =>
         account == null ? GardenPage.signIn : _settingsReturn,
       _ => GardenPage.signIn,
@@ -126,39 +124,42 @@ class GardenController extends ChangeNotifier {
   Future<void> refresh() => _request(() async {
     gardens = await gateway.listGardens();
   });
-  Future<void> create(String name) => _request(() async {
-    selected = await gateway.createGarden(name.trim());
-    page = GardenPage.connected;
-    gardens = await gateway.listGardens();
-  });
-  Future<void> join(String code) => _request(() async {
-    selected = await gateway.joinGarden(code.trim());
-    page = GardenPage.connected;
-    gardens = await gateway.listGardens();
-  });
-  Future<void> connect(GardenInfo garden) => _request(() async {
-    selected = await gateway.connect(garden.id);
-    page = GardenPage.connected;
-  });
-  Future<void> openDrive(GardenInfo drive) async {
-    if (busy) return;
-    if (files?.drive?.id == drive.id) {
-      await files!.goTo(0);
-      navigate(GardenPage.files);
-      return;
-    }
-    await connect(drive);
-    if (error == null && files != null) await openFiles();
-  }
-
-  Future<void> openFiles() => _request(() async {
+  Future<void> _showDrive(GardenInfo drive) async {
     final browser = files;
-    final drive = selected;
-    if (browser == null || drive == null) {
-      throw StateError('No drive is connected.');
-    }
+    if (browser == null) throw StateError('File browser is unavailable.');
+    selected = drive;
     await browser.open(drive);
     page = GardenPage.files;
+    if (browser.error != null) throw StateError(browser.error!);
+  }
+
+  Future<void> create(String name) => _request(() async {
+    final drive = await gateway.createGarden(name.trim());
+    gardens = [...gardens, drive];
+    await _showDrive(drive);
+  });
+  Future<void> join(String code) => _request(() async {
+    final drive = await gateway.joinGarden(code.trim());
+    gardens = [...gardens.where((item) => item.id != drive.id), drive];
+    await _showDrive(drive);
+  });
+  Future<void> openDrive(GardenInfo drive) => _request(() async {
+    if (files?.drive?.id == drive.id) {
+      selected = drive;
+      page = GardenPage.files;
+      if (files!.path.isNotEmpty) await files!.goTo(0);
+      return;
+    }
+    await _showDrive(drive);
+  });
+  Future<void> deleteDrive(GardenInfo drive) => _request(() async {
+    await gateway.deleteDrive(drive.id);
+    gardens = gardens.where((item) => item.id != drive.id).toList();
+    if (files?.drive?.id == drive.id) {
+      await files!.close();
+      selected = null;
+      page = GardenPage.gardens;
+    }
   });
   Future<void> signOut() => _request(() async {
     await files?.close();

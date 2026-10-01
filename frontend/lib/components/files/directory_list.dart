@@ -4,6 +4,7 @@ import 'package:garden_client/garden_client.dart';
 import '../../state/files_controller.dart';
 import 'file_actions.dart';
 import 'file_row.dart';
+import 'empty_directory.dart';
 
 class DirectoryList extends StatelessWidget {
   const DirectoryList({super.key, required this.controller});
@@ -12,12 +13,7 @@ class DirectoryList extends StatelessWidget {
   Widget build(BuildContext context) {
     final actions = FileActions(context, controller);
     if (controller.nodes.isEmpty && !controller.busy) {
-      return const Center(
-        child: Text(
-          'This folder is empty',
-          style: TextStyle(fontSize: 13, color: Colors.grey),
-        ),
-      );
+      return const EmptyDirectory();
     }
     return AbsorbPointer(
       absorbing: controller.busy,
@@ -27,6 +23,7 @@ class DirectoryList extends StatelessWidget {
           final FileNode node = controller.nodes[index];
           return FileRow(
             node: node,
+            striped: index.isEven,
             selected: controller.selected?.id == node.id,
             onSelect: () => controller.select(node),
             onOpen: () => actions.open(node),
