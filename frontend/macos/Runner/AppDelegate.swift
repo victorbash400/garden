@@ -5,7 +5,7 @@ import FlutterMacOS
 class AppDelegate: FlutterAppDelegate {
   override func applicationDidFinishLaunching(_ notification: Notification) {
     super.applicationDidFinishLaunching(notification)
-    if let iconURL = Bundle.main.url(forResource: "AppIcon", withExtension: "icns"),
+    if let iconURL = Bundle.main.url(forResource: "GardenIcon", withExtension: "icns"),
        let icon = NSImage(contentsOf: iconURL) {
       NSApplication.shared.applicationIconImage = icon
     }
