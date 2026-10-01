@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../ui/garden_theme.dart';
+import 'password_visibility_button.dart';
 
-class GardenField extends StatelessWidget {
+class GardenField extends StatefulWidget {
   const GardenField({
     super.key,
     required this.label,
@@ -21,22 +22,48 @@ class GardenField extends StatelessWidget {
   final ValueChanged<String>? onSubmitted;
   final TextInputType? keyboardType;
   @override
+  State<GardenField> createState() => _GardenFieldState();
+}
+
+class _GardenFieldState extends State<GardenField> {
+  bool passwordVisible = false;
+
+  @override
+  void didUpdateWidget(covariant GardenField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.obscure != widget.obscure ||
+        oldWidget.controller != widget.controller) {
+      passwordVisible = false;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text(
-        label,
+        widget.label,
         style: const TextStyle(fontSize: 12, color: GardenTheme.secondary),
       ),
       const SizedBox(height: 8),
       TextField(
-        controller: controller,
-        obscureText: obscure,
-        enabled: enabled,
-        autofocus: autofocus,
-        onSubmitted: onSubmitted,
-        keyboardType: keyboardType,
+        controller: widget.controller,
+        obscureText: widget.obscure && !passwordVisible,
+        autocorrect: !widget.obscure,
+        enableSuggestions: !widget.obscure,
+        enabled: widget.enabled,
+        autofocus: widget.autofocus,
+        onSubmitted: widget.onSubmitted,
+        keyboardType: widget.keyboardType,
         decoration: InputDecoration(
+          suffixIcon: widget.obscure
+              ? PasswordVisibilityButton(
+                  visible: passwordVisible,
+                  onPressed: widget.enabled
+                      ? () => setState(() => passwordVisible = !passwordVisible)
+                      : null,
+                )
+              : null,
           isDense: true,
           filled: true,
           fillColor: Colors.white,
