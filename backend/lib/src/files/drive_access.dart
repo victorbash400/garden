@@ -49,7 +49,15 @@ class DriveAccess {
     Transaction transaction, {
     LockMode mode = LockMode.forUpdate,
   }) async {
-    await require(session, gardenId, transaction: transaction);
+    final member = await GardenMember.db.findFirstRow(
+      session,
+      where: (row) =>
+          row.gardenId.equals(gardenId) & row.userId.equals(user(session)),
+      transaction: transaction,
+    );
+    if (member == null) {
+      throw GardenException(message: 'You do not have access to this drive.');
+    }
     final drive = await GardenRecord.db.findById(
       session,
       gardenId,
@@ -69,8 +77,15 @@ class DriveAccess {
     Transaction transaction,
   ) async {
     if (parentId == 0) return;
-    final parent = await node(session, parentId, transaction: transaction);
-    if (parent.gardenId != gardenId || parent.kind != NodeKind.folder) {
+    final parent = await FileNode.db.findById(
+      session,
+      parentId,
+      transaction: transaction,
+    );
+    if (parent == null ||
+        parent.deleted ||
+        parent.gardenId != gardenId ||
+        parent.kind != NodeKind.folder) {
       throw GardenException(message: 'Choose a folder in this drive.');
     }
   }
