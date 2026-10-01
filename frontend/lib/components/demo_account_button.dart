@@ -11,7 +11,10 @@ class DemoAccountButton extends StatelessWidget {
     child: TextButton(
       onPressed: onFill,
       style: TextButton.styleFrom(
-        padding: EdgeInsets.zero,
+        minimumSize: Size.zero,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         foregroundColor: const Color(0xFF737373),
         textStyle: const TextStyle(fontSize: 12),
       ),
