@@ -12,114 +12,132 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _is;
 
-abstract class GardenRecord
+abstract class FileVersion
     implements _is.TableRow<int?>, _is.ProtocolSerialization {
-  GardenRecord._({
+  FileVersion._({
     this.id,
-    required this.name,
-    required this.ownerId,
-    required this.invitationHash,
+    required this.nodeId,
+    required this.authorId,
+    required this.baseVersion,
+    required this.size,
+    required this.chunkCount,
+    bool? committed,
     required this.createdAt,
-    int? revision,
-  }) : revision = revision ?? 0;
+  }) : committed = committed ?? false;
 
-  factory GardenRecord({
+  factory FileVersion({
     int? id,
-    required String name,
-    required String ownerId,
-    required String invitationHash,
+    required int nodeId,
+    required String authorId,
+    required int baseVersion,
+    required int size,
+    required int chunkCount,
+    bool? committed,
     required DateTime createdAt,
-    int? revision,
-  }) = _GardenRecordImpl;
+  }) = _FileVersionImpl;
 
-  factory GardenRecord.fromJson(Map<String, dynamic> jsonSerialization) {
-    return GardenRecord(
+  factory FileVersion.fromJson(Map<String, dynamic> jsonSerialization) {
+    return FileVersion(
       id: jsonSerialization['id'] as int?,
-      name: jsonSerialization['name'] as String,
-      ownerId: jsonSerialization['ownerId'] as String,
-      invitationHash: jsonSerialization['invitationHash'] as String,
+      nodeId: jsonSerialization['nodeId'] as int,
+      authorId: jsonSerialization['authorId'] as String,
+      baseVersion: jsonSerialization['baseVersion'] as int,
+      size: jsonSerialization['size'] as int,
+      chunkCount: jsonSerialization['chunkCount'] as int,
+      committed: jsonSerialization['committed'] == null
+          ? null
+          : _is.BoolJsonExtension.fromJson(jsonSerialization['committed']),
       createdAt: _is.DateTimeJsonExtension.fromJson(
         jsonSerialization['createdAt'],
       ),
-      revision: jsonSerialization['revision'] as int?,
     );
   }
 
-  static final t = GardenRecordTable();
+  static final t = FileVersionTable();
 
-  static const db = GardenRecordRepository._();
+  static const db = FileVersionRepository._();
 
   @override
   int? id;
 
-  String name;
+  int nodeId;
 
-  String ownerId;
+  String authorId;
 
-  String invitationHash;
+  int baseVersion;
+
+  int size;
+
+  int chunkCount;
+
+  bool committed;
 
   DateTime createdAt;
-
-  int revision;
 
   @override
   _is.Table<int?> get table => t;
 
-  /// Returns a shallow copy of this [GardenRecord]
+  /// Returns a shallow copy of this [FileVersion]
   /// with some or all fields replaced by the given arguments.
   @_is.useResult
-  GardenRecord copyWith({
+  FileVersion copyWith({
     int? id,
-    String? name,
-    String? ownerId,
-    String? invitationHash,
+    int? nodeId,
+    String? authorId,
+    int? baseVersion,
+    int? size,
+    int? chunkCount,
+    bool? committed,
     DateTime? createdAt,
-    int? revision,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
-      '__className__': 'GardenRecord',
+      '__className__': 'FileVersion',
       if (id != null) 'id': id,
-      'name': name,
-      'ownerId': ownerId,
-      'invitationHash': invitationHash,
+      'nodeId': nodeId,
+      'authorId': authorId,
+      'baseVersion': baseVersion,
+      'size': size,
+      'chunkCount': chunkCount,
+      'committed': committed,
       'createdAt': createdAt.toJson(),
-      'revision': revision,
     };
   }
 
   @override
   Map<String, dynamic> toJsonForProtocol() {
     return {
-      '__className__': 'GardenRecord',
+      '__className__': 'FileVersion',
       if (id != null) 'id': id,
-      'name': name,
-      'ownerId': ownerId,
-      'invitationHash': invitationHash,
+      'nodeId': nodeId,
+      'authorId': authorId,
+      'baseVersion': baseVersion,
+      'size': size,
+      'chunkCount': chunkCount,
+      'committed': committed,
       'createdAt': createdAt.toJson(),
-      'revision': revision,
     };
   }
 
-  static GardenRecordInclude include() {
-    return GardenRecordInclude._();
+  static FileVersionInclude include() {
+    return FileVersionInclude._();
   }
 
-  static GardenRecordIncludeList includeList({
-    _is.WhereExpressionBuilder<GardenRecordTable>? where,
+  static FileVersionIncludeList includeList({
+    _is.WhereExpressionBuilder<FileVersionTable>? where,
     int? limit,
     int? offset,
-    _is.OrderByBuilder<GardenRecordTable>? orderBy,
-    _is.OrderByListBuilder<GardenRecordTable>? orderByList,
-    GardenRecordInclude? include,
+    _is.OrderByBuilder<FileVersionTable>? orderBy,
+    _is.OrderByListBuilder<FileVersionTable>? orderByList,
+    FileVersionInclude? include,
   }) {
-    return GardenRecordIncludeList._(
+    return FileVersionIncludeList._(
       where: where,
       limit: limit,
       offset: offset,
-      orderBy: orderBy?.call(GardenRecord.t),
-      orderByList: orderByList?.call(GardenRecord.t),
+      orderBy: orderBy?.call(FileVersion.t),
+      orderByList: orderByList?.call(FileVersion.t),
       include: include,
     );
   }
@@ -132,159 +150,190 @@ abstract class GardenRecord
 
 class _Undefined {}
 
-class _GardenRecordImpl extends GardenRecord {
-  _GardenRecordImpl({
+class _FileVersionImpl extends FileVersion {
+  _FileVersionImpl({
     int? id,
-    required String name,
-    required String ownerId,
-    required String invitationHash,
+    required int nodeId,
+    required String authorId,
+    required int baseVersion,
+    required int size,
+    required int chunkCount,
+    bool? committed,
     required DateTime createdAt,
-    int? revision,
   }) : super._(
          id: id,
-         name: name,
-         ownerId: ownerId,
-         invitationHash: invitationHash,
+         nodeId: nodeId,
+         authorId: authorId,
+         baseVersion: baseVersion,
+         size: size,
+         chunkCount: chunkCount,
+         committed: committed,
          createdAt: createdAt,
-         revision: revision,
        );
 
-  /// Returns a shallow copy of this [GardenRecord]
+  /// Returns a shallow copy of this [FileVersion]
   /// with some or all fields replaced by the given arguments.
   @_is.useResult
   @override
-  GardenRecord copyWith({
+  FileVersion copyWith({
     Object? id = _Undefined,
-    String? name,
-    String? ownerId,
-    String? invitationHash,
+    int? nodeId,
+    String? authorId,
+    int? baseVersion,
+    int? size,
+    int? chunkCount,
+    bool? committed,
     DateTime? createdAt,
-    int? revision,
   }) {
-    return GardenRecord(
+    return FileVersion(
       id: id is int? ? id : this.id,
-      name: name ?? this.name,
-      ownerId: ownerId ?? this.ownerId,
-      invitationHash: invitationHash ?? this.invitationHash,
+      nodeId: nodeId ?? this.nodeId,
+      authorId: authorId ?? this.authorId,
+      baseVersion: baseVersion ?? this.baseVersion,
+      size: size ?? this.size,
+      chunkCount: chunkCount ?? this.chunkCount,
+      committed: committed ?? this.committed,
       createdAt: createdAt ?? this.createdAt,
-      revision: revision ?? this.revision,
     );
   }
 }
 
-class GardenRecordUpdateTable extends _is.UpdateTable<GardenRecordTable> {
-  GardenRecordUpdateTable(super.table);
+class FileVersionUpdateTable extends _is.UpdateTable<FileVersionTable> {
+  FileVersionUpdateTable(super.table);
 
-  _is.ColumnValue<String, String> name(String value) => _is.ColumnValue(
-    table.name,
+  _is.ColumnValue<int, int> nodeId(int value) => _is.ColumnValue(
+    table.nodeId,
     value,
   );
 
-  _is.ColumnValue<String, String> ownerId(String value) => _is.ColumnValue(
-    table.ownerId,
+  _is.ColumnValue<String, String> authorId(String value) => _is.ColumnValue(
+    table.authorId,
     value,
   );
 
-  _is.ColumnValue<String, String> invitationHash(String value) =>
-      _is.ColumnValue(
-        table.invitationHash,
-        value,
-      );
+  _is.ColumnValue<int, int> baseVersion(int value) => _is.ColumnValue(
+    table.baseVersion,
+    value,
+  );
+
+  _is.ColumnValue<int, int> size(int value) => _is.ColumnValue(
+    table.size,
+    value,
+  );
+
+  _is.ColumnValue<int, int> chunkCount(int value) => _is.ColumnValue(
+    table.chunkCount,
+    value,
+  );
+
+  _is.ColumnValue<bool, bool> committed(bool value) => _is.ColumnValue(
+    table.committed,
+    value,
+  );
 
   _is.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
       _is.ColumnValue(
         table.createdAt,
         value,
       );
-
-  _is.ColumnValue<int, int> revision(int value) => _is.ColumnValue(
-    table.revision,
-    value,
-  );
 }
 
-class GardenRecordTable extends _is.Table<int?> {
-  GardenRecordTable({super.tableRelation}) : super(tableName: 'garden_record') {
-    updateTable = GardenRecordUpdateTable(this);
-    name = _is.ColumnString(
-      'name',
+class FileVersionTable extends _is.Table<int?> {
+  FileVersionTable({super.tableRelation}) : super(tableName: 'file_version') {
+    updateTable = FileVersionUpdateTable(this);
+    nodeId = _is.ColumnInt(
+      'nodeId',
       this,
     );
-    ownerId = _is.ColumnString(
-      'ownerId',
+    authorId = _is.ColumnString(
+      'authorId',
       this,
     );
-    invitationHash = _is.ColumnString(
-      'invitationHash',
+    baseVersion = _is.ColumnInt(
+      'baseVersion',
       this,
+    );
+    size = _is.ColumnInt(
+      'size',
+      this,
+    );
+    chunkCount = _is.ColumnInt(
+      'chunkCount',
+      this,
+    );
+    committed = _is.ColumnBool(
+      'committed',
+      this,
+      hasDefault: true,
     );
     createdAt = _is.ColumnDateTime(
       'createdAt',
       this,
     );
-    revision = _is.ColumnInt(
-      'revision',
-      this,
-      hasDefault: true,
-    );
   }
 
-  late final GardenRecordUpdateTable updateTable;
+  late final FileVersionUpdateTable updateTable;
 
-  late final _is.ColumnString name;
+  late final _is.ColumnInt nodeId;
 
-  late final _is.ColumnString ownerId;
+  late final _is.ColumnString authorId;
 
-  late final _is.ColumnString invitationHash;
+  late final _is.ColumnInt baseVersion;
+
+  late final _is.ColumnInt size;
+
+  late final _is.ColumnInt chunkCount;
+
+  late final _is.ColumnBool committed;
 
   late final _is.ColumnDateTime createdAt;
-
-  late final _is.ColumnInt revision;
 
   @override
   List<_is.Column> get columns => [
     id,
-    name,
-    ownerId,
-    invitationHash,
+    nodeId,
+    authorId,
+    baseVersion,
+    size,
+    chunkCount,
+    committed,
     createdAt,
-    revision,
   ];
 }
 
-class GardenRecordInclude extends _is.IncludeObject {
-  GardenRecordInclude._();
+class FileVersionInclude extends _is.IncludeObject {
+  FileVersionInclude._();
 
   @override
   Map<String, _is.Include?> get includes => {};
 
   @override
-  _is.Table<int?> get table => GardenRecord.t;
+  _is.Table<int?> get table => FileVersion.t;
 }
 
-class GardenRecordIncludeList extends _is.IncludeList {
-  GardenRecordIncludeList._({
-    _is.WhereExpressionBuilder<GardenRecordTable>? where,
+class FileVersionIncludeList extends _is.IncludeList {
+  FileVersionIncludeList._({
+    _is.WhereExpressionBuilder<FileVersionTable>? where,
     super.limit,
     super.offset,
     super.orderBy,
     super.orderByList,
     super.include,
   }) {
-    super.where = where?.call(GardenRecord.t);
+    super.where = where?.call(FileVersion.t);
   }
 
   @override
   Map<String, _is.Include?> get includes => include?.includes ?? {};
 
   @override
-  _is.Table<int?> get table => GardenRecord.t;
+  _is.Table<int?> get table => FileVersion.t;
 }
 
-class GardenRecordRepository {
-  const GardenRecordRepository._();
+class FileVersionRepository {
+  const FileVersionRepository._();
 
-  /// Returns a list of [GardenRecord]s matching the given query parameters.
+  /// Returns a list of [FileVersion]s matching the given query parameters.
   ///
   /// Use [where] to specify which items to include in the return value.
   /// If none is specified, all items will be returned.
@@ -306,21 +355,21 @@ class GardenRecordRepository {
   ///   limit: 100,
   /// );
   /// ```
-  Future<List<GardenRecord>> find(
+  Future<List<FileVersion>> find(
     _is.DatabaseSession session, {
-    _is.WhereExpressionBuilder<GardenRecordTable>? where,
+    _is.WhereExpressionBuilder<FileVersionTable>? where,
     int? limit,
     int? offset,
-    _is.OrderByBuilder<GardenRecordTable>? orderBy,
-    _is.OrderByListBuilder<GardenRecordTable>? orderByList,
+    _is.OrderByBuilder<FileVersionTable>? orderBy,
+    _is.OrderByListBuilder<FileVersionTable>? orderByList,
     _is.Transaction? transaction,
     _is.LockMode? lockMode,
     _is.LockBehavior? lockBehavior,
   }) async {
-    return session.db.find<GardenRecord>(
-      where: where?.call(GardenRecord.t),
-      orderBy: orderBy?.call(GardenRecord.t),
-      orderByList: orderByList?.call(GardenRecord.t),
+    return session.db.find<FileVersion>(
+      where: where?.call(FileVersion.t),
+      orderBy: orderBy?.call(FileVersion.t),
+      orderByList: orderByList?.call(FileVersion.t),
       limit: limit,
       offset: offset,
       transaction: transaction,
@@ -329,7 +378,7 @@ class GardenRecordRepository {
     );
   }
 
-  /// Returns the first matching [GardenRecord] matching the given query parameters.
+  /// Returns the first matching [FileVersion] matching the given query parameters.
   ///
   /// Use [where] to specify which items to include in the return value.
   /// If none is specified, all items will be returned.
@@ -346,20 +395,20 @@ class GardenRecordRepository {
   ///   orderBy: (t) => t.age,
   /// );
   /// ```
-  Future<GardenRecord?> findFirstRow(
+  Future<FileVersion?> findFirstRow(
     _is.DatabaseSession session, {
-    _is.WhereExpressionBuilder<GardenRecordTable>? where,
+    _is.WhereExpressionBuilder<FileVersionTable>? where,
     int? offset,
-    _is.OrderByBuilder<GardenRecordTable>? orderBy,
-    _is.OrderByListBuilder<GardenRecordTable>? orderByList,
+    _is.OrderByBuilder<FileVersionTable>? orderBy,
+    _is.OrderByListBuilder<FileVersionTable>? orderByList,
     _is.Transaction? transaction,
     _is.LockMode? lockMode,
     _is.LockBehavior? lockBehavior,
   }) async {
-    return session.db.findFirstRow<GardenRecord>(
-      where: where?.call(GardenRecord.t),
-      orderBy: orderBy?.call(GardenRecord.t),
-      orderByList: orderByList?.call(GardenRecord.t),
+    return session.db.findFirstRow<FileVersion>(
+      where: where?.call(FileVersion.t),
+      orderBy: orderBy?.call(FileVersion.t),
+      orderByList: orderByList?.call(FileVersion.t),
       offset: offset,
       transaction: transaction,
       lockMode: lockMode,
@@ -367,15 +416,15 @@ class GardenRecordRepository {
     );
   }
 
-  /// Finds a single [GardenRecord] by its [id] or null if no such row exists.
-  Future<GardenRecord?> findById(
+  /// Finds a single [FileVersion] by its [id] or null if no such row exists.
+  Future<FileVersion?> findById(
     _is.DatabaseSession session,
     int id, {
     _is.Transaction? transaction,
     _is.LockMode? lockMode,
     _is.LockBehavior? lockBehavior,
   }) async {
-    return session.db.findById<GardenRecord>(
+    return session.db.findById<FileVersion>(
       id,
       transaction: transaction,
       lockMode: lockMode,
@@ -383,9 +432,9 @@ class GardenRecordRepository {
     );
   }
 
-  /// Inserts all [GardenRecord]s in the list and returns the inserted rows.
+  /// Inserts all [FileVersion]s in the list and returns the inserted rows.
   ///
-  /// The returned [GardenRecord]s will have their `id` fields set.
+  /// The returned [FileVersion]s will have their `id` fields set.
   ///
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// insert, none of the rows will be inserted.
@@ -397,14 +446,14 @@ class GardenRecordRepository {
   /// If [noReturn] is set to `true`, the inserted rows are not read back from
   /// the database and an empty list is returned. This avoids the overhead of
   /// transferring and deserializing the rows when the result is not needed.
-  Future<List<GardenRecord>> insert(
+  Future<List<FileVersion>> insert(
     _is.DatabaseSession session,
-    List<GardenRecord> rows, {
+    List<FileVersion> rows, {
     _is.Transaction? transaction,
     bool ignoreConflicts = false,
     bool noReturn = false,
   }) async {
-    return session.db.insert<GardenRecord>(
+    return session.db.insert<FileVersion>(
       rows,
       transaction: transaction,
       ignoreConflicts: ignoreConflicts,
@@ -412,21 +461,21 @@ class GardenRecordRepository {
     );
   }
 
-  /// Inserts a single [GardenRecord] and returns the inserted row.
+  /// Inserts a single [FileVersion] and returns the inserted row.
   ///
-  /// The returned [GardenRecord] will have its `id` field set.
-  Future<GardenRecord> insertRow(
+  /// The returned [FileVersion] will have its `id` field set.
+  Future<FileVersion> insertRow(
     _is.DatabaseSession session,
-    GardenRecord row, {
+    FileVersion row, {
     _is.Transaction? transaction,
   }) async {
-    return session.db.insertRow<GardenRecord>(
+    return session.db.insertRow<FileVersion>(
       row,
       transaction: transaction,
     );
   }
 
-  /// Upserts all [GardenRecord]s in the list and returns the resulting rows.
+  /// Upserts all [FileVersion]s in the list and returns the resulting rows.
   ///
   /// If a row conflicts on the given [conflictColumns], the existing row is
   /// updated with the new values. Otherwise, a new row is inserted.
@@ -438,7 +487,7 @@ class GardenRecordRepository {
   /// given expression. Conflicting rows that don't match are skipped and not
   /// returned, so the resulting list may be shorter than [rows].
   ///
-  /// The returned [GardenRecord]s will have their `id` fields set.
+  /// The returned [FileVersion]s will have their `id` fields set.
   ///
   /// This is an atomic operation, meaning that if one of the rows fails,
   /// none of the rows will be affected.
@@ -446,26 +495,26 @@ class GardenRecordRepository {
   /// If [noReturn] is set to `true`, the resulting rows are not read back from
   /// the database and an empty list is returned. This avoids the overhead of
   /// transferring and deserializing the rows when the result is not needed.
-  Future<List<GardenRecord>> upsert(
+  Future<List<FileVersion>> upsert(
     _is.DatabaseSession session,
-    List<GardenRecord> rows, {
-    required _is.ColumnSelections<GardenRecordTable> conflictColumns,
-    _is.ColumnSelections<GardenRecordTable>? updateColumns,
-    _is.WhereExpressionBuilder<GardenRecordTable>? updateWhere,
+    List<FileVersion> rows, {
+    required _is.ColumnSelections<FileVersionTable> conflictColumns,
+    _is.ColumnSelections<FileVersionTable>? updateColumns,
+    _is.WhereExpressionBuilder<FileVersionTable>? updateWhere,
     _is.Transaction? transaction,
     bool noReturn = false,
   }) async {
-    return session.db.upsert<GardenRecord>(
+    return session.db.upsert<FileVersion>(
       rows,
-      conflictColumns: conflictColumns(GardenRecord.t),
-      updateColumns: updateColumns?.call(GardenRecord.t),
-      updateWhere: updateWhere?.call(GardenRecord.t),
+      conflictColumns: conflictColumns(FileVersion.t),
+      updateColumns: updateColumns?.call(FileVersion.t),
+      updateWhere: updateWhere?.call(FileVersion.t),
       transaction: transaction,
       noReturn: noReturn,
     );
   }
 
-  /// Upserts a single [GardenRecord] and returns the resulting row.
+  /// Upserts a single [FileVersion] and returns the resulting row.
   ///
   /// If the row conflicts on the given [conflictColumns], the existing row is
   /// updated. Otherwise, a new row is inserted.
@@ -477,25 +526,25 @@ class GardenRecordRepository {
   /// row matches the expression. Returns `null` if no row was affected — for
   /// example when [updateWhere] does not match the conflicting row.
   ///
-  /// The returned [GardenRecord] will have its `id` field set.
-  Future<GardenRecord?> upsertRow(
+  /// The returned [FileVersion] will have its `id` field set.
+  Future<FileVersion?> upsertRow(
     _is.DatabaseSession session,
-    GardenRecord row, {
-    required _is.ColumnSelections<GardenRecordTable> conflictColumns,
-    _is.ColumnSelections<GardenRecordTable>? updateColumns,
-    _is.WhereExpressionBuilder<GardenRecordTable>? updateWhere,
+    FileVersion row, {
+    required _is.ColumnSelections<FileVersionTable> conflictColumns,
+    _is.ColumnSelections<FileVersionTable>? updateColumns,
+    _is.WhereExpressionBuilder<FileVersionTable>? updateWhere,
     _is.Transaction? transaction,
   }) async {
-    return session.db.upsertRow<GardenRecord>(
+    return session.db.upsertRow<FileVersion>(
       row,
-      conflictColumns: conflictColumns(GardenRecord.t),
-      updateColumns: updateColumns?.call(GardenRecord.t),
-      updateWhere: updateWhere?.call(GardenRecord.t),
+      conflictColumns: conflictColumns(FileVersion.t),
+      updateColumns: updateColumns?.call(FileVersion.t),
+      updateWhere: updateWhere?.call(FileVersion.t),
       transaction: transaction,
     );
   }
 
-  /// Updates all [GardenRecord]s in the list and returns the updated rows. If
+  /// Updates all [FileVersion]s in the list and returns the updated rows. If
   /// [columns] is provided, only those columns will be updated. Defaults to
   /// all columns.
   /// This is an atomic operation, meaning that if one of the rows fails to
@@ -504,82 +553,82 @@ class GardenRecordRepository {
   /// If [noReturn] is set to `true`, the updated rows are not read back from
   /// the database and an empty list is returned. This avoids the overhead of
   /// transferring and deserializing the rows when the result is not needed.
-  Future<List<GardenRecord>> update(
+  Future<List<FileVersion>> update(
     _is.DatabaseSession session,
-    List<GardenRecord> rows, {
-    _is.ColumnSelections<GardenRecordTable>? columns,
+    List<FileVersion> rows, {
+    _is.ColumnSelections<FileVersionTable>? columns,
     _is.Transaction? transaction,
     bool noReturn = false,
   }) async {
-    return session.db.update<GardenRecord>(
+    return session.db.update<FileVersion>(
       rows,
-      columns: columns?.call(GardenRecord.t),
+      columns: columns?.call(FileVersion.t),
       transaction: transaction,
       noReturn: noReturn,
     );
   }
 
-  /// Updates a single [GardenRecord]. The row needs to have its id set.
+  /// Updates a single [FileVersion]. The row needs to have its id set.
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
-  Future<GardenRecord> updateRow(
+  Future<FileVersion> updateRow(
     _is.DatabaseSession session,
-    GardenRecord row, {
-    _is.ColumnSelections<GardenRecordTable>? columns,
+    FileVersion row, {
+    _is.ColumnSelections<FileVersionTable>? columns,
     _is.Transaction? transaction,
   }) async {
-    return session.db.updateRow<GardenRecord>(
+    return session.db.updateRow<FileVersion>(
       row,
-      columns: columns?.call(GardenRecord.t),
+      columns: columns?.call(FileVersion.t),
       transaction: transaction,
     );
   }
 
-  /// Updates a single [GardenRecord] by its [id] with the specified [columnValues].
+  /// Updates a single [FileVersion] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
-  Future<GardenRecord?> updateById(
+  Future<FileVersion?> updateById(
     _is.DatabaseSession session,
     int id, {
-    required _is.ColumnValueListBuilder<GardenRecordUpdateTable> columnValues,
+    required _is.ColumnValueListBuilder<FileVersionUpdateTable> columnValues,
     _is.Transaction? transaction,
   }) async {
-    return session.db.updateById<GardenRecord>(
+    return session.db.updateById<FileVersion>(
       id,
-      columnValues: columnValues(GardenRecord.t.updateTable),
+      columnValues: columnValues(FileVersion.t.updateTable),
       transaction: transaction,
     );
   }
 
-  /// Updates all [GardenRecord]s matching the [where] expression with the specified [columnValues].
+  /// Updates all [FileVersion]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   ///
   /// If [noReturn] is set to `true`, the updated rows are not read back from
   /// the database and an empty list is returned. This avoids the overhead of
   /// transferring and deserializing the rows when the result is not needed.
-  Future<List<GardenRecord>> updateWhere(
+  Future<List<FileVersion>> updateWhere(
     _is.DatabaseSession session, {
-    required _is.ColumnValueListBuilder<GardenRecordUpdateTable> columnValues,
-    required _is.WhereExpressionBuilder<GardenRecordTable> where,
+    required _is.ColumnValueListBuilder<FileVersionUpdateTable> columnValues,
+    required _is.WhereExpressionBuilder<FileVersionTable> where,
     int? limit,
     int? offset,
-    _is.OrderByBuilder<GardenRecordTable>? orderBy,
-    _is.OrderByListBuilder<GardenRecordTable>? orderByList,
+    _is.OrderByBuilder<FileVersionTable>? orderBy,
+    _is.OrderByListBuilder<FileVersionTable>? orderByList,
     _is.Transaction? transaction,
     bool noReturn = false,
   }) async {
-    return session.db.updateWhere<GardenRecord>(
-      columnValues: columnValues(GardenRecord.t.updateTable),
-      where: where(GardenRecord.t),
+    return session.db.updateWhere<FileVersion>(
+      columnValues: columnValues(FileVersion.t.updateTable),
+      where: where(FileVersion.t),
       limit: limit,
       offset: offset,
-      orderBy: orderBy?.call(GardenRecord.t),
-      orderByList: orderByList?.call(GardenRecord.t),
+      orderBy: orderBy?.call(FileVersion.t),
+      orderByList: orderByList?.call(FileVersion.t),
       transaction: transaction,
       noReturn: noReturn,
     );
   }
 
-  /// Deletes all [GardenRecord]s in the list and returns the deleted rows.
+  /// Deletes all [FileVersion]s in the list and returns the deleted rows.
   ///
   /// To specify the order of the returned rows use [orderBy] or [orderByList]
   /// when sorting by multiple columns.
@@ -590,30 +639,30 @@ class GardenRecordRepository {
   /// If [noReturn] is set to `true`, the deleted rows are not read back from
   /// the database and an empty list is returned. This avoids the overhead of
   /// transferring and deserializing the rows when the result is not needed.
-  Future<List<GardenRecord>> delete(
+  Future<List<FileVersion>> delete(
     _is.DatabaseSession session,
-    List<GardenRecord> rows, {
-    _is.OrderByBuilder<GardenRecordTable>? orderBy,
-    _is.OrderByListBuilder<GardenRecordTable>? orderByList,
+    List<FileVersion> rows, {
+    _is.OrderByBuilder<FileVersionTable>? orderBy,
+    _is.OrderByListBuilder<FileVersionTable>? orderByList,
     _is.Transaction? transaction,
     bool noReturn = false,
   }) async {
-    return session.db.delete<GardenRecord>(
+    return session.db.delete<FileVersion>(
       rows,
-      orderBy: orderBy?.call(GardenRecord.t),
-      orderByList: orderByList?.call(GardenRecord.t),
+      orderBy: orderBy?.call(FileVersion.t),
+      orderByList: orderByList?.call(FileVersion.t),
       transaction: transaction,
       noReturn: noReturn,
     );
   }
 
-  /// Deletes a single [GardenRecord].
-  Future<GardenRecord> deleteRow(
+  /// Deletes a single [FileVersion].
+  Future<FileVersion> deleteRow(
     _is.DatabaseSession session,
-    GardenRecord row, {
+    FileVersion row, {
     _is.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<GardenRecord>(
+    return session.db.deleteRow<FileVersion>(
       row,
       transaction: transaction,
     );
@@ -627,18 +676,18 @@ class GardenRecordRepository {
   /// If [noReturn] is set to `true`, the deleted rows are not read back from
   /// the database and an empty list is returned. This avoids the overhead of
   /// transferring and deserializing the rows when the result is not needed.
-  Future<List<GardenRecord>> deleteWhere(
+  Future<List<FileVersion>> deleteWhere(
     _is.DatabaseSession session, {
-    required _is.WhereExpressionBuilder<GardenRecordTable> where,
-    _is.OrderByBuilder<GardenRecordTable>? orderBy,
-    _is.OrderByListBuilder<GardenRecordTable>? orderByList,
+    required _is.WhereExpressionBuilder<FileVersionTable> where,
+    _is.OrderByBuilder<FileVersionTable>? orderBy,
+    _is.OrderByListBuilder<FileVersionTable>? orderByList,
     _is.Transaction? transaction,
     bool noReturn = false,
   }) async {
-    return session.db.deleteWhere<GardenRecord>(
-      where: where(GardenRecord.t),
-      orderBy: orderBy?.call(GardenRecord.t),
-      orderByList: orderByList?.call(GardenRecord.t),
+    return session.db.deleteWhere<FileVersion>(
+      where: where(FileVersion.t),
+      orderBy: orderBy?.call(FileVersion.t),
+      orderByList: orderByList?.call(FileVersion.t),
       transaction: transaction,
       noReturn: noReturn,
     );
@@ -648,27 +697,27 @@ class GardenRecordRepository {
   /// will return the count of all rows in the table.
   Future<int> count(
     _is.DatabaseSession session, {
-    _is.WhereExpressionBuilder<GardenRecordTable>? where,
+    _is.WhereExpressionBuilder<FileVersionTable>? where,
     int? limit,
     _is.Transaction? transaction,
   }) async {
-    return session.db.count<GardenRecord>(
-      where: where?.call(GardenRecord.t),
+    return session.db.count<FileVersion>(
+      where: where?.call(FileVersion.t),
       limit: limit,
       transaction: transaction,
     );
   }
 
-  /// Acquires row-level locks on [GardenRecord] rows matching the [where] expression.
+  /// Acquires row-level locks on [FileVersion] rows matching the [where] expression.
   Future<void> lockRows(
     _is.DatabaseSession session, {
-    required _is.WhereExpressionBuilder<GardenRecordTable> where,
+    required _is.WhereExpressionBuilder<FileVersionTable> where,
     required _is.LockMode lockMode,
     required _is.Transaction transaction,
     _is.LockBehavior lockBehavior = _is.LockBehavior.wait,
   }) async {
-    return session.db.lockRows<GardenRecord>(
-      where: where(GardenRecord.t),
+    return session.db.lockRows<FileVersion>(
+      where: where(FileVersion.t),
       lockMode: lockMode,
       lockBehavior: lockBehavior,
       transaction: transaction,

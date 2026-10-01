@@ -1,0 +1,4 @@
+class: DirectoryListing
+fields:
+  revision: int
+  nodes: List<FileNode>

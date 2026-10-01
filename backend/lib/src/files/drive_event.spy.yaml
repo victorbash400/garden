@@ -1,0 +1,13 @@
+class: DriveEvent
+table: drive_event
+fields:
+  gardenId: int
+  revision: int
+  operation: String
+  authorId: String
+  node: FileNode?
+  createdAt: DateTime
+indexes:
+  event_revision_unique:
+    fields: gardenId, revision
+    unique: true

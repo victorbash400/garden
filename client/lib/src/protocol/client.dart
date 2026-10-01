@@ -11,6 +11,17 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _ida;
+import 'dart:typed_data' as _idt;
+import 'package:garden_client/src/protocol/files/directory_listing.dart'
+    as _i6024znp;
+import 'package:garden_client/src/protocol/files/drive_event.dart' as _ib0wfils;
+import 'package:garden_client/src/protocol/files/file_comment.dart'
+    as _i6rexlqc;
+import 'package:garden_client/src/protocol/files/file_lease.dart' as _iiqvbxq9;
+import 'package:garden_client/src/protocol/files/file_node.dart' as _i2qlj4hx;
+import 'package:garden_client/src/protocol/files/file_version.dart'
+    as _ibt6e7l6;
+import 'package:garden_client/src/protocol/files/node_kind.dart' as _igh51ulr;
 import 'package:garden_client/src/protocol/gardens/account_details.dart'
     as _i7n7hin1;
 import 'package:garden_client/src/protocol/gardens/garden_summary.dart'
@@ -251,6 +262,191 @@ class EndpointJwtRefresh extends _iacc.EndpointRefreshJwtTokens {
 }
 
 /// {@category Endpoint}
+class EndpointCollaboration extends _isc.EndpointRef {
+  EndpointCollaboration(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'collaboration';
+
+  _ida.Future<List<_i6rexlqc.FileComment>> comments(int nodeId) =>
+      caller.callServerEndpoint<List<_i6rexlqc.FileComment>>(
+        'collaboration',
+        'comments',
+        {'nodeId': nodeId},
+      );
+
+  _ida.Future<_i6rexlqc.FileComment> comment(
+    int nodeId,
+    String text,
+  ) => caller.callServerEndpoint<_i6rexlqc.FileComment>(
+    'collaboration',
+    'comment',
+    {
+      'nodeId': nodeId,
+      'text': text,
+    },
+  );
+
+  _ida.Future<_iiqvbxq9.FileLease> acquire(int nodeId) =>
+      caller.callServerEndpoint<_iiqvbxq9.FileLease>(
+        'collaboration',
+        'acquire',
+        {'nodeId': nodeId},
+      );
+
+  _ida.Future<void> release(
+    int nodeId,
+    String token,
+  ) => caller.callServerEndpoint<void>(
+    'collaboration',
+    'release',
+    {
+      'nodeId': nodeId,
+      'token': token,
+    },
+  );
+}
+
+/// {@category Endpoint}
+class EndpointContent extends _isc.EndpointRef {
+  EndpointContent(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'content';
+
+  _ida.Future<_ibt6e7l6.FileVersion> begin(
+    int nodeId,
+    int baseVersion,
+    int size,
+  ) => caller.callServerEndpoint<_ibt6e7l6.FileVersion>(
+    'content',
+    'begin',
+    {
+      'nodeId': nodeId,
+      'baseVersion': baseVersion,
+      'size': size,
+    },
+  );
+
+  _ida.Future<void> writeChunk(
+    int versionId,
+    int index,
+    _idt.ByteData data,
+  ) => caller.callServerEndpoint<void>(
+    'content',
+    'writeChunk',
+    {
+      'versionId': versionId,
+      'index': index,
+      'data': data,
+    },
+  );
+
+  _ida.Future<_i2qlj4hx.FileNode> finish(int versionId) =>
+      caller.callServerEndpoint<_i2qlj4hx.FileNode>(
+        'content',
+        'finish',
+        {'versionId': versionId},
+      );
+
+  _ida.Future<_idt.ByteData> read(
+    int nodeId,
+    int versionId,
+    int offset,
+    int length,
+  ) => caller.callServerEndpoint<_idt.ByteData>(
+    'content',
+    'read',
+    {
+      'nodeId': nodeId,
+      'versionId': versionId,
+      'offset': offset,
+      'length': length,
+    },
+  );
+
+  _ida.Future<List<_ibt6e7l6.FileVersion>> versions(int nodeId) =>
+      caller.callServerEndpoint<List<_ibt6e7l6.FileVersion>>(
+        'content',
+        'versions',
+        {'nodeId': nodeId},
+      );
+}
+
+/// {@category Endpoint}
+class EndpointFiles extends _isc.EndpointRef {
+  EndpointFiles(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'files';
+
+  _ida.Future<_i6024znp.DirectoryListing> list(
+    int gardenId,
+    int parentId,
+  ) => caller.callServerEndpoint<_i6024znp.DirectoryListing>(
+    'files',
+    'list',
+    {
+      'gardenId': gardenId,
+      'parentId': parentId,
+    },
+  );
+
+  _ida.Future<_i2qlj4hx.FileNode> create(
+    int gardenId,
+    int parentId,
+    String name,
+    _igh51ulr.NodeKind kind,
+  ) => caller.callServerEndpoint<_i2qlj4hx.FileNode>(
+    'files',
+    'create',
+    {
+      'gardenId': gardenId,
+      'parentId': parentId,
+      'name': name,
+      'kind': kind,
+    },
+  );
+
+  _ida.Future<_i2qlj4hx.FileNode> move(
+    int nodeId,
+    int parentId,
+    String name,
+  ) => caller.callServerEndpoint<_i2qlj4hx.FileNode>(
+    'files',
+    'move',
+    {
+      'nodeId': nodeId,
+      'parentId': parentId,
+      'name': name,
+    },
+  );
+
+  _ida.Future<void> delete(int nodeId) => caller.callServerEndpoint<void>(
+    'files',
+    'delete',
+    {'nodeId': nodeId},
+  );
+
+  _ida.Stream<_ib0wfils.DriveEvent> watch(
+    int gardenId,
+    int afterRevision,
+  ) =>
+      caller.callStreamingServerEndpoint<
+        _ida.Stream<_ib0wfils.DriveEvent>,
+        _ib0wfils.DriveEvent
+      >(
+        'files',
+        'watch',
+        {
+          'gardenId': gardenId,
+          'afterRevision': afterRevision,
+        },
+        {},
+      );
+}
+
+/// {@category Endpoint}
 class EndpointGarden extends _isc.EndpointRef {
   EndpointGarden(_isc.EndpointCaller caller) : super(caller);
 
@@ -351,6 +547,9 @@ class Client extends _isc.ServerpodClientShared {
        ) {
     emailIdp = EndpointEmailIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
+    collaboration = EndpointCollaboration(this);
+    content = EndpointContent(this);
+    files = EndpointFiles(this);
     garden = EndpointGarden(this);
     greeting = EndpointGreeting(this);
     modules = Modules(this);
@@ -359,6 +558,12 @@ class Client extends _isc.ServerpodClientShared {
   late final EndpointEmailIdp emailIdp;
 
   late final EndpointJwtRefresh jwtRefresh;
+
+  late final EndpointCollaboration collaboration;
+
+  late final EndpointContent content;
+
+  late final EndpointFiles files;
 
   late final EndpointGarden garden;
 
@@ -370,6 +575,9 @@ class Client extends _isc.ServerpodClientShared {
   Map<String, _isc.EndpointRef> get endpointRefLookup => {
     'emailIdp': emailIdp,
     'jwtRefresh': jwtRefresh,
+    'collaboration': collaboration,
+    'content': content,
+    'files': files,
     'garden': garden,
     'greeting': greeting,
   };

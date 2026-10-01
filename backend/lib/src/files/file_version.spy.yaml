@@ -1,0 +1,13 @@
+class: FileVersion
+table: file_version
+fields:
+  nodeId: int
+  authorId: String
+  baseVersion: int
+  size: int
+  chunkCount: int
+  committed: bool, default=false
+  createdAt: DateTime
+indexes:
+  version_node:
+    fields: nodeId, committed, createdAt

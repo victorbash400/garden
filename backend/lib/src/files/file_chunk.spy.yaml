@@ -1,0 +1,11 @@
+class: FileChunk
+table: file_chunk
+fields:
+  versionId: int
+  chunkIndex: int
+  size: int
+  checksum: String
+indexes:
+  chunk_unique:
+    fields: versionId, chunkIndex
+    unique: true

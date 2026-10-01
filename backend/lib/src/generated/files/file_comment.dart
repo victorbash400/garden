@@ -12,114 +12,106 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _is;
 
-abstract class GardenRecord
+abstract class FileComment
     implements _is.TableRow<int?>, _is.ProtocolSerialization {
-  GardenRecord._({
+  FileComment._({
     this.id,
-    required this.name,
-    required this.ownerId,
-    required this.invitationHash,
+    required this.nodeId,
+    required this.authorId,
+    required this.text,
     required this.createdAt,
-    int? revision,
-  }) : revision = revision ?? 0;
+  });
 
-  factory GardenRecord({
+  factory FileComment({
     int? id,
-    required String name,
-    required String ownerId,
-    required String invitationHash,
+    required int nodeId,
+    required String authorId,
+    required String text,
     required DateTime createdAt,
-    int? revision,
-  }) = _GardenRecordImpl;
+  }) = _FileCommentImpl;
 
-  factory GardenRecord.fromJson(Map<String, dynamic> jsonSerialization) {
-    return GardenRecord(
+  factory FileComment.fromJson(Map<String, dynamic> jsonSerialization) {
+    return FileComment(
       id: jsonSerialization['id'] as int?,
-      name: jsonSerialization['name'] as String,
-      ownerId: jsonSerialization['ownerId'] as String,
-      invitationHash: jsonSerialization['invitationHash'] as String,
+      nodeId: jsonSerialization['nodeId'] as int,
+      authorId: jsonSerialization['authorId'] as String,
+      text: jsonSerialization['text'] as String,
       createdAt: _is.DateTimeJsonExtension.fromJson(
         jsonSerialization['createdAt'],
       ),
-      revision: jsonSerialization['revision'] as int?,
     );
   }
 
-  static final t = GardenRecordTable();
+  static final t = FileCommentTable();
 
-  static const db = GardenRecordRepository._();
+  static const db = FileCommentRepository._();
 
   @override
   int? id;
 
-  String name;
+  int nodeId;
 
-  String ownerId;
+  String authorId;
 
-  String invitationHash;
+  String text;
 
   DateTime createdAt;
-
-  int revision;
 
   @override
   _is.Table<int?> get table => t;
 
-  /// Returns a shallow copy of this [GardenRecord]
+  /// Returns a shallow copy of this [FileComment]
   /// with some or all fields replaced by the given arguments.
   @_is.useResult
-  GardenRecord copyWith({
+  FileComment copyWith({
     int? id,
-    String? name,
-    String? ownerId,
-    String? invitationHash,
+    int? nodeId,
+    String? authorId,
+    String? text,
     DateTime? createdAt,
-    int? revision,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
-      '__className__': 'GardenRecord',
+      '__className__': 'FileComment',
       if (id != null) 'id': id,
-      'name': name,
-      'ownerId': ownerId,
-      'invitationHash': invitationHash,
+      'nodeId': nodeId,
+      'authorId': authorId,
+      'text': text,
       'createdAt': createdAt.toJson(),
-      'revision': revision,
     };
   }
 
   @override
   Map<String, dynamic> toJsonForProtocol() {
     return {
-      '__className__': 'GardenRecord',
+      '__className__': 'FileComment',
       if (id != null) 'id': id,
-      'name': name,
-      'ownerId': ownerId,
-      'invitationHash': invitationHash,
+      'nodeId': nodeId,
+      'authorId': authorId,
+      'text': text,
       'createdAt': createdAt.toJson(),
-      'revision': revision,
     };
   }
 
-  static GardenRecordInclude include() {
-    return GardenRecordInclude._();
+  static FileCommentInclude include() {
+    return FileCommentInclude._();
   }
 
-  static GardenRecordIncludeList includeList({
-    _is.WhereExpressionBuilder<GardenRecordTable>? where,
+  static FileCommentIncludeList includeList({
+    _is.WhereExpressionBuilder<FileCommentTable>? where,
     int? limit,
     int? offset,
-    _is.OrderByBuilder<GardenRecordTable>? orderBy,
-    _is.OrderByListBuilder<GardenRecordTable>? orderByList,
-    GardenRecordInclude? include,
+    _is.OrderByBuilder<FileCommentTable>? orderBy,
+    _is.OrderByListBuilder<FileCommentTable>? orderByList,
+    FileCommentInclude? include,
   }) {
-    return GardenRecordIncludeList._(
+    return FileCommentIncludeList._(
       where: where,
       limit: limit,
       offset: offset,
-      orderBy: orderBy?.call(GardenRecord.t),
-      orderByList: orderByList?.call(GardenRecord.t),
+      orderBy: orderBy?.call(FileComment.t),
+      orderByList: orderByList?.call(FileComment.t),
       include: include,
     );
   }
@@ -132,159 +124,141 @@ abstract class GardenRecord
 
 class _Undefined {}
 
-class _GardenRecordImpl extends GardenRecord {
-  _GardenRecordImpl({
+class _FileCommentImpl extends FileComment {
+  _FileCommentImpl({
     int? id,
-    required String name,
-    required String ownerId,
-    required String invitationHash,
+    required int nodeId,
+    required String authorId,
+    required String text,
     required DateTime createdAt,
-    int? revision,
   }) : super._(
          id: id,
-         name: name,
-         ownerId: ownerId,
-         invitationHash: invitationHash,
+         nodeId: nodeId,
+         authorId: authorId,
+         text: text,
          createdAt: createdAt,
-         revision: revision,
        );
 
-  /// Returns a shallow copy of this [GardenRecord]
+  /// Returns a shallow copy of this [FileComment]
   /// with some or all fields replaced by the given arguments.
   @_is.useResult
   @override
-  GardenRecord copyWith({
+  FileComment copyWith({
     Object? id = _Undefined,
-    String? name,
-    String? ownerId,
-    String? invitationHash,
+    int? nodeId,
+    String? authorId,
+    String? text,
     DateTime? createdAt,
-    int? revision,
   }) {
-    return GardenRecord(
+    return FileComment(
       id: id is int? ? id : this.id,
-      name: name ?? this.name,
-      ownerId: ownerId ?? this.ownerId,
-      invitationHash: invitationHash ?? this.invitationHash,
+      nodeId: nodeId ?? this.nodeId,
+      authorId: authorId ?? this.authorId,
+      text: text ?? this.text,
       createdAt: createdAt ?? this.createdAt,
-      revision: revision ?? this.revision,
     );
   }
 }
 
-class GardenRecordUpdateTable extends _is.UpdateTable<GardenRecordTable> {
-  GardenRecordUpdateTable(super.table);
+class FileCommentUpdateTable extends _is.UpdateTable<FileCommentTable> {
+  FileCommentUpdateTable(super.table);
 
-  _is.ColumnValue<String, String> name(String value) => _is.ColumnValue(
-    table.name,
+  _is.ColumnValue<int, int> nodeId(int value) => _is.ColumnValue(
+    table.nodeId,
     value,
   );
 
-  _is.ColumnValue<String, String> ownerId(String value) => _is.ColumnValue(
-    table.ownerId,
+  _is.ColumnValue<String, String> authorId(String value) => _is.ColumnValue(
+    table.authorId,
     value,
   );
 
-  _is.ColumnValue<String, String> invitationHash(String value) =>
-      _is.ColumnValue(
-        table.invitationHash,
-        value,
-      );
+  _is.ColumnValue<String, String> text(String value) => _is.ColumnValue(
+    table.text,
+    value,
+  );
 
   _is.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
       _is.ColumnValue(
         table.createdAt,
         value,
       );
-
-  _is.ColumnValue<int, int> revision(int value) => _is.ColumnValue(
-    table.revision,
-    value,
-  );
 }
 
-class GardenRecordTable extends _is.Table<int?> {
-  GardenRecordTable({super.tableRelation}) : super(tableName: 'garden_record') {
-    updateTable = GardenRecordUpdateTable(this);
-    name = _is.ColumnString(
-      'name',
+class FileCommentTable extends _is.Table<int?> {
+  FileCommentTable({super.tableRelation}) : super(tableName: 'file_comment') {
+    updateTable = FileCommentUpdateTable(this);
+    nodeId = _is.ColumnInt(
+      'nodeId',
       this,
     );
-    ownerId = _is.ColumnString(
-      'ownerId',
+    authorId = _is.ColumnString(
+      'authorId',
       this,
     );
-    invitationHash = _is.ColumnString(
-      'invitationHash',
+    text = _is.ColumnString(
+      'text',
       this,
     );
     createdAt = _is.ColumnDateTime(
       'createdAt',
       this,
     );
-    revision = _is.ColumnInt(
-      'revision',
-      this,
-      hasDefault: true,
-    );
   }
 
-  late final GardenRecordUpdateTable updateTable;
+  late final FileCommentUpdateTable updateTable;
 
-  late final _is.ColumnString name;
+  late final _is.ColumnInt nodeId;
 
-  late final _is.ColumnString ownerId;
+  late final _is.ColumnString authorId;
 
-  late final _is.ColumnString invitationHash;
+  late final _is.ColumnString text;
 
   late final _is.ColumnDateTime createdAt;
-
-  late final _is.ColumnInt revision;
 
   @override
   List<_is.Column> get columns => [
     id,
-    name,
-    ownerId,
-    invitationHash,
+    nodeId,
+    authorId,
+    text,
     createdAt,
-    revision,
   ];
 }
 
-class GardenRecordInclude extends _is.IncludeObject {
-  GardenRecordInclude._();
+class FileCommentInclude extends _is.IncludeObject {
+  FileCommentInclude._();
 
   @override
   Map<String, _is.Include?> get includes => {};
 
   @override
-  _is.Table<int?> get table => GardenRecord.t;
+  _is.Table<int?> get table => FileComment.t;
 }
 
-class GardenRecordIncludeList extends _is.IncludeList {
-  GardenRecordIncludeList._({
-    _is.WhereExpressionBuilder<GardenRecordTable>? where,
+class FileCommentIncludeList extends _is.IncludeList {
+  FileCommentIncludeList._({
+    _is.WhereExpressionBuilder<FileCommentTable>? where,
     super.limit,
     super.offset,
     super.orderBy,
     super.orderByList,
     super.include,
   }) {
-    super.where = where?.call(GardenRecord.t);
+    super.where = where?.call(FileComment.t);
   }
 
   @override
   Map<String, _is.Include?> get includes => include?.includes ?? {};
 
   @override
-  _is.Table<int?> get table => GardenRecord.t;
+  _is.Table<int?> get table => FileComment.t;
 }
 
-class GardenRecordRepository {
-  const GardenRecordRepository._();
+class FileCommentRepository {
+  const FileCommentRepository._();
 
-  /// Returns a list of [GardenRecord]s matching the given query parameters.
+  /// Returns a list of [FileComment]s matching the given query parameters.
   ///
   /// Use [where] to specify which items to include in the return value.
   /// If none is specified, all items will be returned.
@@ -306,21 +280,21 @@ class GardenRecordRepository {
   ///   limit: 100,
   /// );
   /// ```
-  Future<List<GardenRecord>> find(
+  Future<List<FileComment>> find(
     _is.DatabaseSession session, {
-    _is.WhereExpressionBuilder<GardenRecordTable>? where,
+    _is.WhereExpressionBuilder<FileCommentTable>? where,
     int? limit,
     int? offset,
-    _is.OrderByBuilder<GardenRecordTable>? orderBy,
-    _is.OrderByListBuilder<GardenRecordTable>? orderByList,
+    _is.OrderByBuilder<FileCommentTable>? orderBy,
+    _is.OrderByListBuilder<FileCommentTable>? orderByList,
     _is.Transaction? transaction,
     _is.LockMode? lockMode,
     _is.LockBehavior? lockBehavior,
   }) async {
-    return session.db.find<GardenRecord>(
-      where: where?.call(GardenRecord.t),
-      orderBy: orderBy?.call(GardenRecord.t),
-      orderByList: orderByList?.call(GardenRecord.t),
+    return session.db.find<FileComment>(
+      where: where?.call(FileComment.t),
+      orderBy: orderBy?.call(FileComment.t),
+      orderByList: orderByList?.call(FileComment.t),
       limit: limit,
       offset: offset,
       transaction: transaction,
@@ -329,7 +303,7 @@ class GardenRecordRepository {
     );
   }
 
-  /// Returns the first matching [GardenRecord] matching the given query parameters.
+  /// Returns the first matching [FileComment] matching the given query parameters.
   ///
   /// Use [where] to specify which items to include in the return value.
   /// If none is specified, all items will be returned.
@@ -346,20 +320,20 @@ class GardenRecordRepository {
   ///   orderBy: (t) => t.age,
   /// );
   /// ```
-  Future<GardenRecord?> findFirstRow(
+  Future<FileComment?> findFirstRow(
     _is.DatabaseSession session, {
-    _is.WhereExpressionBuilder<GardenRecordTable>? where,
+    _is.WhereExpressionBuilder<FileCommentTable>? where,
     int? offset,
-    _is.OrderByBuilder<GardenRecordTable>? orderBy,
-    _is.OrderByListBuilder<GardenRecordTable>? orderByList,
+    _is.OrderByBuilder<FileCommentTable>? orderBy,
+    _is.OrderByListBuilder<FileCommentTable>? orderByList,
     _is.Transaction? transaction,
     _is.LockMode? lockMode,
     _is.LockBehavior? lockBehavior,
   }) async {
-    return session.db.findFirstRow<GardenRecord>(
-      where: where?.call(GardenRecord.t),
-      orderBy: orderBy?.call(GardenRecord.t),
-      orderByList: orderByList?.call(GardenRecord.t),
+    return session.db.findFirstRow<FileComment>(
+      where: where?.call(FileComment.t),
+      orderBy: orderBy?.call(FileComment.t),
+      orderByList: orderByList?.call(FileComment.t),
       offset: offset,
       transaction: transaction,
       lockMode: lockMode,
@@ -367,15 +341,15 @@ class GardenRecordRepository {
     );
   }
 
-  /// Finds a single [GardenRecord] by its [id] or null if no such row exists.
-  Future<GardenRecord?> findById(
+  /// Finds a single [FileComment] by its [id] or null if no such row exists.
+  Future<FileComment?> findById(
     _is.DatabaseSession session,
     int id, {
     _is.Transaction? transaction,
     _is.LockMode? lockMode,
     _is.LockBehavior? lockBehavior,
   }) async {
-    return session.db.findById<GardenRecord>(
+    return session.db.findById<FileComment>(
       id,
       transaction: transaction,
       lockMode: lockMode,
@@ -383,9 +357,9 @@ class GardenRecordRepository {
     );
   }
 
-  /// Inserts all [GardenRecord]s in the list and returns the inserted rows.
+  /// Inserts all [FileComment]s in the list and returns the inserted rows.
   ///
-  /// The returned [GardenRecord]s will have their `id` fields set.
+  /// The returned [FileComment]s will have their `id` fields set.
   ///
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// insert, none of the rows will be inserted.
@@ -397,14 +371,14 @@ class GardenRecordRepository {
   /// If [noReturn] is set to `true`, the inserted rows are not read back from
   /// the database and an empty list is returned. This avoids the overhead of
   /// transferring and deserializing the rows when the result is not needed.
-  Future<List<GardenRecord>> insert(
+  Future<List<FileComment>> insert(
     _is.DatabaseSession session,
-    List<GardenRecord> rows, {
+    List<FileComment> rows, {
     _is.Transaction? transaction,
     bool ignoreConflicts = false,
     bool noReturn = false,
   }) async {
-    return session.db.insert<GardenRecord>(
+    return session.db.insert<FileComment>(
       rows,
       transaction: transaction,
       ignoreConflicts: ignoreConflicts,
@@ -412,21 +386,21 @@ class GardenRecordRepository {
     );
   }
 
-  /// Inserts a single [GardenRecord] and returns the inserted row.
+  /// Inserts a single [FileComment] and returns the inserted row.
   ///
-  /// The returned [GardenRecord] will have its `id` field set.
-  Future<GardenRecord> insertRow(
+  /// The returned [FileComment] will have its `id` field set.
+  Future<FileComment> insertRow(
     _is.DatabaseSession session,
-    GardenRecord row, {
+    FileComment row, {
     _is.Transaction? transaction,
   }) async {
-    return session.db.insertRow<GardenRecord>(
+    return session.db.insertRow<FileComment>(
       row,
       transaction: transaction,
     );
   }
 
-  /// Upserts all [GardenRecord]s in the list and returns the resulting rows.
+  /// Upserts all [FileComment]s in the list and returns the resulting rows.
   ///
   /// If a row conflicts on the given [conflictColumns], the existing row is
   /// updated with the new values. Otherwise, a new row is inserted.
@@ -438,7 +412,7 @@ class GardenRecordRepository {
   /// given expression. Conflicting rows that don't match are skipped and not
   /// returned, so the resulting list may be shorter than [rows].
   ///
-  /// The returned [GardenRecord]s will have their `id` fields set.
+  /// The returned [FileComment]s will have their `id` fields set.
   ///
   /// This is an atomic operation, meaning that if one of the rows fails,
   /// none of the rows will be affected.
@@ -446,26 +420,26 @@ class GardenRecordRepository {
   /// If [noReturn] is set to `true`, the resulting rows are not read back from
   /// the database and an empty list is returned. This avoids the overhead of
   /// transferring and deserializing the rows when the result is not needed.
-  Future<List<GardenRecord>> upsert(
+  Future<List<FileComment>> upsert(
     _is.DatabaseSession session,
-    List<GardenRecord> rows, {
-    required _is.ColumnSelections<GardenRecordTable> conflictColumns,
-    _is.ColumnSelections<GardenRecordTable>? updateColumns,
-    _is.WhereExpressionBuilder<GardenRecordTable>? updateWhere,
+    List<FileComment> rows, {
+    required _is.ColumnSelections<FileCommentTable> conflictColumns,
+    _is.ColumnSelections<FileCommentTable>? updateColumns,
+    _is.WhereExpressionBuilder<FileCommentTable>? updateWhere,
     _is.Transaction? transaction,
     bool noReturn = false,
   }) async {
-    return session.db.upsert<GardenRecord>(
+    return session.db.upsert<FileComment>(
       rows,
-      conflictColumns: conflictColumns(GardenRecord.t),
-      updateColumns: updateColumns?.call(GardenRecord.t),
-      updateWhere: updateWhere?.call(GardenRecord.t),
+      conflictColumns: conflictColumns(FileComment.t),
+      updateColumns: updateColumns?.call(FileComment.t),
+      updateWhere: updateWhere?.call(FileComment.t),
       transaction: transaction,
       noReturn: noReturn,
     );
   }
 
-  /// Upserts a single [GardenRecord] and returns the resulting row.
+  /// Upserts a single [FileComment] and returns the resulting row.
   ///
   /// If the row conflicts on the given [conflictColumns], the existing row is
   /// updated. Otherwise, a new row is inserted.
@@ -477,25 +451,25 @@ class GardenRecordRepository {
   /// row matches the expression. Returns `null` if no row was affected — for
   /// example when [updateWhere] does not match the conflicting row.
   ///
-  /// The returned [GardenRecord] will have its `id` field set.
-  Future<GardenRecord?> upsertRow(
+  /// The returned [FileComment] will have its `id` field set.
+  Future<FileComment?> upsertRow(
     _is.DatabaseSession session,
-    GardenRecord row, {
-    required _is.ColumnSelections<GardenRecordTable> conflictColumns,
-    _is.ColumnSelections<GardenRecordTable>? updateColumns,
-    _is.WhereExpressionBuilder<GardenRecordTable>? updateWhere,
+    FileComment row, {
+    required _is.ColumnSelections<FileCommentTable> conflictColumns,
+    _is.ColumnSelections<FileCommentTable>? updateColumns,
+    _is.WhereExpressionBuilder<FileCommentTable>? updateWhere,
     _is.Transaction? transaction,
   }) async {
-    return session.db.upsertRow<GardenRecord>(
+    return session.db.upsertRow<FileComment>(
       row,
-      conflictColumns: conflictColumns(GardenRecord.t),
-      updateColumns: updateColumns?.call(GardenRecord.t),
-      updateWhere: updateWhere?.call(GardenRecord.t),
+      conflictColumns: conflictColumns(FileComment.t),
+      updateColumns: updateColumns?.call(FileComment.t),
+      updateWhere: updateWhere?.call(FileComment.t),
       transaction: transaction,
     );
   }
 
-  /// Updates all [GardenRecord]s in the list and returns the updated rows. If
+  /// Updates all [FileComment]s in the list and returns the updated rows. If
   /// [columns] is provided, only those columns will be updated. Defaults to
   /// all columns.
   /// This is an atomic operation, meaning that if one of the rows fails to
@@ -504,82 +478,82 @@ class GardenRecordRepository {
   /// If [noReturn] is set to `true`, the updated rows are not read back from
   /// the database and an empty list is returned. This avoids the overhead of
   /// transferring and deserializing the rows when the result is not needed.
-  Future<List<GardenRecord>> update(
+  Future<List<FileComment>> update(
     _is.DatabaseSession session,
-    List<GardenRecord> rows, {
-    _is.ColumnSelections<GardenRecordTable>? columns,
+    List<FileComment> rows, {
+    _is.ColumnSelections<FileCommentTable>? columns,
     _is.Transaction? transaction,
     bool noReturn = false,
   }) async {
-    return session.db.update<GardenRecord>(
+    return session.db.update<FileComment>(
       rows,
-      columns: columns?.call(GardenRecord.t),
+      columns: columns?.call(FileComment.t),
       transaction: transaction,
       noReturn: noReturn,
     );
   }
 
-  /// Updates a single [GardenRecord]. The row needs to have its id set.
+  /// Updates a single [FileComment]. The row needs to have its id set.
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
-  Future<GardenRecord> updateRow(
+  Future<FileComment> updateRow(
     _is.DatabaseSession session,
-    GardenRecord row, {
-    _is.ColumnSelections<GardenRecordTable>? columns,
+    FileComment row, {
+    _is.ColumnSelections<FileCommentTable>? columns,
     _is.Transaction? transaction,
   }) async {
-    return session.db.updateRow<GardenRecord>(
+    return session.db.updateRow<FileComment>(
       row,
-      columns: columns?.call(GardenRecord.t),
+      columns: columns?.call(FileComment.t),
       transaction: transaction,
     );
   }
 
-  /// Updates a single [GardenRecord] by its [id] with the specified [columnValues].
+  /// Updates a single [FileComment] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
-  Future<GardenRecord?> updateById(
+  Future<FileComment?> updateById(
     _is.DatabaseSession session,
     int id, {
-    required _is.ColumnValueListBuilder<GardenRecordUpdateTable> columnValues,
+    required _is.ColumnValueListBuilder<FileCommentUpdateTable> columnValues,
     _is.Transaction? transaction,
   }) async {
-    return session.db.updateById<GardenRecord>(
+    return session.db.updateById<FileComment>(
       id,
-      columnValues: columnValues(GardenRecord.t.updateTable),
+      columnValues: columnValues(FileComment.t.updateTable),
       transaction: transaction,
     );
   }
 
-  /// Updates all [GardenRecord]s matching the [where] expression with the specified [columnValues].
+  /// Updates all [FileComment]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   ///
   /// If [noReturn] is set to `true`, the updated rows are not read back from
   /// the database and an empty list is returned. This avoids the overhead of
   /// transferring and deserializing the rows when the result is not needed.
-  Future<List<GardenRecord>> updateWhere(
+  Future<List<FileComment>> updateWhere(
     _is.DatabaseSession session, {
-    required _is.ColumnValueListBuilder<GardenRecordUpdateTable> columnValues,
-    required _is.WhereExpressionBuilder<GardenRecordTable> where,
+    required _is.ColumnValueListBuilder<FileCommentUpdateTable> columnValues,
+    required _is.WhereExpressionBuilder<FileCommentTable> where,
     int? limit,
     int? offset,
-    _is.OrderByBuilder<GardenRecordTable>? orderBy,
-    _is.OrderByListBuilder<GardenRecordTable>? orderByList,
+    _is.OrderByBuilder<FileCommentTable>? orderBy,
+    _is.OrderByListBuilder<FileCommentTable>? orderByList,
     _is.Transaction? transaction,
     bool noReturn = false,
   }) async {
-    return session.db.updateWhere<GardenRecord>(
-      columnValues: columnValues(GardenRecord.t.updateTable),
-      where: where(GardenRecord.t),
+    return session.db.updateWhere<FileComment>(
+      columnValues: columnValues(FileComment.t.updateTable),
+      where: where(FileComment.t),
       limit: limit,
       offset: offset,
-      orderBy: orderBy?.call(GardenRecord.t),
-      orderByList: orderByList?.call(GardenRecord.t),
+      orderBy: orderBy?.call(FileComment.t),
+      orderByList: orderByList?.call(FileComment.t),
       transaction: transaction,
       noReturn: noReturn,
     );
   }
 
-  /// Deletes all [GardenRecord]s in the list and returns the deleted rows.
+  /// Deletes all [FileComment]s in the list and returns the deleted rows.
   ///
   /// To specify the order of the returned rows use [orderBy] or [orderByList]
   /// when sorting by multiple columns.
@@ -590,30 +564,30 @@ class GardenRecordRepository {
   /// If [noReturn] is set to `true`, the deleted rows are not read back from
   /// the database and an empty list is returned. This avoids the overhead of
   /// transferring and deserializing the rows when the result is not needed.
-  Future<List<GardenRecord>> delete(
+  Future<List<FileComment>> delete(
     _is.DatabaseSession session,
-    List<GardenRecord> rows, {
-    _is.OrderByBuilder<GardenRecordTable>? orderBy,
-    _is.OrderByListBuilder<GardenRecordTable>? orderByList,
+    List<FileComment> rows, {
+    _is.OrderByBuilder<FileCommentTable>? orderBy,
+    _is.OrderByListBuilder<FileCommentTable>? orderByList,
     _is.Transaction? transaction,
     bool noReturn = false,
   }) async {
-    return session.db.delete<GardenRecord>(
+    return session.db.delete<FileComment>(
       rows,
-      orderBy: orderBy?.call(GardenRecord.t),
-      orderByList: orderByList?.call(GardenRecord.t),
+      orderBy: orderBy?.call(FileComment.t),
+      orderByList: orderByList?.call(FileComment.t),
       transaction: transaction,
       noReturn: noReturn,
     );
   }
 
-  /// Deletes a single [GardenRecord].
-  Future<GardenRecord> deleteRow(
+  /// Deletes a single [FileComment].
+  Future<FileComment> deleteRow(
     _is.DatabaseSession session,
-    GardenRecord row, {
+    FileComment row, {
     _is.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<GardenRecord>(
+    return session.db.deleteRow<FileComment>(
       row,
       transaction: transaction,
     );
@@ -627,18 +601,18 @@ class GardenRecordRepository {
   /// If [noReturn] is set to `true`, the deleted rows are not read back from
   /// the database and an empty list is returned. This avoids the overhead of
   /// transferring and deserializing the rows when the result is not needed.
-  Future<List<GardenRecord>> deleteWhere(
+  Future<List<FileComment>> deleteWhere(
     _is.DatabaseSession session, {
-    required _is.WhereExpressionBuilder<GardenRecordTable> where,
-    _is.OrderByBuilder<GardenRecordTable>? orderBy,
-    _is.OrderByListBuilder<GardenRecordTable>? orderByList,
+    required _is.WhereExpressionBuilder<FileCommentTable> where,
+    _is.OrderByBuilder<FileCommentTable>? orderBy,
+    _is.OrderByListBuilder<FileCommentTable>? orderByList,
     _is.Transaction? transaction,
     bool noReturn = false,
   }) async {
-    return session.db.deleteWhere<GardenRecord>(
-      where: where(GardenRecord.t),
-      orderBy: orderBy?.call(GardenRecord.t),
-      orderByList: orderByList?.call(GardenRecord.t),
+    return session.db.deleteWhere<FileComment>(
+      where: where(FileComment.t),
+      orderBy: orderBy?.call(FileComment.t),
+      orderByList: orderByList?.call(FileComment.t),
       transaction: transaction,
       noReturn: noReturn,
     );
@@ -648,27 +622,27 @@ class GardenRecordRepository {
   /// will return the count of all rows in the table.
   Future<int> count(
     _is.DatabaseSession session, {
-    _is.WhereExpressionBuilder<GardenRecordTable>? where,
+    _is.WhereExpressionBuilder<FileCommentTable>? where,
     int? limit,
     _is.Transaction? transaction,
   }) async {
-    return session.db.count<GardenRecord>(
-      where: where?.call(GardenRecord.t),
+    return session.db.count<FileComment>(
+      where: where?.call(FileComment.t),
       limit: limit,
       transaction: transaction,
     );
   }
 
-  /// Acquires row-level locks on [GardenRecord] rows matching the [where] expression.
+  /// Acquires row-level locks on [FileComment] rows matching the [where] expression.
   Future<void> lockRows(
     _is.DatabaseSession session, {
-    required _is.WhereExpressionBuilder<GardenRecordTable> where,
+    required _is.WhereExpressionBuilder<FileCommentTable> where,
     required _is.LockMode lockMode,
     required _is.Transaction transaction,
     _is.LockBehavior lockBehavior = _is.LockBehavior.wait,
   }) async {
-    return session.db.lockRows<GardenRecord>(
-      where: where(GardenRecord.t),
+    return session.db.lockRows<FileComment>(
+      where: where(FileComment.t),
       lockMode: lockMode,
       lockBehavior: lockBehavior,
       transaction: transaction,

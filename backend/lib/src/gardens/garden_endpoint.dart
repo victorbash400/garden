@@ -28,18 +28,36 @@ class GardenEndpoint extends Endpoint {
       session,
       where: (row) => row.userId.equals(_user(session)),
     );
-    final result = <GardenSummary>[];
-    for (final membership in memberships) {
-      final record = await GardenRecord.db.findById(
-        session,
-        membership.gardenId,
-      );
-      if (record == null) {
-        throw GardenException(message: 'A drive membership is invalid.');
-      }
-      result.add(await _summary(session, record, membership.role));
+    if (memberships.isEmpty) return [];
+    final ids = memberships.map((member) => member.gardenId).toSet();
+    final records = await GardenRecord.db.find(
+      session,
+      where: (row) => row.id.inSet(ids),
+    );
+    final members = await GardenMember.db.find(
+      session,
+      where: (row) => row.gardenId.inSet(ids),
+    );
+    final counts = <int, int>{};
+    for (final member in members) {
+      counts.update(member.gardenId, (count) => count + 1, ifAbsent: () => 1);
     }
-    return result;
+    final roles = {
+      for (final member in memberships) member.gardenId: member.role,
+    };
+    if (records.length != memberships.length) {
+      throw GardenException(message: 'A drive membership is invalid.');
+    }
+    return records
+        .map(
+          (record) => GardenSummary(
+            id: record.id!,
+            name: record.name,
+            role: roles[record.id]!,
+            members: counts[record.id]!,
+          ),
+        )
+        .toList();
   }
 
   Future<GardenSummary> create(Session session, String name) async {
@@ -89,6 +107,12 @@ class GardenEndpoint extends Endpoint {
       throw GardenException(message: 'The invitation code is invalid.');
     }
     await session.db.transaction((transaction) async {
+      await GardenRecord.db.findById(
+        session,
+        record.id!,
+        transaction: transaction,
+        lockMode: LockMode.forUpdate,
+      );
       final existing = await GardenMember.db.findFirstRow(
         session,
         where: (row) =>

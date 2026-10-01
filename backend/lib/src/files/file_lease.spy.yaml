@@ -1,0 +1,11 @@
+class: FileLease
+table: file_lease
+fields:
+  nodeId: int
+  holderId: String
+  token: String
+  expiresAt: DateTime
+indexes:
+  lease_node_unique:
+    fields: nodeId
+    unique: true

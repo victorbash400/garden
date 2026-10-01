@@ -1,0 +1,18 @@
+class: FileNode
+table: file_node
+fields:
+  gardenId: int
+  parentId: int
+  name: String
+  activeName: String?
+  kind: NodeKind
+  size: int, default=0
+  version: int, default=0
+  deleted: bool, default=false
+  updatedAt: DateTime
+indexes:
+  node_sibling_unique:
+    fields: gardenId, parentId, activeName
+    unique: true
+  node_directory:
+    fields: gardenId, parentId, deleted

@@ -10,6 +10,8 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'dart:typed_data' as _idt;
+import 'package:garden_server/src/generated/files/node_kind.dart' as _iso8aj7z;
 import 'package:serverpod/serverpod.dart' as _is;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _iacs;
@@ -17,6 +19,9 @@ import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _iais;
 import '../auth/email_idp_endpoint.dart' as _iuc1hd5t;
 import '../auth/jwt_refresh_endpoint.dart' as _inwq3ztq;
+import '../files/collaboration_endpoint.dart' as _iiks30z9;
+import '../files/content_endpoint.dart' as _iqqtuyco;
+import '../files/files_endpoint.dart' as _idx8vriz;
 import '../gardens/garden_endpoint.dart' as _isd11de7;
 import '../greetings/greeting_endpoint.dart' as _il624ik7;
 
@@ -34,6 +39,24 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'jwtRefresh',
+          null,
+        ),
+      'collaboration': _iiks30z9.CollaborationEndpoint()
+        ..initialize(
+          server,
+          'collaboration',
+          null,
+        ),
+      'content': _iqqtuyco.ContentEndpoint()
+        ..initialize(
+          server,
+          'content',
+          null,
+        ),
+      'files': _idx8vriz.FilesEndpoint()
+        ..initialize(
+          server,
+          'files',
           null,
         ),
       'garden': _isd11de7.GardenEndpoint()
@@ -252,6 +275,392 @@ class Endpoints extends _is.EndpointDispatch {
                         session,
                         refreshToken: params['refreshToken'],
                       ),
+        ),
+      },
+    );
+    connectors['collaboration'] = _is.EndpointConnector(
+      name: 'collaboration',
+      endpoint: endpoints['collaboration']!,
+      methodConnectors: {
+        'comments': _is.MethodConnector(
+          name: 'comments',
+          params: {
+            'nodeId': _is.ParameterDescription(
+              name: 'nodeId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['collaboration']
+                          as _iiks30z9.CollaborationEndpoint)
+                      .comments(
+                        session,
+                        params['nodeId'],
+                      ),
+        ),
+        'comment': _is.MethodConnector(
+          name: 'comment',
+          params: {
+            'nodeId': _is.ParameterDescription(
+              name: 'nodeId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'text': _is.ParameterDescription(
+              name: 'text',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['collaboration']
+                          as _iiks30z9.CollaborationEndpoint)
+                      .comment(
+                        session,
+                        params['nodeId'],
+                        params['text'],
+                      ),
+        ),
+        'acquire': _is.MethodConnector(
+          name: 'acquire',
+          params: {
+            'nodeId': _is.ParameterDescription(
+              name: 'nodeId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['collaboration']
+                          as _iiks30z9.CollaborationEndpoint)
+                      .acquire(
+                        session,
+                        params['nodeId'],
+                      ),
+        ),
+        'release': _is.MethodConnector(
+          name: 'release',
+          params: {
+            'nodeId': _is.ParameterDescription(
+              name: 'nodeId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'token': _is.ParameterDescription(
+              name: 'token',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['collaboration']
+                          as _iiks30z9.CollaborationEndpoint)
+                      .release(
+                        session,
+                        params['nodeId'],
+                        params['token'],
+                      ),
+        ),
+      },
+    );
+    connectors['content'] = _is.EndpointConnector(
+      name: 'content',
+      endpoint: endpoints['content']!,
+      methodConnectors: {
+        'begin': _is.MethodConnector(
+          name: 'begin',
+          params: {
+            'nodeId': _is.ParameterDescription(
+              name: 'nodeId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'baseVersion': _is.ParameterDescription(
+              name: 'baseVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'size': _is.ParameterDescription(
+              name: 'size',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['content'] as _iqqtuyco.ContentEndpoint).begin(
+                    session,
+                    params['nodeId'],
+                    params['baseVersion'],
+                    params['size'],
+                  ),
+        ),
+        'writeChunk': _is.MethodConnector(
+          name: 'writeChunk',
+          params: {
+            'versionId': _is.ParameterDescription(
+              name: 'versionId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'index': _is.ParameterDescription(
+              name: 'index',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'data': _is.ParameterDescription(
+              name: 'data',
+              type: _is.getType<_idt.ByteData>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['content'] as _iqqtuyco.ContentEndpoint)
+                  .writeChunk(
+                    session,
+                    params['versionId'],
+                    params['index'],
+                    params['data'],
+                  ),
+        ),
+        'finish': _is.MethodConnector(
+          name: 'finish',
+          params: {
+            'versionId': _is.ParameterDescription(
+              name: 'versionId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['content'] as _iqqtuyco.ContentEndpoint).finish(
+                    session,
+                    params['versionId'],
+                  ),
+        ),
+        'read': _is.MethodConnector(
+          name: 'read',
+          params: {
+            'nodeId': _is.ParameterDescription(
+              name: 'nodeId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'versionId': _is.ParameterDescription(
+              name: 'versionId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'offset': _is.ParameterDescription(
+              name: 'offset',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'length': _is.ParameterDescription(
+              name: 'length',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['content'] as _iqqtuyco.ContentEndpoint).read(
+                    session,
+                    params['nodeId'],
+                    params['versionId'],
+                    params['offset'],
+                    params['length'],
+                  ),
+        ),
+        'versions': _is.MethodConnector(
+          name: 'versions',
+          params: {
+            'nodeId': _is.ParameterDescription(
+              name: 'nodeId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['content'] as _iqqtuyco.ContentEndpoint).versions(
+                    session,
+                    params['nodeId'],
+                  ),
+        ),
+      },
+    );
+    connectors['files'] = _is.EndpointConnector(
+      name: 'files',
+      endpoint: endpoints['files']!,
+      methodConnectors: {
+        'list': _is.MethodConnector(
+          name: 'list',
+          params: {
+            'gardenId': _is.ParameterDescription(
+              name: 'gardenId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'parentId': _is.ParameterDescription(
+              name: 'parentId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['files'] as _idx8vriz.FilesEndpoint).list(
+                session,
+                params['gardenId'],
+                params['parentId'],
+              ),
+        ),
+        'create': _is.MethodConnector(
+          name: 'create',
+          params: {
+            'gardenId': _is.ParameterDescription(
+              name: 'gardenId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'parentId': _is.ParameterDescription(
+              name: 'parentId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'name': _is.ParameterDescription(
+              name: 'name',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'kind': _is.ParameterDescription(
+              name: 'kind',
+              type: _is.getType<_iso8aj7z.NodeKind>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['files'] as _idx8vriz.FilesEndpoint).create(
+                session,
+                params['gardenId'],
+                params['parentId'],
+                params['name'],
+                params['kind'],
+              ),
+        ),
+        'move': _is.MethodConnector(
+          name: 'move',
+          params: {
+            'nodeId': _is.ParameterDescription(
+              name: 'nodeId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'parentId': _is.ParameterDescription(
+              name: 'parentId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'name': _is.ParameterDescription(
+              name: 'name',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['files'] as _idx8vriz.FilesEndpoint).move(
+                session,
+                params['nodeId'],
+                params['parentId'],
+                params['name'],
+              ),
+        ),
+        'delete': _is.MethodConnector(
+          name: 'delete',
+          params: {
+            'nodeId': _is.ParameterDescription(
+              name: 'nodeId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['files'] as _idx8vriz.FilesEndpoint).delete(
+                session,
+                params['nodeId'],
+              ),
+        ),
+        'watch': _is.MethodStreamConnector(
+          name: 'watch',
+          params: {
+            'gardenId': _is.ParameterDescription(
+              name: 'gardenId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'afterRevision': _is.ParameterDescription(
+              name: 'afterRevision',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          streamParams: {},
+          returnType: _is.MethodStreamReturnType.streamType,
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+                Map<String, Stream> streamParams,
+              ) => (endpoints['files'] as _idx8vriz.FilesEndpoint).watch(
+                session,
+                params['gardenId'],
+                params['afterRevision'],
+              ),
         ),
       },
     );

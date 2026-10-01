@@ -12,114 +12,106 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _is;
 
-abstract class GardenRecord
+abstract class FileLease
     implements _is.TableRow<int?>, _is.ProtocolSerialization {
-  GardenRecord._({
+  FileLease._({
     this.id,
-    required this.name,
-    required this.ownerId,
-    required this.invitationHash,
-    required this.createdAt,
-    int? revision,
-  }) : revision = revision ?? 0;
+    required this.nodeId,
+    required this.holderId,
+    required this.token,
+    required this.expiresAt,
+  });
 
-  factory GardenRecord({
+  factory FileLease({
     int? id,
-    required String name,
-    required String ownerId,
-    required String invitationHash,
-    required DateTime createdAt,
-    int? revision,
-  }) = _GardenRecordImpl;
+    required int nodeId,
+    required String holderId,
+    required String token,
+    required DateTime expiresAt,
+  }) = _FileLeaseImpl;
 
-  factory GardenRecord.fromJson(Map<String, dynamic> jsonSerialization) {
-    return GardenRecord(
+  factory FileLease.fromJson(Map<String, dynamic> jsonSerialization) {
+    return FileLease(
       id: jsonSerialization['id'] as int?,
-      name: jsonSerialization['name'] as String,
-      ownerId: jsonSerialization['ownerId'] as String,
-      invitationHash: jsonSerialization['invitationHash'] as String,
-      createdAt: _is.DateTimeJsonExtension.fromJson(
-        jsonSerialization['createdAt'],
+      nodeId: jsonSerialization['nodeId'] as int,
+      holderId: jsonSerialization['holderId'] as String,
+      token: jsonSerialization['token'] as String,
+      expiresAt: _is.DateTimeJsonExtension.fromJson(
+        jsonSerialization['expiresAt'],
       ),
-      revision: jsonSerialization['revision'] as int?,
     );
   }
 
-  static final t = GardenRecordTable();
+  static final t = FileLeaseTable();
 
-  static const db = GardenRecordRepository._();
+  static const db = FileLeaseRepository._();
 
   @override
   int? id;
 
-  String name;
+  int nodeId;
 
-  String ownerId;
+  String holderId;
 
-  String invitationHash;
+  String token;
 
-  DateTime createdAt;
-
-  int revision;
+  DateTime expiresAt;
 
   @override
   _is.Table<int?> get table => t;
 
-  /// Returns a shallow copy of this [GardenRecord]
+  /// Returns a shallow copy of this [FileLease]
   /// with some or all fields replaced by the given arguments.
   @_is.useResult
-  GardenRecord copyWith({
+  FileLease copyWith({
     int? id,
-    String? name,
-    String? ownerId,
-    String? invitationHash,
-    DateTime? createdAt,
-    int? revision,
+    int? nodeId,
+    String? holderId,
+    String? token,
+    DateTime? expiresAt,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
-      '__className__': 'GardenRecord',
+      '__className__': 'FileLease',
       if (id != null) 'id': id,
-      'name': name,
-      'ownerId': ownerId,
-      'invitationHash': invitationHash,
-      'createdAt': createdAt.toJson(),
-      'revision': revision,
+      'nodeId': nodeId,
+      'holderId': holderId,
+      'token': token,
+      'expiresAt': expiresAt.toJson(),
     };
   }
 
   @override
   Map<String, dynamic> toJsonForProtocol() {
     return {
-      '__className__': 'GardenRecord',
+      '__className__': 'FileLease',
       if (id != null) 'id': id,
-      'name': name,
-      'ownerId': ownerId,
-      'invitationHash': invitationHash,
-      'createdAt': createdAt.toJson(),
-      'revision': revision,
+      'nodeId': nodeId,
+      'holderId': holderId,
+      'token': token,
+      'expiresAt': expiresAt.toJson(),
     };
   }
 
-  static GardenRecordInclude include() {
-    return GardenRecordInclude._();
+  static FileLeaseInclude include() {
+    return FileLeaseInclude._();
   }
 
-  static GardenRecordIncludeList includeList({
-    _is.WhereExpressionBuilder<GardenRecordTable>? where,
+  static FileLeaseIncludeList includeList({
+    _is.WhereExpressionBuilder<FileLeaseTable>? where,
     int? limit,
     int? offset,
-    _is.OrderByBuilder<GardenRecordTable>? orderBy,
-    _is.OrderByListBuilder<GardenRecordTable>? orderByList,
-    GardenRecordInclude? include,
+    _is.OrderByBuilder<FileLeaseTable>? orderBy,
+    _is.OrderByListBuilder<FileLeaseTable>? orderByList,
+    FileLeaseInclude? include,
   }) {
-    return GardenRecordIncludeList._(
+    return FileLeaseIncludeList._(
       where: where,
       limit: limit,
       offset: offset,
-      orderBy: orderBy?.call(GardenRecord.t),
-      orderByList: orderByList?.call(GardenRecord.t),
+      orderBy: orderBy?.call(FileLease.t),
+      orderByList: orderByList?.call(FileLease.t),
       include: include,
     );
   }
@@ -132,159 +124,141 @@ abstract class GardenRecord
 
 class _Undefined {}
 
-class _GardenRecordImpl extends GardenRecord {
-  _GardenRecordImpl({
+class _FileLeaseImpl extends FileLease {
+  _FileLeaseImpl({
     int? id,
-    required String name,
-    required String ownerId,
-    required String invitationHash,
-    required DateTime createdAt,
-    int? revision,
+    required int nodeId,
+    required String holderId,
+    required String token,
+    required DateTime expiresAt,
   }) : super._(
          id: id,
-         name: name,
-         ownerId: ownerId,
-         invitationHash: invitationHash,
-         createdAt: createdAt,
-         revision: revision,
+         nodeId: nodeId,
+         holderId: holderId,
+         token: token,
+         expiresAt: expiresAt,
        );
 
-  /// Returns a shallow copy of this [GardenRecord]
+  /// Returns a shallow copy of this [FileLease]
   /// with some or all fields replaced by the given arguments.
   @_is.useResult
   @override
-  GardenRecord copyWith({
+  FileLease copyWith({
     Object? id = _Undefined,
-    String? name,
-    String? ownerId,
-    String? invitationHash,
-    DateTime? createdAt,
-    int? revision,
+    int? nodeId,
+    String? holderId,
+    String? token,
+    DateTime? expiresAt,
   }) {
-    return GardenRecord(
+    return FileLease(
       id: id is int? ? id : this.id,
-      name: name ?? this.name,
-      ownerId: ownerId ?? this.ownerId,
-      invitationHash: invitationHash ?? this.invitationHash,
-      createdAt: createdAt ?? this.createdAt,
-      revision: revision ?? this.revision,
+      nodeId: nodeId ?? this.nodeId,
+      holderId: holderId ?? this.holderId,
+      token: token ?? this.token,
+      expiresAt: expiresAt ?? this.expiresAt,
     );
   }
 }
 
-class GardenRecordUpdateTable extends _is.UpdateTable<GardenRecordTable> {
-  GardenRecordUpdateTable(super.table);
+class FileLeaseUpdateTable extends _is.UpdateTable<FileLeaseTable> {
+  FileLeaseUpdateTable(super.table);
 
-  _is.ColumnValue<String, String> name(String value) => _is.ColumnValue(
-    table.name,
+  _is.ColumnValue<int, int> nodeId(int value) => _is.ColumnValue(
+    table.nodeId,
     value,
   );
 
-  _is.ColumnValue<String, String> ownerId(String value) => _is.ColumnValue(
-    table.ownerId,
+  _is.ColumnValue<String, String> holderId(String value) => _is.ColumnValue(
+    table.holderId,
     value,
   );
 
-  _is.ColumnValue<String, String> invitationHash(String value) =>
+  _is.ColumnValue<String, String> token(String value) => _is.ColumnValue(
+    table.token,
+    value,
+  );
+
+  _is.ColumnValue<DateTime, DateTime> expiresAt(DateTime value) =>
       _is.ColumnValue(
-        table.invitationHash,
+        table.expiresAt,
         value,
       );
-
-  _is.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _is.ColumnValue(
-        table.createdAt,
-        value,
-      );
-
-  _is.ColumnValue<int, int> revision(int value) => _is.ColumnValue(
-    table.revision,
-    value,
-  );
 }
 
-class GardenRecordTable extends _is.Table<int?> {
-  GardenRecordTable({super.tableRelation}) : super(tableName: 'garden_record') {
-    updateTable = GardenRecordUpdateTable(this);
-    name = _is.ColumnString(
-      'name',
+class FileLeaseTable extends _is.Table<int?> {
+  FileLeaseTable({super.tableRelation}) : super(tableName: 'file_lease') {
+    updateTable = FileLeaseUpdateTable(this);
+    nodeId = _is.ColumnInt(
+      'nodeId',
       this,
     );
-    ownerId = _is.ColumnString(
-      'ownerId',
+    holderId = _is.ColumnString(
+      'holderId',
       this,
     );
-    invitationHash = _is.ColumnString(
-      'invitationHash',
+    token = _is.ColumnString(
+      'token',
       this,
     );
-    createdAt = _is.ColumnDateTime(
-      'createdAt',
+    expiresAt = _is.ColumnDateTime(
+      'expiresAt',
       this,
-    );
-    revision = _is.ColumnInt(
-      'revision',
-      this,
-      hasDefault: true,
     );
   }
 
-  late final GardenRecordUpdateTable updateTable;
+  late final FileLeaseUpdateTable updateTable;
 
-  late final _is.ColumnString name;
+  late final _is.ColumnInt nodeId;
 
-  late final _is.ColumnString ownerId;
+  late final _is.ColumnString holderId;
 
-  late final _is.ColumnString invitationHash;
+  late final _is.ColumnString token;
 
-  late final _is.ColumnDateTime createdAt;
-
-  late final _is.ColumnInt revision;
+  late final _is.ColumnDateTime expiresAt;
 
   @override
   List<_is.Column> get columns => [
     id,
-    name,
-    ownerId,
-    invitationHash,
-    createdAt,
-    revision,
+    nodeId,
+    holderId,
+    token,
+    expiresAt,
   ];
 }
 
-class GardenRecordInclude extends _is.IncludeObject {
-  GardenRecordInclude._();
+class FileLeaseInclude extends _is.IncludeObject {
+  FileLeaseInclude._();
 
   @override
   Map<String, _is.Include?> get includes => {};
 
   @override
-  _is.Table<int?> get table => GardenRecord.t;
+  _is.Table<int?> get table => FileLease.t;
 }
 
-class GardenRecordIncludeList extends _is.IncludeList {
-  GardenRecordIncludeList._({
-    _is.WhereExpressionBuilder<GardenRecordTable>? where,
+class FileLeaseIncludeList extends _is.IncludeList {
+  FileLeaseIncludeList._({
+    _is.WhereExpressionBuilder<FileLeaseTable>? where,
     super.limit,
     super.offset,
     super.orderBy,
     super.orderByList,
     super.include,
   }) {
-    super.where = where?.call(GardenRecord.t);
+    super.where = where?.call(FileLease.t);
   }
 
   @override
   Map<String, _is.Include?> get includes => include?.includes ?? {};
 
   @override
-  _is.Table<int?> get table => GardenRecord.t;
+  _is.Table<int?> get table => FileLease.t;
 }
 
-class GardenRecordRepository {
-  const GardenRecordRepository._();
+class FileLeaseRepository {
+  const FileLeaseRepository._();
 
-  /// Returns a list of [GardenRecord]s matching the given query parameters.
+  /// Returns a list of [FileLease]s matching the given query parameters.
   ///
   /// Use [where] to specify which items to include in the return value.
   /// If none is specified, all items will be returned.
@@ -306,21 +280,21 @@ class GardenRecordRepository {
   ///   limit: 100,
   /// );
   /// ```
-  Future<List<GardenRecord>> find(
+  Future<List<FileLease>> find(
     _is.DatabaseSession session, {
-    _is.WhereExpressionBuilder<GardenRecordTable>? where,
+    _is.WhereExpressionBuilder<FileLeaseTable>? where,
     int? limit,
     int? offset,
-    _is.OrderByBuilder<GardenRecordTable>? orderBy,
-    _is.OrderByListBuilder<GardenRecordTable>? orderByList,
+    _is.OrderByBuilder<FileLeaseTable>? orderBy,
+    _is.OrderByListBuilder<FileLeaseTable>? orderByList,
     _is.Transaction? transaction,
     _is.LockMode? lockMode,
     _is.LockBehavior? lockBehavior,
   }) async {
-    return session.db.find<GardenRecord>(
-      where: where?.call(GardenRecord.t),
-      orderBy: orderBy?.call(GardenRecord.t),
-      orderByList: orderByList?.call(GardenRecord.t),
+    return session.db.find<FileLease>(
+      where: where?.call(FileLease.t),
+      orderBy: orderBy?.call(FileLease.t),
+      orderByList: orderByList?.call(FileLease.t),
       limit: limit,
       offset: offset,
       transaction: transaction,
@@ -329,7 +303,7 @@ class GardenRecordRepository {
     );
   }
 
-  /// Returns the first matching [GardenRecord] matching the given query parameters.
+  /// Returns the first matching [FileLease] matching the given query parameters.
   ///
   /// Use [where] to specify which items to include in the return value.
   /// If none is specified, all items will be returned.
@@ -346,20 +320,20 @@ class GardenRecordRepository {
   ///   orderBy: (t) => t.age,
   /// );
   /// ```
-  Future<GardenRecord?> findFirstRow(
+  Future<FileLease?> findFirstRow(
     _is.DatabaseSession session, {
-    _is.WhereExpressionBuilder<GardenRecordTable>? where,
+    _is.WhereExpressionBuilder<FileLeaseTable>? where,
     int? offset,
-    _is.OrderByBuilder<GardenRecordTable>? orderBy,
-    _is.OrderByListBuilder<GardenRecordTable>? orderByList,
+    _is.OrderByBuilder<FileLeaseTable>? orderBy,
+    _is.OrderByListBuilder<FileLeaseTable>? orderByList,
     _is.Transaction? transaction,
     _is.LockMode? lockMode,
     _is.LockBehavior? lockBehavior,
   }) async {
-    return session.db.findFirstRow<GardenRecord>(
-      where: where?.call(GardenRecord.t),
-      orderBy: orderBy?.call(GardenRecord.t),
-      orderByList: orderByList?.call(GardenRecord.t),
+    return session.db.findFirstRow<FileLease>(
+      where: where?.call(FileLease.t),
+      orderBy: orderBy?.call(FileLease.t),
+      orderByList: orderByList?.call(FileLease.t),
       offset: offset,
       transaction: transaction,
       lockMode: lockMode,
@@ -367,15 +341,15 @@ class GardenRecordRepository {
     );
   }
 
-  /// Finds a single [GardenRecord] by its [id] or null if no such row exists.
-  Future<GardenRecord?> findById(
+  /// Finds a single [FileLease] by its [id] or null if no such row exists.
+  Future<FileLease?> findById(
     _is.DatabaseSession session,
     int id, {
     _is.Transaction? transaction,
     _is.LockMode? lockMode,
     _is.LockBehavior? lockBehavior,
   }) async {
-    return session.db.findById<GardenRecord>(
+    return session.db.findById<FileLease>(
       id,
       transaction: transaction,
       lockMode: lockMode,
@@ -383,9 +357,9 @@ class GardenRecordRepository {
     );
   }
 
-  /// Inserts all [GardenRecord]s in the list and returns the inserted rows.
+  /// Inserts all [FileLease]s in the list and returns the inserted rows.
   ///
-  /// The returned [GardenRecord]s will have their `id` fields set.
+  /// The returned [FileLease]s will have their `id` fields set.
   ///
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// insert, none of the rows will be inserted.
@@ -397,14 +371,14 @@ class GardenRecordRepository {
   /// If [noReturn] is set to `true`, the inserted rows are not read back from
   /// the database and an empty list is returned. This avoids the overhead of
   /// transferring and deserializing the rows when the result is not needed.
-  Future<List<GardenRecord>> insert(
+  Future<List<FileLease>> insert(
     _is.DatabaseSession session,
-    List<GardenRecord> rows, {
+    List<FileLease> rows, {
     _is.Transaction? transaction,
     bool ignoreConflicts = false,
     bool noReturn = false,
   }) async {
-    return session.db.insert<GardenRecord>(
+    return session.db.insert<FileLease>(
       rows,
       transaction: transaction,
       ignoreConflicts: ignoreConflicts,
@@ -412,21 +386,21 @@ class GardenRecordRepository {
     );
   }
 
-  /// Inserts a single [GardenRecord] and returns the inserted row.
+  /// Inserts a single [FileLease] and returns the inserted row.
   ///
-  /// The returned [GardenRecord] will have its `id` field set.
-  Future<GardenRecord> insertRow(
+  /// The returned [FileLease] will have its `id` field set.
+  Future<FileLease> insertRow(
     _is.DatabaseSession session,
-    GardenRecord row, {
+    FileLease row, {
     _is.Transaction? transaction,
   }) async {
-    return session.db.insertRow<GardenRecord>(
+    return session.db.insertRow<FileLease>(
       row,
       transaction: transaction,
     );
   }
 
-  /// Upserts all [GardenRecord]s in the list and returns the resulting rows.
+  /// Upserts all [FileLease]s in the list and returns the resulting rows.
   ///
   /// If a row conflicts on the given [conflictColumns], the existing row is
   /// updated with the new values. Otherwise, a new row is inserted.
@@ -438,7 +412,7 @@ class GardenRecordRepository {
   /// given expression. Conflicting rows that don't match are skipped and not
   /// returned, so the resulting list may be shorter than [rows].
   ///
-  /// The returned [GardenRecord]s will have their `id` fields set.
+  /// The returned [FileLease]s will have their `id` fields set.
   ///
   /// This is an atomic operation, meaning that if one of the rows fails,
   /// none of the rows will be affected.
@@ -446,26 +420,26 @@ class GardenRecordRepository {
   /// If [noReturn] is set to `true`, the resulting rows are not read back from
   /// the database and an empty list is returned. This avoids the overhead of
   /// transferring and deserializing the rows when the result is not needed.
-  Future<List<GardenRecord>> upsert(
+  Future<List<FileLease>> upsert(
     _is.DatabaseSession session,
-    List<GardenRecord> rows, {
-    required _is.ColumnSelections<GardenRecordTable> conflictColumns,
-    _is.ColumnSelections<GardenRecordTable>? updateColumns,
-    _is.WhereExpressionBuilder<GardenRecordTable>? updateWhere,
+    List<FileLease> rows, {
+    required _is.ColumnSelections<FileLeaseTable> conflictColumns,
+    _is.ColumnSelections<FileLeaseTable>? updateColumns,
+    _is.WhereExpressionBuilder<FileLeaseTable>? updateWhere,
     _is.Transaction? transaction,
     bool noReturn = false,
   }) async {
-    return session.db.upsert<GardenRecord>(
+    return session.db.upsert<FileLease>(
       rows,
-      conflictColumns: conflictColumns(GardenRecord.t),
-      updateColumns: updateColumns?.call(GardenRecord.t),
-      updateWhere: updateWhere?.call(GardenRecord.t),
+      conflictColumns: conflictColumns(FileLease.t),
+      updateColumns: updateColumns?.call(FileLease.t),
+      updateWhere: updateWhere?.call(FileLease.t),
       transaction: transaction,
       noReturn: noReturn,
     );
   }
 
-  /// Upserts a single [GardenRecord] and returns the resulting row.
+  /// Upserts a single [FileLease] and returns the resulting row.
   ///
   /// If the row conflicts on the given [conflictColumns], the existing row is
   /// updated. Otherwise, a new row is inserted.
@@ -477,25 +451,25 @@ class GardenRecordRepository {
   /// row matches the expression. Returns `null` if no row was affected — for
   /// example when [updateWhere] does not match the conflicting row.
   ///
-  /// The returned [GardenRecord] will have its `id` field set.
-  Future<GardenRecord?> upsertRow(
+  /// The returned [FileLease] will have its `id` field set.
+  Future<FileLease?> upsertRow(
     _is.DatabaseSession session,
-    GardenRecord row, {
-    required _is.ColumnSelections<GardenRecordTable> conflictColumns,
-    _is.ColumnSelections<GardenRecordTable>? updateColumns,
-    _is.WhereExpressionBuilder<GardenRecordTable>? updateWhere,
+    FileLease row, {
+    required _is.ColumnSelections<FileLeaseTable> conflictColumns,
+    _is.ColumnSelections<FileLeaseTable>? updateColumns,
+    _is.WhereExpressionBuilder<FileLeaseTable>? updateWhere,
     _is.Transaction? transaction,
   }) async {
-    return session.db.upsertRow<GardenRecord>(
+    return session.db.upsertRow<FileLease>(
       row,
-      conflictColumns: conflictColumns(GardenRecord.t),
-      updateColumns: updateColumns?.call(GardenRecord.t),
-      updateWhere: updateWhere?.call(GardenRecord.t),
+      conflictColumns: conflictColumns(FileLease.t),
+      updateColumns: updateColumns?.call(FileLease.t),
+      updateWhere: updateWhere?.call(FileLease.t),
       transaction: transaction,
     );
   }
 
-  /// Updates all [GardenRecord]s in the list and returns the updated rows. If
+  /// Updates all [FileLease]s in the list and returns the updated rows. If
   /// [columns] is provided, only those columns will be updated. Defaults to
   /// all columns.
   /// This is an atomic operation, meaning that if one of the rows fails to
@@ -504,82 +478,82 @@ class GardenRecordRepository {
   /// If [noReturn] is set to `true`, the updated rows are not read back from
   /// the database and an empty list is returned. This avoids the overhead of
   /// transferring and deserializing the rows when the result is not needed.
-  Future<List<GardenRecord>> update(
+  Future<List<FileLease>> update(
     _is.DatabaseSession session,
-    List<GardenRecord> rows, {
-    _is.ColumnSelections<GardenRecordTable>? columns,
+    List<FileLease> rows, {
+    _is.ColumnSelections<FileLeaseTable>? columns,
     _is.Transaction? transaction,
     bool noReturn = false,
   }) async {
-    return session.db.update<GardenRecord>(
+    return session.db.update<FileLease>(
       rows,
-      columns: columns?.call(GardenRecord.t),
+      columns: columns?.call(FileLease.t),
       transaction: transaction,
       noReturn: noReturn,
     );
   }
 
-  /// Updates a single [GardenRecord]. The row needs to have its id set.
+  /// Updates a single [FileLease]. The row needs to have its id set.
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
-  Future<GardenRecord> updateRow(
+  Future<FileLease> updateRow(
     _is.DatabaseSession session,
-    GardenRecord row, {
-    _is.ColumnSelections<GardenRecordTable>? columns,
+    FileLease row, {
+    _is.ColumnSelections<FileLeaseTable>? columns,
     _is.Transaction? transaction,
   }) async {
-    return session.db.updateRow<GardenRecord>(
+    return session.db.updateRow<FileLease>(
       row,
-      columns: columns?.call(GardenRecord.t),
+      columns: columns?.call(FileLease.t),
       transaction: transaction,
     );
   }
 
-  /// Updates a single [GardenRecord] by its [id] with the specified [columnValues].
+  /// Updates a single [FileLease] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
-  Future<GardenRecord?> updateById(
+  Future<FileLease?> updateById(
     _is.DatabaseSession session,
     int id, {
-    required _is.ColumnValueListBuilder<GardenRecordUpdateTable> columnValues,
+    required _is.ColumnValueListBuilder<FileLeaseUpdateTable> columnValues,
     _is.Transaction? transaction,
   }) async {
-    return session.db.updateById<GardenRecord>(
+    return session.db.updateById<FileLease>(
       id,
-      columnValues: columnValues(GardenRecord.t.updateTable),
+      columnValues: columnValues(FileLease.t.updateTable),
       transaction: transaction,
     );
   }
 
-  /// Updates all [GardenRecord]s matching the [where] expression with the specified [columnValues].
+  /// Updates all [FileLease]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   ///
   /// If [noReturn] is set to `true`, the updated rows are not read back from
   /// the database and an empty list is returned. This avoids the overhead of
   /// transferring and deserializing the rows when the result is not needed.
-  Future<List<GardenRecord>> updateWhere(
+  Future<List<FileLease>> updateWhere(
     _is.DatabaseSession session, {
-    required _is.ColumnValueListBuilder<GardenRecordUpdateTable> columnValues,
-    required _is.WhereExpressionBuilder<GardenRecordTable> where,
+    required _is.ColumnValueListBuilder<FileLeaseUpdateTable> columnValues,
+    required _is.WhereExpressionBuilder<FileLeaseTable> where,
     int? limit,
     int? offset,
-    _is.OrderByBuilder<GardenRecordTable>? orderBy,
-    _is.OrderByListBuilder<GardenRecordTable>? orderByList,
+    _is.OrderByBuilder<FileLeaseTable>? orderBy,
+    _is.OrderByListBuilder<FileLeaseTable>? orderByList,
     _is.Transaction? transaction,
     bool noReturn = false,
   }) async {
-    return session.db.updateWhere<GardenRecord>(
-      columnValues: columnValues(GardenRecord.t.updateTable),
-      where: where(GardenRecord.t),
+    return session.db.updateWhere<FileLease>(
+      columnValues: columnValues(FileLease.t.updateTable),
+      where: where(FileLease.t),
       limit: limit,
       offset: offset,
-      orderBy: orderBy?.call(GardenRecord.t),
-      orderByList: orderByList?.call(GardenRecord.t),
+      orderBy: orderBy?.call(FileLease.t),
+      orderByList: orderByList?.call(FileLease.t),
       transaction: transaction,
       noReturn: noReturn,
     );
   }
 
-  /// Deletes all [GardenRecord]s in the list and returns the deleted rows.
+  /// Deletes all [FileLease]s in the list and returns the deleted rows.
   ///
   /// To specify the order of the returned rows use [orderBy] or [orderByList]
   /// when sorting by multiple columns.
@@ -590,30 +564,30 @@ class GardenRecordRepository {
   /// If [noReturn] is set to `true`, the deleted rows are not read back from
   /// the database and an empty list is returned. This avoids the overhead of
   /// transferring and deserializing the rows when the result is not needed.
-  Future<List<GardenRecord>> delete(
+  Future<List<FileLease>> delete(
     _is.DatabaseSession session,
-    List<GardenRecord> rows, {
-    _is.OrderByBuilder<GardenRecordTable>? orderBy,
-    _is.OrderByListBuilder<GardenRecordTable>? orderByList,
+    List<FileLease> rows, {
+    _is.OrderByBuilder<FileLeaseTable>? orderBy,
+    _is.OrderByListBuilder<FileLeaseTable>? orderByList,
     _is.Transaction? transaction,
     bool noReturn = false,
   }) async {
-    return session.db.delete<GardenRecord>(
+    return session.db.delete<FileLease>(
       rows,
-      orderBy: orderBy?.call(GardenRecord.t),
-      orderByList: orderByList?.call(GardenRecord.t),
+      orderBy: orderBy?.call(FileLease.t),
+      orderByList: orderByList?.call(FileLease.t),
       transaction: transaction,
       noReturn: noReturn,
     );
   }
 
-  /// Deletes a single [GardenRecord].
-  Future<GardenRecord> deleteRow(
+  /// Deletes a single [FileLease].
+  Future<FileLease> deleteRow(
     _is.DatabaseSession session,
-    GardenRecord row, {
+    FileLease row, {
     _is.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<GardenRecord>(
+    return session.db.deleteRow<FileLease>(
       row,
       transaction: transaction,
     );
@@ -627,18 +601,18 @@ class GardenRecordRepository {
   /// If [noReturn] is set to `true`, the deleted rows are not read back from
   /// the database and an empty list is returned. This avoids the overhead of
   /// transferring and deserializing the rows when the result is not needed.
-  Future<List<GardenRecord>> deleteWhere(
+  Future<List<FileLease>> deleteWhere(
     _is.DatabaseSession session, {
-    required _is.WhereExpressionBuilder<GardenRecordTable> where,
-    _is.OrderByBuilder<GardenRecordTable>? orderBy,
-    _is.OrderByListBuilder<GardenRecordTable>? orderByList,
+    required _is.WhereExpressionBuilder<FileLeaseTable> where,
+    _is.OrderByBuilder<FileLeaseTable>? orderBy,
+    _is.OrderByListBuilder<FileLeaseTable>? orderByList,
     _is.Transaction? transaction,
     bool noReturn = false,
   }) async {
-    return session.db.deleteWhere<GardenRecord>(
-      where: where(GardenRecord.t),
-      orderBy: orderBy?.call(GardenRecord.t),
-      orderByList: orderByList?.call(GardenRecord.t),
+    return session.db.deleteWhere<FileLease>(
+      where: where(FileLease.t),
+      orderBy: orderBy?.call(FileLease.t),
+      orderByList: orderByList?.call(FileLease.t),
       transaction: transaction,
       noReturn: noReturn,
     );
@@ -648,27 +622,27 @@ class GardenRecordRepository {
   /// will return the count of all rows in the table.
   Future<int> count(
     _is.DatabaseSession session, {
-    _is.WhereExpressionBuilder<GardenRecordTable>? where,
+    _is.WhereExpressionBuilder<FileLeaseTable>? where,
     int? limit,
     _is.Transaction? transaction,
   }) async {
-    return session.db.count<GardenRecord>(
-      where: where?.call(GardenRecord.t),
+    return session.db.count<FileLease>(
+      where: where?.call(FileLease.t),
       limit: limit,
       transaction: transaction,
     );
   }
 
-  /// Acquires row-level locks on [GardenRecord] rows matching the [where] expression.
+  /// Acquires row-level locks on [FileLease] rows matching the [where] expression.
   Future<void> lockRows(
     _is.DatabaseSession session, {
-    required _is.WhereExpressionBuilder<GardenRecordTable> where,
+    required _is.WhereExpressionBuilder<FileLeaseTable> where,
     required _is.LockMode lockMode,
     required _is.Transaction transaction,
     _is.LockBehavior lockBehavior = _is.LockBehavior.wait,
   }) async {
-    return session.db.lockRows<GardenRecord>(
-      where: where(GardenRecord.t),
+    return session.db.lockRows<FileLease>(
+      where: where(FileLease.t),
       lockMode: lockMode,
       lockBehavior: lockBehavior,
       transaction: transaction,

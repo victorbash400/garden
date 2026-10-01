@@ -1,0 +1,10 @@
+class: FileComment
+table: file_comment
+fields:
+  nodeId: int
+  authorId: String
+  text: String
+  createdAt: DateTime
+indexes:
+  comment_node:
+    fields: nodeId, createdAt

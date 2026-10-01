@@ -9,6 +9,23 @@ emailIdp:
   - hasAccount:
 jwtRefresh:
   - refreshAccessToken:
+collaboration:
+  - comments:
+  - comment:
+  - acquire:
+  - release:
+content:
+  - begin:
+  - writeChunk:
+  - finish:
+  - read:
+  - versions:
+files:
+  - list:
+  - create:
+  - move:
+  - delete:
+  - watch:
 garden:
   - account:
   - list:

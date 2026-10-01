@@ -11,6 +11,10 @@
 // ignore_for_file: dead_code, unnecessary_type_check
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:garden_server/src/generated/files/file_comment.dart'
+    as _ih79ezm0;
+import 'package:garden_server/src/generated/files/file_version.dart'
+    as _iwzwya1z;
 import 'package:garden_server/src/generated/gardens/garden_summary.dart'
     as _itk3qnhp;
 import 'package:serverpod/protocol.dart' as _isp;
@@ -19,12 +23,28 @@ import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _iacs;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _iais;
+import 'files/directory_listing.dart' as _i8kiawn9;
+import 'files/drive_event.dart' as _i4wn0cbe;
+import 'files/file_chunk.dart' as _imjz65yx;
+import 'files/file_comment.dart' as _i8jjzct9;
+import 'files/file_lease.dart' as _ifu05pz5;
+import 'files/file_node.dart' as _iqxechne;
+import 'files/file_version.dart' as _inq2edz5;
+import 'files/node_kind.dart' as _idxfoob7;
 import 'gardens/account_details.dart' as _i4muwn5e;
 import 'gardens/garden_exception.dart' as _icsgmcpa;
 import 'gardens/garden_member.dart' as _icenu3t8;
 import 'gardens/garden_record.dart' as _iwqk3oef;
 import 'gardens/garden_summary.dart' as _i5zbrq86;
 import 'greetings/greeting.dart' as _izw8z7ou;
+export 'files/directory_listing.dart';
+export 'files/drive_event.dart';
+export 'files/file_chunk.dart';
+export 'files/file_comment.dart';
+export 'files/file_lease.dart';
+export 'files/file_node.dart';
+export 'files/file_version.dart';
+export 'files/node_kind.dart';
 export 'gardens/account_details.dart';
 export 'gardens/garden_exception.dart';
 export 'gardens/garden_member.dart';
@@ -40,6 +60,455 @@ class Protocol extends _is.DatabaseSerializationManager {
   static final Protocol _instance = Protocol._().._registerHostProtocols();
 
   static List<_isp.TableDefinition> get targetTableDefinitions => [
+    _isp.TableDefinition(
+      name: 'drive_event',
+      dartName: 'DriveEvent',
+      schema: 'public',
+      module: 'garden',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'gardenId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'revision',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'operation',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'authorId',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'node',
+          columnType: _isp.ColumnType.json,
+          isNullable: true,
+          dartType: 'protocol:FileNode?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'event_revision_unique',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'gardenId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'revision',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'file_chunk',
+      dartName: 'FileChunk',
+      schema: 'public',
+      module: 'garden',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'versionId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'chunkIndex',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'size',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'checksum',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'chunk_unique',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'versionId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'chunkIndex',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'file_comment',
+      dartName: 'FileComment',
+      schema: 'public',
+      module: 'garden',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'nodeId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'authorId',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'text',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'comment_node',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'nodeId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'createdAt',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'file_lease',
+      dartName: 'FileLease',
+      schema: 'public',
+      module: 'garden',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'nodeId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'holderId',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'token',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'expiresAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'lease_node_unique',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'nodeId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'file_node',
+      dartName: 'FileNode',
+      schema: 'public',
+      module: 'garden',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'gardenId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'parentId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'name',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'activeName',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'kind',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:NodeKind',
+        ),
+        _isp.ColumnDefinition(
+          name: 'size',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '0',
+        ),
+        _isp.ColumnDefinition(
+          name: 'version',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '0',
+        ),
+        _isp.ColumnDefinition(
+          name: 'deleted',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
+        ),
+        _isp.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'node_sibling_unique',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'gardenId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'parentId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'activeName',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'node_directory',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'gardenId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'parentId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'deleted',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'file_version',
+      dartName: 'FileVersion',
+      schema: 'public',
+      module: 'garden',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'nodeId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'authorId',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'baseVersion',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'size',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'chunkCount',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'committed',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'version_node',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'nodeId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'committed',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'createdAt',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
     _isp.TableDefinition(
       name: 'garden_member',
       dartName: 'GardenMember',
@@ -131,6 +600,13 @@ class Protocol extends _is.DatabaseSerializationManager {
           isNullable: false,
           dartType: 'DateTime',
         ),
+        _isp.ColumnDefinition(
+          name: 'revision',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '0',
+        ),
       ],
       foreignKeys: [],
       indexes: [
@@ -182,6 +658,30 @@ class Protocol extends _is.DatabaseSerializationManager {
       }
     }
 
+    if (t == _i8kiawn9.DirectoryListing) {
+      return _i8kiawn9.DirectoryListing.fromJson(data) as T;
+    }
+    if (t == _i4wn0cbe.DriveEvent) {
+      return _i4wn0cbe.DriveEvent.fromJson(data) as T;
+    }
+    if (t == _imjz65yx.FileChunk) {
+      return _imjz65yx.FileChunk.fromJson(data) as T;
+    }
+    if (t == _i8jjzct9.FileComment) {
+      return _i8jjzct9.FileComment.fromJson(data) as T;
+    }
+    if (t == _ifu05pz5.FileLease) {
+      return _ifu05pz5.FileLease.fromJson(data) as T;
+    }
+    if (t == _iqxechne.FileNode) {
+      return _iqxechne.FileNode.fromJson(data) as T;
+    }
+    if (t == _inq2edz5.FileVersion) {
+      return _inq2edz5.FileVersion.fromJson(data) as T;
+    }
+    if (t == _idxfoob7.NodeKind) {
+      return _idxfoob7.NodeKind.fromJson(data) as T;
+    }
     if (t == _i4muwn5e.AccountDetails) {
       return _i4muwn5e.AccountDetails.fromJson(data) as T;
     }
@@ -199,6 +699,31 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (t == _izw8z7ou.Greeting) {
       return _izw8z7ou.Greeting.fromJson(data) as T;
+    }
+    if (t == _is.getType<_i8kiawn9.DirectoryListing?>()) {
+      return (data != null ? _i8kiawn9.DirectoryListing.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_i4wn0cbe.DriveEvent?>()) {
+      return (data != null ? _i4wn0cbe.DriveEvent.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_imjz65yx.FileChunk?>()) {
+      return (data != null ? _imjz65yx.FileChunk.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i8jjzct9.FileComment?>()) {
+      return (data != null ? _i8jjzct9.FileComment.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_ifu05pz5.FileLease?>()) {
+      return (data != null ? _ifu05pz5.FileLease.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_iqxechne.FileNode?>()) {
+      return (data != null ? _iqxechne.FileNode.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_inq2edz5.FileVersion?>()) {
+      return (data != null ? _inq2edz5.FileVersion.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_idxfoob7.NodeKind?>()) {
+      return (data != null ? _idxfoob7.NodeKind.fromJson(data) : null) as T;
     }
     if (t == _is.getType<_i4muwn5e.AccountDetails?>()) {
       return (data != null ? _i4muwn5e.AccountDetails.fromJson(data) : null)
@@ -221,6 +746,24 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _is.getType<_izw8z7ou.Greeting?>()) {
       return (data != null ? _izw8z7ou.Greeting.fromJson(data) : null) as T;
     }
+    if (t == List<_iqxechne.FileNode>) {
+      return (data as List)
+              .map((e) => deserialize<_iqxechne.FileNode>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ih79ezm0.FileComment>) {
+      return (data as List)
+              .map((e) => deserialize<_ih79ezm0.FileComment>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_iwzwya1z.FileVersion>) {
+      return (data as List)
+              .map((e) => deserialize<_iwzwya1z.FileVersion>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_itk3qnhp.GardenSummary>) {
       return (data as List)
               .map((e) => deserialize<_itk3qnhp.GardenSummary>(e))
@@ -241,6 +784,14 @@ class Protocol extends _is.DatabaseSerializationManager {
 
   static String? getClassNameForType(Type type) {
     return switch (type) {
+      _i8kiawn9.DirectoryListing => 'DirectoryListing',
+      _i4wn0cbe.DriveEvent => 'DriveEvent',
+      _imjz65yx.FileChunk => 'FileChunk',
+      _i8jjzct9.FileComment => 'FileComment',
+      _ifu05pz5.FileLease => 'FileLease',
+      _iqxechne.FileNode => 'FileNode',
+      _inq2edz5.FileVersion => 'FileVersion',
+      _idxfoob7.NodeKind => 'NodeKind',
       _i4muwn5e.AccountDetails => 'AccountDetails',
       _icsgmcpa.GardenException => 'GardenException',
       _icenu3t8.GardenMember => 'GardenMember',
@@ -261,6 +812,22 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
 
     switch (data) {
+      case _i8kiawn9.DirectoryListing():
+        return 'DirectoryListing';
+      case _i4wn0cbe.DriveEvent():
+        return 'DriveEvent';
+      case _imjz65yx.FileChunk():
+        return 'FileChunk';
+      case _i8jjzct9.FileComment():
+        return 'FileComment';
+      case _ifu05pz5.FileLease():
+        return 'FileLease';
+      case _iqxechne.FileNode():
+        return 'FileNode';
+      case _inq2edz5.FileVersion():
+        return 'FileVersion';
+      case _idxfoob7.NodeKind():
+        return 'NodeKind';
       case _i4muwn5e.AccountDetails():
         return 'AccountDetails';
       case _icsgmcpa.GardenException():
@@ -298,6 +865,30 @@ class Protocol extends _is.DatabaseSerializationManager {
     var dataClassName = data['className'];
     if (dataClassName is! String) {
       return super.deserializeByClassName(data);
+    }
+    if (dataClassName == 'DirectoryListing') {
+      return deserialize<_i8kiawn9.DirectoryListing>(data['data']);
+    }
+    if (dataClassName == 'DriveEvent') {
+      return deserialize<_i4wn0cbe.DriveEvent>(data['data']);
+    }
+    if (dataClassName == 'FileChunk') {
+      return deserialize<_imjz65yx.FileChunk>(data['data']);
+    }
+    if (dataClassName == 'FileComment') {
+      return deserialize<_i8jjzct9.FileComment>(data['data']);
+    }
+    if (dataClassName == 'FileLease') {
+      return deserialize<_ifu05pz5.FileLease>(data['data']);
+    }
+    if (dataClassName == 'FileNode') {
+      return deserialize<_iqxechne.FileNode>(data['data']);
+    }
+    if (dataClassName == 'FileVersion') {
+      return deserialize<_inq2edz5.FileVersion>(data['data']);
+    }
+    if (dataClassName == 'NodeKind') {
+      return deserialize<_idxfoob7.NodeKind>(data['data']);
     }
     if (dataClassName == 'AccountDetails') {
       return deserialize<_i4muwn5e.AccountDetails>(data['data']);
@@ -358,6 +949,18 @@ class Protocol extends _is.DatabaseSerializationManager {
       }
     }
     switch (t) {
+      case _i4wn0cbe.DriveEvent:
+        return _i4wn0cbe.DriveEvent.t;
+      case _imjz65yx.FileChunk:
+        return _imjz65yx.FileChunk.t;
+      case _i8jjzct9.FileComment:
+        return _i8jjzct9.FileComment.t;
+      case _ifu05pz5.FileLease:
+        return _ifu05pz5.FileLease.t;
+      case _iqxechne.FileNode:
+        return _iqxechne.FileNode.t;
+      case _inq2edz5.FileVersion:
+        return _inq2edz5.FileVersion.t;
       case _icenu3t8.GardenMember:
         return _icenu3t8.GardenMember.t;
       case _iwqk3oef.GardenRecord:

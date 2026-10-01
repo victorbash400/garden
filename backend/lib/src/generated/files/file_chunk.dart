@@ -12,114 +12,104 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _is;
 
-abstract class GardenRecord
+abstract class FileChunk
     implements _is.TableRow<int?>, _is.ProtocolSerialization {
-  GardenRecord._({
+  FileChunk._({
     this.id,
-    required this.name,
-    required this.ownerId,
-    required this.invitationHash,
-    required this.createdAt,
-    int? revision,
-  }) : revision = revision ?? 0;
+    required this.versionId,
+    required this.chunkIndex,
+    required this.size,
+    required this.checksum,
+  });
 
-  factory GardenRecord({
+  factory FileChunk({
     int? id,
-    required String name,
-    required String ownerId,
-    required String invitationHash,
-    required DateTime createdAt,
-    int? revision,
-  }) = _GardenRecordImpl;
+    required int versionId,
+    required int chunkIndex,
+    required int size,
+    required String checksum,
+  }) = _FileChunkImpl;
 
-  factory GardenRecord.fromJson(Map<String, dynamic> jsonSerialization) {
-    return GardenRecord(
+  factory FileChunk.fromJson(Map<String, dynamic> jsonSerialization) {
+    return FileChunk(
       id: jsonSerialization['id'] as int?,
-      name: jsonSerialization['name'] as String,
-      ownerId: jsonSerialization['ownerId'] as String,
-      invitationHash: jsonSerialization['invitationHash'] as String,
-      createdAt: _is.DateTimeJsonExtension.fromJson(
-        jsonSerialization['createdAt'],
-      ),
-      revision: jsonSerialization['revision'] as int?,
+      versionId: jsonSerialization['versionId'] as int,
+      chunkIndex: jsonSerialization['chunkIndex'] as int,
+      size: jsonSerialization['size'] as int,
+      checksum: jsonSerialization['checksum'] as String,
     );
   }
 
-  static final t = GardenRecordTable();
+  static final t = FileChunkTable();
 
-  static const db = GardenRecordRepository._();
+  static const db = FileChunkRepository._();
 
   @override
   int? id;
 
-  String name;
+  int versionId;
 
-  String ownerId;
+  int chunkIndex;
 
-  String invitationHash;
+  int size;
 
-  DateTime createdAt;
-
-  int revision;
+  String checksum;
 
   @override
   _is.Table<int?> get table => t;
 
-  /// Returns a shallow copy of this [GardenRecord]
+  /// Returns a shallow copy of this [FileChunk]
   /// with some or all fields replaced by the given arguments.
   @_is.useResult
-  GardenRecord copyWith({
+  FileChunk copyWith({
     int? id,
-    String? name,
-    String? ownerId,
-    String? invitationHash,
-    DateTime? createdAt,
-    int? revision,
+    int? versionId,
+    int? chunkIndex,
+    int? size,
+    String? checksum,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
-      '__className__': 'GardenRecord',
+      '__className__': 'FileChunk',
       if (id != null) 'id': id,
-      'name': name,
-      'ownerId': ownerId,
-      'invitationHash': invitationHash,
-      'createdAt': createdAt.toJson(),
-      'revision': revision,
+      'versionId': versionId,
+      'chunkIndex': chunkIndex,
+      'size': size,
+      'checksum': checksum,
     };
   }
 
   @override
   Map<String, dynamic> toJsonForProtocol() {
     return {
-      '__className__': 'GardenRecord',
+      '__className__': 'FileChunk',
       if (id != null) 'id': id,
-      'name': name,
-      'ownerId': ownerId,
-      'invitationHash': invitationHash,
-      'createdAt': createdAt.toJson(),
-      'revision': revision,
+      'versionId': versionId,
+      'chunkIndex': chunkIndex,
+      'size': size,
+      'checksum': checksum,
     };
   }
 
-  static GardenRecordInclude include() {
-    return GardenRecordInclude._();
+  static FileChunkInclude include() {
+    return FileChunkInclude._();
   }
 
-  static GardenRecordIncludeList includeList({
-    _is.WhereExpressionBuilder<GardenRecordTable>? where,
+  static FileChunkIncludeList includeList({
+    _is.WhereExpressionBuilder<FileChunkTable>? where,
     int? limit,
     int? offset,
-    _is.OrderByBuilder<GardenRecordTable>? orderBy,
-    _is.OrderByListBuilder<GardenRecordTable>? orderByList,
-    GardenRecordInclude? include,
+    _is.OrderByBuilder<FileChunkTable>? orderBy,
+    _is.OrderByListBuilder<FileChunkTable>? orderByList,
+    FileChunkInclude? include,
   }) {
-    return GardenRecordIncludeList._(
+    return FileChunkIncludeList._(
       where: where,
       limit: limit,
       offset: offset,
-      orderBy: orderBy?.call(GardenRecord.t),
-      orderByList: orderByList?.call(GardenRecord.t),
+      orderBy: orderBy?.call(FileChunk.t),
+      orderByList: orderByList?.call(FileChunk.t),
       include: include,
     );
   }
@@ -132,159 +122,140 @@ abstract class GardenRecord
 
 class _Undefined {}
 
-class _GardenRecordImpl extends GardenRecord {
-  _GardenRecordImpl({
+class _FileChunkImpl extends FileChunk {
+  _FileChunkImpl({
     int? id,
-    required String name,
-    required String ownerId,
-    required String invitationHash,
-    required DateTime createdAt,
-    int? revision,
+    required int versionId,
+    required int chunkIndex,
+    required int size,
+    required String checksum,
   }) : super._(
          id: id,
-         name: name,
-         ownerId: ownerId,
-         invitationHash: invitationHash,
-         createdAt: createdAt,
-         revision: revision,
+         versionId: versionId,
+         chunkIndex: chunkIndex,
+         size: size,
+         checksum: checksum,
        );
 
-  /// Returns a shallow copy of this [GardenRecord]
+  /// Returns a shallow copy of this [FileChunk]
   /// with some or all fields replaced by the given arguments.
   @_is.useResult
   @override
-  GardenRecord copyWith({
+  FileChunk copyWith({
     Object? id = _Undefined,
-    String? name,
-    String? ownerId,
-    String? invitationHash,
-    DateTime? createdAt,
-    int? revision,
+    int? versionId,
+    int? chunkIndex,
+    int? size,
+    String? checksum,
   }) {
-    return GardenRecord(
+    return FileChunk(
       id: id is int? ? id : this.id,
-      name: name ?? this.name,
-      ownerId: ownerId ?? this.ownerId,
-      invitationHash: invitationHash ?? this.invitationHash,
-      createdAt: createdAt ?? this.createdAt,
-      revision: revision ?? this.revision,
+      versionId: versionId ?? this.versionId,
+      chunkIndex: chunkIndex ?? this.chunkIndex,
+      size: size ?? this.size,
+      checksum: checksum ?? this.checksum,
     );
   }
 }
 
-class GardenRecordUpdateTable extends _is.UpdateTable<GardenRecordTable> {
-  GardenRecordUpdateTable(super.table);
+class FileChunkUpdateTable extends _is.UpdateTable<FileChunkTable> {
+  FileChunkUpdateTable(super.table);
 
-  _is.ColumnValue<String, String> name(String value) => _is.ColumnValue(
-    table.name,
+  _is.ColumnValue<int, int> versionId(int value) => _is.ColumnValue(
+    table.versionId,
     value,
   );
 
-  _is.ColumnValue<String, String> ownerId(String value) => _is.ColumnValue(
-    table.ownerId,
+  _is.ColumnValue<int, int> chunkIndex(int value) => _is.ColumnValue(
+    table.chunkIndex,
     value,
   );
 
-  _is.ColumnValue<String, String> invitationHash(String value) =>
-      _is.ColumnValue(
-        table.invitationHash,
-        value,
-      );
+  _is.ColumnValue<int, int> size(int value) => _is.ColumnValue(
+    table.size,
+    value,
+  );
 
-  _is.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _is.ColumnValue(
-        table.createdAt,
-        value,
-      );
-
-  _is.ColumnValue<int, int> revision(int value) => _is.ColumnValue(
-    table.revision,
+  _is.ColumnValue<String, String> checksum(String value) => _is.ColumnValue(
+    table.checksum,
     value,
   );
 }
 
-class GardenRecordTable extends _is.Table<int?> {
-  GardenRecordTable({super.tableRelation}) : super(tableName: 'garden_record') {
-    updateTable = GardenRecordUpdateTable(this);
-    name = _is.ColumnString(
-      'name',
+class FileChunkTable extends _is.Table<int?> {
+  FileChunkTable({super.tableRelation}) : super(tableName: 'file_chunk') {
+    updateTable = FileChunkUpdateTable(this);
+    versionId = _is.ColumnInt(
+      'versionId',
       this,
     );
-    ownerId = _is.ColumnString(
-      'ownerId',
+    chunkIndex = _is.ColumnInt(
+      'chunkIndex',
       this,
     );
-    invitationHash = _is.ColumnString(
-      'invitationHash',
+    size = _is.ColumnInt(
+      'size',
       this,
     );
-    createdAt = _is.ColumnDateTime(
-      'createdAt',
+    checksum = _is.ColumnString(
+      'checksum',
       this,
-    );
-    revision = _is.ColumnInt(
-      'revision',
-      this,
-      hasDefault: true,
     );
   }
 
-  late final GardenRecordUpdateTable updateTable;
+  late final FileChunkUpdateTable updateTable;
 
-  late final _is.ColumnString name;
+  late final _is.ColumnInt versionId;
 
-  late final _is.ColumnString ownerId;
+  late final _is.ColumnInt chunkIndex;
 
-  late final _is.ColumnString invitationHash;
+  late final _is.ColumnInt size;
 
-  late final _is.ColumnDateTime createdAt;
-
-  late final _is.ColumnInt revision;
+  late final _is.ColumnString checksum;
 
   @override
   List<_is.Column> get columns => [
     id,
-    name,
-    ownerId,
-    invitationHash,
-    createdAt,
-    revision,
+    versionId,
+    chunkIndex,
+    size,
+    checksum,
   ];
 }
 
-class GardenRecordInclude extends _is.IncludeObject {
-  GardenRecordInclude._();
+class FileChunkInclude extends _is.IncludeObject {
+  FileChunkInclude._();
 
   @override
   Map<String, _is.Include?> get includes => {};
 
   @override
-  _is.Table<int?> get table => GardenRecord.t;
+  _is.Table<int?> get table => FileChunk.t;
 }
 
-class GardenRecordIncludeList extends _is.IncludeList {
-  GardenRecordIncludeList._({
-    _is.WhereExpressionBuilder<GardenRecordTable>? where,
+class FileChunkIncludeList extends _is.IncludeList {
+  FileChunkIncludeList._({
+    _is.WhereExpressionBuilder<FileChunkTable>? where,
     super.limit,
     super.offset,
     super.orderBy,
     super.orderByList,
     super.include,
   }) {
-    super.where = where?.call(GardenRecord.t);
+    super.where = where?.call(FileChunk.t);
   }
 
   @override
   Map<String, _is.Include?> get includes => include?.includes ?? {};
 
   @override
-  _is.Table<int?> get table => GardenRecord.t;
+  _is.Table<int?> get table => FileChunk.t;
 }
 
-class GardenRecordRepository {
-  const GardenRecordRepository._();
+class FileChunkRepository {
+  const FileChunkRepository._();
 
-  /// Returns a list of [GardenRecord]s matching the given query parameters.
+  /// Returns a list of [FileChunk]s matching the given query parameters.
   ///
   /// Use [where] to specify which items to include in the return value.
   /// If none is specified, all items will be returned.
@@ -306,21 +277,21 @@ class GardenRecordRepository {
   ///   limit: 100,
   /// );
   /// ```
-  Future<List<GardenRecord>> find(
+  Future<List<FileChunk>> find(
     _is.DatabaseSession session, {
-    _is.WhereExpressionBuilder<GardenRecordTable>? where,
+    _is.WhereExpressionBuilder<FileChunkTable>? where,
     int? limit,
     int? offset,
-    _is.OrderByBuilder<GardenRecordTable>? orderBy,
-    _is.OrderByListBuilder<GardenRecordTable>? orderByList,
+    _is.OrderByBuilder<FileChunkTable>? orderBy,
+    _is.OrderByListBuilder<FileChunkTable>? orderByList,
     _is.Transaction? transaction,
     _is.LockMode? lockMode,
     _is.LockBehavior? lockBehavior,
   }) async {
-    return session.db.find<GardenRecord>(
-      where: where?.call(GardenRecord.t),
-      orderBy: orderBy?.call(GardenRecord.t),
-      orderByList: orderByList?.call(GardenRecord.t),
+    return session.db.find<FileChunk>(
+      where: where?.call(FileChunk.t),
+      orderBy: orderBy?.call(FileChunk.t),
+      orderByList: orderByList?.call(FileChunk.t),
       limit: limit,
       offset: offset,
       transaction: transaction,
@@ -329,7 +300,7 @@ class GardenRecordRepository {
     );
   }
 
-  /// Returns the first matching [GardenRecord] matching the given query parameters.
+  /// Returns the first matching [FileChunk] matching the given query parameters.
   ///
   /// Use [where] to specify which items to include in the return value.
   /// If none is specified, all items will be returned.
@@ -346,20 +317,20 @@ class GardenRecordRepository {
   ///   orderBy: (t) => t.age,
   /// );
   /// ```
-  Future<GardenRecord?> findFirstRow(
+  Future<FileChunk?> findFirstRow(
     _is.DatabaseSession session, {
-    _is.WhereExpressionBuilder<GardenRecordTable>? where,
+    _is.WhereExpressionBuilder<FileChunkTable>? where,
     int? offset,
-    _is.OrderByBuilder<GardenRecordTable>? orderBy,
-    _is.OrderByListBuilder<GardenRecordTable>? orderByList,
+    _is.OrderByBuilder<FileChunkTable>? orderBy,
+    _is.OrderByListBuilder<FileChunkTable>? orderByList,
     _is.Transaction? transaction,
     _is.LockMode? lockMode,
     _is.LockBehavior? lockBehavior,
   }) async {
-    return session.db.findFirstRow<GardenRecord>(
-      where: where?.call(GardenRecord.t),
-      orderBy: orderBy?.call(GardenRecord.t),
-      orderByList: orderByList?.call(GardenRecord.t),
+    return session.db.findFirstRow<FileChunk>(
+      where: where?.call(FileChunk.t),
+      orderBy: orderBy?.call(FileChunk.t),
+      orderByList: orderByList?.call(FileChunk.t),
       offset: offset,
       transaction: transaction,
       lockMode: lockMode,
@@ -367,15 +338,15 @@ class GardenRecordRepository {
     );
   }
 
-  /// Finds a single [GardenRecord] by its [id] or null if no such row exists.
-  Future<GardenRecord?> findById(
+  /// Finds a single [FileChunk] by its [id] or null if no such row exists.
+  Future<FileChunk?> findById(
     _is.DatabaseSession session,
     int id, {
     _is.Transaction? transaction,
     _is.LockMode? lockMode,
     _is.LockBehavior? lockBehavior,
   }) async {
-    return session.db.findById<GardenRecord>(
+    return session.db.findById<FileChunk>(
       id,
       transaction: transaction,
       lockMode: lockMode,
@@ -383,9 +354,9 @@ class GardenRecordRepository {
     );
   }
 
-  /// Inserts all [GardenRecord]s in the list and returns the inserted rows.
+  /// Inserts all [FileChunk]s in the list and returns the inserted rows.
   ///
-  /// The returned [GardenRecord]s will have their `id` fields set.
+  /// The returned [FileChunk]s will have their `id` fields set.
   ///
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// insert, none of the rows will be inserted.
@@ -397,14 +368,14 @@ class GardenRecordRepository {
   /// If [noReturn] is set to `true`, the inserted rows are not read back from
   /// the database and an empty list is returned. This avoids the overhead of
   /// transferring and deserializing the rows when the result is not needed.
-  Future<List<GardenRecord>> insert(
+  Future<List<FileChunk>> insert(
     _is.DatabaseSession session,
-    List<GardenRecord> rows, {
+    List<FileChunk> rows, {
     _is.Transaction? transaction,
     bool ignoreConflicts = false,
     bool noReturn = false,
   }) async {
-    return session.db.insert<GardenRecord>(
+    return session.db.insert<FileChunk>(
       rows,
       transaction: transaction,
       ignoreConflicts: ignoreConflicts,
@@ -412,21 +383,21 @@ class GardenRecordRepository {
     );
   }
 
-  /// Inserts a single [GardenRecord] and returns the inserted row.
+  /// Inserts a single [FileChunk] and returns the inserted row.
   ///
-  /// The returned [GardenRecord] will have its `id` field set.
-  Future<GardenRecord> insertRow(
+  /// The returned [FileChunk] will have its `id` field set.
+  Future<FileChunk> insertRow(
     _is.DatabaseSession session,
-    GardenRecord row, {
+    FileChunk row, {
     _is.Transaction? transaction,
   }) async {
-    return session.db.insertRow<GardenRecord>(
+    return session.db.insertRow<FileChunk>(
       row,
       transaction: transaction,
     );
   }
 
-  /// Upserts all [GardenRecord]s in the list and returns the resulting rows.
+  /// Upserts all [FileChunk]s in the list and returns the resulting rows.
   ///
   /// If a row conflicts on the given [conflictColumns], the existing row is
   /// updated with the new values. Otherwise, a new row is inserted.
@@ -438,7 +409,7 @@ class GardenRecordRepository {
   /// given expression. Conflicting rows that don't match are skipped and not
   /// returned, so the resulting list may be shorter than [rows].
   ///
-  /// The returned [GardenRecord]s will have their `id` fields set.
+  /// The returned [FileChunk]s will have their `id` fields set.
   ///
   /// This is an atomic operation, meaning that if one of the rows fails,
   /// none of the rows will be affected.
@@ -446,26 +417,26 @@ class GardenRecordRepository {
   /// If [noReturn] is set to `true`, the resulting rows are not read back from
   /// the database and an empty list is returned. This avoids the overhead of
   /// transferring and deserializing the rows when the result is not needed.
-  Future<List<GardenRecord>> upsert(
+  Future<List<FileChunk>> upsert(
     _is.DatabaseSession session,
-    List<GardenRecord> rows, {
-    required _is.ColumnSelections<GardenRecordTable> conflictColumns,
-    _is.ColumnSelections<GardenRecordTable>? updateColumns,
-    _is.WhereExpressionBuilder<GardenRecordTable>? updateWhere,
+    List<FileChunk> rows, {
+    required _is.ColumnSelections<FileChunkTable> conflictColumns,
+    _is.ColumnSelections<FileChunkTable>? updateColumns,
+    _is.WhereExpressionBuilder<FileChunkTable>? updateWhere,
     _is.Transaction? transaction,
     bool noReturn = false,
   }) async {
-    return session.db.upsert<GardenRecord>(
+    return session.db.upsert<FileChunk>(
       rows,
-      conflictColumns: conflictColumns(GardenRecord.t),
-      updateColumns: updateColumns?.call(GardenRecord.t),
-      updateWhere: updateWhere?.call(GardenRecord.t),
+      conflictColumns: conflictColumns(FileChunk.t),
+      updateColumns: updateColumns?.call(FileChunk.t),
+      updateWhere: updateWhere?.call(FileChunk.t),
       transaction: transaction,
       noReturn: noReturn,
     );
   }
 
-  /// Upserts a single [GardenRecord] and returns the resulting row.
+  /// Upserts a single [FileChunk] and returns the resulting row.
   ///
   /// If the row conflicts on the given [conflictColumns], the existing row is
   /// updated. Otherwise, a new row is inserted.
@@ -477,25 +448,25 @@ class GardenRecordRepository {
   /// row matches the expression. Returns `null` if no row was affected — for
   /// example when [updateWhere] does not match the conflicting row.
   ///
-  /// The returned [GardenRecord] will have its `id` field set.
-  Future<GardenRecord?> upsertRow(
+  /// The returned [FileChunk] will have its `id` field set.
+  Future<FileChunk?> upsertRow(
     _is.DatabaseSession session,
-    GardenRecord row, {
-    required _is.ColumnSelections<GardenRecordTable> conflictColumns,
-    _is.ColumnSelections<GardenRecordTable>? updateColumns,
-    _is.WhereExpressionBuilder<GardenRecordTable>? updateWhere,
+    FileChunk row, {
+    required _is.ColumnSelections<FileChunkTable> conflictColumns,
+    _is.ColumnSelections<FileChunkTable>? updateColumns,
+    _is.WhereExpressionBuilder<FileChunkTable>? updateWhere,
     _is.Transaction? transaction,
   }) async {
-    return session.db.upsertRow<GardenRecord>(
+    return session.db.upsertRow<FileChunk>(
       row,
-      conflictColumns: conflictColumns(GardenRecord.t),
-      updateColumns: updateColumns?.call(GardenRecord.t),
-      updateWhere: updateWhere?.call(GardenRecord.t),
+      conflictColumns: conflictColumns(FileChunk.t),
+      updateColumns: updateColumns?.call(FileChunk.t),
+      updateWhere: updateWhere?.call(FileChunk.t),
       transaction: transaction,
     );
   }
 
-  /// Updates all [GardenRecord]s in the list and returns the updated rows. If
+  /// Updates all [FileChunk]s in the list and returns the updated rows. If
   /// [columns] is provided, only those columns will be updated. Defaults to
   /// all columns.
   /// This is an atomic operation, meaning that if one of the rows fails to
@@ -504,82 +475,82 @@ class GardenRecordRepository {
   /// If [noReturn] is set to `true`, the updated rows are not read back from
   /// the database and an empty list is returned. This avoids the overhead of
   /// transferring and deserializing the rows when the result is not needed.
-  Future<List<GardenRecord>> update(
+  Future<List<FileChunk>> update(
     _is.DatabaseSession session,
-    List<GardenRecord> rows, {
-    _is.ColumnSelections<GardenRecordTable>? columns,
+    List<FileChunk> rows, {
+    _is.ColumnSelections<FileChunkTable>? columns,
     _is.Transaction? transaction,
     bool noReturn = false,
   }) async {
-    return session.db.update<GardenRecord>(
+    return session.db.update<FileChunk>(
       rows,
-      columns: columns?.call(GardenRecord.t),
+      columns: columns?.call(FileChunk.t),
       transaction: transaction,
       noReturn: noReturn,
     );
   }
 
-  /// Updates a single [GardenRecord]. The row needs to have its id set.
+  /// Updates a single [FileChunk]. The row needs to have its id set.
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
-  Future<GardenRecord> updateRow(
+  Future<FileChunk> updateRow(
     _is.DatabaseSession session,
-    GardenRecord row, {
-    _is.ColumnSelections<GardenRecordTable>? columns,
+    FileChunk row, {
+    _is.ColumnSelections<FileChunkTable>? columns,
     _is.Transaction? transaction,
   }) async {
-    return session.db.updateRow<GardenRecord>(
+    return session.db.updateRow<FileChunk>(
       row,
-      columns: columns?.call(GardenRecord.t),
+      columns: columns?.call(FileChunk.t),
       transaction: transaction,
     );
   }
 
-  /// Updates a single [GardenRecord] by its [id] with the specified [columnValues].
+  /// Updates a single [FileChunk] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
-  Future<GardenRecord?> updateById(
+  Future<FileChunk?> updateById(
     _is.DatabaseSession session,
     int id, {
-    required _is.ColumnValueListBuilder<GardenRecordUpdateTable> columnValues,
+    required _is.ColumnValueListBuilder<FileChunkUpdateTable> columnValues,
     _is.Transaction? transaction,
   }) async {
-    return session.db.updateById<GardenRecord>(
+    return session.db.updateById<FileChunk>(
       id,
-      columnValues: columnValues(GardenRecord.t.updateTable),
+      columnValues: columnValues(FileChunk.t.updateTable),
       transaction: transaction,
     );
   }
 
-  /// Updates all [GardenRecord]s matching the [where] expression with the specified [columnValues].
+  /// Updates all [FileChunk]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   ///
   /// If [noReturn] is set to `true`, the updated rows are not read back from
   /// the database and an empty list is returned. This avoids the overhead of
   /// transferring and deserializing the rows when the result is not needed.
-  Future<List<GardenRecord>> updateWhere(
+  Future<List<FileChunk>> updateWhere(
     _is.DatabaseSession session, {
-    required _is.ColumnValueListBuilder<GardenRecordUpdateTable> columnValues,
-    required _is.WhereExpressionBuilder<GardenRecordTable> where,
+    required _is.ColumnValueListBuilder<FileChunkUpdateTable> columnValues,
+    required _is.WhereExpressionBuilder<FileChunkTable> where,
     int? limit,
     int? offset,
-    _is.OrderByBuilder<GardenRecordTable>? orderBy,
-    _is.OrderByListBuilder<GardenRecordTable>? orderByList,
+    _is.OrderByBuilder<FileChunkTable>? orderBy,
+    _is.OrderByListBuilder<FileChunkTable>? orderByList,
     _is.Transaction? transaction,
     bool noReturn = false,
   }) async {
-    return session.db.updateWhere<GardenRecord>(
-      columnValues: columnValues(GardenRecord.t.updateTable),
-      where: where(GardenRecord.t),
+    return session.db.updateWhere<FileChunk>(
+      columnValues: columnValues(FileChunk.t.updateTable),
+      where: where(FileChunk.t),
       limit: limit,
       offset: offset,
-      orderBy: orderBy?.call(GardenRecord.t),
-      orderByList: orderByList?.call(GardenRecord.t),
+      orderBy: orderBy?.call(FileChunk.t),
+      orderByList: orderByList?.call(FileChunk.t),
       transaction: transaction,
       noReturn: noReturn,
     );
   }
 
-  /// Deletes all [GardenRecord]s in the list and returns the deleted rows.
+  /// Deletes all [FileChunk]s in the list and returns the deleted rows.
   ///
   /// To specify the order of the returned rows use [orderBy] or [orderByList]
   /// when sorting by multiple columns.
@@ -590,30 +561,30 @@ class GardenRecordRepository {
   /// If [noReturn] is set to `true`, the deleted rows are not read back from
   /// the database and an empty list is returned. This avoids the overhead of
   /// transferring and deserializing the rows when the result is not needed.
-  Future<List<GardenRecord>> delete(
+  Future<List<FileChunk>> delete(
     _is.DatabaseSession session,
-    List<GardenRecord> rows, {
-    _is.OrderByBuilder<GardenRecordTable>? orderBy,
-    _is.OrderByListBuilder<GardenRecordTable>? orderByList,
+    List<FileChunk> rows, {
+    _is.OrderByBuilder<FileChunkTable>? orderBy,
+    _is.OrderByListBuilder<FileChunkTable>? orderByList,
     _is.Transaction? transaction,
     bool noReturn = false,
   }) async {
-    return session.db.delete<GardenRecord>(
+    return session.db.delete<FileChunk>(
       rows,
-      orderBy: orderBy?.call(GardenRecord.t),
-      orderByList: orderByList?.call(GardenRecord.t),
+      orderBy: orderBy?.call(FileChunk.t),
+      orderByList: orderByList?.call(FileChunk.t),
       transaction: transaction,
       noReturn: noReturn,
     );
   }
 
-  /// Deletes a single [GardenRecord].
-  Future<GardenRecord> deleteRow(
+  /// Deletes a single [FileChunk].
+  Future<FileChunk> deleteRow(
     _is.DatabaseSession session,
-    GardenRecord row, {
+    FileChunk row, {
     _is.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<GardenRecord>(
+    return session.db.deleteRow<FileChunk>(
       row,
       transaction: transaction,
     );
@@ -627,18 +598,18 @@ class GardenRecordRepository {
   /// If [noReturn] is set to `true`, the deleted rows are not read back from
   /// the database and an empty list is returned. This avoids the overhead of
   /// transferring and deserializing the rows when the result is not needed.
-  Future<List<GardenRecord>> deleteWhere(
+  Future<List<FileChunk>> deleteWhere(
     _is.DatabaseSession session, {
-    required _is.WhereExpressionBuilder<GardenRecordTable> where,
-    _is.OrderByBuilder<GardenRecordTable>? orderBy,
-    _is.OrderByListBuilder<GardenRecordTable>? orderByList,
+    required _is.WhereExpressionBuilder<FileChunkTable> where,
+    _is.OrderByBuilder<FileChunkTable>? orderBy,
+    _is.OrderByListBuilder<FileChunkTable>? orderByList,
     _is.Transaction? transaction,
     bool noReturn = false,
   }) async {
-    return session.db.deleteWhere<GardenRecord>(
-      where: where(GardenRecord.t),
-      orderBy: orderBy?.call(GardenRecord.t),
-      orderByList: orderByList?.call(GardenRecord.t),
+    return session.db.deleteWhere<FileChunk>(
+      where: where(FileChunk.t),
+      orderBy: orderBy?.call(FileChunk.t),
+      orderByList: orderByList?.call(FileChunk.t),
       transaction: transaction,
       noReturn: noReturn,
     );
@@ -648,27 +619,27 @@ class GardenRecordRepository {
   /// will return the count of all rows in the table.
   Future<int> count(
     _is.DatabaseSession session, {
-    _is.WhereExpressionBuilder<GardenRecordTable>? where,
+    _is.WhereExpressionBuilder<FileChunkTable>? where,
     int? limit,
     _is.Transaction? transaction,
   }) async {
-    return session.db.count<GardenRecord>(
-      where: where?.call(GardenRecord.t),
+    return session.db.count<FileChunk>(
+      where: where?.call(FileChunk.t),
       limit: limit,
       transaction: transaction,
     );
   }
 
-  /// Acquires row-level locks on [GardenRecord] rows matching the [where] expression.
+  /// Acquires row-level locks on [FileChunk] rows matching the [where] expression.
   Future<void> lockRows(
     _is.DatabaseSession session, {
-    required _is.WhereExpressionBuilder<GardenRecordTable> where,
+    required _is.WhereExpressionBuilder<FileChunkTable> where,
     required _is.LockMode lockMode,
     required _is.Transaction transaction,
     _is.LockBehavior lockBehavior = _is.LockBehavior.wait,
   }) async {
-    return session.db.lockRows<GardenRecord>(
-      where: where(GardenRecord.t),
+    return session.db.lockRows<FileChunk>(
+      where: where(FileChunk.t),
       lockMode: lockMode,
       lockBehavior: lockBehavior,
       transaction: transaction,

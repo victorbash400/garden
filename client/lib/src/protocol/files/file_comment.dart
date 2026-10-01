@@ -12,36 +12,33 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
-abstract class GardenRecord
+abstract class FileComment
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
-  GardenRecord._({
+  FileComment._({
     this.id,
-    required this.name,
-    required this.ownerId,
-    required this.invitationHash,
+    required this.nodeId,
+    required this.authorId,
+    required this.text,
     required this.createdAt,
-    int? revision,
-  }) : revision = revision ?? 0;
+  });
 
-  factory GardenRecord({
+  factory FileComment({
     int? id,
-    required String name,
-    required String ownerId,
-    required String invitationHash,
+    required int nodeId,
+    required String authorId,
+    required String text,
     required DateTime createdAt,
-    int? revision,
-  }) = _GardenRecordImpl;
+  }) = _FileCommentImpl;
 
-  factory GardenRecord.fromJson(Map<String, dynamic> jsonSerialization) {
-    return GardenRecord(
+  factory FileComment.fromJson(Map<String, dynamic> jsonSerialization) {
+    return FileComment(
       id: jsonSerialization['id'] as int?,
-      name: jsonSerialization['name'] as String,
-      ownerId: jsonSerialization['ownerId'] as String,
-      invitationHash: jsonSerialization['invitationHash'] as String,
+      nodeId: jsonSerialization['nodeId'] as int,
+      authorId: jsonSerialization['authorId'] as String,
+      text: jsonSerialization['text'] as String,
       createdAt: _isc.DateTimeJsonExtension.fromJson(
         jsonSerialization['createdAt'],
       ),
-      revision: jsonSerialization['revision'] as int?,
     );
   }
 
@@ -50,50 +47,45 @@ abstract class GardenRecord
   /// the id will be null.
   int? id;
 
-  String name;
+  int nodeId;
 
-  String ownerId;
+  String authorId;
 
-  String invitationHash;
+  String text;
 
   DateTime createdAt;
 
-  int revision;
-
-  /// Returns a shallow copy of this [GardenRecord]
+  /// Returns a shallow copy of this [FileComment]
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
-  GardenRecord copyWith({
+  FileComment copyWith({
     int? id,
-    String? name,
-    String? ownerId,
-    String? invitationHash,
+    int? nodeId,
+    String? authorId,
+    String? text,
     DateTime? createdAt,
-    int? revision,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
-      '__className__': 'GardenRecord',
+      '__className__': 'FileComment',
       if (id != null) 'id': id,
-      'name': name,
-      'ownerId': ownerId,
-      'invitationHash': invitationHash,
+      'nodeId': nodeId,
+      'authorId': authorId,
+      'text': text,
       'createdAt': createdAt.toJson(),
-      'revision': revision,
     };
   }
 
   @override
   Map<String, dynamic> toJsonForProtocol() {
     return {
-      '__className__': 'GardenRecord',
+      '__className__': 'FileComment',
       if (id != null) 'id': id,
-      'name': name,
-      'ownerId': ownerId,
-      'invitationHash': invitationHash,
+      'nodeId': nodeId,
+      'authorId': authorId,
+      'text': text,
       'createdAt': createdAt.toJson(),
-      'revision': revision,
     };
   }
 
@@ -105,42 +97,38 @@ abstract class GardenRecord
 
 class _Undefined {}
 
-class _GardenRecordImpl extends GardenRecord {
-  _GardenRecordImpl({
+class _FileCommentImpl extends FileComment {
+  _FileCommentImpl({
     int? id,
-    required String name,
-    required String ownerId,
-    required String invitationHash,
+    required int nodeId,
+    required String authorId,
+    required String text,
     required DateTime createdAt,
-    int? revision,
   }) : super._(
          id: id,
-         name: name,
-         ownerId: ownerId,
-         invitationHash: invitationHash,
+         nodeId: nodeId,
+         authorId: authorId,
+         text: text,
          createdAt: createdAt,
-         revision: revision,
        );
 
-  /// Returns a shallow copy of this [GardenRecord]
+  /// Returns a shallow copy of this [FileComment]
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
   @override
-  GardenRecord copyWith({
+  FileComment copyWith({
     Object? id = _Undefined,
-    String? name,
-    String? ownerId,
-    String? invitationHash,
+    int? nodeId,
+    String? authorId,
+    String? text,
     DateTime? createdAt,
-    int? revision,
   }) {
-    return GardenRecord(
+    return FileComment(
       id: id is int? ? id : this.id,
-      name: name ?? this.name,
-      ownerId: ownerId ?? this.ownerId,
-      invitationHash: invitationHash ?? this.invitationHash,
+      nodeId: nodeId ?? this.nodeId,
+      authorId: authorId ?? this.authorId,
+      text: text ?? this.text,
       createdAt: createdAt ?? this.createdAt,
-      revision: revision ?? this.revision,
     );
   }
 }
