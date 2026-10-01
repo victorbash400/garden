@@ -3,8 +3,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class TreeFolderIcon extends StatelessWidget {
-  const TreeFolderIcon({super.key, this.connected = false});
+  const TreeFolderIcon({super.key, this.connected = false, this.drive = false});
   final bool connected;
+  final bool drive;
   @override
   Widget build(BuildContext context) => SizedBox(
     width: 24,
@@ -12,7 +13,10 @@ class TreeFolderIcon extends StatelessWidget {
     child: Stack(
       alignment: Alignment.center,
       children: [
-        SvgPicture.asset('assets/testbed-folder.svg', width: 22, height: 17),
+        if (drive)
+          const Icon(LucideIcons.hardDrive, size: 20, color: Color(0xFF737373))
+        else
+          SvgPicture.asset('assets/testbed-folder.svg', width: 22, height: 17),
         if (connected)
           const Positioned(
             right: 0,

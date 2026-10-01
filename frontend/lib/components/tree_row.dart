@@ -73,8 +73,12 @@ class TreeRow extends StatelessWidget {
                   padding: const EdgeInsets.only(left: 2, right: 8),
                   child: Row(
                     children: [
-                      icon == LucideIcons.folder
-                          ? TreeFolderIcon(connected: connected)
+                      icon == LucideIcons.folder ||
+                              icon == LucideIcons.hardDrive
+                          ? TreeFolderIcon(
+                              connected: connected,
+                              drive: icon == LucideIcons.hardDrive,
+                            )
                           : SizedBox(
                               width: 24,
                               child: Icon(

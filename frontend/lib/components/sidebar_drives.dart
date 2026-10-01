@@ -35,7 +35,7 @@ class _SidebarDrivesState extends State<SidebarDrives> {
         for (final drive in controller.gardens) ...[
           TreeRow(
             label: drive.name,
-            icon: LucideIcons.folder,
+            icon: LucideIcons.hardDrive,
             connected: drive.role != 'Owner',
             depth: 0,
             selected:
