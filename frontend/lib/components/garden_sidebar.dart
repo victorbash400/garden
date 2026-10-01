@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../state/garden_controller.dart';
-import '../ui/garden_theme.dart';
-import 'sidebar_account.dart';
+import 'garden_mark.dart';
 import 'sidebar_item.dart';
 import 'sidebar_drives.dart';
 
@@ -12,16 +11,33 @@ class GardenSidebar extends StatelessWidget {
   final GardenController controller;
   @override
   Widget build(BuildContext context) => Container(
-    width: 220,
-    color: GardenTheme.sidebar,
+    width: 240,
+    color: const Color(0xFFF9F9F9),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 30),
-        SidebarAccount(controller: controller),
-        const SizedBox(height: 16),
-        const SizedBox(height: 8),
-        Expanded(child: SidebarDrives(controller: controller)),
+        const SizedBox(
+          height: 54,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              children: [
+                GardenMark(size: 18),
+                SizedBox(width: 8),
+                Text(
+                  'Garden',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: SidebarDrives(controller: controller),
+          ),
+        ),
         SidebarItem(
           icon: LucideIcons.settings2,
           label: 'Settings',

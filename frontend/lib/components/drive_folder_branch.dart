@@ -42,7 +42,9 @@ class _DriveFolderBranchState extends State<DriveFolderBranch> {
                   if (mounted) setState(() => expanded.add(folder.id!));
                   widget.onNavigate();
                 },
-          onToggle: widget.controller.busy
+          onToggle:
+              widget.controller.busy ||
+                  !widget.controller.folders.hasChildren(folder.id!)
               ? null
               : () async {
                   if (expanded.contains(folder.id)) {

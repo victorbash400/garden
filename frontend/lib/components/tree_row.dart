@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../ui/garden_theme.dart';
+import 'tree_folder_icon.dart';
 
 class TreeRow extends StatelessWidget {
   const TreeRow({
@@ -13,63 +13,98 @@ class TreeRow extends StatelessWidget {
     this.onToggle,
     this.expanded = false,
     this.depth = 0,
+    this.connected = false,
   });
   final String label;
   final IconData icon;
   final bool selected;
   final bool expanded;
+  final bool connected;
   final int depth;
   final VoidCallback? onOpen;
   final VoidCallback? onToggle;
+  static final buttonStyle = TextButton.styleFrom(
+    minimumSize: Size.zero,
+    padding: EdgeInsets.zero,
+    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    overlayColor: Colors.transparent,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+  );
   @override
   Widget build(BuildContext context) => Padding(
-    padding: EdgeInsets.only(left: 8 + depth * 12, right: 8, top: 1, bottom: 1),
+    padding: EdgeInsets.only(left: depth * 20, top: 1),
     child: Material(
-      color: selected ? GardenTheme.selection : Colors.transparent,
-      borderRadius: BorderRadius.circular(6),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 26,
-            height: 32,
-            child: onToggle == null
-                ? null
-                : IconButton(
-                    tooltip: '${expanded ? 'Collapse' : 'Expand'} $label',
-                    padding: EdgeInsets.zero,
-                    onPressed: onToggle,
-                    icon: Icon(
-                      expanded
-                          ? LucideIcons.chevronDown
-                          : LucideIcons.chevronRight,
-                      size: 13,
-                    ),
-                  ),
-          ),
-          Expanded(
-            child: InkWell(
-              onTap: onOpen,
-              borderRadius: BorderRadius.circular(6),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 3),
-                child: Row(
-                  children: [
-                    Icon(icon, size: 15),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 12),
+      color: selected ? const Color(0xFFE8E8E8) : Colors.transparent,
+      borderRadius: BorderRadius.circular(8),
+      child: SizedBox(
+        height: 34,
+        child: Row(
+          children: [
+            SizedBox(
+              width: 20,
+              height: 34,
+              child: onToggle == null
+                  ? null
+                  : Semantics(
+                      label: '${expanded ? 'Collapse' : 'Expand'} $label',
+                      expanded: expanded,
+                      child: TextButton(
+                        style: buttonStyle,
+                        onPressed: onToggle,
+                        child: AnimatedRotation(
+                          turns: expanded ? 0.25 : 0,
+                          duration: MediaQuery.disableAnimationsOf(context)
+                              ? Duration.zero
+                              : const Duration(milliseconds: 220),
+                          child: const Icon(
+                            LucideIcons.chevronRight,
+                            size: 13,
+                            color: Color(0xFF858581),
+                          ),
+                        ),
                       ),
                     ),
-                  ],
+            ),
+            Expanded(
+              child: TextButton(
+                onPressed: onOpen,
+                style: buttonStyle,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 2, right: 8),
+                  child: Row(
+                    children: [
+                      icon == LucideIcons.folder
+                          ? TreeFolderIcon(connected: connected)
+                          : SizedBox(
+                              width: 24,
+                              child: Icon(
+                                icon,
+                                size: 16,
+                                color: const Color(0xFF5C8FC4),
+                              ),
+                            ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: selected
+                                ? const Color(0xFF8839EF)
+                                : const Color(0xFF333330),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     ),
   );

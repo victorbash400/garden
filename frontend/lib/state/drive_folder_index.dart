@@ -3,6 +3,11 @@ import 'package:garden_client/garden_client.dart';
 class DriveFolderIndex {
   final Map<int, FileNode> _folders = {};
   final Map<int, FileNode> _files = {};
+  bool hasChildren(int parentId) =>
+      _folders.values.any(
+        (node) => node.parentId == parentId && !node.deleted,
+      ) ||
+      _files.values.any((node) => node.parentId == parentId && !node.deleted);
   void clear() {
     _folders.clear();
     _files.clear();
