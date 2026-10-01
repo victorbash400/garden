@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../components/garden_button.dart';
+import '../components/drive_dialog.dart';
 import '../components/garden_row.dart';
 import '../state/garden_controller.dart';
 
@@ -21,7 +22,7 @@ class GardensView extends StatelessWidget {
               icon: LucideIcons.plus,
               onPressed: controller.busy
                   ? null
-                  : () => controller.navigate(GardenPage.create),
+                  : () => showDriveDialog(context, controller),
             ),
             const SizedBox(width: 10),
             GardenButton(
@@ -29,7 +30,7 @@ class GardensView extends StatelessWidget {
               secondary: true,
               onPressed: controller.busy
                   ? null
-                  : () => controller.navigate(GardenPage.join),
+                  : () => showDriveDialog(context, controller, join: true),
             ),
             const Spacer(),
             IconButton(

@@ -140,6 +140,17 @@ class GardenController extends ChangeNotifier {
     selected = await gateway.connect(garden.id);
     page = GardenPage.connected;
   });
+  Future<void> openDrive(GardenInfo drive) async {
+    if (busy) return;
+    if (files?.drive?.id == drive.id) {
+      await files!.goTo(0);
+      navigate(GardenPage.files);
+      return;
+    }
+    await connect(drive);
+    if (error == null && files != null) await openFiles();
+  }
+
   Future<void> openFiles() => _request(() async {
     final browser = files;
     final drive = selected;

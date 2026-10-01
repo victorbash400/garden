@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'drive_folder_index.dart';
+
 import '../utils/error_message.dart';
 
 import 'package:flutter/foundation.dart';
@@ -12,6 +14,7 @@ import '../services/files/file_transfer.dart';
 class FilesController extends ChangeNotifier {
   FilesController(this.gateway);
   final FilesGateway gateway;
+  final folders = DriveFolderIndex();
   GardenInfo? drive;
   List<FileNode> nodes = [];
   List<FileNode> path = [];
@@ -48,6 +51,7 @@ class FilesController extends ChangeNotifier {
     }
     if (generation != _generation) return;
     nodes = listing.nodes;
+    folders.replaceDirectory(parentId, nodes);
     revision = listing.revision;
     selected = null;
     final events = _buffer!;
@@ -125,6 +129,17 @@ class FilesController extends ChangeNotifier {
       rethrow;
     }
   });
+  Future<void> openFolder(FileNode folder) => _request(() async {
+    final previous = path;
+    path = folders.pathTo(folder);
+    try {
+      await _load();
+    } catch (_) {
+      path = previous;
+      rethrow;
+    }
+  });
+
   void _subscribe(int id, int cursor) {
     final generation = _generation;
     _subscription = gateway
@@ -167,6 +182,7 @@ class FilesController extends ChangeNotifier {
       });
   Future<void> delete(FileNode node) => _request(() async {
     await gateway.delete(node.id!);
+    folders.remove(node.id!);
     nodes = nodes.where((item) => item.id != node.id).toList();
     selected = null;
   });
@@ -192,6 +208,7 @@ class FilesController extends ChangeNotifier {
         selected = saved;
       });
   void _upsert(FileNode node) {
+    folders.update(node);
     nodes = nodes.where((item) => item.id != node.id).toList();
     if (!node.deleted && node.parentId == parentId) nodes.add(node);
     _sort();
@@ -218,6 +235,7 @@ class FilesController extends ChangeNotifier {
     await _subscription?.cancel();
     _subscription = null;
     drive = null;
+    folders.clear();
     nodes = [];
     path = [];
     selected = null;

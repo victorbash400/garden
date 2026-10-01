@@ -78,6 +78,21 @@ void main() {
     await controller.open(drive);
     await controller.create('Work', NodeKind.folder);
     final folder = controller.selected!;
+    expect(controller.folders.children(0).single.id, folder.id);
+    await controller.openFolder(folder);
+    await controller.create('Nested', NodeKind.folder);
+    final nested = controller.selected!;
+    expect(controller.folders.pathTo(nested).map((node) => node.name), [
+      'Work',
+      'Nested',
+    ]);
+    await controller.goTo(0);
+    await controller.openFolder(nested);
+    expect(controller.path.map((node) => node.name), ['Work', 'Nested']);
+    await controller.goTo(1);
+    await controller.delete(nested);
+    expect(controller.folders.children(folder.id!), isEmpty);
+    await controller.goTo(0);
     await controller.create('notes.txt', NodeKind.file);
     final file = controller.selected!;
     await controller.move(file, folder.id!, 'renamed.txt');

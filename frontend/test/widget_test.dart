@@ -99,7 +99,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(GardenSidebar), findsOneWidget);
       expect(find.byType(SettingsSidebar), findsNothing);
-      expect(find.text('Shared'), findsOneWidget);
+      expect(find.text('Shared'), findsWidgets);
     },
   );
 
@@ -179,13 +179,15 @@ void main() {
       final controller = GardenController(TestGateway(), MemoryPreferences());
       await controller.signIn('garden@example.com', 'password');
       await tester.pumpWidget(GardenApp(controller: controller));
-      await tester.tap(find.text('Create drive'));
+      await tester.tap(find.text('Create drive').last);
       await tester.pumpAndSettle();
+      expect(find.byType(Dialog), findsOneWidget);
+      expect(tester.getCenter(find.byType(Dialog)).dy, closeTo(300, 1));
       await tester.enterText(find.byType(TextField), 'Projects');
       await tester.pump();
-      await tester.tap(find.text('Create drive'));
+      await tester.tap(find.text('Create drive').last);
       await tester.pumpAndSettle();
-      expect(find.text('Projects'), findsOneWidget);
+      expect(find.text('Projects'), findsWidgets);
       expect(find.text('Connected to drive'), findsOneWidget);
       expect(
         find.text('Finder mounting is not available yet.'),
@@ -200,14 +202,14 @@ void main() {
     final controller = GardenController(TestGateway(), MemoryPreferences());
     await controller.signIn('garden@example.com', 'password');
     await tester.pumpWidget(GardenApp(controller: controller));
-    await tester.tap(find.text('Join drive'));
+    await tester.tap(find.text('Join drive').last);
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'invite');
     await tester.pump();
-    await tester.tap(find.text('Join drive'));
+    await tester.tap(find.text('Join drive').last);
     await tester.pumpAndSettle();
     expect(controller.selected!.role, 'Member');
-    expect(find.text('Shared'), findsOneWidget);
+    expect(find.text('Shared'), findsWidgets);
     expect(find.text('Connected to drive'), findsOneWidget);
   });
 

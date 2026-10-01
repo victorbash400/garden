@@ -29,7 +29,14 @@ class SidebarItem extends StatelessWidget {
             children: [
               Icon(icon, size: 16),
               const SizedBox(width: 9),
-              Text(label, style: const TextStyle(fontSize: 12)),
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ),
             ],
           ),
         ),

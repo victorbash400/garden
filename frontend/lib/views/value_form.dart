@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../components/garden_field.dart';
-import '../components/onboarding_footer.dart';
+import '../components/garden_button.dart';
 
 class ValueForm extends StatefulWidget {
   const ValueForm({
@@ -42,28 +42,36 @@ class _ValueFormState extends State<ValueForm> {
   }
 
   @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      Expanded(
-        child: Center(
-          child: SizedBox(
-            width: 340,
-            child: GardenField(
+  Widget build(BuildContext context) => Center(
+    child: SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: SizedBox(
+        width: 340,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            GardenField(
               label: widget.label,
               controller: value,
               enabled: !widget.busy,
               autofocus: true,
               onSubmitted: (_) => submit(),
             ),
-          ),
+            const SizedBox(height: 24),
+            GardenButton(
+              label: widget.action,
+              onPressed: canSubmit ? submit : null,
+            ),
+            const SizedBox(height: 12),
+            GardenButton(
+              label: 'Back',
+              secondary: true,
+              onPressed: widget.busy ? null : widget.onBack,
+            ),
+          ],
         ),
       ),
-      OnboardingFooter(
-        action: widget.action,
-        busy: widget.busy,
-        onBack: widget.busy ? null : widget.onBack,
-        onAction: canSubmit ? submit : null,
-      ),
-    ],
+    ),
   );
 }

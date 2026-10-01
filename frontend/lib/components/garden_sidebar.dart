@@ -5,13 +5,14 @@ import '../state/garden_controller.dart';
 import '../ui/garden_theme.dart';
 import 'garden_mark.dart';
 import 'sidebar_item.dart';
+import 'sidebar_drives.dart';
 
 class GardenSidebar extends StatelessWidget {
   const GardenSidebar({super.key, required this.controller});
   final GardenController controller;
   @override
   Widget build(BuildContext context) => Container(
-    width: 200,
+    width: 220,
     color: GardenTheme.sidebar,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,7 +35,7 @@ class GardenSidebar extends StatelessWidget {
         SidebarItem(
           icon: LucideIcons.folder,
           label: 'Drives',
-          selected: controller.page != GardenPage.settings,
+          selected: controller.page == GardenPage.gardens,
           onTap: controller.busy
               ? null
               : () => controller.navigate(
@@ -43,7 +44,8 @@ class GardenSidebar extends StatelessWidget {
                       : GardenPage.gardens,
                 ),
         ),
-        const Spacer(),
+        const SizedBox(height: 8),
+        Expanded(child: SidebarDrives(controller: controller)),
         SidebarItem(
           icon: LucideIcons.settings2,
           label: 'Settings',
