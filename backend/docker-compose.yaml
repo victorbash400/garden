@@ -1,0 +1,30 @@
+services:
+  # Development services
+  postgres:
+    image: ghcr.io/serverpod/postgres:16
+    ports:
+      - "8090:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: garden
+      POSTGRES_PASSWORD: ${GARDEN_DB_PASSWORD:?Set GARDEN_DB_PASSWORD}
+    volumes:
+      - garden_data:/var/lib/postgresql/data
+
+
+  # Test services
+  postgres_test:
+    image: ghcr.io/serverpod/postgres:16
+    ports:
+      - "9090:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: garden_test
+      POSTGRES_PASSWORD: ${GARDEN_TEST_DB_PASSWORD:?Set GARDEN_TEST_DB_PASSWORD}
+    volumes:
+      - garden_test_data:/var/lib/postgresql/data
+
+
+volumes:
+  garden_data:
+  garden_test_data:

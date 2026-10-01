@@ -1,0 +1,26 @@
+name: garden_flutter
+description: Garden macOS application.
+publish_to: none
+version: 0.1.0+1
+environment:
+  sdk: ^3.13.4
+resolution: workspace
+dependencies:
+  flutter:
+    sdk: flutter
+  garden_client:
+    path: ../client
+  serverpod_flutter: ^4.0.3
+  serverpod_auth_idp_flutter: ^4.0.3
+  flutter_svg: ^2.3.0
+  lucide_icons_flutter: ^3.1.21
+  window_manager: ^0.5.2
+  shared_preferences: ^2.5.5
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/garden.svg
