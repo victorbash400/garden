@@ -28,6 +28,8 @@ abstract final class GardenTheme {
       activeTrackColor: ink,
       thumbColor: ink,
       trackHeight: 3,
+      activeTickMarkColor: Colors.transparent,
+      inactiveTickMarkColor: Colors.transparent,
     ),
   );
 }

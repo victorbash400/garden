@@ -5,6 +5,8 @@ import '../model/garden_info.dart';
 import '../services/garden_gateway.dart';
 import '../services/preferences_store.dart';
 
+enum SettingsSection { account, storage }
+
 enum GardenPage {
   welcome,
   signIn,
@@ -22,6 +24,8 @@ class GardenController extends ChangeNotifier {
   final GardenGateway gateway;
   final PreferencesStore preferences;
   GardenPage page = GardenPage.signIn;
+  SettingsSection settingsSection = SettingsSection.account;
+  GardenPage _settingsReturn = GardenPage.gardens;
   AccountInfo? account;
   List<GardenInfo> gardens = [];
   GardenInfo? selected;
@@ -43,7 +47,17 @@ class GardenController extends ChangeNotifier {
 
   void navigate(GardenPage destination) {
     if (busy) return;
+    if (destination == GardenPage.settings && page != GardenPage.settings) {
+      _settingsReturn = page;
+    }
     page = destination;
+    error = null;
+    notifyListeners();
+  }
+
+  void selectSettings(SettingsSection section) {
+    if (busy) return;
+    settingsSection = section;
     error = null;
     notifyListeners();
   }
@@ -57,7 +71,7 @@ class GardenController extends ChangeNotifier {
       GardenPage.join ||
       GardenPage.connected => GardenPage.gardens,
       GardenPage.settings =>
-        account == null ? GardenPage.signIn : GardenPage.gardens,
+        account == null ? GardenPage.signIn : _settingsReturn,
       _ => GardenPage.signIn,
     });
   }

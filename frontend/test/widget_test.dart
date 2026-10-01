@@ -9,6 +9,7 @@ import 'package:garden_flutter/services/preferences_store.dart';
 import 'package:garden_flutter/state/garden_controller.dart';
 import 'package:garden_flutter/ui/garden_app.dart';
 import 'package:garden_flutter/components/garden_sidebar.dart';
+import 'package:garden_flutter/components/settings/settings_sidebar.dart';
 
 class MemoryPreferences implements PreferencesStore {
   int limit = 20;
@@ -77,6 +78,31 @@ class PendingGateway extends TestGateway {
 }
 
 void main() {
+  testWidgets(
+    'Settings replaces the sidebar and Back restores the previous drive view',
+    (tester) async {
+      final controller = GardenController(TestGateway(), MemoryPreferences());
+      await controller.signIn('demo@garden.local', 'garden-demo');
+      await controller.connect(
+        const GardenInfo(id: 1, name: 'Shared', role: 'Member', members: 2),
+      );
+      controller.navigate(GardenPage.settings);
+      await tester.pumpWidget(GardenApp(controller: controller));
+      expect(find.byType(SettingsSidebar), findsOneWidget);
+      expect(find.byType(GardenSidebar), findsNothing);
+      expect(find.text('Sign out'), findsOneWidget);
+      await tester.tap(find.text('Storage'));
+      await tester.pumpAndSettle();
+      expect(find.text('Cache limit'), findsOneWidget);
+      expect(find.text('Finder connection'), findsOneWidget);
+      await tester.tap(find.byTooltip('Back to drives'));
+      await tester.pumpAndSettle();
+      expect(find.byType(GardenSidebar), findsOneWidget);
+      expect(find.byType(SettingsSidebar), findsNothing);
+      expect(find.text('Shared'), findsOneWidget);
+    },
+  );
+
   testWidgets('Signed-out launch shows sign-in without a sidebar', (
     tester,
   ) async {
