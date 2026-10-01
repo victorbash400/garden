@@ -8,6 +8,7 @@ import '../components/settings/settings_transition.dart';
 import '../components/onboarding_footer.dart';
 import '../views/account_form.dart';
 import '../views/connection_view.dart';
+import '../views/files_view.dart';
 import '../views/gardens_view.dart';
 import '../views/settings_view.dart';
 import '../views/value_form.dart';
@@ -53,6 +54,7 @@ class GardenApp extends StatelessWidget {
                     const LinearProgressIndicator(minHeight: 2),
                   Expanded(
                     child: SettingsTransition(
+                      enabled: controller.account != null,
                       child: KeyedSubtree(
                         key: ValueKey(controller.page),
                         child: _content(),
@@ -61,12 +63,16 @@ class GardenApp extends StatelessWidget {
                   ),
                   if (controller.page == GardenPage.connected)
                     OnboardingFooter(
-                      action: 'Drives',
+                      action: controller.files == null
+                          ? 'Drives'
+                          : 'Open drive',
                       busy: controller.busy,
                       onBack: controller.busy ? null : controller.back,
                       onAction: controller.account == null || controller.busy
                           ? null
-                          : () => controller.navigate(GardenPage.gardens),
+                          : controller.files == null
+                          ? () => controller.navigate(GardenPage.gardens)
+                          : controller.openFiles,
                     ),
                 ],
               ),
@@ -132,6 +138,10 @@ class GardenApp extends StatelessWidget {
       ),
     ),
     GardenPage.connected => ConnectionView(garden: controller.selected!),
+    GardenPage.files => FilesView(
+      controller: controller.files!,
+      userId: controller.account!.id,
+    ),
     GardenPage.settings => SettingsView(controller: controller),
   };
 }

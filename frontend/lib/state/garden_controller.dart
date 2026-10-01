@@ -1,9 +1,12 @@
 import 'package:flutter/foundation.dart';
 
+import '../utils/error_message.dart';
+
 import '../model/account_info.dart';
 import '../model/garden_info.dart';
 import '../services/garden_gateway.dart';
 import '../services/preferences_store.dart';
+import 'files_controller.dart';
 
 enum SettingsSection { account, storage }
 
@@ -17,10 +20,12 @@ enum GardenPage {
   join,
   connected,
   settings,
+  files,
 }
 
 class GardenController extends ChangeNotifier {
-  GardenController(this.gateway, this.preferences);
+  GardenController(this.gateway, this.preferences, {this.files});
+  final FilesController? files;
   final GardenGateway gateway;
   final PreferencesStore preferences;
   GardenPage page = GardenPage.signIn;
@@ -29,7 +34,8 @@ class GardenController extends ChangeNotifier {
   AccountInfo? account;
   List<GardenInfo> gardens = [];
   GardenInfo? selected;
-  bool busy = false;
+  bool _busy = false;
+  bool get busy => _busy || (files?.busy ?? false);
   String? error;
   int cacheLimit = 20;
   String? registrationId;
@@ -69,6 +75,7 @@ class GardenController extends ChangeNotifier {
       GardenPage.verify => GardenPage.register,
       GardenPage.create ||
       GardenPage.join ||
+      GardenPage.files ||
       GardenPage.connected => GardenPage.gardens,
       GardenPage.settings =>
         account == null ? GardenPage.signIn : _settingsReturn,
@@ -120,7 +127,17 @@ class GardenController extends ChangeNotifier {
     selected = await gateway.connect(garden.id);
     page = GardenPage.connected;
   });
+  Future<void> openFiles() => _request(() async {
+    final browser = files;
+    final drive = selected;
+    if (browser == null || drive == null) {
+      throw StateError('No drive is connected.');
+    }
+    await browser.open(drive);
+    page = GardenPage.files;
+  });
   Future<void> signOut() => _request(() async {
+    await files?.close();
     await gateway.signOut();
     account = null;
     gardens = [];
@@ -139,15 +156,15 @@ class GardenController extends ChangeNotifier {
 
   Future<void> _request(Future<void> Function() action) async {
     if (busy) return;
-    busy = true;
+    _busy = true;
     error = null;
     notifyListeners();
     try {
       await action();
     } catch (failure) {
-      error = failure.toString();
+      error = errorMessage(failure);
     } finally {
-      busy = false;
+      _busy = false;
       notifyListeners();
     }
   }

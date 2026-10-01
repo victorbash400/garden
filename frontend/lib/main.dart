@@ -5,6 +5,8 @@ import 'package:window_manager/window_manager.dart';
 
 import 'services/local_preferences.dart';
 import 'services/serverpod_gateway.dart';
+import 'services/files/serverpod_files_gateway.dart';
+import 'state/files_controller.dart';
 import 'state/garden_controller.dart';
 import 'ui/garden_app.dart';
 
@@ -25,9 +27,11 @@ Future<void> main() async {
     'SERVER_URL',
     defaultValue: 'http://localhost:8080/',
   );
+  final gateway = ServerpodGateway(serverUrl);
   final controller = GardenController(
-    ServerpodGateway(serverUrl),
+    gateway,
     LocalPreferences(),
+    files: FilesController(ServerpodFilesGateway(gateway.client)),
   );
   runApp(GardenApp(controller: controller));
   unawaited(controller.initialize());

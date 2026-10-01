@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 
 class SettingsTransition extends StatelessWidget {
-  const SettingsTransition({super.key, required this.child});
+  const SettingsTransition({
+    super.key,
+    required this.child,
+    this.enabled = true,
+  });
   final Widget child;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) => AnimatedSwitcher(
-    duration: MediaQuery.disableAnimationsOf(context)
+    duration: !enabled || MediaQuery.disableAnimationsOf(context)
         ? Duration.zero
         : const Duration(milliseconds: 200),
     switchInCurve: Curves.easeOutCubic,
