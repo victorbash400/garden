@@ -12,6 +12,7 @@ dependencies:
   crypto: ^3.0.7
   googleapis: ^17.0.0
   googleapis_auth: ^2.3.4
+  passkeys_server: ^1.0.0
   serverpod: ^4.0.3
   serverpod_auth_idp_server: ^4.0.3
   serverpod_cloud_storage: ^4.0.3

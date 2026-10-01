@@ -13,6 +13,7 @@
 import 'dart:typed_data' as _idt;
 import 'package:garden_server/src/generated/files/node_kind.dart' as _iso8aj7z;
 import 'package:garden_server/src/generated/future_calls.dart' as _id1va6nu;
+import 'package:garden_server/src/generated/protocol.dart' as _ipujdd36;
 import 'package:serverpod/serverpod.dart' as _is;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _iacs;
@@ -20,6 +21,7 @@ import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _iais;
 import '../auth/email_idp_endpoint.dart' as _iuc1hd5t;
 import '../auth/jwt_refresh_endpoint.dart' as _inwq3ztq;
+import '../auth/passkey_idp_endpoint.dart' as _ia8doutj;
 import '../files/collaboration_endpoint.dart' as _iiks30z9;
 import '../files/content_endpoint.dart' as _iqqtuyco;
 import '../files/files_endpoint.dart' as _idx8vriz;
@@ -41,6 +43,12 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'jwtRefresh',
+          null,
+        ),
+      'passkeyIdp': _ia8doutj.PasskeyIdpEndpoint()
+        ..initialize(
+          server,
+          'passkeyIdp',
           null,
         ),
       'collaboration': _iiks30z9.CollaborationEndpoint()
@@ -277,6 +285,113 @@ class Endpoints extends _is.EndpointDispatch {
                         session,
                         refreshToken: params['refreshToken'],
                       ),
+        ),
+      },
+    );
+    connectors['passkeyIdp'] = _is.EndpointConnector(
+      name: 'passkeyIdp',
+      endpoint: endpoints['passkeyIdp']!,
+      methodConnectors: {
+        'register': _is.MethodConnector(
+          name: 'register',
+          params: {
+            'registrationRequest': _is.ParameterDescription(
+              name: 'registrationRequest',
+              type: _is.getType<_iais.PasskeyRegistrationRequest>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['passkeyIdp'] as _ia8doutj.PasskeyIdpEndpoint)
+                      .register(
+                        session,
+                        registrationRequest: params['registrationRequest'],
+                      ),
+        ),
+        'login': _is.MethodConnector(
+          name: 'login',
+          params: {
+            'loginRequest': _is.ParameterDescription(
+              name: 'loginRequest',
+              type: _is.getType<_iais.PasskeyLoginRequest>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['passkeyIdp'] as _ia8doutj.PasskeyIdpEndpoint)
+                      .login(
+                        session,
+                        loginRequest: params['loginRequest'],
+                      ),
+        ),
+        'listKeys': _is.MethodConnector(
+          name: 'listKeys',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['passkeyIdp'] as _ia8doutj.PasskeyIdpEndpoint)
+                      .listKeys(session)
+                      .then(
+                        (container) =>
+                            _ipujdd36.Protocol().mapContainerToJson(container),
+                      ),
+        ),
+        'removeKey': _is.MethodConnector(
+          name: 'removeKey',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['passkeyIdp'] as _ia8doutj.PasskeyIdpEndpoint)
+                      .removeKey(
+                        session,
+                        params['id'],
+                      ),
+        ),
+        'createChallenge': _is.MethodConnector(
+          name: 'createChallenge',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['passkeyIdp'] as _ia8doutj.PasskeyIdpEndpoint)
+                      .createChallenge(session)
+                      .then(
+                        (record) =>
+                            _ipujdd36.Protocol().mapRecordToJson(record),
+                      ),
+        ),
+        'hasAccount': _is.MethodConnector(
+          name: 'hasAccount',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['passkeyIdp'] as _ia8doutj.PasskeyIdpEndpoint)
+                      .hasAccount(session),
         ),
       },
     );

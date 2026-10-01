@@ -262,6 +262,68 @@ class EndpointJwtRefresh extends _iacc.EndpointRefreshJwtTokens {
 }
 
 /// {@category Endpoint}
+class EndpointPasskeyIdp extends _iaic.EndpointPasskeyIdpBase {
+  EndpointPasskeyIdp(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'passkeyIdp';
+
+  @override
+  _ida.Future<void> register({
+    required _iaic.PasskeyRegistrationRequest registrationRequest,
+  }) => caller.callServerEndpoint<void>(
+    'passkeyIdp',
+    'register',
+    {'registrationRequest': registrationRequest},
+  );
+
+  @override
+  _ida.Future<_iacc.AuthSuccess> login({
+    required _iaic.PasskeyLoginRequest loginRequest,
+  }) => caller.callServerEndpoint<_iacc.AuthSuccess>(
+    'passkeyIdp',
+    'login',
+    {'loginRequest': loginRequest},
+  );
+
+  _ida.Future<
+    List<({DateTime createdAt, _isc.UuidValue id, _idt.ByteData keyId})>
+  >
+  listKeys() =>
+      caller.callServerEndpoint<
+        List<({DateTime createdAt, _isc.UuidValue id, _idt.ByteData keyId})>
+      >(
+        'passkeyIdp',
+        'listKeys',
+        {},
+      );
+
+  _ida.Future<void> removeKey(_isc.UuidValue id) =>
+      caller.callServerEndpoint<void>(
+        'passkeyIdp',
+        'removeKey',
+        {'id': id},
+      );
+
+  /// Returns a new challenge to be used for a login or registration request.
+  @override
+  _ida.Future<({_idt.ByteData challenge, _isc.UuidValue id})>
+  createChallenge() =>
+      caller.callServerEndpoint<({_idt.ByteData challenge, _isc.UuidValue id})>(
+        'passkeyIdp',
+        'createChallenge',
+        {},
+      );
+
+  @override
+  _ida.Future<bool> hasAccount() => caller.callServerEndpoint<bool>(
+    'passkeyIdp',
+    'hasAccount',
+    {},
+  );
+}
+
+/// {@category Endpoint}
 class EndpointCollaboration extends _isc.EndpointRef {
   EndpointCollaboration(_isc.EndpointCaller caller) : super(caller);
 
@@ -559,6 +621,7 @@ class Client extends _isc.ServerpodClientShared {
        ) {
     emailIdp = EndpointEmailIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
+    passkeyIdp = EndpointPasskeyIdp(this);
     collaboration = EndpointCollaboration(this);
     content = EndpointContent(this);
     files = EndpointFiles(this);
@@ -570,6 +633,8 @@ class Client extends _isc.ServerpodClientShared {
   late final EndpointEmailIdp emailIdp;
 
   late final EndpointJwtRefresh jwtRefresh;
+
+  late final EndpointPasskeyIdp passkeyIdp;
 
   late final EndpointCollaboration collaboration;
 
@@ -587,6 +652,7 @@ class Client extends _isc.ServerpodClientShared {
   Map<String, _isc.EndpointRef> get endpointRefLookup => {
     'emailIdp': emailIdp,
     'jwtRefresh': jwtRefresh,
+    'passkeyIdp': passkeyIdp,
     'collaboration': collaboration,
     'content': content,
     'files': files,

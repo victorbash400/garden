@@ -9,6 +9,13 @@ emailIdp:
   - hasAccount:
 jwtRefresh:
   - refreshAccessToken:
+passkeyIdp:
+  - register:
+  - login:
+  - listKeys:
+  - removeKey:
+  - createChallenge:
+  - hasAccount:
 collaboration:
   - comments:
   - comment:

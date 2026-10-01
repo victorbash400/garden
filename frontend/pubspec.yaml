@@ -17,10 +17,14 @@ dependencies:
   window_manager: ^0.5.2
   shared_preferences: ^2.5.5
   file_selector: ^1.1.0
+  passkeys: ^2.23.1
+  local_auth: ^3.0.2
+  serverpod_auth_idp_client: ^4.0.3
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  shared_preferences_platform_interface: ^2.4.2
 flutter:
   uses-material-design: true
   assets:

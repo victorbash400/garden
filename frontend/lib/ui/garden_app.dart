@@ -74,6 +74,10 @@ class GardenApp extends StatelessWidget {
     GardenPage.signIn => Center(
       child: AccountForm(
         key: const ValueKey('signin'),
+        security: controller.security,
+        onPasskey: controller.security == null
+            ? null
+            : controller.signInWithPasskey,
         savedEmail: controller.savedEmail,
         onContinueSaved: controller.continueSavedLogin,
         onForgetSaved: controller.forgetSavedLogin,

@@ -7,6 +7,7 @@ import '../model/garden_info.dart';
 import '../services/garden_gateway.dart';
 import '../services/preferences_store.dart';
 import 'files_controller.dart';
+import 'account_security_controller.dart';
 
 enum SettingsSection { account, storage }
 
@@ -27,8 +28,10 @@ class GardenController extends ChangeNotifier {
     this.gateway,
     this.preferences, {
     this.files,
+    this.security,
     this.localServer = false,
   });
+  final AccountSecurityController? security;
   final bool localServer;
   final FilesController? files;
   final GardenGateway gateway;
@@ -52,6 +55,7 @@ class GardenController extends ChangeNotifier {
   Future<void> initialize() => _request(() async {
     cacheLimit = await preferences.readCacheLimit();
     savedEmail = await gateway.savedLogin();
+    await security?.checkConfiguration();
   });
 
   void navigate(GardenPage destination) {
@@ -110,6 +114,14 @@ class GardenController extends ChangeNotifier {
     );
     page = GardenPage.gardens;
     gardens = await gateway.listGardens();
+  });
+
+  Future<void> signInWithPasskey() => _request(() async {
+    final auth = security;
+    if (auth == null) throw StateError('Passkeys are unavailable.');
+    account = await auth.gateway.signInWithPasskey(remember: rememberLogin);
+    gardens = await gateway.listGardens();
+    page = GardenPage.gardens;
   });
 
   Future<void> register(String email, String password) => _request(() async {
@@ -188,6 +200,7 @@ class GardenController extends ChangeNotifier {
     selected = null;
     registrationPassword = '';
     registrationId = null;
+    savedEmail = null;
     page = GardenPage.signIn;
   });
   Future<void> setCacheLimit(int gib) => _request(() async {

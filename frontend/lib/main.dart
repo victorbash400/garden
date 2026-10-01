@@ -7,6 +7,7 @@ import 'services/local_preferences.dart';
 import 'services/serverpod_gateway.dart';
 import 'services/files/serverpod_files_gateway.dart';
 import 'state/files_controller.dart';
+import 'state/account_security_controller.dart';
 import 'state/garden_controller.dart';
 import 'ui/garden_app.dart';
 
@@ -31,6 +32,7 @@ Future<void> main() async {
   final controller = GardenController(
     gateway,
     LocalPreferences(),
+    security: AccountSecurityController(gateway),
     localServer: const [
       'localhost',
       '127.0.0.1',

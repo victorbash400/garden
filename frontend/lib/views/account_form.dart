@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../components/garden_field.dart';
+import '../components/passkey_sign_in_button.dart';
+import '../state/account_security_controller.dart';
 import '../components/remember_login_control.dart';
 import '../components/saved_login_button.dart';
 import '../components/demo_account_button.dart';
@@ -14,6 +16,8 @@ class AccountForm extends StatefulWidget {
     required this.onSubmit,
     required this.submitLabel,
     this.onBack,
+    this.onPasskey,
+    this.security,
     this.onCreateAccount,
     this.showDemo = false,
     this.savedEmail,
@@ -22,6 +26,8 @@ class AccountForm extends StatefulWidget {
     this.remember = false,
     this.onRememberChanged,
   });
+  final AccountSecurityController? security;
+  final VoidCallback? onPasskey;
   final String? savedEmail;
   final VoidCallback? onContinueSaved;
   final VoidCallback? onForgetSaved;
@@ -80,6 +86,7 @@ class _AccountFormState extends State<AccountForm> {
               if (widget.savedEmail != null) ...[
                 SavedLoginButton(
                   email: widget.savedEmail!,
+                  touchId: widget.security?.touchId ?? false,
                   onContinue: widget.busy ? null : widget.onContinueSaved,
                   onForget: widget.busy ? null : widget.onForgetSaved,
                 ),
@@ -130,6 +137,14 @@ class _AccountFormState extends State<AccountForm> {
                 label: widget.busy ? 'Please wait' : widget.submitLabel,
                 onPressed: canSubmit ? submit : null,
               ),
+              if (widget.onPasskey != null) ...[
+                const SizedBox(height: 12),
+                PasskeySignInButton(
+                  security: widget.security!,
+                  busy: widget.busy,
+                  onPressed: widget.onPasskey!,
+                ),
+              ],
               if (widget.onBack != null) ...[
                 const SizedBox(height: 12),
                 GardenButton(

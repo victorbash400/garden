@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:serverpod_auth_idp_server/providers/passkey.dart';
+import 'src/auth/app_association_route.dart';
 import 'src/auth/demo_account.dart';
 import 'src/auth/garden_email_config.dart';
 import 'package:serverpod_auth_idp_server/core.dart';
@@ -23,9 +25,14 @@ void run(List<String> args) async {
     ],
     identityProviderBuilders: [
       gardenEmailConfig(pod),
+      const PasskeyIdpConfig(hostname: 'garden.serverpod.space'),
     ],
   );
 
+  pod.webServer.addRoute(
+    AppAssociationRoute(),
+    '/.well-known/apple-app-site-association',
+  );
   await configureFileStorage(pod);
   await UploadCleanupTasks.configure(pod);
 

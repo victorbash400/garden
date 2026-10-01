@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../components/settings/settings_group.dart';
+import '../components/settings/account_security_controls.dart';
 import '../components/settings/settings_row.dart';
 import '../components/settings/settings_action_row.dart';
 import '../state/garden_controller.dart';
@@ -11,6 +12,13 @@ class AccountSettings extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(
     children: [
+      if (controller.security != null) ...[
+        AccountSecurityControls(
+          controller: controller.security!,
+          account: controller.account!,
+        ),
+        const SizedBox(height: 20),
+      ],
       SettingsGroup(
         children: [
           SettingsRow(
