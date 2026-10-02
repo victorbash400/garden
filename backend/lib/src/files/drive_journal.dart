@@ -11,8 +11,9 @@ class DriveJournal {
     GardenRecord drive,
     Transaction transaction,
     String operation,
-    FileNode node,
-  ) async {
+    FileNode node, {
+    int? previousParentId,
+  }) async {
     drive.revision++;
     await GardenRecord.db.updateRow(session, drive, transaction: transaction);
     return DriveEvent.db.insertRow(
@@ -23,6 +24,7 @@ class DriveJournal {
         operation: operation,
         authorId: DriveAccess.user(session),
         node: node,
+        previousParentId: previousParentId,
         createdAt: DateTime.now().toUtc(),
       ),
       transaction: transaction,

@@ -12,8 +12,10 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:typed_data' as _idt;
+import 'package:garden_client/src/protocol/files/drive_event.dart' as _ib0wfils;
 import 'package:garden_client/src/protocol/files/file_comment.dart'
     as _i6rexlqc;
+import 'package:garden_client/src/protocol/files/file_node.dart' as _i2qlj4hx;
 import 'package:garden_client/src/protocol/files/file_version.dart'
     as _ibt6e7l6;
 import 'package:garden_client/src/protocol/gardens/garden_summary.dart'
@@ -32,6 +34,7 @@ import 'files/file_node.dart' as _iqxechne;
 import 'files/file_version.dart' as _inq2edz5;
 import 'files/node_kind.dart' as _idxfoob7;
 import 'gardens/account_details.dart' as _i4muwn5e;
+import 'gardens/finder_session.dart' as _i14hlkad;
 import 'gardens/garden_exception.dart' as _icsgmcpa;
 import 'gardens/garden_member.dart' as _icenu3t8;
 import 'gardens/garden_record.dart' as _iwqk3oef;
@@ -46,6 +49,7 @@ export 'files/file_node.dart';
 export 'files/file_version.dart';
 export 'files/node_kind.dart';
 export 'gardens/account_details.dart';
+export 'gardens/finder_session.dart';
 export 'gardens/garden_exception.dart';
 export 'gardens/garden_member.dart';
 export 'gardens/garden_record.dart';
@@ -114,6 +118,9 @@ class Protocol extends _isc.SerializationManager {
     if (t == _i4muwn5e.AccountDetails) {
       return _i4muwn5e.AccountDetails.fromJson(data) as T;
     }
+    if (t == _i14hlkad.FinderSession) {
+      return _i14hlkad.FinderSession.fromJson(data) as T;
+    }
     if (t == _icsgmcpa.GardenException) {
       return _icsgmcpa.GardenException.fromJson(data) as T;
     }
@@ -156,6 +163,10 @@ class Protocol extends _isc.SerializationManager {
     }
     if (t == _isc.getType<_i4muwn5e.AccountDetails?>()) {
       return (data != null ? _i4muwn5e.AccountDetails.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_i14hlkad.FinderSession?>()) {
+      return (data != null ? _i14hlkad.FinderSession.fromJson(data) : null)
           as T;
     }
     if (t == _isc.getType<_icsgmcpa.GardenException?>()) {
@@ -246,6 +257,21 @@ class Protocol extends _isc.SerializationManager {
               .toList()
           as T;
     }
+    if (t == List<_ib0wfils.DriveEvent>) {
+      return (data as List)
+              .map((e) => deserialize<_ib0wfils.DriveEvent>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i2qlj4hx.FileNode>) {
+      return (data as List)
+              .map((e) => deserialize<_i2qlj4hx.FileNode>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<String>) {
+      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    }
     if (t == List<_iwcj6pye.GardenSummary>) {
       return (data as List)
               .map((e) => deserialize<_iwcj6pye.GardenSummary>(e))
@@ -272,6 +298,7 @@ class Protocol extends _isc.SerializationManager {
       _inq2edz5.FileVersion => 'FileVersion',
       _idxfoob7.NodeKind => 'NodeKind',
       _i4muwn5e.AccountDetails => 'AccountDetails',
+      _i14hlkad.FinderSession => 'FinderSession',
       _icsgmcpa.GardenException => 'GardenException',
       _icenu3t8.GardenMember => 'GardenMember',
       _iwqk3oef.GardenRecord => 'GardenRecord',
@@ -309,6 +336,8 @@ class Protocol extends _isc.SerializationManager {
         return 'NodeKind';
       case _i4muwn5e.AccountDetails():
         return 'AccountDetails';
+      case _i14hlkad.FinderSession():
+        return 'FinderSession';
       case _icsgmcpa.GardenException():
         return 'GardenException';
       case _icenu3t8.GardenMember():
@@ -367,6 +396,9 @@ class Protocol extends _isc.SerializationManager {
     }
     if (dataClassName == 'AccountDetails') {
       return deserialize<_i4muwn5e.AccountDetails>(data['data']);
+    }
+    if (dataClassName == 'FinderSession') {
+      return deserialize<_i14hlkad.FinderSession>(data['data']);
     }
     if (dataClassName == 'GardenException') {
       return deserialize<_icsgmcpa.GardenException>(data['data']);

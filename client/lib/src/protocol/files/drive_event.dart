@@ -23,6 +23,7 @@ abstract class DriveEvent
     required this.operation,
     required this.authorId,
     this.node,
+    this.previousParentId,
     required this.createdAt,
   });
 
@@ -33,6 +34,7 @@ abstract class DriveEvent
     required String operation,
     required String authorId,
     _iylbd4h6.FileNode? node,
+    int? previousParentId,
     required DateTime createdAt,
   }) = _DriveEventImpl;
 
@@ -48,6 +50,7 @@ abstract class DriveEvent
           : _iyvihoc1.Protocol().deserialize<_iylbd4h6.FileNode>(
               jsonSerialization['node'],
             ),
+      previousParentId: jsonSerialization['previousParentId'] as int?,
       createdAt: _isc.DateTimeJsonExtension.fromJson(
         jsonSerialization['createdAt'],
       ),
@@ -69,6 +72,8 @@ abstract class DriveEvent
 
   _iylbd4h6.FileNode? node;
 
+  int? previousParentId;
+
   DateTime createdAt;
 
   /// Returns a shallow copy of this [DriveEvent]
@@ -81,6 +86,7 @@ abstract class DriveEvent
     String? operation,
     String? authorId,
     _iylbd4h6.FileNode? node,
+    int? previousParentId,
     DateTime? createdAt,
   });
   @override
@@ -93,6 +99,7 @@ abstract class DriveEvent
       'operation': operation,
       'authorId': authorId,
       if (node != null) 'node': node?.toJson(),
+      if (previousParentId != null) 'previousParentId': previousParentId,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -107,6 +114,7 @@ abstract class DriveEvent
       'operation': operation,
       'authorId': authorId,
       if (node != null) 'node': node?.toJsonForProtocol(),
+      if (previousParentId != null) 'previousParentId': previousParentId,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -127,6 +135,7 @@ class _DriveEventImpl extends DriveEvent {
     required String operation,
     required String authorId,
     _iylbd4h6.FileNode? node,
+    int? previousParentId,
     required DateTime createdAt,
   }) : super._(
          id: id,
@@ -135,6 +144,7 @@ class _DriveEventImpl extends DriveEvent {
          operation: operation,
          authorId: authorId,
          node: node,
+         previousParentId: previousParentId,
          createdAt: createdAt,
        );
 
@@ -149,6 +159,7 @@ class _DriveEventImpl extends DriveEvent {
     String? operation,
     String? authorId,
     Object? node = _Undefined,
+    Object? previousParentId = _Undefined,
     DateTime? createdAt,
   }) {
     return DriveEvent(
@@ -158,6 +169,9 @@ class _DriveEventImpl extends DriveEvent {
       operation: operation ?? this.operation,
       authorId: authorId ?? this.authorId,
       node: node is _iylbd4h6.FileNode? ? node : this.node?.copyWith(),
+      previousParentId: previousParentId is int?
+          ? previousParentId
+          : this.previousParentId,
       createdAt: createdAt ?? this.createdAt,
     );
   }

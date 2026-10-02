@@ -644,6 +644,124 @@ class Endpoints extends _is.EndpointDispatch {
       name: 'files',
       endpoint: endpoints['files']!,
       methodConnectors: {
+        'get': _is.MethodConnector(
+          name: 'get',
+          params: {
+            'nodeId': _is.ParameterDescription(
+              name: 'nodeId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['files'] as _idx8vriz.FilesEndpoint).get(
+                session,
+                params['nodeId'],
+              ),
+        ),
+        'changes': _is.MethodConnector(
+          name: 'changes',
+          params: {
+            'gardenId': _is.ParameterDescription(
+              name: 'gardenId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'afterRevision': _is.ParameterDescription(
+              name: 'afterRevision',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['files'] as _idx8vriz.FilesEndpoint).changes(
+                    session,
+                    params['gardenId'],
+                    params['afterRevision'],
+                  ),
+        ),
+        'snapshot': _is.MethodConnector(
+          name: 'snapshot',
+          params: {
+            'gardenId': _is.ParameterDescription(
+              name: 'gardenId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'afterNodeId': _is.ParameterDescription(
+              name: 'afterNodeId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['files'] as _idx8vriz.FilesEndpoint).snapshot(
+                    session,
+                    params['gardenId'],
+                    params['afterNodeId'],
+                  ),
+        ),
+        'revision': _is.MethodConnector(
+          name: 'revision',
+          params: {
+            'gardenId': _is.ParameterDescription(
+              name: 'gardenId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['files'] as _idx8vriz.FilesEndpoint).revision(
+                    session,
+                    params['gardenId'],
+                  ),
+        ),
+        'listPage': _is.MethodConnector(
+          name: 'listPage',
+          params: {
+            'gardenId': _is.ParameterDescription(
+              name: 'gardenId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'parentId': _is.ParameterDescription(
+              name: 'parentId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'afterNodeId': _is.ParameterDescription(
+              name: 'afterNodeId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['files'] as _idx8vriz.FilesEndpoint).listPage(
+                    session,
+                    params['gardenId'],
+                    params['parentId'],
+                    params['afterNodeId'],
+                  ),
+        ),
         'list': _is.MethodConnector(
           name: 'list',
           params: {
@@ -794,6 +912,44 @@ class Endpoints extends _is.EndpointDispatch {
                 Map<String, dynamic> params,
               ) async => (endpoints['garden'] as _isd11de7.GardenEndpoint)
                   .account(session),
+        ),
+        'finderSession': _is.MethodConnector(
+          name: 'finderSession',
+          params: {
+            'gardenId': _is.ParameterDescription(
+              name: 'gardenId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['garden'] as _isd11de7.GardenEndpoint)
+                  .finderSession(
+                    session,
+                    params['gardenId'],
+                  ),
+        ),
+        'revokeFinderSessions': _is.MethodConnector(
+          name: 'revokeFinderSessions',
+          params: {
+            'tokenIds': _is.ParameterDescription(
+              name: 'tokenIds',
+              type: _is.getType<List<String>>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['garden'] as _isd11de7.GardenEndpoint)
+                  .revokeFinderSessions(
+                    session,
+                    params['tokenIds'],
+                  ),
         ),
         'list': _is.MethodConnector(
           name: 'list',

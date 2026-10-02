@@ -12,8 +12,11 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:typed_data' as _idt;
+import 'package:garden_server/src/generated/files/drive_event.dart'
+    as _ipqwe4ae;
 import 'package:garden_server/src/generated/files/file_comment.dart'
     as _ih79ezm0;
+import 'package:garden_server/src/generated/files/file_node.dart' as _il49blua;
 import 'package:garden_server/src/generated/files/file_version.dart'
     as _iwzwya1z;
 import 'package:garden_server/src/generated/gardens/garden_summary.dart'
@@ -35,6 +38,7 @@ import 'files/node_kind.dart' as _idxfoob7;
 import 'future_calls_generated_models/upload_cleanup_future_call_expire_model.dart'
     as _i4nkt2dm;
 import 'gardens/account_details.dart' as _i4muwn5e;
+import 'gardens/finder_session.dart' as _i14hlkad;
 import 'gardens/garden_exception.dart' as _icsgmcpa;
 import 'gardens/garden_member.dart' as _icenu3t8;
 import 'gardens/garden_record.dart' as _iwqk3oef;
@@ -49,6 +53,7 @@ export 'files/file_node.dart';
 export 'files/file_version.dart';
 export 'files/node_kind.dart';
 export 'gardens/account_details.dart';
+export 'gardens/finder_session.dart';
 export 'gardens/garden_exception.dart';
 export 'gardens/garden_member.dart';
 export 'gardens/garden_record.dart';
@@ -105,6 +110,12 @@ class Protocol extends _is.DatabaseSerializationManager {
           columnType: _isp.ColumnType.json,
           isNullable: true,
           dartType: 'protocol:FileNode?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'previousParentId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
         ),
         _isp.ColumnDefinition(
           name: 'createdAt',
@@ -771,6 +782,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _i4muwn5e.AccountDetails) {
       return _i4muwn5e.AccountDetails.fromJson(data) as T;
     }
+    if (t == _i14hlkad.FinderSession) {
+      return _i14hlkad.FinderSession.fromJson(data) as T;
+    }
     if (t == _icsgmcpa.GardenException) {
       return _icsgmcpa.GardenException.fromJson(data) as T;
     }
@@ -819,6 +833,10 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (t == _is.getType<_i4muwn5e.AccountDetails?>()) {
       return (data != null ? _i4muwn5e.AccountDetails.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_i14hlkad.FinderSession?>()) {
+      return (data != null ? _i14hlkad.FinderSession.fromJson(data) : null)
           as T;
     }
     if (t == _is.getType<_icsgmcpa.GardenException?>()) {
@@ -909,6 +927,21 @@ class Protocol extends _is.DatabaseSerializationManager {
               .toList()
           as T;
     }
+    if (t == List<_ipqwe4ae.DriveEvent>) {
+      return (data as List)
+              .map((e) => deserialize<_ipqwe4ae.DriveEvent>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_il49blua.FileNode>) {
+      return (data as List)
+              .map((e) => deserialize<_il49blua.FileNode>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<String>) {
+      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    }
     if (t == List<_itk3qnhp.GardenSummary>) {
       return (data as List)
               .map((e) => deserialize<_itk3qnhp.GardenSummary>(e))
@@ -940,6 +973,7 @@ class Protocol extends _is.DatabaseSerializationManager {
       _i4nkt2dm.UploadCleanupFutureCallExpireModel =>
         'UploadCleanupFutureCallExpireModel',
       _i4muwn5e.AccountDetails => 'AccountDetails',
+      _i14hlkad.FinderSession => 'FinderSession',
       _icsgmcpa.GardenException => 'GardenException',
       _icenu3t8.GardenMember => 'GardenMember',
       _iwqk3oef.GardenRecord => 'GardenRecord',
@@ -979,6 +1013,8 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'UploadCleanupFutureCallExpireModel';
       case _i4muwn5e.AccountDetails():
         return 'AccountDetails';
+      case _i14hlkad.FinderSession():
+        return 'FinderSession';
       case _icsgmcpa.GardenException():
         return 'GardenException';
       case _icenu3t8.GardenMember():
@@ -1046,6 +1082,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (dataClassName == 'AccountDetails') {
       return deserialize<_i4muwn5e.AccountDetails>(data['data']);
+    }
+    if (dataClassName == 'FinderSession') {
+      return deserialize<_i14hlkad.FinderSession>(data['data']);
     }
     if (dataClassName == 'GardenException') {
       return deserialize<_icsgmcpa.GardenException>(data['data']);

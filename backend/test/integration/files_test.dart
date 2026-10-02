@@ -87,13 +87,49 @@ void main() {
         endpoints.files.move(owner, folder.id!, folder.id!, 'Work'),
         throwsA(isA<GardenException>()),
       );
+      await endpoints.files.delete(owner, folder.id!);
+      expect((await endpoints.files.list(owner, drive.id, 0)).nodes, isEmpty);
       await expectLater(
-        endpoints.files.delete(owner, folder.id!),
+        endpoints.files.list(owner, drive.id, folder.id!),
         throwsA(isA<GardenException>()),
       );
       await expectLater(
         endpoints.files.create(owner, drive.id, 0, '../bad', NodeKind.file),
         throwsA(isA<GardenException>()),
+      );
+    });
+
+    test('Finder pages directories and records both sides of a move', () async {
+      final drive = await endpoints.garden.create(owner, 'Finder');
+      final first = await endpoints.files.create(
+        owner, drive.id, 0, 'First', NodeKind.folder,
+      );
+      final second = await endpoints.files.create(
+        owner, drive.id, 0, 'Second', NodeKind.folder,
+      );
+      final file = await endpoints.files.create(
+        owner, drive.id, first.id!, 'note.txt', NodeKind.file,
+      );
+      expect(await endpoints.files.revision(owner, drive.id), 3);
+      expect(
+        (await endpoints.files.listPage(owner, drive.id, 0, 0))
+            .map((node) => node.name),
+        ['First', 'Second'],
+      );
+      expect(
+        (await endpoints.files.listPage(owner, drive.id, 0, first.id!))
+            .single.id,
+        second.id,
+      );
+      await endpoints.files.move(owner, file.id!, second.id!, 'renamed.txt');
+      final events = await endpoints.files.changes(owner, drive.id, 3);
+      expect(events.single.previousParentId, first.id);
+      expect(events.single.node?.parentId, second.id);
+      await endpoints.files.delete(owner, second.id!);
+      expect(
+        (await endpoints.files.snapshot(owner, drive.id, 0))
+            .map((node) => node.id),
+        [first.id],
       );
     });
 

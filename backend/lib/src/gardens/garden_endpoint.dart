@@ -23,6 +23,51 @@ class GardenEndpoint extends Endpoint {
     return AccountDetails(id: id, email: email);
   }
 
+  Future<FinderSession> finderSession(Session session, int gardenId) async {
+    final user = _user(session);
+    final member = await GardenMember.db.findFirstRow(
+      session,
+      where: (row) => row.gardenId.equals(gardenId) & row.userId.equals(user),
+    );
+    final drive = await GardenRecord.db.findById(session, gardenId);
+    if (member == null || drive == null || drive.deleted) {
+      throw GardenException(message: 'You do not have access to this drive.');
+    }
+    final auth = await AuthServices.instance.tokenManager.issueToken(
+      session,
+      authUserId: UuidValue.fromString(user),
+      method: 'finder',
+    );
+    final refreshToken = auth.refreshToken;
+    if (refreshToken == null) {
+      throw GardenException(message: 'Finder authentication is unavailable.');
+    }
+    return FinderSession(
+      token: auth.token,
+      refreshToken: refreshToken,
+      tokenId: auth.jwtRefreshTokenId.toString(),
+    );
+  }
+
+  Future<void> revokeFinderSessions(
+    Session session,
+    List<String> tokenIds,
+  ) async {
+    if (tokenIds.isEmpty) return;
+    final tokens = await AuthServices.instance.tokenManager.listTokens(
+      session,
+      authUserId: UuidValue.fromString(_user(session)),
+      method: 'finder',
+    );
+    final owned = tokens.map((token) => token.tokenId).toSet();
+    for (final id in tokenIds.toSet().intersection(owned)) {
+      await AuthServices.instance.tokenManager.revokeToken(
+        session,
+        tokenId: id,
+      );
+    }
+  }
+
   Future<List<GardenSummary>> list(Session session) async {
     final memberships = await GardenMember.db.find(
       session,

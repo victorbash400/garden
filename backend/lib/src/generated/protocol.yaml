@@ -28,6 +28,11 @@ content:
   - read:
   - versions:
 files:
+  - get:
+  - changes:
+  - snapshot:
+  - revision:
+  - listPage:
   - list:
   - create:
   - move:
@@ -35,6 +40,8 @@ files:
   - watch:
 garden:
   - account:
+  - finderSession:
+  - revokeFinderSessions:
   - list:
   - create:
   - invite:

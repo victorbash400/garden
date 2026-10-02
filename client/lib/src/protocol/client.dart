@@ -24,6 +24,8 @@ import 'package:garden_client/src/protocol/files/file_version.dart'
 import 'package:garden_client/src/protocol/files/node_kind.dart' as _igh51ulr;
 import 'package:garden_client/src/protocol/gardens/account_details.dart'
     as _i7n7hin1;
+import 'package:garden_client/src/protocol/gardens/finder_session.dart'
+    as _ihw30tky;
 import 'package:garden_client/src/protocol/gardens/garden_summary.dart'
     as _iwcj6pye;
 import 'package:garden_client/src/protocol/greetings/greeting.dart'
@@ -442,6 +444,57 @@ class EndpointFiles extends _isc.EndpointRef {
   @override
   String get name => 'files';
 
+  _ida.Future<_i2qlj4hx.FileNode> get(int nodeId) =>
+      caller.callServerEndpoint<_i2qlj4hx.FileNode>(
+        'files',
+        'get',
+        {'nodeId': nodeId},
+      );
+
+  _ida.Future<List<_ib0wfils.DriveEvent>> changes(
+    int gardenId,
+    int afterRevision,
+  ) => caller.callServerEndpoint<List<_ib0wfils.DriveEvent>>(
+    'files',
+    'changes',
+    {
+      'gardenId': gardenId,
+      'afterRevision': afterRevision,
+    },
+  );
+
+  _ida.Future<List<_i2qlj4hx.FileNode>> snapshot(
+    int gardenId,
+    int afterNodeId,
+  ) => caller.callServerEndpoint<List<_i2qlj4hx.FileNode>>(
+    'files',
+    'snapshot',
+    {
+      'gardenId': gardenId,
+      'afterNodeId': afterNodeId,
+    },
+  );
+
+  _ida.Future<int> revision(int gardenId) => caller.callServerEndpoint<int>(
+    'files',
+    'revision',
+    {'gardenId': gardenId},
+  );
+
+  _ida.Future<List<_i2qlj4hx.FileNode>> listPage(
+    int gardenId,
+    int parentId,
+    int afterNodeId,
+  ) => caller.callServerEndpoint<List<_i2qlj4hx.FileNode>>(
+    'files',
+    'listPage',
+    {
+      'gardenId': gardenId,
+      'parentId': parentId,
+      'afterNodeId': afterNodeId,
+    },
+  );
+
   _ida.Future<_i6024znp.DirectoryListing> list(
     int gardenId,
     int parentId,
@@ -520,6 +573,20 @@ class EndpointGarden extends _isc.EndpointRef {
         'garden',
         'account',
         {},
+      );
+
+  _ida.Future<_ihw30tky.FinderSession> finderSession(int gardenId) =>
+      caller.callServerEndpoint<_ihw30tky.FinderSession>(
+        'garden',
+        'finderSession',
+        {'gardenId': gardenId},
+      );
+
+  _ida.Future<void> revokeFinderSessions(List<String> tokenIds) =>
+      caller.callServerEndpoint<void>(
+        'garden',
+        'revokeFinderSessions',
+        {'tokenIds': tokenIds},
       );
 
   _ida.Future<List<_iwcj6pye.GardenSummary>> list() =>

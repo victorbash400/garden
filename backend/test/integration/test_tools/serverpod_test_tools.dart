@@ -30,6 +30,8 @@ import 'package:garden_server/src/generated/future_calls_generated_models/upload
     as _izf17ijw;
 import 'package:garden_server/src/generated/gardens/account_details.dart'
     as _i83iryap;
+import 'package:garden_server/src/generated/gardens/finder_session.dart'
+    as _i8w42qq9;
 import 'package:garden_server/src/generated/gardens/garden_summary.dart'
     as _itk3qnhp;
 import 'package:garden_server/src/generated/greetings/greeting.dart'
@@ -1107,6 +1109,175 @@ class _FilesEndpoint {
 
   final _is.SerializationManager _serializationManager;
 
+  _ida.Future<_il49blua.FileNode> get(
+    _ist.TestSessionBuilder sessionBuilder,
+    int nodeId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'files',
+            method: 'get',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'files',
+          methodName: 'get',
+          parameters: _ist.testObjectToJson({'nodeId': nodeId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_il49blua.FileNode>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_ipqwe4ae.DriveEvent>> changes(
+    _ist.TestSessionBuilder sessionBuilder,
+    int gardenId,
+    int afterRevision,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'files',
+            method: 'changes',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'files',
+          methodName: 'changes',
+          parameters: _ist.testObjectToJson({
+            'gardenId': gardenId,
+            'afterRevision': afterRevision,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_ipqwe4ae.DriveEvent>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_il49blua.FileNode>> snapshot(
+    _ist.TestSessionBuilder sessionBuilder,
+    int gardenId,
+    int afterNodeId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'files',
+            method: 'snapshot',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'files',
+          methodName: 'snapshot',
+          parameters: _ist.testObjectToJson({
+            'gardenId': gardenId,
+            'afterNodeId': afterNodeId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_il49blua.FileNode>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<int> revision(
+    _ist.TestSessionBuilder sessionBuilder,
+    int gardenId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'files',
+            method: 'revision',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'files',
+          methodName: 'revision',
+          parameters: _ist.testObjectToJson({'gardenId': gardenId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<int>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_il49blua.FileNode>> listPage(
+    _ist.TestSessionBuilder sessionBuilder,
+    int gardenId,
+    int parentId,
+    int afterNodeId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'files',
+            method: 'listPage',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'files',
+          methodName: 'listPage',
+          parameters: _ist.testObjectToJson({
+            'gardenId': gardenId,
+            'parentId': parentId,
+            'afterNodeId': afterNodeId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_il49blua.FileNode>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _ida.Future<_i1pn1l7f.DirectoryListing> list(
     _ist.TestSessionBuilder sessionBuilder,
     int gardenId,
@@ -1320,6 +1491,68 @@ class _GardenEndpoint {
                   _localCallContext.arguments,
                 )
                 as _ida.Future<_i83iryap.AccountDetails>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_i8w42qq9.FinderSession> finderSession(
+    _ist.TestSessionBuilder sessionBuilder,
+    int gardenId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'garden',
+            method: 'finderSession',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'garden',
+          methodName: 'finderSession',
+          parameters: _ist.testObjectToJson({'gardenId': gardenId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_i8w42qq9.FinderSession>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<void> revokeFinderSessions(
+    _ist.TestSessionBuilder sessionBuilder,
+    List<String> tokenIds,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'garden',
+            method: 'revokeFinderSessions',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'garden',
+          methodName: 'revokeFinderSessions',
+          parameters: _ist.testObjectToJson({'tokenIds': tokenIds}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<void>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

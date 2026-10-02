@@ -1,0 +1,5 @@
+class: FinderSession
+fields:
+  token: String
+  refreshToken: String
+  tokenId: String
