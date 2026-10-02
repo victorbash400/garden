@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../components/settings/settings_transition.dart';
+import '../components/connection_notice_button.dart';
 import '../state/garden_controller.dart';
 import 'account_settings.dart';
+import 'connections_settings.dart';
 import 'storage_settings.dart';
 
 class SettingsView extends StatelessWidget {
@@ -22,23 +24,41 @@ class SettingsView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    controller.settingsSection == SettingsSection.account
-                        ? 'Account'
-                        : 'Storage',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        switch (controller.settingsSection) {
+                          SettingsSection.account => 'Account',
+                          SettingsSection.storage => 'Storage',
+                          SettingsSection.connections => 'Connections',
+                        },
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const Spacer(),
+                      if (controller.needsFinderAttention)
+                        ConnectionNoticeButton(
+                          onPressed: controller.openConnections,
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 32),
                   SettingsTransition(
                     child: KeyedSubtree(
                       key: ValueKey(controller.settingsSection),
-                      child:
-                          controller.settingsSection == SettingsSection.account
-                          ? AccountSettings(controller: controller)
-                          : StorageSettings(controller: controller),
+                      child: switch (controller.settingsSection) {
+                        SettingsSection.account => AccountSettings(
+                          controller: controller,
+                        ),
+                        SettingsSection.storage => StorageSettings(
+                          controller: controller,
+                        ),
+                        SettingsSection.connections => ConnectionsSettings(
+                          controller: controller,
+                        ),
+                      },
                     ),
                   ),
                 ],

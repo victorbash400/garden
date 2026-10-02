@@ -88,6 +88,11 @@ class MainFlutterWindow: NSWindow {
             result(nil)
           case "tokenIDs":
             result(try await FinderDomainManager.tokenIDs(accountID: accountID))
+          case "retiredTokenIDs":
+            guard let driveIDs = arguments["driveIDs"] as? [Int] else {
+              throw FinderBridgeError.invalidArguments
+            }
+            result(try await FinderDomainManager.retiredTokenIDs(accountID: accountID, driveIDs: driveIDs))
           case "enabled":
             guard let driveIDs = arguments["driveIDs"] as? [Int] else {
               throw FinderBridgeError.invalidArguments

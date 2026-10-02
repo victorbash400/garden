@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../components/garden_button.dart';
 import '../components/drive_dialog.dart';
 import '../components/garden_row.dart';
+import '../components/connection_notice_button.dart';
 import '../state/garden_controller.dart';
 
 class GardensView extends StatelessWidget {
@@ -33,6 +34,8 @@ class GardensView extends StatelessWidget {
                   : () => showDriveDialog(context, controller, join: true),
             ),
             const Spacer(),
+            if (controller.needsFinderAttention)
+              ConnectionNoticeButton(onPressed: controller.openConnections),
             IconButton(
               tooltip: 'Refresh drives',
               onPressed: controller.busy ? null : controller.refresh,

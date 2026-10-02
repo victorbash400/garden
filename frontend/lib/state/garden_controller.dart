@@ -11,7 +11,7 @@ import '../native/mac_finder_updates.dart';
 import 'files_controller.dart';
 import 'account_security_controller.dart';
 
-enum SettingsSection { account, storage }
+enum SettingsSection { account, storage, connections }
 
 enum GardenPage {
   starting,
@@ -19,7 +19,6 @@ enum GardenPage {
   signIn,
   register,
   verify,
-  setup,
   gardens,
   create,
   join,
@@ -40,8 +39,10 @@ class GardenController extends ChangeNotifier {
   final AccountSecurityController? security;
   final FinderMounts? finder;
   final MacFinderUpdates? finderUpdates;
+  Set<int> finderConnectedDriveIDs = {};
   Set<int> finderEnabledDriveIDs = {};
   bool finderSyncing = false;
+  String? finderIssue;
   final bool localServer;
   final FilesController? files;
   final GardenGateway gateway;
@@ -107,7 +108,6 @@ class GardenController extends ChangeNotifier {
       GardenPage.create ||
       GardenPage.join ||
       GardenPage.files => GardenPage.gardens,
-      GardenPage.setup => GardenPage.setup,
       GardenPage.settings =>
         account == null ? GardenPage.signIn : _settingsReturn,
       _ => GardenPage.signIn,
@@ -172,6 +172,7 @@ class GardenController extends ChangeNotifier {
 
   Future<void> refresh() => _request(() async {
     gardens = await gateway.listGardens();
+    await _loadFinderPreferences();
     _queueFinderSync();
   });
 
@@ -180,10 +181,23 @@ class GardenController extends ChangeNotifier {
     savedEmail = signedIn.email;
     page = GardenPage.starting;
     gardens = await gateway.listGardens();
-    page = await preferences.onboardingComplete(signedIn.id)
-        ? GardenPage.gardens
-        : GardenPage.setup;
+    await _loadFinderPreferences();
+    page = GardenPage.gardens;
     _queueFinderSync();
+  }
+
+  Future<void> _loadFinderPreferences() async {
+    final signedIn = account;
+    if (signedIn == null) return;
+    final enabled = await Future.wait(
+      gardens.map(
+        (drive) => preferences.finderConnectionEnabled(signedIn.id, drive.id),
+      ),
+    );
+    finderConnectedDriveIDs = {
+      for (var index = 0; index < gardens.length; index++)
+        if (enabled[index]) gardens[index].id,
+    };
   }
 
   Future<void> retryLoading() => _request(() async {
@@ -199,7 +213,14 @@ class GardenController extends ChangeNotifier {
     await _finderWork;
     final signedIn = account;
     if (signedIn == null) throw StateError('Sign in first.');
-    finderEnabledDriveIDs = await finder?.enabled(signedIn, gardens) ?? {};
+    finderEnabledDriveIDs =
+        await finder?.enabled(
+          signedIn,
+          gardens
+              .where((drive) => finderConnectedDriveIDs.contains(drive.id))
+              .toList(),
+        ) ??
+        {};
   });
 
   Future<void> openInFinder(GardenInfo drive) => _request(() async {
@@ -215,13 +236,38 @@ class GardenController extends ChangeNotifier {
     await finder!.openSettings();
   });
 
-  Future<void> finishSetup() => _request(() async {
-    final signedIn = account;
-    if (signedIn == null) throw StateError('Sign in first.');
-    if (gardens.isEmpty) throw StateError('Create or join a drive first.');
-    await preferences.completeOnboarding(signedIn.id);
-    page = GardenPage.gardens;
-  });
+  Future<void> setFinderConnected(GardenInfo drive, bool enabled) =>
+      _request(() async {
+        final signedIn = account;
+        if (signedIn == null) throw StateError('Sign in first.');
+        if (!gardens.any((item) => item.id == drive.id)) {
+          throw StateError('This drive is unavailable.');
+        }
+        await preferences.setFinderConnectionEnabled(
+          signedIn.id,
+          drive.id,
+          enabled,
+        );
+        if (enabled) {
+          finderConnectedDriveIDs.add(drive.id);
+        } else {
+          finderConnectedDriveIDs.remove(drive.id);
+          finderEnabledDriveIDs.remove(drive.id);
+        }
+        _queueFinderSync();
+      });
+
+  bool get needsFinderAttention =>
+      finder != null &&
+      !finderSyncing &&
+      (finderIssue != null ||
+          finderConnectedDriveIDs.difference(finderEnabledDriveIDs).isNotEmpty);
+
+  void openConnections() {
+    selectSettings(SettingsSection.connections);
+    navigate(GardenPage.settings);
+  }
+
   Future<void> _showDrive(GardenInfo drive) async {
     final browser = files;
     if (browser == null) throw StateError('File browser is unavailable.');
@@ -232,20 +278,23 @@ class GardenController extends ChangeNotifier {
   }
 
   Future<void> create(String name) => _request(() async {
-    final onboarding = page == GardenPage.setup;
     final drive = await gateway.createGarden(name.trim());
     gardens = [...gardens, drive];
-    selected = drive;
+    await preferences.setFinderConnectionEnabled(account!.id, drive.id, true);
+    finderConnectedDriveIDs.add(drive.id);
     _queueFinderSync();
-    if (!onboarding) await _showDrive(drive);
+    await _showDrive(drive);
   });
   Future<void> join(String code) => _request(() async {
-    final onboarding = page == GardenPage.setup;
     final drive = await gateway.joinGarden(code.trim());
     gardens = [...gardens.where((item) => item.id != drive.id), drive];
-    selected = drive;
+    if (await preferences.finderConnectionEnabled(account!.id, drive.id)) {
+      finderConnectedDriveIDs.add(drive.id);
+    } else {
+      finderConnectedDriveIDs.remove(drive.id);
+    }
     _queueFinderSync();
-    if (!onboarding) await _showDrive(drive);
+    await _showDrive(drive);
   });
   Future<void> openDrive(GardenInfo drive) => _request(() async {
     if (files?.drive?.id == drive.id) {
@@ -259,6 +308,7 @@ class GardenController extends ChangeNotifier {
   Future<void> deleteDrive(GardenInfo drive) => _request(() async {
     await gateway.deleteDrive(drive.id);
     gardens = gardens.where((item) => item.id != drive.id).toList();
+    finderConnectedDriveIDs.remove(drive.id);
     finderEnabledDriveIDs.remove(drive.id);
     _queueFinderSync();
     if (files?.drive?.id == drive.id) {
@@ -276,8 +326,10 @@ class GardenController extends ChangeNotifier {
     account = null;
     gardens = [];
     selected = null;
+    finderConnectedDriveIDs = {};
     finderEnabledDriveIDs = {};
     finderSyncing = false;
+    finderIssue = null;
     registrationPassword = '';
     registrationId = null;
     savedEmail = null;
@@ -294,7 +346,9 @@ class GardenController extends ChangeNotifier {
   void _queueFinderSync() {
     final current = account;
     if (current == null) return;
-    final drives = [...gardens];
+    final drives = gardens
+        .where((drive) => finderConnectedDriveIDs.contains(drive.id))
+        .toList();
     finderSyncing = true;
     notifyListeners();
     _finderWork = _finderWork.then((_) async {
@@ -303,6 +357,7 @@ class GardenController extends ChangeNotifier {
         await finder?.sync(current, drives);
         finderEnabledDriveIDs = await finder?.enabled(current, drives) ?? {};
         await finderUpdates?.sync(current, drives);
+        finderIssue = null;
       } catch (failure) {
         finderUpdateError(failure);
       } finally {
@@ -313,7 +368,7 @@ class GardenController extends ChangeNotifier {
   }
 
   void finderUpdateError(Object failure) {
-    error = errorMessage(failure);
+    finderIssue = errorMessage(failure);
     notifyListeners();
   }
 

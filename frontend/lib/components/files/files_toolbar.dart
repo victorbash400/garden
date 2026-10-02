@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../state/files_controller.dart';
 import 'toolbar_button.dart';
 import 'toolbar_group.dart';
+import '../connection_notice_button.dart';
 
 class FilesToolbar extends StatelessWidget {
   const FilesToolbar({
@@ -13,12 +14,14 @@ class FilesToolbar extends StatelessWidget {
     required this.onImport,
     required this.onInvite,
     required this.onBackToDrives,
+    this.onConnections,
   });
   final FilesController controller;
   final ValueChanged<String> onCreate;
   final VoidCallback onImport;
   final VoidCallback onInvite;
   final VoidCallback onBackToDrives;
+  final VoidCallback? onConnections;
   @override
   Widget build(BuildContext context) => SizedBox(
     height: 56,
@@ -102,6 +105,8 @@ class FilesToolbar extends StatelessWidget {
           ),
           ToolbarGroup(
             children: [
+              if (onConnections != null)
+                ConnectionNoticeButton(onPressed: onConnections),
               if (!controller.live)
                 ToolbarButton(
                   tooltip: 'Reconnect live updates',

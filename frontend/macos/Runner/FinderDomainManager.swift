@@ -83,6 +83,23 @@ enum FinderDomainManager {
     return ids
   }
 
+  static func retiredTokenIDs(accountID: String, driveIDs: [Int]) async throws -> [String] {
+    let valid = Set(driveIDs.map { identifier(accountID: accountID, driveID: $0) })
+    let prefix = "account-\(accountID)-drive-"
+    var ids: [String] = []
+    for domain in try await domains() {
+      let id = domain.identifier.rawValue
+      if id.hasPrefix(prefix) && !valid.contains(id) {
+        do {
+          ids.append(try FinderCredentialStore.read(id).tokenID)
+        } catch FinderCredentialError.keychain(errSecItemNotFound) {
+          continue
+        }
+      }
+    }
+    return ids
+  }
+
   static func enabled(accountID: String, driveIDs: [Int]) async throws -> [Int] {
     let current = try await domains()
     return driveIDs.filter { driveID in

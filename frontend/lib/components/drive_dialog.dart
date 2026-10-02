@@ -40,8 +40,7 @@ class _DriveDialogState extends State<DriveDialog> {
     }
     if (mounted &&
         widget.controller.error == null &&
-        (widget.controller.page == GardenPage.files ||
-            widget.controller.page == GardenPage.setup)) {
+        widget.controller.page == GardenPage.files) {
       Navigator.of(context).pop();
     }
   }

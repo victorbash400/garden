@@ -15,10 +15,12 @@ class FilesView extends StatelessWidget {
     required this.controller,
     required this.userId,
     required this.onBackToDrives,
+    this.onConnections,
   });
   final FilesController controller;
   final String userId;
   final VoidCallback onBackToDrives;
+  final VoidCallback? onConnections;
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: controller,
@@ -35,6 +37,7 @@ class FilesView extends StatelessWidget {
               onImport: actions.import,
               onInvite: actions.invite,
               onBackToDrives: onBackToDrives,
+              onConnections: onConnections,
             ),
             SizedBox(
               height: 2,

@@ -39,6 +39,16 @@ class MacFinderMounts implements FinderMounts {
         'refreshToken': session.refreshToken,
       });
     }
+    final retired = await _channel.invokeListMethod<String>('retiredTokenIDs', {
+      'accountID': account.id,
+      'driveIDs': ids,
+    });
+    if (retired == null) {
+      throw StateError('Finder did not return retired sessions.');
+    }
+    if (retired.isNotEmpty) {
+      await gateway.client.garden.revokeFinderSessions(retired);
+    }
     await _channel.invokeMethod<void>('reconcile', {
       'accountID': account.id,
       'driveIDs': ids,

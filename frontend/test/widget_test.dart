@@ -18,7 +18,7 @@ import 'package:garden_flutter/components/settings/settings_sidebar.dart';
 
 class MemoryPreferences implements PreferencesStore {
   int limit = 20;
-  bool complete = true;
+  final disabled = <int>{};
   @override
   Future<int> readCacheLimit() async => limit;
   @override
@@ -27,10 +27,19 @@ class MemoryPreferences implements PreferencesStore {
   }
 
   @override
-  Future<bool> onboardingComplete(String accountId) async => complete;
+  Future<bool> finderConnectionEnabled(String accountId, int driveId) async =>
+      !disabled.contains(driveId);
   @override
-  Future<void> completeOnboarding(String accountId) async {
-    complete = true;
+  Future<void> setFinderConnectionEnabled(
+    String accountId,
+    int driveId,
+    bool enabled,
+  ) async {
+    if (enabled) {
+      disabled.remove(driveId);
+    } else {
+      disabled.add(driveId);
+    }
   }
 }
 
@@ -137,7 +146,7 @@ class TestFinder implements FinderMounts {
   Future<Set<int>> enabled(
     AccountInfo account,
     List<GardenInfo> drives,
-  ) async => enabledIDs;
+  ) async => enabledIDs.intersection(drives.map((drive) => drive.id).toSet());
 
   @override
   Future<void> open(AccountInfo account, int driveID) async {
@@ -163,10 +172,10 @@ class TestFinder implements FinderMounts {
 }
 
 void main() {
-  testWidgets('first run creates a drive and checks Finder before continuing', (
+  testWidgets('Finder controls live in Settings and the alert opens them', (
     tester,
   ) async {
-    final preferences = MemoryPreferences()..complete = false;
+    final preferences = MemoryPreferences();
     final finder = TestFinder();
     final controller = GardenController(
       TestGateway(),
@@ -176,9 +185,8 @@ void main() {
     );
     await controller.signIn('garden@example.com', 'password');
     await tester.pumpWidget(GardenApp(controller: controller));
-    expect(controller.page, GardenPage.setup);
-    expect(find.byType(GardenSidebar), findsNothing);
-    expect(find.text('Use Garden without Finder'), findsOneWidget);
+    expect(controller.page, GardenPage.gardens);
+    expect(find.byType(GardenSidebar), findsOneWidget);
     await tester.tap(find.text('Create drive').first);
     await tester.pumpAndSettle();
     expect(find.byType(Dialog), findsOneWidget);
@@ -191,21 +199,33 @@ void main() {
     expect(controller.error, isNull);
     expect(controller.gardens.map((drive) => drive.id), [1]);
     expect(finder.mountedDriveIDs, {1});
-    expect(find.text('Not enabled'), findsOneWidget);
+    expect(find.byTooltip('Finder needs attention'), findsOneWidget);
+    await tester.tap(find.byTooltip('Finder needs attention'));
+    await tester.pumpAndSettle();
+    expect(controller.settingsSection, SettingsSection.connections);
+    expect(find.text('Needs approval'), findsOneWidget);
     await tester.tap(find.text('Open System Settings'));
     await tester.pumpAndSettle();
     expect(finder.openedSettings, isTrue);
-    finder.enabledIDs = {1};
-    await tester.tap(find.text('Check Finder'));
+    await tester.tap(find.byType(Switch).first);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Open in Finder'));
+    await controller.checkFinder();
+    await tester.pumpAndSettle();
+    expect(preferences.disabled, {1});
+    expect(finder.mountedDriveIDs, isEmpty);
+    expect(controller.needsFinderAttention, isFalse);
+    await tester.tap(find.byType(Switch).first);
+    await tester.pumpAndSettle();
+    await controller.checkFinder();
+    await tester.pumpAndSettle();
+    expect(finder.mountedDriveIDs, {1});
+    finder.enabledIDs = {1};
+    await tester.tap(find.text('Check again'));
+    await tester.pumpAndSettle();
+    expect(find.text('Enabled'), findsOneWidget);
+    await tester.tap(find.byTooltip('Open in Finder'));
     await tester.pumpAndSettle();
     expect(finder.openedID, 1);
-    await tester.tap(find.text('Continue in Garden'));
-    await tester.pumpAndSettle();
-    expect(preferences.complete, isTrue);
-    expect(controller.page, GardenPage.gardens);
-    expect(find.byType(GardenSidebar), findsOneWidget);
   });
 
   testWidgets('hosted sign-in omits the local demo account', (tester) async {
@@ -273,7 +293,9 @@ void main() {
       await tester.tap(find.text('Storage'));
       await tester.pumpAndSettle();
       expect(find.text('Cache limit'), findsOneWidget);
-      expect(find.text('Finder connection'), findsOneWidget);
+      await tester.tap(find.text('Connections'));
+      await tester.pumpAndSettle();
+      expect(find.text('Finder File Provider'), findsOneWidget);
       await tester.tap(find.text('Back to drives'));
       await tester.pumpAndSettle();
       expect(find.byType(GardenSidebar), findsOneWidget);
@@ -413,12 +435,14 @@ void main() {
   });
 
   test('Drive creation opens files without a redundant list request', () async {
-    final gateway = TestGateway()..failList = true;
+    final gateway = TestGateway();
     final controller = GardenController(
       gateway,
       MemoryPreferences(),
       files: FilesController(FilesFixture()),
     );
+    await controller.signIn('garden@example.com', 'password');
+    gateway.failList = true;
     await controller.create('Projects');
     expect(controller.page, GardenPage.files);
     expect(controller.selected!.name, 'Projects');
