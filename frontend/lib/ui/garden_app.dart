@@ -83,7 +83,7 @@ class GardenApp extends StatelessWidget {
         onForgetSaved: controller.forgetSavedLogin,
         remember: controller.rememberLogin,
         onRememberChanged: controller.setRememberLogin,
-        showDemo: true,
+        showDemo: controller.localServer,
         onCreateAccount: () => controller.navigate(GardenPage.register),
         busy: controller.busy,
         submitLabel: 'Sign in',

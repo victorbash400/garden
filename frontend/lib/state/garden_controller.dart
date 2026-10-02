@@ -105,6 +105,8 @@ class GardenController extends ChangeNotifier {
   Future<void> continueSavedLogin() => _request(() async {
     account = await gateway.restoreAccount();
     if (account == null) {
+      await gateway.forgetSavedLogin();
+      savedEmail = null;
       throw StateError('Saved login expired. Sign in again.');
     }
     gardens = await gateway.listGardens();

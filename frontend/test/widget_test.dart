@@ -28,6 +28,7 @@ class MemoryPreferences implements PreferencesStore {
 class TestGateway implements GardenGateway {
   bool fail = false;
   bool failList = false;
+  bool expiredSavedLogin = false;
   int calls = 0;
   int restoreCalls = 0;
   String? savedEmail;
@@ -42,7 +43,7 @@ class TestGateway implements GardenGateway {
   @override
   Future<AccountInfo?> restoreAccount() async {
     restoreCalls++;
-    return savedEmail == null
+    return savedEmail == null || expiredSavedLogin
         ? null
         : AccountInfo(id: 'account', email: savedEmail!);
   }
@@ -110,6 +111,34 @@ class PendingGateway extends TestGateway {
 }
 
 void main() {
+  testWidgets('hosted sign-in omits the local demo account', (tester) async {
+    final controller = GardenController(TestGateway(), MemoryPreferences());
+    await tester.pumpWidget(GardenApp(controller: controller));
+    expect(find.text('Use demo account'), findsNothing);
+  });
+
+  testWidgets('local sign-in offers the demo account', (tester) async {
+    final controller = GardenController(
+      TestGateway(),
+      MemoryPreferences(),
+      localServer: true,
+    );
+    await tester.pumpWidget(GardenApp(controller: controller));
+    expect(find.text('Use demo account'), findsOneWidget);
+  });
+
+  test('expired saved login is removed', () async {
+    final gateway = TestGateway()
+      ..savedEmail = 'saved@example.com'
+      ..expiredSavedLogin = true;
+    final controller = GardenController(gateway, MemoryPreferences());
+    await controller.initialize();
+    await controller.continueSavedLogin();
+    expect(controller.savedEmail, isNull);
+    expect(gateway.savedEmail, isNull);
+    expect(controller.error, 'Saved login expired. Sign in again.');
+  });
+
   testWidgets('saved login waits for Continue and remember is optional', (
     tester,
   ) async {
@@ -166,6 +195,7 @@ void main() {
       TestGateway(),
       MemoryPreferences(),
       files: FilesController(FilesFixture()),
+      localServer: true,
     );
     await tester.pumpWidget(GardenApp(controller: controller));
     expect(find.byType(TextField), findsNWidgets(2));
@@ -178,7 +208,11 @@ void main() {
     tester,
   ) async {
     final gateway = TestGateway();
-    final controller = GardenController(gateway, MemoryPreferences());
+    final controller = GardenController(
+      gateway,
+      MemoryPreferences(),
+      localServer: true,
+    );
     controller.navigate(GardenPage.signIn);
     await tester.pumpWidget(GardenApp(controller: controller));
     await tester.tap(find.text('Use demo account'));

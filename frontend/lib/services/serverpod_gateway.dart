@@ -37,7 +37,11 @@ class ServerpodGateway implements GardenGateway {
     storage.remember = true;
     await client.auth.initialize();
     if (!client.auth.isAuthenticated) return null;
-    return _account();
+    try {
+      return await _account();
+    } on ServerpodClientUnauthorized {
+      return null;
+    }
   }
 
   Future<AccountInfo> signInWithPasskey({required bool remember}) async {
@@ -72,10 +76,12 @@ class ServerpodGateway implements GardenGateway {
     String password, {
     bool remember = false,
   }) async {
-    final result = await client.emailIdp.login(
-      email: email,
-      password: password,
-    );
+    final AuthSuccess result;
+    try {
+      result = await client.emailIdp.login(email: email, password: password);
+    } on ServerpodClientUnauthorized {
+      throw StateError('Invalid email or password.');
+    }
     await _storeSignIn(result, remember);
     final account = AccountInfo(
       id: result.authUserId.toString(),
