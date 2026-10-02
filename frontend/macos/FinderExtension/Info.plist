@@ -14,7 +14,6 @@
   <key>NSExtension</key>
   <dict>
     <key>NSExtensionPointIdentifier</key><string>com.apple.fileprovider-nonui</string>
-    <key>NSExtensionFileProviderDocumentGroup</key><string>group.com.victorbash.garden</string>
     <key>NSExtensionPrincipalClass</key><string>$(PRODUCT_MODULE_NAME).GardenFileProvider</string>
     <key>NSExtensionFileProviderSupportsEnumeration</key><true/>
   </dict>
