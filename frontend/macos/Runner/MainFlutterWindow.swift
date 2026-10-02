@@ -98,6 +98,11 @@ class MainFlutterWindow: NSWindow {
               throw FinderBridgeError.invalidArguments
             }
             result(try await FinderDomainManager.enabled(accountID: accountID, driveIDs: driveIDs))
+          case "permissionRequired":
+            guard let driveIDs = arguments["driveIDs"] as? [Int] else {
+              throw FinderBridgeError.invalidArguments
+            }
+            result(try await FinderDomainManager.permissionRequired(accountID: accountID, driveIDs: driveIDs))
           case "open":
             guard let driveID = arguments["driveID"] as? Int else {
               throw FinderBridgeError.invalidArguments

@@ -110,6 +110,13 @@ enum FinderDomainManager {
     }
   }
 
+  static func permissionRequired(accountID: String, driveIDs: [Int]) async throws -> Bool {
+    let expected = Set(driveIDs.map { identifier(accountID: accountID, driveID: $0) })
+    return try await domains().contains { domain in
+      expected.contains(domain.identifier.rawValue) && !domain.userEnabled
+    }
+  }
+
   static func open(accountID: String, driveID: Int) async throws {
     let id = identifier(accountID: accountID, driveID: driveID)
     guard let domain = try await domains().first(where: { $0.identifier.rawValue == id }),

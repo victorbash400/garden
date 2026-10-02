@@ -9,13 +9,4 @@ class LocalPreferences implements PreferencesStore {
       await _storage.getInt('cacheLimitGiB') ?? 20;
   @override
   Future<void> saveCacheLimit(int gib) => _storage.setInt('cacheLimitGiB', gib);
-  @override
-  Future<bool> finderConnectionEnabled(String accountId, int driveId) async =>
-      !(await _storage.getBool('finderDisabled.$accountId.$driveId') ?? false);
-  @override
-  Future<void> setFinderConnectionEnabled(
-    String accountId,
-    int driveId,
-    bool enabled,
-  ) => _storage.setBool('finderDisabled.$accountId.$driveId', !enabled);
 }

@@ -18,28 +18,11 @@ import 'package:garden_flutter/components/settings/settings_sidebar.dart';
 
 class MemoryPreferences implements PreferencesStore {
   int limit = 20;
-  final disabled = <int>{};
   @override
   Future<int> readCacheLimit() async => limit;
   @override
   Future<void> saveCacheLimit(int gib) async {
     limit = gib;
-  }
-
-  @override
-  Future<bool> finderConnectionEnabled(String accountId, int driveId) async =>
-      !disabled.contains(driveId);
-  @override
-  Future<void> setFinderConnectionEnabled(
-    String accountId,
-    int driveId,
-    bool enabled,
-  ) async {
-    if (enabled) {
-      disabled.remove(driveId);
-    } else {
-      disabled.add(driveId);
-    }
   }
 }
 
@@ -132,6 +115,7 @@ class TestFinder implements FinderMounts {
   @override
   final Set<int> mountedDriveIDs = {};
   Set<int> enabledIDs = {};
+  bool requiresPermission = false;
   int? openedID;
   bool openedSettings = false;
 
@@ -147,6 +131,12 @@ class TestFinder implements FinderMounts {
     AccountInfo account,
     List<GardenInfo> drives,
   ) async => enabledIDs.intersection(drives.map((drive) => drive.id).toSet());
+
+  @override
+  Future<bool> permissionRequired(
+    AccountInfo account,
+    List<GardenInfo> drives,
+  ) async => requiresPermission;
 
   @override
   Future<void> open(AccountInfo account, int driveID) async {
@@ -172,13 +162,14 @@ class TestFinder implements FinderMounts {
 }
 
 void main() {
-  testWidgets('Finder controls live in Settings and the alert opens them', (
+  testWidgets('Connections shows system status without drive controls', (
     tester,
   ) async {
     final preferences = MemoryPreferences();
     final finder = TestFinder();
+    final gateway = TestGateway();
     final controller = GardenController(
-      TestGateway(),
+      gateway,
       preferences,
       finder: finder,
       files: FilesController(FilesFixture()),
@@ -200,32 +191,33 @@ void main() {
     expect(controller.gardens.map((drive) => drive.id), [1]);
     expect(finder.mountedDriveIDs, {1});
     expect(find.byTooltip('Finder needs attention'), findsOneWidget);
+    finder.requiresPermission = true;
+    await controller.checkFinder();
+    await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Finder needs attention'));
     await tester.pumpAndSettle();
     expect(controller.settingsSection, SettingsSection.connections);
-    expect(find.text('Needs approval'), findsOneWidget);
+    expect(find.text('Garden service'), findsOneWidget);
+    expect(find.text('Finder File Provider'), findsOneWidget);
+    expect(find.text('Permission required'), findsOneWidget);
+    expect(find.text('Projects'), findsNothing);
+    expect(find.byType(Switch), findsNothing);
     await tester.tap(find.text('Open System Settings'));
     await tester.pumpAndSettle();
     expect(finder.openedSettings, isTrue);
-    await tester.tap(find.byType(Switch).first);
-    await tester.pumpAndSettle();
-    await controller.checkFinder();
-    await tester.pumpAndSettle();
-    expect(preferences.disabled, {1});
-    expect(finder.mountedDriveIDs, isEmpty);
-    expect(controller.needsFinderAttention, isFalse);
-    await tester.tap(find.byType(Switch).first);
-    await tester.pumpAndSettle();
-    await controller.checkFinder();
-    await tester.pumpAndSettle();
-    expect(finder.mountedDriveIDs, {1});
+    finder.requiresPermission = false;
     finder.enabledIDs = {1};
-    await tester.tap(find.text('Check again'));
+    await tester.tap(find.text('Check connections'));
     await tester.pumpAndSettle();
-    expect(find.text('Enabled'), findsOneWidget);
-    await tester.tap(find.byTooltip('Open in Finder'));
+    expect(find.text('Permission required'), findsNothing);
+    expect(find.text('Open System Settings'), findsNothing);
+    expect(controller.needsFinderAttention, isFalse);
+    gateway.failList = true;
+    await tester.tap(find.text('Check connections'));
     await tester.pumpAndSettle();
-    expect(finder.openedID, 1);
+    expect(find.text('Unavailable'), findsOneWidget);
+    expect(find.text('Cannot refresh Gardens.'), findsOneWidget);
+    expect(controller.needsFinderAttention, isTrue);
   });
 
   testWidgets('hosted sign-in omits the local demo account', (tester) async {

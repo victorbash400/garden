@@ -82,6 +82,22 @@ class MacFinderMounts implements FinderMounts {
   }
 
   @override
+  Future<bool> permissionRequired(
+    AccountInfo account,
+    List<GardenInfo> drives,
+  ) async {
+    if (!Platform.isMacOS || drives.isEmpty) return false;
+    final required = await _channel.invokeMethod<bool>('permissionRequired', {
+      'accountID': account.id,
+      'driveIDs': drives.map((drive) => drive.id).toList(),
+    });
+    if (required == null) {
+      throw StateError('Finder did not return permission status.');
+    }
+    return required;
+  }
+
+  @override
   Future<void> open(AccountInfo account, int driveID) async {
     if (!Platform.isMacOS) return;
     await _channel.invokeMethod<void>('open', {
