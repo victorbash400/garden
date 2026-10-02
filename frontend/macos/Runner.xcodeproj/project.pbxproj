@@ -21,17 +21,33 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		A10000000000000000000001 /* NativeAuthenticationConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000002; };
+		14F8DF57F2F53B0521DFDBF0 /* FinderCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7A65DF6BF53C6D521B7B380 /* FinderCredential.swift */; };
 		331C80D8294CF71000263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C80D7294CF71000263BE5 /* RunnerTests.swift */; };
 		335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */; };
 		33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC10F02044A3C60003C045 /* AppDelegate.swift */; };
 		33CC10F32044A3C60003C045 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 33CC10F22044A3C60003C045 /* Assets.xcassets */; };
 		33CC10F62044A3C60003C045 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 33CC10F42044A3C60003C045 /* MainMenu.xib */; };
 		33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC11122044BFA00003C045 /* MainFlutterWindow.swift */; };
+		49D52B7A5FA59A146655C404 /* GardenFileProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B12707A464BFB445C4B11ADC /* GardenFileProvider.swift */; };
+		5C783FA9250AE456D3BF102B /* GardenFinder.appex in Embed File Provider */ = {isa = PBXBuildFile; fileRef = 8A7991D10F43F3644477D51B /* GardenFinder.appex */; };
 		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };
+		805B49A9BB38C082F1F565F1 /* FinderDomainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBFF06A0D3701CBA9BBF3EF2 /* FinderDomainManager.swift */; };
+		932E11ADD36A74FD71E1BCD1 /* GardenEnumerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D33975B290D3833331A5ED7 /* GardenEnumerator.swift */; };
+		93C2E6D4C5E03E5BB279B77B /* FinderCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7A65DF6BF53C6D521B7B380 /* FinderCredential.swift */; };
+		A10000000000000000000001 /* NativeAuthenticationConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000002 /* NativeAuthenticationConfiguration.swift */; };
+		AA2A3E9AEDCB62FB57D5DFC4 /* GardenAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8681944F850AE3C8FBA3090E /* GardenAPI.swift */; };
+		C36A5F1C0E9B80E1CEC20C8C /* GardenNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E80EEA4C2EDA2C0390B33422 /* GardenNode.swift */; };
+		E25B32C16FDD678CDDF940AA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8AB1F02B9F6E420FC69954F5 /* Cocoa.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		01C406B8FEBAFE584A7650A0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 33CC10E52044A3C60003C045 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 45D588E2E8A2677B0F54F3C7;
+			remoteInfo = GardenFinder;
+		};
 		331C80D9294CF71000263BE5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 33CC10E52044A3C60003C045 /* Project object */;
@@ -59,15 +75,25 @@
 			name = "Bundle Framework";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		9B03859DF3C3C96B5916D6E3 /* Embed File Provider */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				5C783FA9250AE456D3BF102B /* GardenFinder.appex in Embed File Provider */,
+			);
+			name = "Embed File Provider";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		A10000000000000000000002 /* NativeAuthenticationConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAuthenticationConfiguration.swift; sourceTree = "<group>"; };
 		331C80D5294CF71000263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		331C80D7294CF71000263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
 		333000ED22D3DE5D00554162 /* Warnings.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Warnings.xcconfig; sourceTree = "<group>"; };
 		335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratedPluginRegistrant.swift; sourceTree = "<group>"; };
-		33CC10ED2044A3C60003C045 /* garden.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "garden.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		33CC10ED2044A3C60003C045 /* garden.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = garden.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		33CC10F02044A3C60003C045 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		33CC10F22044A3C60003C045 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = Runner/Assets.xcassets; sourceTree = "<group>"; };
 		33CC10F52044A3C60003C045 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
@@ -79,9 +105,20 @@
 		33E51913231747F40026EE4D /* DebugProfile.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DebugProfile.entitlements; sourceTree = "<group>"; };
 		33E51914231749380026EE4D /* Release.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = Release.entitlements; sourceTree = "<group>"; };
 		33E5194F232828860026EE4D /* AppInfo.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = AppInfo.xcconfig; sourceTree = "<group>"; };
+		435EFA02F1B7C72D04EB5675 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = Info.plist; path = FinderExtension/Info.plist; sourceTree = "<group>"; };
 		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = ephemeral/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
+		7D33975B290D3833331A5ED7 /* GardenEnumerator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenEnumerator.swift; path = FinderExtension/GardenEnumerator.swift; sourceTree = "<group>"; };
+		8681944F850AE3C8FBA3090E /* GardenAPI.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenAPI.swift; path = FinderShared/GardenAPI.swift; sourceTree = "<group>"; };
+		8A7991D10F43F3644477D51B /* GardenFinder.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = GardenFinder.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		8AB1F02B9F6E420FC69954F5 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk/System/Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		A10000000000000000000002 /* NativeAuthenticationConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAuthenticationConfiguration.swift; sourceTree = "<group>"; };
+		B12707A464BFB445C4B11ADC /* GardenFileProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenFileProvider.swift; path = FinderExtension/GardenFileProvider.swift; sourceTree = "<group>"; };
+		B7A65DF6BF53C6D521B7B380 /* FinderCredential.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FinderCredential.swift; path = FinderShared/FinderCredential.swift; sourceTree = "<group>"; };
+		BBFF06A0D3701CBA9BBF3EF2 /* FinderDomainManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FinderDomainManager.swift; path = FinderDomainManager.swift; sourceTree = "<group>"; };
+		D6E75AE443F8D12E9E4A0DED /* FinderExtension.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; name = FinderExtension.entitlements; path = FinderExtension/FinderExtension.entitlements; sourceTree = "<group>"; };
+		E80EEA4C2EDA2C0390B33422 /* GardenNode.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenNode.swift; path = FinderShared/GardenNode.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,9 +137,28 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AABACD98090611837CC0AFBE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E25B32C16FDD678CDDF940AA /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2B3A901D6B118F0A0A68AB03 /* FinderExtension */ = {
+			isa = PBXGroup;
+			children = (
+				B12707A464BFB445C4B11ADC /* GardenFileProvider.swift */,
+				7D33975B290D3833331A5ED7 /* GardenEnumerator.swift */,
+				435EFA02F1B7C72D04EB5675 /* Info.plist */,
+				D6E75AE443F8D12E9E4A0DED /* FinderExtension.entitlements */,
+			);
+			name = FinderExtension;
+			sourceTree = "<group>";
+		};
 		331C80D6294CF71000263BE5 /* RunnerTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -130,6 +186,8 @@
 				331C80D6294CF71000263BE5 /* RunnerTests */,
 				33CC10EE2044A3C60003C045 /* Products */,
 				D73912EC22F37F3D000D13A0 /* Frameworks */,
+				2B3A901D6B118F0A0A68AB03 /* FinderExtension */,
+				B15DA367A708CFAC0D4F7B0B /* FinderShared */,
 			);
 			sourceTree = "<group>";
 		};
@@ -138,6 +196,7 @@
 			children = (
 				33CC10ED2044A3C60003C045 /* garden.app */,
 				331C80D5294CF71000263BE5 /* RunnerTests.xctest */,
+				8A7991D10F43F3644477D51B /* GardenFinder.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -175,13 +234,33 @@
 				33E51914231749380026EE4D /* Release.entitlements */,
 				33CC11242044D66E0003C045 /* Resources */,
 				33BA886A226E78AF003329D5 /* Configs */,
+				BBFF06A0D3701CBA9BBF3EF2 /* FinderDomainManager.swift */,
 			);
 			path = Runner;
+			sourceTree = "<group>";
+		};
+		85F5E81455A0FBD92C24AC1A /* OS X */ = {
+			isa = PBXGroup;
+			children = (
+				8AB1F02B9F6E420FC69954F5 /* Cocoa.framework */,
+			);
+			name = "OS X";
+			sourceTree = "<group>";
+		};
+		B15DA367A708CFAC0D4F7B0B /* FinderShared */ = {
+			isa = PBXGroup;
+			children = (
+				B7A65DF6BF53C6D521B7B380 /* FinderCredential.swift */,
+				E80EEA4C2EDA2C0390B33422 /* GardenNode.swift */,
+				8681944F850AE3C8FBA3090E /* GardenAPI.swift */,
+			);
+			name = FinderShared;
 			sourceTree = "<group>";
 		};
 		D73912EC22F37F3D000D13A0 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				85F5E81455A0FBD92C24AC1A /* OS X */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -216,11 +295,13 @@
 				33CC10EB2044A3C60003C045 /* Resources */,
 				33CC110E2044A8840003C045 /* Bundle Framework */,
 				3399D490228B24CF009A79C7 /* ShellScript */,
+				9B03859DF3C3C96B5916D6E3 /* Embed File Provider */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				33CC11202044C79F0003C045 /* PBXTargetDependency */,
+				77C372D9BC3FD2100C8F17DA /* PBXTargetDependency */,
 			);
 			name = Runner;
 			packageProductDependencies = (
@@ -229,6 +310,23 @@
 			productName = Runner;
 			productReference = 33CC10ED2044A3C60003C045 /* garden.app */;
 			productType = "com.apple.product-type.application";
+		};
+		45D588E2E8A2677B0F54F3C7 /* GardenFinder */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E606A50ACFC261C1D410598F /* Build configuration list for PBXNativeTarget "GardenFinder" */;
+			buildPhases = (
+				3B7E08B69CE4488072B09E86 /* Sources */,
+				AABACD98090611837CC0AFBE /* Frameworks */,
+				C31A0550D8684F89012F152C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GardenFinder;
+			productName = GardenFinder;
+			productReference = 8A7991D10F43F3644477D51B /* GardenFinder.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -257,7 +355,10 @@
 					};
 					33CC111A2044C6BA0003C045 = {
 						CreatedOnToolsVersion = 9.2;
-						ProvisioningStyle = Manual;
+						ProvisioningStyle = Automatic;
+					};
+					45D588E2E8A2677B0F54F3C7 = {
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -271,7 +372,7 @@
 			);
 			mainGroup = 33CC10E42044A3C60003C045;
 			packageReferences = (
-				781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */,
+				781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "FlutterGeneratedPluginSwiftPackage" */,
 			);
 			productRefGroup = 33CC10EE2044A3C60003C045 /* Products */;
 			projectDirPath = "";
@@ -280,6 +381,7 @@
 				33CC10EC2044A3C60003C045 /* Runner */,
 				331C80D4294CF70F00263BE5 /* RunnerTests */,
 				33CC111A2044C6BA0003C045 /* Flutter Assemble */,
+				45D588E2E8A2677B0F54F3C7 /* GardenFinder */,
 			);
 		};
 /* End PBXProject section */
@@ -298,6 +400,13 @@
 			files = (
 				33CC10F32044A3C60003C045 /* Assets.xcassets in Resources */,
 				33CC10F62044A3C60003C045 /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C31A0550D8684F89012F152C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -361,6 +470,20 @@
 				A10000000000000000000001 /* NativeAuthenticationConfiguration.swift in Sources */,
 				33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */,
 				335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */,
+				93C2E6D4C5E03E5BB279B77B /* FinderCredential.swift in Sources */,
+				805B49A9BB38C082F1F565F1 /* FinderDomainManager.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3B7E08B69CE4488072B09E86 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				49D52B7A5FA59A146655C404 /* GardenFileProvider.swift in Sources */,
+				932E11ADD36A74FD71E1BCD1 /* GardenEnumerator.swift in Sources */,
+				14F8DF57F2F53B0521DFDBF0 /* FinderCredential.swift in Sources */,
+				C36A5F1C0E9B80E1CEC20C8C /* GardenNode.swift in Sources */,
+				AA2A3E9AEDCB62FB57D5DFC4 /* GardenAPI.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -376,6 +499,12 @@
 			isa = PBXTargetDependency;
 			target = 33CC111A2044C6BA0003C045 /* Flutter Assemble */;
 			targetProxy = 33CC111F2044C79F0003C045 /* PBXContainerItemProxy */;
+		};
+		77C372D9BC3FD2100C8F17DA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = GardenFinder;
+			target = 45D588E2E8A2677B0F54F3C7 /* GardenFinder */;
+			targetProxy = 01C406B8FEBAFE584A7650A0 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -490,14 +619,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = GardenIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/DebugProfile.entitlements;
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Profile;
@@ -505,7 +633,7 @@
 		338D0CEB231458BD00FA5F75 /* Profile */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Profile;
@@ -622,14 +750,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = GardenIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/DebugProfile.entitlements;
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 			};
@@ -642,14 +769,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = GardenIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Release.entitlements;
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -669,6 +795,63 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
+		};
+		5A9DA6E360B069B3784F4550 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = FinderExtension/FinderExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 387H4ZZF2K;
+				ENABLE_APP_SANDBOX = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = FinderExtension/Info.plist;
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
+				PRODUCT_BUNDLE_IDENTIFIER = com.victorbash.garden.finder;
+				PRODUCT_NAME = GardenFinder;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Profile;
+		};
+		5C8467AE36FA9FDE8ACAE037 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = FinderExtension/FinderExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 387H4ZZF2K;
+				ENABLE_APP_SANDBOX = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = FinderExtension/Info.plist;
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
+				PRODUCT_BUNDLE_IDENTIFIER = com.victorbash.garden.finder;
+				PRODUCT_NAME = GardenFinder;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		E3C4703616F48FBF57677741 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = FinderExtension/FinderExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 387H4ZZF2K;
+				ENABLE_APP_SANDBOX = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = FinderExtension/Info.plist;
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
+				PRODUCT_BUNDLE_IDENTIFIER = com.victorbash.garden.finder;
+				PRODUCT_NAME = GardenFinder;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
 		};
 /* End XCBuildConfiguration section */
 
@@ -713,10 +896,20 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		E606A50ACFC261C1D410598F /* Build configuration list for PBXNativeTarget "GardenFinder" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5C8467AE36FA9FDE8ACAE037 /* Release */,
+				E3C4703616F48FBF57677741 /* Debug */,
+				5A9DA6E360B069B3784F4550 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */ = {
+		781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "FlutterGeneratedPluginSwiftPackage" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage;
 		};

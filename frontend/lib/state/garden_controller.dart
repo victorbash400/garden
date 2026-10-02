@@ -6,6 +6,8 @@ import '../model/account_info.dart';
 import '../model/garden_info.dart';
 import '../services/garden_gateway.dart';
 import '../services/preferences_store.dart';
+import '../native/mac_finder_mounts.dart';
+import '../native/mac_finder_updates.dart';
 import 'files_controller.dart';
 import 'account_security_controller.dart';
 
@@ -29,9 +31,14 @@ class GardenController extends ChangeNotifier {
     this.preferences, {
     this.files,
     this.security,
+    this.finder,
+    this.finderUpdates,
     this.localServer = false,
   });
   final AccountSecurityController? security;
+  final MacFinderMounts? finder;
+  final MacFinderUpdates? finderUpdates;
+  int get mountedDriveCount => finder?.mountedDriveIDs.length ?? 0;
   final bool localServer;
   final FilesController? files;
   final GardenGateway gateway;
@@ -45,6 +52,7 @@ class GardenController extends ChangeNotifier {
   List<GardenInfo> gardens = [];
   GardenInfo? selected;
   bool _busy = false;
+  Future<void> _finderWork = Future.value();
   bool get busy => _busy || (files?.busy ?? false);
   String? error;
   int cacheLimit = 20;
@@ -101,6 +109,7 @@ class GardenController extends ChangeNotifier {
     }
     gardens = await gateway.listGardens();
     page = GardenPage.gardens;
+    _queueFinderSync();
   });
   Future<void> forgetSavedLogin() => _request(() async {
     await gateway.forgetSavedLogin();
@@ -114,6 +123,7 @@ class GardenController extends ChangeNotifier {
     );
     page = GardenPage.gardens;
     gardens = await gateway.listGardens();
+    _queueFinderSync();
   });
 
   Future<void> signInWithPasskey() => _request(() async {
@@ -122,6 +132,7 @@ class GardenController extends ChangeNotifier {
     account = await auth.gateway.signInWithPasskey(remember: rememberLogin);
     gardens = await gateway.listGardens();
     page = GardenPage.gardens;
+    _queueFinderSync();
   });
 
   Future<void> register(String email, String password) => _request(() async {
@@ -143,6 +154,7 @@ class GardenController extends ChangeNotifier {
     registrationId = null;
     page = GardenPage.gardens;
     gardens = await gateway.listGardens();
+    _queueFinderSync();
   });
 
   Future<void> resendVerification() => _request(() async {
@@ -154,6 +166,7 @@ class GardenController extends ChangeNotifier {
 
   Future<void> refresh() => _request(() async {
     gardens = await gateway.listGardens();
+    _queueFinderSync();
   });
   Future<void> _showDrive(GardenInfo drive) async {
     final browser = files;
@@ -167,11 +180,13 @@ class GardenController extends ChangeNotifier {
   Future<void> create(String name) => _request(() async {
     final drive = await gateway.createGarden(name.trim());
     gardens = [...gardens, drive];
+    _queueFinderSync();
     await _showDrive(drive);
   });
   Future<void> join(String code) => _request(() async {
     final drive = await gateway.joinGarden(code.trim());
     gardens = [...gardens.where((item) => item.id != drive.id), drive];
+    _queueFinderSync();
     await _showDrive(drive);
   });
   Future<void> openDrive(GardenInfo drive) => _request(() async {
@@ -186,6 +201,7 @@ class GardenController extends ChangeNotifier {
   Future<void> deleteDrive(GardenInfo drive) => _request(() async {
     await gateway.deleteDrive(drive.id);
     gardens = gardens.where((item) => item.id != drive.id).toList();
+    _queueFinderSync();
     if (files?.drive?.id == drive.id) {
       await files!.close();
       selected = null;
@@ -193,6 +209,9 @@ class GardenController extends ChangeNotifier {
     }
   });
   Future<void> signOut() => _request(() async {
+    await _finderWork;
+    await finderUpdates?.close();
+    if (account != null) await finder?.signOut(account!);
     await files?.close();
     await gateway.signOut();
     account = null;
@@ -210,6 +229,27 @@ class GardenController extends ChangeNotifier {
     await preferences.saveCacheLimit(gib);
     cacheLimit = gib;
   });
+
+  void _queueFinderSync() {
+    final current = account;
+    if (current == null) return;
+    final drives = [...gardens];
+    _finderWork = _finderWork.then((_) async {
+      if (account?.id != current.id) return;
+      try {
+        await finder?.sync(current, drives);
+        await finderUpdates?.sync(current, drives);
+        notifyListeners();
+      } catch (failure) {
+        finderUpdateError(failure);
+      }
+    });
+  }
+
+  void finderUpdateError(Object failure) {
+    error = errorMessage(failure);
+    notifyListeners();
+  }
 
   Future<void> _request(Future<void> Function() action) async {
     if (busy) return;

@@ -6,6 +6,8 @@ import 'package:window_manager/window_manager.dart';
 import 'services/local_preferences.dart';
 import 'services/serverpod_gateway.dart';
 import 'services/files/serverpod_files_gateway.dart';
+import 'native/mac_finder_mounts.dart';
+import 'native/mac_finder_updates.dart';
 import 'state/files_controller.dart';
 import 'state/account_security_controller.dart';
 import 'state/garden_controller.dart';
@@ -29,10 +31,17 @@ Future<void> main() async {
     defaultValue: 'https://garden.api.serverpod.space/',
   );
   final gateway = ServerpodGateway(serverUrl);
-  final controller = GardenController(
+  final finder = MacFinderMounts(gateway, serverUrl);
+  late final GardenController controller;
+  final finderUpdates = MacFinderUpdates(
+    gateway, finder, (failure) => controller.finderUpdateError(failure),
+  );
+  controller = GardenController(
     gateway,
     LocalPreferences(),
     security: AccountSecurityController(gateway),
+    finder: finder,
+    finderUpdates: finderUpdates,
     localServer: const [
       'localhost',
       '127.0.0.1',

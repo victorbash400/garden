@@ -19,9 +19,11 @@ class StorageSettings extends StatelessWidget {
           onSave: controller.setCacheLimit,
         ),
       ),
-      const SettingsRow(
+      SettingsRow(
         label: 'Finder connection',
-        value: Text('Not available yet'),
+        value: Text(controller.account == null
+            ? 'Sign in to connect'
+            : '${controller.mountedDriveCount} drives'),
       ),
     ],
   );

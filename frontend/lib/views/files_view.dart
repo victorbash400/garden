@@ -90,10 +90,6 @@ class FilesView extends StatelessWidget {
                     style: const TextStyle(fontSize: 11, color: Colors.grey),
                   ),
                   const Spacer(),
-                  const Text(
-                    'Finder not mounted',
-                    style: TextStyle(fontSize: 11, color: Colors.grey),
-                  ),
                 ],
               ),
             ),

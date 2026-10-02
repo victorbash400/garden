@@ -1,0 +1,95 @@
+import FileProvider
+import Foundation
+import UniformTypeIdentifiers
+
+struct GardenNode {
+  let id: Int
+  let parentID: Int
+  let name: String
+  let folder: Bool
+  let size: Int
+  let version: Int
+  let modified: String
+  let modifiedDate: Date
+  let deleted: Bool
+
+  init(_ value: [String: Any]) throws {
+    guard let id = value["id"] as? Int,
+          let parentID = value["parentId"] as? Int,
+          let name = value["name"] as? String,
+          let kind = value["kind"] as? String,
+          let size = value["size"] as? Int,
+          let version = value["version"] as? Int,
+          let modified = value["updatedAt"] as? String,
+          let deleted = value["deleted"] as? Bool,
+          kind == "folder" || kind == "file" else {
+      throw GardenAPIError.invalidResponse
+    }
+    let formatter = ISO8601DateFormatter()
+    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    let dateWithFraction = formatter.date(from: modified)
+    formatter.formatOptions = [.withInternetDateTime]
+    guard let modifiedDate = dateWithFraction ?? formatter.date(from: modified) else {
+      throw GardenAPIError.invalidResponse
+    }
+    self.id = id
+    self.parentID = parentID
+    self.name = name
+    self.folder = kind == "folder"
+    self.size = size
+    self.version = version
+    self.modified = modified
+    self.modifiedDate = modifiedDate
+    self.deleted = deleted
+  }
+}
+
+final class GardenItem: NSObject, NSFileProviderItem {
+  let itemIdentifier: NSFileProviderItemIdentifier
+  let parentItemIdentifier: NSFileProviderItemIdentifier
+  let filename: String
+  let contentType: UTType
+  let documentSize: NSNumber?
+  let itemVersion: NSFileProviderItemVersion
+  let contentModificationDate: Date?
+  let capabilities: NSFileProviderItemCapabilities
+
+  init(node: GardenNode) {
+    itemIdentifier = NSFileProviderItemIdentifier(String(node.id))
+    parentItemIdentifier = node.parentID == 0
+      ? .rootContainer : NSFileProviderItemIdentifier(String(node.parentID))
+    filename = node.name
+    contentType = node.folder ? .folder : (UTType(filenameExtension: (node.name as NSString).pathExtension) ?? .data)
+    documentSize = node.folder ? nil : NSNumber(value: node.size)
+    itemVersion = NSFileProviderItemVersion(
+      contentVersion: Data(String(node.version).utf8),
+      metadataVersion: Data(node.modified.utf8)
+    )
+    contentModificationDate = node.modifiedDate
+    capabilities = node.folder
+      ? [
+          .allowsReading, .allowsAddingSubItems, .allowsRenaming,
+          .allowsReparenting, .allowsTrashing, .allowsDeleting,
+        ]
+      : [
+          .allowsReading, .allowsWriting, .allowsRenaming,
+          .allowsReparenting, .allowsTrashing, .allowsDeleting,
+        ]
+    super.init()
+  }
+
+  init(driveName: String) {
+    itemIdentifier = .rootContainer
+    parentItemIdentifier = .rootContainer
+    filename = driveName
+    contentType = .folder
+    documentSize = nil
+    itemVersion = NSFileProviderItemVersion(
+      contentVersion: Data("root".utf8),
+      metadataVersion: Data("root".utf8)
+    )
+    contentModificationDate = nil
+    capabilities = [.allowsReading, .allowsAddingSubItems]
+    super.init()
+  }
+}
