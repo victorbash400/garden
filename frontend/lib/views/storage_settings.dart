@@ -21,9 +21,11 @@ class StorageSettings extends StatelessWidget {
       ),
       SettingsRow(
         label: 'Finder connection',
-        value: Text(controller.account == null
-            ? 'Sign in to connect'
-            : '${controller.mountedDriveCount} drives'),
+        value: Text(
+          controller.account == null
+              ? 'Sign in to connect'
+              : '${controller.finderEnabledDriveIDs.length} of ${controller.gardens.length} enabled',
+        ),
       ),
     ],
   );

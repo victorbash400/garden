@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_flutter/model/account_info.dart';
 import 'package:garden_flutter/model/garden_info.dart';
+import 'package:garden_flutter/native/finder_mounts.dart';
 import 'package:garden_flutter/services/garden_gateway.dart';
 import 'package:garden_flutter/services/preferences_store.dart';
 import 'package:garden_flutter/state/garden_controller.dart';
@@ -17,11 +18,19 @@ import 'package:garden_flutter/components/settings/settings_sidebar.dart';
 
 class MemoryPreferences implements PreferencesStore {
   int limit = 20;
+  bool complete = true;
   @override
   Future<int> readCacheLimit() async => limit;
   @override
   Future<void> saveCacheLimit(int gib) async {
     limit = gib;
+  }
+
+  @override
+  Future<bool> onboardingComplete(String accountId) async => complete;
+  @override
+  Future<void> completeOnboarding(String accountId) async {
+    complete = true;
   }
 }
 
@@ -110,7 +119,95 @@ class PendingGateway extends TestGateway {
   }
 }
 
+class TestFinder implements FinderMounts {
+  @override
+  final Set<int> mountedDriveIDs = {};
+  Set<int> enabledIDs = {};
+  int? openedID;
+  bool openedSettings = false;
+
+  @override
+  Future<void> sync(AccountInfo account, List<GardenInfo> drives) async {
+    mountedDriveIDs
+      ..clear()
+      ..addAll(drives.map((drive) => drive.id));
+  }
+
+  @override
+  Future<Set<int>> enabled(
+    AccountInfo account,
+    List<GardenInfo> drives,
+  ) async => enabledIDs;
+
+  @override
+  Future<void> open(AccountInfo account, int driveID) async {
+    openedID = driveID;
+  }
+
+  @override
+  Future<void> openSettings() async {
+    openedSettings = true;
+  }
+
+  @override
+  Future<void> signal(
+    AccountInfo account,
+    int driveID,
+    List<int> parentIDs,
+  ) async {}
+
+  @override
+  Future<void> signOut(AccountInfo account) async {
+    mountedDriveIDs.clear();
+  }
+}
+
 void main() {
+  testWidgets('first run creates a drive and checks Finder before continuing', (
+    tester,
+  ) async {
+    final preferences = MemoryPreferences()..complete = false;
+    final finder = TestFinder();
+    final controller = GardenController(
+      TestGateway(),
+      preferences,
+      finder: finder,
+      files: FilesController(FilesFixture()),
+    );
+    await controller.signIn('garden@example.com', 'password');
+    await tester.pumpWidget(GardenApp(controller: controller));
+    expect(controller.page, GardenPage.setup);
+    expect(find.byType(GardenSidebar), findsNothing);
+    expect(find.text('Use Garden without Finder'), findsOneWidget);
+    await tester.tap(find.text('Create drive').first);
+    await tester.pumpAndSettle();
+    expect(find.byType(Dialog), findsOneWidget);
+    await tester.enterText(find.byType(TextField), 'Projects');
+    await tester.pump();
+    await tester.tap(find.text('Create drive').last);
+    await tester.pumpAndSettle();
+    await controller.checkFinder();
+    await tester.pumpAndSettle();
+    expect(controller.error, isNull);
+    expect(controller.gardens.map((drive) => drive.id), [1]);
+    expect(finder.mountedDriveIDs, {1});
+    expect(find.text('Not enabled'), findsOneWidget);
+    await tester.tap(find.text('Open System Settings'));
+    await tester.pumpAndSettle();
+    expect(finder.openedSettings, isTrue);
+    finder.enabledIDs = {1};
+    await tester.tap(find.text('Check Finder'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Open in Finder'));
+    await tester.pumpAndSettle();
+    expect(finder.openedID, 1);
+    await tester.tap(find.text('Continue in Garden'));
+    await tester.pumpAndSettle();
+    expect(preferences.complete, isTrue);
+    expect(controller.page, GardenPage.gardens);
+    expect(find.byType(GardenSidebar), findsOneWidget);
+  });
+
   testWidgets('hosted sign-in omits the local demo account', (tester) async {
     final controller = GardenController(TestGateway(), MemoryPreferences());
     await tester.pumpWidget(GardenApp(controller: controller));
@@ -123,6 +220,7 @@ void main() {
       MemoryPreferences(),
       localServer: true,
     );
+    await controller.initialize();
     await tester.pumpWidget(GardenApp(controller: controller));
     expect(find.text('Use demo account'), findsOneWidget);
   });
@@ -133,31 +231,27 @@ void main() {
       ..expiredSavedLogin = true;
     final controller = GardenController(gateway, MemoryPreferences());
     await controller.initialize();
-    await controller.continueSavedLogin();
     expect(controller.savedEmail, isNull);
     expect(gateway.savedEmail, isNull);
-    expect(controller.error, 'Saved login expired. Sign in again.');
+    expect(controller.page, GardenPage.signIn);
   });
 
-  testWidgets('saved login waits for Continue and remember is optional', (
-    tester,
-  ) async {
-    final gateway = TestGateway()..savedEmail = 'saved@example.com';
-    final controller = GardenController(gateway, MemoryPreferences());
-    await controller.initialize();
-    expect(gateway.restoreCalls, 0);
-    await tester.pumpWidget(GardenApp(controller: controller));
-    expect(find.text('Continue as saved@example.com'), findsOneWidget);
-    await tester.tap(find.text('Continue as saved@example.com'));
-    await tester.pumpAndSettle();
-    expect(gateway.restoreCalls, 1);
-    expect(controller.account!.email, 'saved@example.com');
-    await controller.signOut();
-    controller.setRememberLogin(true);
-    await controller.signIn('new@example.com', 'password');
-    expect(gateway.remembered, isTrue);
-    expect(gateway.savedEmail, 'new@example.com');
-  });
+  testWidgets(
+    'saved login restores automatically and new login is remembered',
+    (tester) async {
+      final gateway = TestGateway()..savedEmail = 'saved@example.com';
+      final controller = GardenController(gateway, MemoryPreferences());
+      await controller.initialize();
+      expect(gateway.restoreCalls, 1);
+      await tester.pumpWidget(GardenApp(controller: controller));
+      expect(find.text('Continue as saved@example.com'), findsNothing);
+      expect(controller.account!.email, 'saved@example.com');
+      await controller.signOut();
+      await controller.signIn('new@example.com', 'password');
+      expect(gateway.remembered, isTrue);
+      expect(gateway.savedEmail, 'new@example.com');
+    },
+  );
 
   testWidgets(
     'Settings replaces the sidebar and Back restores the previous drive view',
@@ -197,6 +291,7 @@ void main() {
       files: FilesController(FilesFixture()),
       localServer: true,
     );
+    await controller.initialize();
     await tester.pumpWidget(GardenApp(controller: controller));
     expect(find.byType(TextField), findsNWidgets(2));
     expect(find.byType(GardenSidebar), findsNothing);
@@ -250,6 +345,7 @@ void main() {
         MemoryPreferences(),
         files: FilesController(FilesFixture()),
       );
+      await controller.initialize();
       await tester.pumpWidget(GardenApp(controller: controller));
       await tester.tap(find.text('Create account'));
       await tester.pumpAndSettle();
@@ -334,7 +430,7 @@ void main() {
     final controller = GardenController(gateway, MemoryPreferences());
     await controller.signIn('garden@example.com', 'password');
     expect(controller.account!.email, 'garden@example.com');
-    expect(controller.page, GardenPage.gardens);
+    expect(controller.page, GardenPage.starting);
     expect(controller.error, contains('Cannot refresh Gardens.'));
   });
 
@@ -343,9 +439,8 @@ void main() {
   ) async {
     final gateway = TestGateway();
     final controller = GardenController(gateway, MemoryPreferences());
+    await controller.initialize();
     await tester.pumpWidget(GardenApp(controller: controller));
-    await tester.tap(find.text('Sign in'));
-    await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).at(0), 'garden@example.com');
     await tester.enterText(find.byType(TextField).at(1), 'password');
     await tester.pump();

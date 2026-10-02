@@ -1,6 +1,7 @@
 import FileProvider
 import Foundation
 import Security
+import AppKit
 
 enum FinderDomainManager {
   static func identifier(accountID: String, driveID: Int) -> String {
@@ -80,6 +81,39 @@ enum FinderDomainManager {
       }
     }
     return ids
+  }
+
+  static func enabled(accountID: String, driveIDs: [Int]) async throws -> [Int] {
+    let current = try await domains()
+    return driveIDs.filter { driveID in
+      current.contains { domain in
+        domain.identifier.rawValue == identifier(accountID: accountID, driveID: driveID)
+          && domain.userEnabled && !domain.isDisconnected
+      }
+    }
+  }
+
+  static func open(accountID: String, driveID: Int) async throws {
+    let id = identifier(accountID: accountID, driveID: driveID)
+    guard let domain = try await domains().first(where: { $0.identifier.rawValue == id }),
+          let manager = NSFileProviderManager(for: domain) else {
+      throw FinderBridgeError.domainMissing
+    }
+    let url = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<URL, Error>) in
+      manager.getUserVisibleURL(for: .rootContainer) { url, error in
+        if let error { continuation.resume(throwing: error) }
+        else if let url { continuation.resume(returning: url) }
+        else { continuation.resume(throwing: FinderBridgeError.domainMissing) }
+      }
+    }
+    guard NSWorkspace.shared.open(url) else { throw FinderBridgeError.cannotOpen }
+  }
+
+  static func openSettings() throws {
+    guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.systempreferences"),
+          NSWorkspace.shared.open(url) else {
+      throw FinderBridgeError.cannotOpenSettings
+    }
   }
 
   static func signal(accountID: String, driveID: Int, parentIDs: [Int]) async throws {

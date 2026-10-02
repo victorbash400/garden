@@ -9,4 +9,10 @@ class LocalPreferences implements PreferencesStore {
       await _storage.getInt('cacheLimitGiB') ?? 20;
   @override
   Future<void> saveCacheLimit(int gib) => _storage.setInt('cacheLimitGiB', gib);
+  @override
+  Future<bool> onboardingComplete(String accountId) async =>
+      await _storage.getBool('onboarding.$accountId') ?? false;
+  @override
+  Future<void> completeOnboarding(String accountId) =>
+      _storage.setBool('onboarding.$accountId', true);
 }

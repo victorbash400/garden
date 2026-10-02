@@ -6,7 +6,7 @@ import '../model/account_info.dart';
 import '../model/garden_info.dart';
 import '../services/garden_gateway.dart';
 import '../services/preferences_store.dart';
-import '../native/mac_finder_mounts.dart';
+import '../native/finder_mounts.dart';
 import '../native/mac_finder_updates.dart';
 import 'files_controller.dart';
 import 'account_security_controller.dart';
@@ -14,10 +14,12 @@ import 'account_security_controller.dart';
 enum SettingsSection { account, storage }
 
 enum GardenPage {
+  starting,
   welcome,
   signIn,
   register,
   verify,
+  setup,
   gardens,
   create,
   join,
@@ -36,19 +38,19 @@ class GardenController extends ChangeNotifier {
     this.localServer = false,
   });
   final AccountSecurityController? security;
-  final MacFinderMounts? finder;
+  final FinderMounts? finder;
   final MacFinderUpdates? finderUpdates;
-  int get mountedDriveCount => finder?.mountedDriveIDs.length ?? 0;
+  Set<int> finderEnabledDriveIDs = {};
+  bool finderSyncing = false;
   final bool localServer;
   final FilesController? files;
   final GardenGateway gateway;
   final PreferencesStore preferences;
-  GardenPage page = GardenPage.signIn;
+  GardenPage page = GardenPage.starting;
   SettingsSection settingsSection = SettingsSection.account;
   GardenPage _settingsReturn = GardenPage.gardens;
   AccountInfo? account;
   String? savedEmail;
-  bool rememberLogin = false;
   List<GardenInfo> gardens = [];
   GardenInfo? selected;
   bool _busy = false;
@@ -60,11 +62,25 @@ class GardenController extends ChangeNotifier {
   String registrationEmail = '';
   String registrationPassword = '';
 
-  Future<void> initialize() => _request(() async {
+  Future<void> initialize() => _request(_loadStartup);
+
+  Future<void> _loadStartup() async {
     cacheLimit = await preferences.readCacheLimit();
     savedEmail = await gateway.savedLogin();
     await security?.checkConfiguration();
-  });
+    if (savedEmail == null || security?.touchId == true) {
+      page = GardenPage.signIn;
+      return;
+    }
+    final restored = await gateway.restoreAccount();
+    if (restored == null) {
+      await gateway.forgetSavedLogin();
+      savedEmail = null;
+      page = GardenPage.signIn;
+      return;
+    }
+    await _finishAuthentication(restored);
+  }
 
   void navigate(GardenPage destination) {
     if (busy) return;
@@ -91,50 +107,40 @@ class GardenController extends ChangeNotifier {
       GardenPage.create ||
       GardenPage.join ||
       GardenPage.files => GardenPage.gardens,
+      GardenPage.setup => GardenPage.setup,
       GardenPage.settings =>
         account == null ? GardenPage.signIn : _settingsReturn,
       _ => GardenPage.signIn,
     });
   }
 
-  void setRememberLogin(bool value) {
-    rememberLogin = value;
-    notifyListeners();
-  }
-
   Future<void> continueSavedLogin() => _request(() async {
-    account = await gateway.restoreAccount();
-    if (account == null) {
+    final restored = await gateway.restoreAccount();
+    if (restored == null) {
       await gateway.forgetSavedLogin();
       savedEmail = null;
       throw StateError('Saved login expired. Sign in again.');
     }
-    gardens = await gateway.listGardens();
-    page = GardenPage.gardens;
-    _queueFinderSync();
+    await _finishAuthentication(restored);
   });
   Future<void> forgetSavedLogin() => _request(() async {
     await gateway.forgetSavedLogin();
     savedEmail = null;
   });
   Future<void> signIn(String email, String password) => _request(() async {
-    account = await gateway.signIn(
+    final signedIn = await gateway.signIn(
       email.trim(),
       password,
-      remember: rememberLogin,
+      remember: true,
     );
-    page = GardenPage.gardens;
-    gardens = await gateway.listGardens();
-    _queueFinderSync();
+    await _finishAuthentication(signedIn);
   });
 
   Future<void> signInWithPasskey() => _request(() async {
     final auth = security;
     if (auth == null) throw StateError('Passkeys are unavailable.');
-    account = await auth.gateway.signInWithPasskey(remember: rememberLogin);
-    gardens = await gateway.listGardens();
-    page = GardenPage.gardens;
-    _queueFinderSync();
+    final signedIn = await auth.gateway.signInWithPasskey(remember: true);
+    await _finishAuthentication(signedIn);
   });
 
   Future<void> register(String email, String password) => _request(() async {
@@ -147,16 +153,14 @@ class GardenController extends ChangeNotifier {
   Future<void> verify(String code) => _request(() async {
     final id = registrationId;
     if (id == null) throw StateError('Registration has not started.');
-    account = await gateway.finishRegistration(
+    final signedIn = await gateway.finishRegistration(
       id,
       code.trim(),
       registrationPassword,
     );
     registrationPassword = '';
     registrationId = null;
-    page = GardenPage.gardens;
-    gardens = await gateway.listGardens();
-    _queueFinderSync();
+    await _finishAuthentication(signedIn);
   });
 
   Future<void> resendVerification() => _request(() async {
@@ -170,6 +174,54 @@ class GardenController extends ChangeNotifier {
     gardens = await gateway.listGardens();
     _queueFinderSync();
   });
+
+  Future<void> _finishAuthentication(AccountInfo signedIn) async {
+    account = signedIn;
+    savedEmail = signedIn.email;
+    page = GardenPage.starting;
+    gardens = await gateway.listGardens();
+    page = await preferences.onboardingComplete(signedIn.id)
+        ? GardenPage.gardens
+        : GardenPage.setup;
+    _queueFinderSync();
+  }
+
+  Future<void> retryLoading() => _request(() async {
+    final signedIn = account;
+    if (signedIn == null) {
+      await _loadStartup();
+      return;
+    }
+    await _finishAuthentication(signedIn);
+  });
+
+  Future<void> checkFinder() => _request(() async {
+    await _finderWork;
+    final signedIn = account;
+    if (signedIn == null) throw StateError('Sign in first.');
+    finderEnabledDriveIDs = await finder?.enabled(signedIn, gardens) ?? {};
+  });
+
+  Future<void> openInFinder(GardenInfo drive) => _request(() async {
+    final signedIn = account;
+    if (signedIn == null || finder == null) {
+      throw StateError('Finder is unavailable.');
+    }
+    await finder!.open(signedIn, drive.id);
+  });
+
+  Future<void> openFinderSettings() => _request(() async {
+    if (finder == null) throw StateError('Finder is unavailable.');
+    await finder!.openSettings();
+  });
+
+  Future<void> finishSetup() => _request(() async {
+    final signedIn = account;
+    if (signedIn == null) throw StateError('Sign in first.');
+    if (gardens.isEmpty) throw StateError('Create or join a drive first.');
+    await preferences.completeOnboarding(signedIn.id);
+    page = GardenPage.gardens;
+  });
   Future<void> _showDrive(GardenInfo drive) async {
     final browser = files;
     if (browser == null) throw StateError('File browser is unavailable.');
@@ -180,16 +232,20 @@ class GardenController extends ChangeNotifier {
   }
 
   Future<void> create(String name) => _request(() async {
+    final onboarding = page == GardenPage.setup;
     final drive = await gateway.createGarden(name.trim());
     gardens = [...gardens, drive];
+    selected = drive;
     _queueFinderSync();
-    await _showDrive(drive);
+    if (!onboarding) await _showDrive(drive);
   });
   Future<void> join(String code) => _request(() async {
+    final onboarding = page == GardenPage.setup;
     final drive = await gateway.joinGarden(code.trim());
     gardens = [...gardens.where((item) => item.id != drive.id), drive];
+    selected = drive;
     _queueFinderSync();
-    await _showDrive(drive);
+    if (!onboarding) await _showDrive(drive);
   });
   Future<void> openDrive(GardenInfo drive) => _request(() async {
     if (files?.drive?.id == drive.id) {
@@ -203,6 +259,7 @@ class GardenController extends ChangeNotifier {
   Future<void> deleteDrive(GardenInfo drive) => _request(() async {
     await gateway.deleteDrive(drive.id);
     gardens = gardens.where((item) => item.id != drive.id).toList();
+    finderEnabledDriveIDs.remove(drive.id);
     _queueFinderSync();
     if (files?.drive?.id == drive.id) {
       await files!.close();
@@ -219,6 +276,8 @@ class GardenController extends ChangeNotifier {
     account = null;
     gardens = [];
     selected = null;
+    finderEnabledDriveIDs = {};
+    finderSyncing = false;
     registrationPassword = '';
     registrationId = null;
     savedEmail = null;
@@ -236,14 +295,19 @@ class GardenController extends ChangeNotifier {
     final current = account;
     if (current == null) return;
     final drives = [...gardens];
+    finderSyncing = true;
+    notifyListeners();
     _finderWork = _finderWork.then((_) async {
       if (account?.id != current.id) return;
       try {
         await finder?.sync(current, drives);
+        finderEnabledDriveIDs = await finder?.enabled(current, drives) ?? {};
         await finderUpdates?.sync(current, drives);
-        notifyListeners();
       } catch (failure) {
         finderUpdateError(failure);
+      } finally {
+        finderSyncing = false;
+        notifyListeners();
       }
     });
   }

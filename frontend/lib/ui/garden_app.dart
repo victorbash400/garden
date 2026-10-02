@@ -9,6 +9,8 @@ import '../views/account_form.dart';
 import '../views/files_view.dart';
 import '../views/gardens_view.dart';
 import '../views/settings_view.dart';
+import '../views/setup_view.dart';
+import '../views/startup_view.dart';
 import '../views/value_form.dart';
 import '../views/verification_view.dart';
 import '../views/welcome_view.dart';
@@ -27,7 +29,7 @@ class GardenApp extends StatelessWidget {
       builder: (context, _) => Scaffold(
         body: Row(
           children: [
-            if (controller.account != null)
+            if (_showSidebar)
               AnimatedSize(
                 duration: MediaQuery.disableAnimationsOf(context)
                     ? Duration.zero
@@ -51,7 +53,7 @@ class GardenApp extends StatelessWidget {
                     ),
                   Expanded(
                     child: SettingsTransition(
-                      enabled: controller.account != null,
+                      enabled: _showSidebar,
                       child: KeyedSubtree(
                         key: ValueKey(controller.page),
                         child: _content(),
@@ -66,7 +68,22 @@ class GardenApp extends StatelessWidget {
       ),
     ),
   );
+  bool get _showSidebar =>
+      controller.account != null &&
+      const {
+        GardenPage.gardens,
+        GardenPage.create,
+        GardenPage.join,
+        GardenPage.files,
+        GardenPage.settings,
+      }.contains(controller.page);
+
   Widget _content() => switch (controller.page) {
+    GardenPage.starting => StartupView(
+      error: controller.error,
+      onRetry: controller.retryLoading,
+      onSignIn: () => controller.navigate(GardenPage.signIn),
+    ),
     GardenPage.welcome => WelcomeView(
       onSignIn: () => controller.navigate(GardenPage.signIn),
       onRegister: () => controller.navigate(GardenPage.register),
@@ -81,8 +98,6 @@ class GardenApp extends StatelessWidget {
         savedEmail: controller.savedEmail,
         onContinueSaved: controller.continueSavedLogin,
         onForgetSaved: controller.forgetSavedLogin,
-        remember: controller.rememberLogin,
-        onRememberChanged: controller.setRememberLogin,
         showDemo: controller.localServer,
         onCreateAccount: () => controller.navigate(GardenPage.register),
         busy: controller.busy,
@@ -93,6 +108,7 @@ class GardenApp extends StatelessWidget {
     GardenPage.register => Center(
       child: AccountForm(
         key: const ValueKey('register'),
+        isRegistration: true,
         busy: controller.busy,
         submitLabel: 'Create account',
         onSubmit: controller.register,
@@ -100,6 +116,7 @@ class GardenApp extends StatelessWidget {
       ),
     ),
     GardenPage.verify => VerificationView(controller: controller),
+    GardenPage.setup => SetupView(controller: controller),
     GardenPage.gardens => GardensView(controller: controller),
     GardenPage.create => Center(
       child: ValueForm(

@@ -4,11 +4,15 @@ import FlutterMacOS
 enum FinderBridgeError: LocalizedError {
   case invalidArguments
   case domainMissing
+  case cannotOpen
+  case cannotOpenSettings
 
   var errorDescription: String? {
     switch self {
     case .invalidArguments: "Garden Finder received invalid arguments."
     case .domainMissing: "Garden Finder drive is not registered."
+    case .cannotOpen: "Finder could not open this drive."
+    case .cannotOpenSettings: "System Settings could not open."
     }
   }
 }
@@ -33,6 +37,15 @@ class MainFlutterWindow: NSWindow {
     FlutterMethodChannel(
       name: "garden/finder", binaryMessenger: flutterViewController.engine.binaryMessenger
     ).setMethodCallHandler { call, result in
+      if call.method == "openSettings" {
+        do {
+          try FinderDomainManager.openSettings()
+          result(nil)
+        } catch {
+          result(FlutterError(code: "finder_error", message: error.localizedDescription, details: nil))
+        }
+        return
+      }
       guard let arguments = call.arguments as? [String: Any],
             let accountID = arguments["accountID"] as? String else {
         result(FlutterError(code: "invalid_arguments", message: "Missing account ID", details: nil))
@@ -75,6 +88,17 @@ class MainFlutterWindow: NSWindow {
             result(nil)
           case "tokenIDs":
             result(try await FinderDomainManager.tokenIDs(accountID: accountID))
+          case "enabled":
+            guard let driveIDs = arguments["driveIDs"] as? [Int] else {
+              throw FinderBridgeError.invalidArguments
+            }
+            result(try await FinderDomainManager.enabled(accountID: accountID, driveIDs: driveIDs))
+          case "open":
+            guard let driveID = arguments["driveID"] as? Int else {
+              throw FinderBridgeError.invalidArguments
+            }
+            try await FinderDomainManager.open(accountID: accountID, driveID: driveID)
+            result(nil)
           case "signal":
             guard let driveID = arguments["driveID"] as? Int,
                   let parentIDs = arguments["parentIDs"] as? [Int] else {

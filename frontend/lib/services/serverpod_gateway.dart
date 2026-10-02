@@ -108,8 +108,10 @@ class ServerpodGateway implements GardenGateway {
       registrationToken: token,
       password: password,
     );
-    await client.auth.updateSignedInUser(result);
-    return _account();
+    await _storeSignIn(result, true);
+    final account = await _account();
+    await preferences.setString(savedEmailKey, account.email);
+    return account;
   }
 
   @override

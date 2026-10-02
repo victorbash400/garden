@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../components/garden_field.dart';
 import '../components/passkey_sign_in_button.dart';
 import '../state/account_security_controller.dart';
-import '../components/remember_login_control.dart';
 import '../components/saved_login_button.dart';
 import '../components/demo_account_button.dart';
 import '../components/garden_button.dart';
@@ -19,22 +18,20 @@ class AccountForm extends StatefulWidget {
     this.onPasskey,
     this.security,
     this.onCreateAccount,
+    this.isRegistration = false,
     this.showDemo = false,
     this.savedEmail,
     this.onContinueSaved,
     this.onForgetSaved,
-    this.remember = false,
-    this.onRememberChanged,
   });
   final AccountSecurityController? security;
   final VoidCallback? onPasskey;
   final String? savedEmail;
   final VoidCallback? onContinueSaved;
   final VoidCallback? onForgetSaved;
-  final bool remember;
-  final ValueChanged<bool>? onRememberChanged;
   final bool busy;
   final bool showDemo;
+  final bool isRegistration;
   final String submitLabel;
   final void Function(String email, String password) onSubmit;
   final VoidCallback? onBack;
@@ -107,9 +104,9 @@ class _AccountFormState extends State<AccountForm> {
               GardenField(
                 label: 'Password',
                 autofillHints: [
-                  widget.showDemo
-                      ? AutofillHints.password
-                      : AutofillHints.newPassword,
+                  widget.isRegistration
+                      ? AutofillHints.newPassword
+                      : AutofillHints.password,
                 ],
                 controller: password,
                 obscure: true,
@@ -123,13 +120,6 @@ class _AccountFormState extends State<AccountForm> {
                   onFillDemo: widget.busy ? null : fillDemo,
                   onCreateAccount: widget.busy ? null : widget.onCreateAccount,
                   showCreateAccount: widget.onCreateAccount != null,
-                ),
-              ],
-              if (widget.onRememberChanged != null) ...[
-                const SizedBox(height: 16),
-                RememberLoginControl(
-                  value: widget.remember,
-                  onChanged: widget.busy ? null : widget.onRememberChanged,
                 ),
               ],
               const SizedBox(height: 24),
