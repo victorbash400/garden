@@ -1,16 +1,13 @@
-import 'dart:convert';
 import 'dart:io';
-import 'package:googleapis/cloudtasks/v2.dart' as tasks;
-import 'package:googleapis_auth/auth_io.dart';
+import 'package:aws_client/scheduler.dart' as aws;
 import 'package:serverpod/serverpod.dart';
 import '../generated/future_calls.dart';
 import 'upload_cleanup_route.dart';
 
 class UploadCleanupTasks {
-  static late tasks.CloudTasksApi _api;
-  static late String _queue;
-  static late String _url;
-  static late String _secret;
+  static aws.Scheduler? _scheduler;
+  static late String _lambdaArn;
+  static late String _roleArn;
 
   static bool _local(Serverpod pod) =>
       pod.runMode == ServerpodRunMode.development ||
@@ -18,23 +15,31 @@ class UploadCleanupTasks {
 
   static Future<void> configure(Serverpod pod) async {
     if (_local(pod)) return;
-    _queue = Platform.environment['GARDEN_UPLOAD_CLEANUP_QUEUE'] ?? '';
-    _url = Platform.environment['GARDEN_UPLOAD_CLEANUP_URL'] ?? '';
-    _secret = pod.getPassword('uploadCleanupToken') ?? '';
-    final credentials = pod.getPassword('gcpServiceAccount');
-    if (_queue.isEmpty ||
-        !Uri.parse(_url).isScheme('https') ||
-        _secret.length < 32 ||
-        credentials == null) {
-      throw StateError('Upload cleanup Cloud Tasks configuration is required.');
+    final region = Platform.environment['GARDEN_S3_REGION'];
+    _lambdaArn = Platform.environment['GARDEN_UPLOAD_CLEANUP_LAMBDA_ARN'] ?? '';
+    _roleArn = Platform.environment['GARDEN_UPLOAD_CLEANUP_ROLE_ARN'] ?? '';
+    final token = pod.getPassword('uploadCleanupToken');
+    final accessKey = pod.getPassword('AWSAccessKeyId');
+    final secretKey = pod.getPassword('AWSSecretKey');
+    if (region == null ||
+        region.isEmpty ||
+        _lambdaArn.isEmpty ||
+        _roleArn.isEmpty ||
+        token == null ||
+        token.length < 32 ||
+        accessKey == null ||
+        secretKey == null) {
+      throw StateError('AWS upload cleanup configuration is required.');
     }
-    final client = await clientViaServiceAccount(
-      ServiceAccountCredentials.fromJson(credentials),
-      [tasks.CloudTasksApi.cloudPlatformScope],
+    _scheduler = aws.Scheduler(
+      region: region,
+      credentials: aws.AwsClientCredentials(
+        accessKey: accessKey,
+        secretKey: secretKey,
+      ),
     );
-    _api = tasks.CloudTasksApi(client);
     pod.webServer.addRoute(
-      UploadCleanupRoute(_secret),
+      UploadCleanupRoute(token),
       '/internal/upload-cleanup',
     );
   }
@@ -47,25 +52,28 @@ class UploadCleanupTasks {
           .expire(versionId);
       return;
     }
-    await _api.projects.locations.queues.tasks.create(
-      tasks.CreateTaskRequest(
-        task: tasks.Task(
-          scheduleTime: DateTime.now()
-              .toUtc()
-              .add(const Duration(hours: 24))
-              .toIso8601String(),
-          httpRequest: tasks.HttpRequest(
-            url: _url,
-            httpMethod: 'POST',
-            headers: {
-              'Authorization': 'Bearer $_secret',
-              'Content-Type': 'text/plain',
-            },
-            body: base64Encode(utf8.encode('$versionId')),
-          ),
+    final due = DateTime.now().toUtc().add(
+      const Duration(hours: 24, minutes: 5),
+    );
+    final timestamp = due.toIso8601String().substring(0, 19);
+    await _scheduler!.createSchedule(
+      name: 'upload-$versionId',
+      groupName: 'garden-upload-cleanup',
+      scheduleExpression: 'at($timestamp)',
+      scheduleExpressionTimezone: 'UTC',
+      actionAfterCompletion: aws.ActionAfterCompletion.delete,
+      flexibleTimeWindow: aws.FlexibleTimeWindow(
+        mode: aws.FlexibleTimeWindowMode.off,
+      ),
+      target: aws.Target(
+        arn: _lambdaArn,
+        roleArn: _roleArn,
+        input: '$versionId',
+        retryPolicy: aws.RetryPolicy(
+          maximumEventAgeInSeconds: 3600,
+          maximumRetryAttempts: 3,
         ),
       ),
-      _queue,
     );
   }
 }

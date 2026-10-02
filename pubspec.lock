@@ -73,6 +73,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.13.1"
+  aws_client:
+    dependency: transitive
+    description:
+      name: aws_client
+      sha256: "16085d52b40c27077f7a4240735091a69577c6bedcc852f91ff770c39f124882"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.10.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -1242,6 +1250,14 @@ packages:
     description:
       name: serverpod_cloud_storage_gcp
       sha256: f5990c748b96483b23f115c774d281deeb8db163dd14307b35c2105f325e7af3
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.3"
+  serverpod_cloud_storage_s3:
+    dependency: transitive
+    description:
+      name: serverpod_cloud_storage_s3
+      sha256: "96083aebdedd868a9b3e1838ed1d1ba2bc5427737a748120f73daa71484f5b17"
       url: "https://pub.dev"
     source: hosted
     version: "4.0.3"
