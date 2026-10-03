@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'drive_folder_index.dart';
+import 'drive_browser_state.dart';
+import 'file_import_controller.dart';
 
 import '../utils/error_message.dart';
 
@@ -9,12 +11,15 @@ import 'package:garden_client/garden_client.dart';
 
 import '../model/garden_info.dart';
 import '../services/files/files_gateway.dart';
-import '../services/files/file_transfer.dart';
 
 class FilesController extends ChangeNotifier {
-  FilesController(this.gateway);
+  FilesController(this.gateway) {
+    imports = FileImportController(gateway, _acceptImported);
+  }
   final FilesGateway gateway;
-  final folders = DriveFolderIndex();
+  late final FileImportController imports;
+  final Map<int, DriveBrowserState> _sessions = {};
+  var folders = DriveFolderIndex();
   GardenInfo? drive;
   List<FileNode> nodes = [];
   List<FileNode> path = [];
@@ -31,8 +36,32 @@ class FilesController extends ChangeNotifier {
   int get parentId => path.isEmpty ? 0 : path.last.id!;
 
   Future<void> open(GardenInfo garden) async {
-    await close();
+    if (drive?.id == garden.id) return;
+    if (drive != null) {
+      if (!live) folders.invalidate();
+      _sessions[drive!.id] = DriveBrowserState(
+        folders: folders,
+        path: path.toList(),
+        selected: selected,
+        revision: revision,
+      );
+    }
+    await _detach();
     drive = garden;
+    final session = _sessions.remove(garden.id);
+    if (session != null) {
+      folders = session.folders;
+      path = session.path;
+      selected = session.selected;
+      revision = session.revision;
+      if (folders.isLoaded(parentId)) {
+        nodes = folders.directory(parentId);
+        _sort();
+        _subscribe(garden.id, revision);
+        notifyListeners();
+        return;
+      }
+    }
     await _request(() async {
       _buffer = [];
       await _load();
@@ -227,27 +256,16 @@ class FilesController extends ChangeNotifier {
     nodes = nodes.where((item) => item.id != node.id).toList();
     selected = null;
   });
-  Future<void> import(String name, int size, Stream<List<int>> bytes) =>
-      _request(() async {
-        final node = await gateway.create(
-          drive!.id,
-          parentId,
-          name,
-          NodeKind.file,
-        );
-        _upsert(node);
-        final saved = await FileTransfer(gateway).upload(
-          node,
-          size,
-          bytes,
-          onProgress: (sent) {
-            progress = size == 0 ? 1 : sent / size;
-            notifyListeners();
-          },
-        );
-        _upsert(saved);
-        selected = saved;
-      });
+  void _acceptImported(int driveId, FileNode node) {
+    final index = drive?.id == driveId ? folders : _sessions[driveId]?.folders;
+    index?.update(node);
+    if (node.kind == NodeKind.folder && !node.deleted) {
+      index?.markEmpty(node.id!);
+    }
+    if (drive?.id == driveId) _upsert(node);
+    notifyListeners();
+  }
+
   void _upsert(FileNode node) {
     folders.update(node);
     nodes = nodes.where((item) => item.id != node.id).toList();
@@ -272,11 +290,17 @@ class FilesController extends ChangeNotifier {
   }
 
   Future<void> close() async {
+    await imports.cancelAndWait();
+    _sessions.clear();
+    await _detach();
+  }
+
+  Future<void> _detach() async {
     _generation++;
     await _subscription?.cancel();
     _subscription = null;
     drive = null;
-    folders.clear();
+    folders = DriveFolderIndex();
     nodes = [];
     path = [];
     selected = null;
@@ -290,6 +314,7 @@ class FilesController extends ChangeNotifier {
   void dispose() {
     _generation++;
     unawaited(_subscription?.cancel());
+    imports.dispose();
     super.dispose();
   }
 }

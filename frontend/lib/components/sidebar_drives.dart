@@ -41,7 +41,9 @@ class _SidebarDrivesState extends State<SidebarDrives> {
                 files!.path.isEmpty,
             expanded:
                 files?.drive?.id == drive.id && !collapsed.contains(drive.id),
-            onOpen: controller.busy ? null : () => controller.openDrive(drive),
+            onOpen: controller.busy
+                ? null
+                : () => controller.openDrive(drive, root: true),
             onToggle:
                 controller.busy ||
                     files?.drive?.id != drive.id ||

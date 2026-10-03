@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:garden_client/garden_client.dart';
 
 import 'files_gateway.dart';
+import 'transfer_cancellation.dart';
 
 class FileTransfer {
   const FileTransfer(this.gateway);
@@ -14,12 +15,16 @@ class FileTransfer {
     int size,
     Stream<List<int>> input, {
     void Function(int)? onProgress,
+    TransferCancellation? cancellation,
+    void Function()? onCommit,
   }) async {
+    cancellation?.check();
     final version = await gateway.begin(node.id!, node.version, size);
     var buffer = BytesBuilder(copy: false);
     var index = 0;
     var sent = 0;
     await for (final bytes in input) {
+      cancellation?.check();
       var offset = 0;
       while (offset < bytes.length) {
         final remaining = chunkSize - buffer.length;
@@ -27,6 +32,7 @@ class FileTransfer {
         buffer.add(bytes.sublist(offset, end));
         offset = end;
         if (buffer.length == chunkSize) {
+          cancellation?.check();
           final data = buffer.takeBytes();
           await gateway.writeChunk(
             version.id!,
@@ -39,6 +45,7 @@ class FileTransfer {
       }
     }
     if (buffer.isNotEmpty) {
+      cancellation?.check();
       final data = buffer.takeBytes();
       await gateway.writeChunk(
         version.id!,
@@ -49,6 +56,8 @@ class FileTransfer {
       onProgress?.call(sent);
     }
     if (sent != size) throw StateError('The file changed during upload.');
+    cancellation?.check();
+    onCommit?.call();
     return gateway.finish(version.id!);
   }
 

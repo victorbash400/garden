@@ -8,6 +8,7 @@ import 'package:garden_client/garden_client.dart';
 import '../../state/files_controller.dart';
 import '../../state/file_editor_controller.dart';
 import '../../services/files/file_transfer.dart';
+import '../../services/files/import_entry.dart';
 import 'file_editor_dialog.dart';
 import 'file_move_dialog.dart';
 import 'node_name_dialog.dart';
@@ -52,10 +53,16 @@ class FileActions {
   }
 
   Future<void> import() async {
+    final driveId = controller.drive!.id;
+    final parentId = controller.parentId;
     try {
-      final file = await openFile();
-      if (file == null) return;
-      await controller.import(file.name, await file.length(), file.openRead());
+      final files = await openFiles();
+      if (files.isEmpty) return;
+      final entries = <ImportEntry>[];
+      for (final file in files) {
+        entries.add(ImportFile(file.name, await file.length(), file.openRead));
+      }
+      await controller.imports.import(driveId, parentId, entries);
     } catch (failure) {
       controller.reportError(failure);
     }

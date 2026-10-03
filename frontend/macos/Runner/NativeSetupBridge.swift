@@ -1,0 +1,92 @@
+import Cocoa
+import FlutterMacOS
+import ServiceManagement
+
+enum NativeSetupBridge {
+  private static var backgroundActivity: NSObjectProtocol?
+
+  static func install(on messenger: FlutterBinaryMessenger) {
+    FlutterMethodChannel(name: "garden/setup", binaryMessenger: messenger)
+      .setMethodCallHandler { call, result in
+        do {
+          switch call.method {
+          case "status":
+            result(status())
+          case "setLaunchAtLogin":
+            guard let enabled = call.arguments as? Bool else {
+              throw FinderBridgeError.invalidArguments
+            }
+            try setLaunchAtLogin(enabled)
+            result(status())
+          case "openLoginSettings":
+            try openLoginSettings()
+            result(nil)
+          case "setBackgroundActive":
+            guard let active = call.arguments as? Bool else {
+              throw FinderBridgeError.invalidArguments
+            }
+            setBackgroundActive(active)
+            result(nil)
+          default:
+            result(FlutterMethodNotImplemented)
+          }
+        } catch {
+          result(FlutterError(code: "setup_error", message: error.localizedDescription, details: nil))
+        }
+      }
+  }
+
+  static func status() -> [String: Any] {
+    let extensionURL = Bundle.main.builtInPlugInsURL?.appendingPathComponent("GardenFinder.appex")
+    let available = extensionURL.flatMap { Bundle(url: $0)?.bundleIdentifier }
+      == "com.victorbash.garden.finder"
+    var login = "unsupported"
+    if #available(macOS 13.0, *) {
+      switch SMAppService.mainApp.status {
+      case .enabled: login = "enabled"
+      case .notRegistered: login = "disabled"
+      case .requiresApproval: login = "requiresApproval"
+      case .notFound: login = "notFound"
+      @unknown default: login = "unknown"
+      }
+    }
+    return ["finderAvailable": available, "launchAtLogin": login]
+  }
+
+  static func openLoginSettings() throws {
+    guard #available(macOS 13.0, *) else {
+      throw NSError(domain: "GardenSetup", code: 1,
+        userInfo: [NSLocalizedDescriptionKey: "Login item controls require macOS 13 or later."])
+    }
+    SMAppService.openSystemSettingsLoginItems()
+  }
+
+  private static func setLaunchAtLogin(_ enabled: Bool) throws {
+    guard #available(macOS 13.0, *) else {
+      throw NSError(domain: "GardenSetup", code: 1,
+        userInfo: [NSLocalizedDescriptionKey: "Launch at login requires macOS 13 or later."])
+    }
+    let service = SMAppService.mainApp
+    if enabled && service.status != .enabled && service.status != .requiresApproval {
+      do {
+        try service.register()
+      } catch {
+        // Registration can require approval even when macOS returns an error.
+        guard service.status == .requiresApproval else { throw error }
+      }
+    } else if !enabled && service.status != .notRegistered {
+      try service.unregister()
+    }
+  }
+
+  private static func setBackgroundActive(_ active: Bool) {
+    if active && backgroundActivity == nil {
+      backgroundActivity = ProcessInfo.processInfo.beginActivity(
+        options: .userInitiatedAllowingIdleSystemSleep,
+        reason: "Synchronize Garden drives")
+    } else if !active, let activity = backgroundActivity {
+      ProcessInfo.processInfo.endActivity(activity)
+      backgroundActivity = nil
+    }
+  }
+}

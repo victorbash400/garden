@@ -119,10 +119,13 @@ class FilesToolbar extends StatelessWidget {
                   onPressed: controller.busy ? null : onInvite,
                   icon: LucideIcons.link,
                 ),
-              ToolbarButton(
-                tooltip: 'Import file',
-                onPressed: controller.busy ? null : onImport,
-                icon: LucideIcons.upload,
+              ListenableBuilder(
+                listenable: controller.imports,
+                builder: (_, _) => ToolbarButton(
+                  tooltip: 'Import files',
+                  onPressed: controller.imports.busy ? null : onImport,
+                  icon: LucideIcons.upload,
+                ),
               ),
               SizedBox(
                 width: 32,

@@ -14,7 +14,7 @@ class DriveRowActions extends StatelessWidget {
   final GardenInfo drive;
   final GardenController controller;
   Future<void> createFolder(BuildContext context) async {
-    await controller.openDrive(drive);
+    await controller.openDrive(drive, root: true);
     final files = controller.files;
     if (context.mounted && controller.error == null && files != null) {
       await FileActions(context, files).create('folder');

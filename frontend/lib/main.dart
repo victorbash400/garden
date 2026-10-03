@@ -8,6 +8,9 @@ import 'services/serverpod_gateway.dart';
 import 'services/files/serverpod_files_gateway.dart';
 import 'native/mac_finder_mounts.dart';
 import 'native/mac_finder_updates.dart';
+import 'native/mac_system_setup.dart';
+import 'native/garden_window_lifecycle.dart';
+import 'state/native_setup_controller.dart';
 import 'state/files_controller.dart';
 import 'state/account_security_controller.dart';
 import 'state/garden_controller.dart';
@@ -22,33 +25,35 @@ Future<void> main() async {
     center: true,
     title: 'Garden',
   );
-  await windowManager.waitUntilReadyToShow(options, () async {
-    await windowManager.show();
-    await windowManager.focus();
-  });
   const serverUrl = String.fromEnvironment(
     'SERVER_URL',
     defaultValue: 'https://garden.api.serverpod.space/',
   );
   final gateway = ServerpodGateway(serverUrl);
+  final system = MacSystemSetup();
   final finder = MacFinderMounts(gateway, serverUrl);
+  final filesGateway = ServerpodFilesGateway(gateway.client);
   late final GardenController controller;
-  final finderUpdates = MacFinderUpdates(
-    gateway, finder, (failure) => controller.finderUpdateError(failure),
-  );
+  final finderUpdates = MacFinderUpdates(filesGateway, finder, system);
   controller = GardenController(
     gateway,
     LocalPreferences(),
     security: AccountSecurityController(gateway),
     finder: finder,
     finderUpdates: finderUpdates,
+    nativeSetup: NativeSetupController(system),
     localServer: const [
       'localhost',
       '127.0.0.1',
       '::1',
     ].contains(Uri.parse(serverUrl).host),
-    files: FilesController(ServerpodFilesGateway(gateway.client)),
+    files: FilesController(filesGateway),
   );
+  await GardenWindowLifecycle(controller.finderUpdateError).install();
+  await windowManager.waitUntilReadyToShow(options, () async {
+    await windowManager.show();
+    await windowManager.focus();
+  });
   runApp(GardenApp(controller: controller));
   unawaited(controller.initialize());
 }

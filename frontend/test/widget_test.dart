@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_flutter/model/account_info.dart';
 import 'package:garden_flutter/model/garden_info.dart';
 import 'package:garden_flutter/native/finder_mounts.dart';
+import 'package:garden_flutter/native/finder_status.dart';
 import 'package:garden_flutter/services/garden_gateway.dart';
 import 'package:garden_flutter/services/preferences_store.dart';
 import 'package:garden_flutter/state/garden_controller.dart';
@@ -127,16 +128,17 @@ class TestFinder implements FinderMounts {
   }
 
   @override
-  Future<Set<int>> enabled(
+  Future<FinderStatus> status(
     AccountInfo account,
     List<GardenInfo> drives,
-  ) async => enabledIDs.intersection(drives.map((drive) => drive.id).toSet());
-
-  @override
-  Future<bool> permissionRequired(
-    AccountInfo account,
-    List<GardenInfo> drives,
-  ) async => requiresPermission;
+  ) async {
+    final ids = drives.map((drive) => drive.id).toSet();
+    return FinderStatus(
+      registered: ids.intersection(mountedDriveIDs),
+      enabled: ids.intersection(enabledIDs),
+      disabled: requiresPermission ? ids : {},
+    );
+  }
 
   @override
   Future<void> open(AccountInfo account, int driveID) async {
@@ -202,7 +204,7 @@ void main() {
     expect(find.text('Permission required'), findsOneWidget);
     expect(find.text('Projects'), findsNothing);
     expect(find.byType(Switch), findsNothing);
-    await tester.tap(find.text('Open System Settings'));
+    await tester.tap(find.text('Enable…'));
     await tester.pumpAndSettle();
     expect(finder.openedSettings, isTrue);
     finder.requiresPermission = false;
@@ -210,7 +212,7 @@ void main() {
     await tester.tap(find.text('Check connections'));
     await tester.pumpAndSettle();
     expect(find.text('Permission required'), findsNothing);
-    expect(find.text('Open System Settings'), findsNothing);
+    expect(find.text('Enable…'), findsNothing);
     expect(controller.needsFinderAttention, isFalse);
     gateway.failList = true;
     await tester.tap(find.text('Check connections'));

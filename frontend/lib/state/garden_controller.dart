@@ -7,7 +7,9 @@ import '../model/garden_info.dart';
 import '../services/garden_gateway.dart';
 import '../services/preferences_store.dart';
 import '../native/finder_mounts.dart';
-import '../native/mac_finder_updates.dart';
+import '../native/finder_updates.dart';
+import '../native/finder_status.dart';
+import 'native_setup_controller.dart';
 import 'files_controller.dart';
 import 'account_security_controller.dart';
 
@@ -34,13 +36,19 @@ class GardenController extends ChangeNotifier {
     this.security,
     this.finder,
     this.finderUpdates,
+    this.nativeSetup,
     this.localServer = false,
-  });
+  }) {
+    finderUpdates?.addListener(notifyListeners);
+    nativeSetup?.addListener(notifyListeners);
+  }
   final AccountSecurityController? security;
   final FinderMounts? finder;
-  final MacFinderUpdates? finderUpdates;
-  Set<int> finderEnabledDriveIDs = {};
-  bool finderPermissionRequired = false;
+  final FinderUpdates? finderUpdates;
+  final NativeSetupController? nativeSetup;
+  FinderStatus finderStatus = const FinderStatus();
+  Set<int> get finderEnabledDriveIDs => finderStatus.enabled;
+  bool get finderPermissionRequired => finderStatus.disabled.isNotEmpty;
   bool finderSyncing = false;
   String? finderIssue;
   bool serviceAvailable = false;
@@ -67,6 +75,7 @@ class GardenController extends ChangeNotifier {
   Future<void> initialize() => _request(_loadStartup);
 
   Future<void> _loadStartup() async {
+    await nativeSetup?.refresh();
     cacheLimit = await preferences.readCacheLimit();
     savedEmail = await gateway.savedLogin();
     await security?.checkConfiguration();
@@ -183,6 +192,7 @@ class GardenController extends ChangeNotifier {
   });
 
   Future<void> checkConnections() => _request(() async {
+    await nativeSetup?.refresh();
     try {
       gardens = await gateway.listGardens();
       serviceAvailable = true;
@@ -217,9 +227,15 @@ class GardenController extends ChangeNotifier {
     await _finderWork;
     final signedIn = account;
     if (signedIn == null) throw StateError('Sign in first.');
-    finderEnabledDriveIDs = await finder?.enabled(signedIn, gardens) ?? {};
-    finderPermissionRequired =
-        await finder?.permissionRequired(signedIn, gardens) ?? false;
+    await nativeSetup?.refresh();
+    finderStatus =
+        await finder?.status(signedIn, gardens) ?? const FinderStatus();
+    if (finderUpdates?.state == FinderUpdateState.disconnected) {
+      await finderUpdates!.sync(signedIn, gardens);
+    }
+    if (files?.drive != null && files?.live == false) {
+      await files!.reconnect();
+    }
   });
 
   Future<void> openInFinder(GardenInfo drive) => _request(() async {
@@ -238,6 +254,8 @@ class GardenController extends ChangeNotifier {
   bool get needsFinderAttention =>
       account != null &&
       (!serviceAvailable ||
+          nativeSetup?.needsAttention == true ||
+          finderUpdates?.error != null ||
           (finder != null &&
               !finderSyncing &&
               (finderIssue != null ||
@@ -273,19 +291,23 @@ class GardenController extends ChangeNotifier {
     _queueFinderSync();
     await _showDrive(drive);
   });
-  Future<void> openDrive(GardenInfo drive) => _request(() async {
-    if (files?.drive?.id == drive.id) {
-      selected = drive;
-      page = GardenPage.files;
-      if (files!.path.isNotEmpty) await files!.goTo(0);
-      return;
-    }
-    await _showDrive(drive);
-  });
+  Future<void> openDrive(GardenInfo drive, {bool root = false}) =>
+      _request(() async {
+        if (files?.drive?.id == drive.id) {
+          selected = drive;
+          page = GardenPage.files;
+          if (root) await files!.goTo(0);
+          return;
+        }
+        await _showDrive(drive);
+        if (root) await files!.goTo(0);
+      });
   Future<void> deleteDrive(GardenInfo drive) => _request(() async {
+    if (files?.imports.driveId == drive.id) {
+      await files!.imports.cancelAndWait();
+    }
     await gateway.deleteDrive(drive.id);
     gardens = gardens.where((item) => item.id != drive.id).toList();
-    finderEnabledDriveIDs.remove(drive.id);
     _queueFinderSync();
     if (files?.drive?.id == drive.id) {
       await files!.close();
@@ -302,8 +324,7 @@ class GardenController extends ChangeNotifier {
     account = null;
     gardens = [];
     selected = null;
-    finderEnabledDriveIDs = {};
-    finderPermissionRequired = false;
+    finderStatus = const FinderStatus();
     finderSyncing = false;
     finderIssue = null;
     serviceAvailable = false;
@@ -330,11 +351,10 @@ class GardenController extends ChangeNotifier {
       if (account?.id != current.id) return;
       try {
         await finder?.sync(current, drives);
-        finderEnabledDriveIDs = await finder?.enabled(current, drives) ?? {};
-        finderPermissionRequired =
-            await finder?.permissionRequired(current, drives) ?? false;
-        await finderUpdates?.sync(current, drives);
+        finderStatus =
+            await finder?.status(current, drives) ?? const FinderStatus();
         finderIssue = null;
+        await finderUpdates?.sync(current, drives);
       } catch (failure) {
         finderUpdateError(failure);
       } finally {
@@ -347,6 +367,13 @@ class GardenController extends ChangeNotifier {
   void finderUpdateError(Object failure) {
     finderIssue = errorMessage(failure);
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    finderUpdates?.removeListener(notifyListeners);
+    nativeSetup?.removeListener(notifyListeners);
+    super.dispose();
   }
 
   Future<void> _request(Future<void> Function() action) async {

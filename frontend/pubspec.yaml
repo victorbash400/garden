@@ -20,6 +20,7 @@ dependencies:
   passkeys: ^2.23.1
   local_auth: ^3.0.2
   serverpod_auth_idp_client: ^4.0.3
+  desktop_drop: ^0.8.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

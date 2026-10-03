@@ -7,6 +7,7 @@ import '../components/files/directory_header.dart';
 import '../components/files/file_actions.dart';
 import '../components/files/file_details.dart';
 import '../components/files/files_toolbar.dart';
+import '../components/files/directory_drop_target.dart';
 import '../state/files_controller.dart';
 
 class FilesView extends StatelessWidget {
@@ -66,7 +67,12 @@ class FilesView extends StatelessWidget {
                           ),
                           child: const DirectoryHeader(),
                         ),
-                        Expanded(child: DirectoryList(controller: controller)),
+                        Expanded(
+                          child: DirectoryDropTarget(
+                            controller: controller,
+                            child: DirectoryList(controller: controller),
+                          ),
+                        ),
                       ],
                     ),
                   ),

@@ -48,7 +48,10 @@ class FilesFixture implements FilesGateway {
   @override
   Stream<DriveEvent> watch(int driveId, int revision) {
     final output = StreamController<DriveEvent>();
-    final subscription = events.stream.listen(output.add);
+    final subscription = events.stream.listen(
+      output.add,
+      onError: output.addError,
+    );
     output.onListen = () {
       for (final event in journal.where((event) => event.revision > revision)) {
         output.add(event);

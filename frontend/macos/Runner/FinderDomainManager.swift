@@ -18,6 +18,10 @@ enum FinderDomainManager {
         missing.append(id)
         continue
       }
+      if current.contains(where: { $0.identifier.rawValue == name && $0.isDisconnected }) {
+        missing.append(id)
+        continue
+      }
       do {
         _ = try FinderCredentialStore.read(name)
       } catch FinderCredentialError.keychain(errSecItemNotFound) {
@@ -38,7 +42,7 @@ enum FinderDomainManager {
       throw FinderBridgeError.invalidArguments
     }
     try FinderCredentialStore.save(credential, domainID: id)
-    if try await domains().contains(where: { $0.identifier.rawValue == id }) {
+    if try await domains().contains(where: { $0.identifier.rawValue == id && !$0.isDisconnected }) {
       return
     }
     let domain = NSFileProviderDomain(
@@ -100,21 +104,17 @@ enum FinderDomainManager {
     return ids
   }
 
-  static func enabled(accountID: String, driveIDs: [Int]) async throws -> [Int] {
-    let current = try await domains()
-    return driveIDs.filter { driveID in
-      current.contains { domain in
-        domain.identifier.rawValue == identifier(accountID: accountID, driveID: driveID)
-          && domain.userEnabled && !domain.isDisconnected
-      }
+  static func connectionStatus(accountID: String, driveIDs: [Int]) async throws -> [String: [Int]] {
+    let current = Dictionary(uniqueKeysWithValues: try await domains().map { ($0.identifier.rawValue, $0) })
+    var status: [String: [Int]] = ["registered": [], "enabled": [], "disabled": [], "disconnected": []]
+    for id in driveIDs {
+      guard let domain = current[identifier(accountID: accountID, driveID: id)] else { continue }
+      status["registered"]!.append(id)
+      if !domain.userEnabled { status["disabled"]!.append(id) }
+      if domain.isDisconnected { status["disconnected"]!.append(id) }
+      if domain.userEnabled && !domain.isDisconnected { status["enabled"]!.append(id) }
     }
-  }
-
-  static func permissionRequired(accountID: String, driveIDs: [Int]) async throws -> Bool {
-    let expected = Set(driveIDs.map { identifier(accountID: accountID, driveID: $0) })
-    return try await domains().contains { domain in
-      expected.contains(domain.identifier.rawValue) && !domain.userEnabled
-    }
+    return status
   }
 
   static func open(accountID: String, driveID: Int) async throws {
@@ -134,10 +134,7 @@ enum FinderDomainManager {
   }
 
   static func openSettings() throws {
-    guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.systempreferences"),
-          NSWorkspace.shared.open(url) else {
-      throw FinderBridgeError.cannotOpenSettings
-    }
+    try NativeSetupBridge.openLoginSettings()
   }
 
   static func signal(accountID: String, driveID: Int, parentIDs: [Int]) async throws {

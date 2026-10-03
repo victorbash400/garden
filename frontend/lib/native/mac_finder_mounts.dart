@@ -6,6 +6,7 @@ import '../model/account_info.dart';
 import '../model/garden_info.dart';
 import '../services/serverpod_gateway.dart';
 import 'finder_mounts.dart';
+import 'finder_status.dart';
 
 class MacFinderMounts implements FinderMounts {
   MacFinderMounts(this.gateway, this.serverURL);
@@ -71,30 +72,19 @@ class MacFinderMounts implements FinderMounts {
   }
 
   @override
-  Future<Set<int>> enabled(AccountInfo account, List<GardenInfo> drives) async {
-    if (!Platform.isMacOS) return {};
-    final ids = await _channel.invokeListMethod<int>('enabled', {
-      'accountID': account.id,
-      'driveIDs': drives.map((drive) => drive.id).toList(),
-    });
-    if (ids == null) throw StateError('Finder did not return drive status.');
-    return ids.toSet();
-  }
-
-  @override
-  Future<bool> permissionRequired(
+  Future<FinderStatus> status(
     AccountInfo account,
     List<GardenInfo> drives,
   ) async {
-    if (!Platform.isMacOS || drives.isEmpty) return false;
-    final required = await _channel.invokeMethod<bool>('permissionRequired', {
+    if (!Platform.isMacOS) return const FinderStatus();
+    final result = await _channel.invokeMapMethod<Object?, Object?>('status', {
       'accountID': account.id,
       'driveIDs': drives.map((drive) => drive.id).toList(),
     });
-    if (required == null) {
-      throw StateError('Finder did not return permission status.');
+    if (result == null) {
+      throw StateError('Finder did not return connection status.');
     }
-    return required;
+    return FinderStatus.fromMap(result);
   }
 
   @override

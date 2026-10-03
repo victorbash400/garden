@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../state/garden_controller.dart';
 import '../components/error_notice.dart';
 import '../components/finder_status_observer.dart';
+import '../components/files/import_status_bar.dart';
 import '../components/garden_sidebar.dart';
 import '../components/settings/settings_sidebar.dart';
 import '../components/settings/settings_transition.dart';
@@ -62,6 +63,8 @@ class GardenApp extends StatelessWidget {
                         ),
                       ),
                     ),
+                    if (controller.files != null)
+                      ImportStatusBar(controller: controller.files!.imports),
                   ],
                 ),
               ),

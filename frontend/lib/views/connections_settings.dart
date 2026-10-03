@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import '../components/settings/settings_group.dart';
 import '../components/settings/settings_row.dart';
 import '../state/garden_controller.dart';
+import '../components/settings/finder_setup_row.dart';
+import '../components/settings/login_item_row.dart';
+import '../components/settings/background_updates_row.dart';
 
 class ConnectionsSettings extends StatelessWidget {
   const ConnectionsSettings({super.key, required this.controller});
@@ -11,22 +14,6 @@ class ConnectionsSettings extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasDrives = controller.gardens.isNotEmpty;
-    final finderReady =
-        hasDrives &&
-        controller.finderEnabledDriveIDs.length == controller.gardens.length;
-    final finderStatus = controller.finderSyncing
-        ? 'Connecting'
-        : controller.finderIssue != null
-        ? 'Error'
-        : !hasDrives
-        ? 'Ready for drives'
-        : controller.finderPermissionRequired
-        ? 'Permission required'
-        : finderReady
-        ? 'Connected'
-        : 'Needs attention';
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -40,27 +27,21 @@ class ConnectionsSettings extends StatelessWidget {
                     : 'Unavailable',
               ),
             ),
-            SettingsRow(
-              label: 'Finder File Provider',
-              value: Text(finderStatus),
-            ),
+            FinderSetupRow(controller: controller),
+            if (controller.finderUpdates != null)
+              BackgroundUpdatesRow(updates: controller.finderUpdates!),
+            if (controller.nativeSetup != null)
+              LoginItemRow(controller: controller.nativeSetup!),
           ],
         ),
-        if (controller.finderPermissionRequired) ...[
+        for (final issue in [
+          controller.finderIssue,
+          controller.finderUpdates?.error,
+          controller.nativeSetup?.error,
+        ].whereType<String>().toSet()) ...[
           const SizedBox(height: 12),
-          const Text(
-            'Enable Garden in System Settings → Login Items & Extensions → File Providers.',
-            style: TextStyle(fontSize: 12, color: Color(0xFF686868)),
-          ),
-          TextButton(
-            onPressed: controller.busy ? null : controller.openFinderSettings,
-            child: const Text('Open System Settings'),
-          ),
-        ],
-        if (controller.finderIssue != null) ...[
-          const SizedBox(height: 12),
-          Text(
-            controller.finderIssue!,
+          SelectableText(
+            issue,
             style: const TextStyle(fontSize: 12, color: Color(0xFFB23D3D)),
           ),
         ],

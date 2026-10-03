@@ -38,6 +38,7 @@
 		AA2A3E9AEDCB62FB57D5DFC4 /* GardenAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8681944F850AE3C8FBA3090E /* GardenAPI.swift */; };
 		C36A5F1C0E9B80E1CEC20C8C /* GardenNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E80EEA4C2EDA2C0390B33422 /* GardenNode.swift */; };
 		E25B32C16FDD678CDDF940AA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8AB1F02B9F6E420FC69954F5 /* Cocoa.framework */; };
+		A20000000000000000000001 /* NativeSetupBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* NativeSetupBridge.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -119,6 +120,7 @@
 		BBFF06A0D3701CBA9BBF3EF2 /* FinderDomainManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FinderDomainManager.swift; path = FinderDomainManager.swift; sourceTree = "<group>"; };
 		D6E75AE443F8D12E9E4A0DED /* FinderExtension.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; name = FinderExtension.entitlements; path = FinderExtension/FinderExtension.entitlements; sourceTree = "<group>"; };
 		E80EEA4C2EDA2C0390B33422 /* GardenNode.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenNode.swift; path = FinderShared/GardenNode.swift; sourceTree = "<group>"; };
+		A20000000000000000000002 /* NativeSetupBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeSetupBridge.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -228,6 +230,7 @@
 			isa = PBXGroup;
 			children = (
 				33CC10F02044A3C60003C045 /* AppDelegate.swift */,
+				A20000000000000000000002 /* NativeSetupBridge.swift */,
 				33CC11122044BFA00003C045 /* MainFlutterWindow.swift */,
 				A10000000000000000000002 /* NativeAuthenticationConfiguration.swift */,
 				33E51913231747F40026EE4D /* DebugProfile.entitlements */,
@@ -469,6 +472,7 @@
 				33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */,
 				A10000000000000000000001 /* NativeAuthenticationConfiguration.swift in Sources */,
 				33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */,
+				A20000000000000000000001 /* NativeSetupBridge.swift in Sources */,
 				335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */,
 				93C2E6D4C5E03E5BB279B77B /* FinderCredential.swift in Sources */,
 				805B49A9BB38C082F1F565F1 /* FinderDomainManager.swift in Sources */,
