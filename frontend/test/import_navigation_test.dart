@@ -37,6 +37,7 @@ void main() {
       await files.imports.import(1, 0, [await ImportEntry.fromPath(root.path)]);
       expect(files.imports.error, isNull);
       expect(files.imports.completed, 1);
+      expect(files.imports.result, '4 items imported');
       final project = gateway.nodes.singleWhere((n) => n.name == 'Project');
       final folder = gateway.nodes.singleWhere((n) => n.name == 'Nested');
       final note = gateway.nodes.singleWhere((n) => n.name == 'notes.txt');
@@ -46,6 +47,10 @@ void main() {
       expect(gateway.nodes.any((n) => n.name == 'Empty'), isTrue);
       await files.openFolder(folder);
       expect(files.nodes.single.name, 'notes.txt');
+      await files.openFolder(
+        gateway.nodes.singleWhere((n) => n.name == 'Empty'),
+      );
+      expect(files.nodes, isEmpty);
     } finally {
       await files.close();
       files.dispose();

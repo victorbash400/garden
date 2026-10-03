@@ -23,6 +23,12 @@ class FileImportController extends ChangeNotifier {
   String? result;
   double? progress;
   int completed = 0;
+  int _foldersCreated = 0;
+  String get _importedCount {
+    final count = completed + _foldersCreated;
+    return "$count ${count == 1 ? 'item' : 'items'} imported";
+  }
+
   bool get canCancel =>
       busy && !committing && _cancellation?.cancelled == false;
 
@@ -54,6 +60,7 @@ class FileImportController extends ChangeNotifier {
     this.driveId = driveId;
     _completion = Completer<void>();
     completed = 0;
+    _foldersCreated = 0;
     error = null;
     result = null;
     final cancellation = TransferCancellation();
@@ -63,10 +70,9 @@ class FileImportController extends ChangeNotifier {
       for (final entry in entries) {
         await _entry(driveId, parentId, entry, cancellation);
       }
-      result = '$completed ${completed == 1 ? 'file' : 'files'} imported';
+      result = _importedCount;
     } on TransferCancelled {
-      result =
-          'Import cancelled · $completed ${completed == 1 ? 'file' : 'files'} imported';
+      result = 'Import cancelled · $_importedCount';
     } catch (failure) {
       error = errorMessage(failure);
     } finally {
@@ -100,6 +106,7 @@ class FileImportController extends ChangeNotifier {
         entry.name,
         NodeKind.folder,
       );
+      _foldersCreated++;
       onNode(driveId, folder);
       await for (final child in entry.children()) {
         cancellation.check();
