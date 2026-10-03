@@ -97,6 +97,21 @@ class MacFinderMounts implements FinderMounts {
   }
 
   @override
+  Future<void> openNode(AccountInfo account, int driveID, int nodeID) async {
+    if (!Platform.isMacOS) {
+      throw UnsupportedError('Native file opening requires macOS.');
+    }
+    final application = await _channel.invokeMethod<String>('open', {
+      'accountID': account.id,
+      'driveID': driveID,
+      'nodeID': nodeID,
+    });
+    if (application == null || application.isEmpty) {
+      throw StateError('macOS did not confirm that the file was opened.');
+    }
+  }
+
+  @override
   Future<void> openSettings() async {
     if (!Platform.isMacOS) return;
     await _channel.invokeMethod<void>('openSettings');

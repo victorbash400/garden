@@ -103,8 +103,10 @@ class MainFlutterWindow: NSWindow {
             guard let driveID = arguments["driveID"] as? Int else {
               throw FinderBridgeError.invalidArguments
             }
-            try await FinderDomainManager.open(accountID: accountID, driveID: driveID)
-            result(nil)
+            let application = try await FinderDomainManager.open(
+              accountID: accountID, driveID: driveID, nodeID: arguments["nodeID"] as? Int
+            )
+            result(application)
           case "signal":
             guard let driveID = arguments["driveID"] as? Int,
                   let parentIDs = arguments["parentIDs"] as? [Int] else {

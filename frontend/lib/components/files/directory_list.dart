@@ -5,6 +5,7 @@ import '../../state/files_controller.dart';
 import 'file_actions.dart';
 import 'file_row.dart';
 import 'empty_directory.dart';
+import 'node_context_menu.dart';
 
 class DirectoryList extends StatelessWidget {
   const DirectoryList({super.key, required this.controller});
@@ -21,13 +22,17 @@ class DirectoryList extends StatelessWidget {
         itemCount: controller.nodes.length,
         itemBuilder: (_, index) {
           final FileNode node = controller.nodes[index];
-          return FileRow(
+          return NodeContextMenu(
+            controller: controller,
             node: node,
-            striped: index.isEven,
-            selected: controller.selected?.id == node.id,
-            onSelect: () => controller.select(node),
-            onOpen: () => actions.open(node),
-            onAction: (action) => actions.perform(node, action),
+            child: FileRow(
+              node: node,
+              striped: index.isEven,
+              selected: controller.selected?.id == node.id,
+              onSelect: () => controller.select(node),
+              onOpen: () => actions.open(node),
+              onAction: (action) => actions.perform(node, action),
+            ),
           );
         },
       ),

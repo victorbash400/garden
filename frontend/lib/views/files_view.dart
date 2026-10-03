@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:garden_client/garden_client.dart';
 
 import '../components/error_notice.dart';
-import '../components/files/directory_list.dart';
-import '../components/files/directory_header.dart';
+import '../components/files/directory_browser.dart';
+import '../components/files/file_keyboard_bindings.dart';
 import '../components/files/file_actions.dart';
 import '../components/files/file_details.dart';
 import '../components/files/files_toolbar.dart';
-import '../components/files/directory_drop_target.dart';
 import '../state/files_controller.dart';
 
 class FilesView extends StatelessWidget {
@@ -28,81 +27,69 @@ class FilesView extends StatelessWidget {
     builder: (context, _) {
       final actions = FileActions(context, controller);
       final selected = controller.selected;
-      return ColoredBox(
-        color: Colors.white,
-        child: Column(
-          children: [
-            FilesToolbar(
-              controller: controller,
-              onCreate: actions.create,
-              onImport: actions.import,
-              onInvite: actions.invite,
-              onBackToDrives: onBackToDrives,
-              onConnections: onConnections,
-            ),
-            SizedBox(
-              height: 2,
-              child: controller.busy
-                  ? LinearProgressIndicator(
-                      minHeight: 2,
-                      value: controller.progress,
-                    )
-                  : null,
-            ),
-            if (controller.error != null)
-              ErrorNotice(
-                message: controller.error!,
-                onDismiss: controller.dismissError,
+      return FileKeyboardBindings(
+        controller: controller,
+        child: ColoredBox(
+          color: Colors.white,
+          child: Column(
+            children: [
+              FilesToolbar(
+                controller: controller,
+                onCreate: actions.create,
+                onImport: actions.import,
+                onInvite: actions.invite,
+                onBackToDrives: onBackToDrives,
+                onConnections: onConnections,
               ),
-            Expanded(
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      children: [
-                        DefaultTextStyle.merge(
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey,
-                          ),
-                          child: const DirectoryHeader(),
-                        ),
-                        Expanded(
-                          child: DirectoryDropTarget(
-                            controller: controller,
-                            child: DirectoryList(controller: controller),
-                          ),
-                        ),
-                      ],
+              SizedBox(
+                height: 2,
+                child: controller.busy
+                    ? LinearProgressIndicator(
+                        minHeight: 2,
+                        value: controller.progress,
+                      )
+                    : null,
+              ),
+              if (controller.error != null)
+                ErrorNotice(
+                  message: controller.error!,
+                  onDismiss: controller.dismissError,
+                ),
+              Expanded(
+                child: Row(
+                  children: [
+                    Expanded(child: DirectoryBrowser(controller: controller)),
+                    if (selected != null && selected.kind == NodeKind.file)
+                      FileDetails(
+                        key: ValueKey(selected.id),
+                        gateway: controller.gateway,
+                        node: selected,
+                        revision: controller.revision,
+                        userId: userId,
+                        onExport: (version) =>
+                            actions.export(selected, version: version),
+                      ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1, color: Color(0xFFE8E8EB)),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 9,
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      '${controller.nodes.length} ${controller.nodes.length == 1 ? 'item' : 'items'}',
+                      style: const TextStyle(fontSize: 11, color: Colors.grey),
                     ),
-                  ),
-                  if (selected != null && selected.kind == NodeKind.file)
-                    FileDetails(
-                      key: ValueKey(selected.id),
-                      gateway: controller.gateway,
-                      node: selected,
-                      revision: controller.revision,
-                      userId: userId,
-                      onExport: (version) =>
-                          actions.export(selected, version: version),
-                    ),
-                ],
+                    const Spacer(),
+                  ],
+                ),
               ),
-            ),
-            const Divider(height: 1, color: Color(0xFFE8E8EB)),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 9),
-              child: Row(
-                children: [
-                  Text(
-                    '${controller.nodes.length} ${controller.nodes.length == 1 ? 'item' : 'items'}',
-                    style: const TextStyle(fontSize: 11, color: Colors.grey),
-                  ),
-                  const Spacer(),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     },

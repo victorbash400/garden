@@ -7,6 +7,7 @@ abstract interface class FinderMounts {
   Future<void> sync(AccountInfo account, List<GardenInfo> drives);
   Future<FinderStatus> status(AccountInfo account, List<GardenInfo> drives);
   Future<void> open(AccountInfo account, int driveID);
+  Future<void> openNode(AccountInfo account, int driveID, int nodeID);
   Future<void> openSettings();
   Future<void> signOut(AccountInfo account);
   Future<void> signal(AccountInfo account, int driveID, List<int> parentIDs);

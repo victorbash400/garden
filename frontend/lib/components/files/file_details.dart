@@ -7,6 +7,7 @@ import '../../services/files/files_gateway.dart';
 import 'file_comment_input.dart';
 import 'file_comments_list.dart';
 import 'file_versions_list.dart';
+import 'file_information.dart';
 
 class FileDetails extends StatefulWidget {
   const FileDetails({
@@ -99,15 +100,7 @@ class _FileDetailsState extends State<FileDetails> {
         length: 2,
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                widget.node.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 13),
-              ),
-            ),
+            FileInformation(node: widget.node),
             const TabBar(
               tabs: [
                 Tab(text: 'Versions'),

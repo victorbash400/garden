@@ -232,7 +232,8 @@ void main() {
     await tester.tap(find.text('Create'));
     await tester.pumpAndSettle();
     expect(files.busy, isFalse);
-    await tester.tap(find.byType(PopupMenuButton<String>).last);
+    await tester.tap(find.byTooltip('File actions').last);
+    await tester.pump(const Duration(milliseconds: 350));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Edit text'));
     await tester.pumpAndSettle();

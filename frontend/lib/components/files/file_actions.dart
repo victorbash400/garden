@@ -9,6 +9,7 @@ import '../../state/files_controller.dart';
 import '../../state/file_editor_controller.dart';
 import '../../services/files/file_transfer.dart';
 import '../../services/files/import_entry.dart';
+import '../../services/files/text_file_type.dart';
 import 'file_editor_dialog.dart';
 import 'file_move_dialog.dart';
 import 'node_name_dialog.dart';
@@ -36,7 +37,7 @@ class FileActions {
     }
   }
 
-  Future<void> create(String kind) async {
+  Future<void> create(String kind, {int? parentId}) async {
     final name = await showDialog<String>(
       context: context,
       builder: (_) => NodeNameDialog(
@@ -48,13 +49,14 @@ class FileActions {
       await controller.create(
         name,
         kind == 'folder' ? NodeKind.folder : NodeKind.file,
+        parentId: parentId,
       );
     }
   }
 
-  Future<void> import() async {
+  Future<void> import({int? parentId}) async {
     final driveId = controller.drive!.id;
-    final parentId = controller.parentId;
+    final destination = parentId ?? controller.parentId;
     try {
       final files = await openFiles();
       if (files.isEmpty) return;
@@ -62,7 +64,7 @@ class FileActions {
       for (final file in files) {
         entries.add(ImportFile(file.name, await file.length(), file.openRead));
       }
-      await controller.imports.import(driveId, parentId, entries);
+      await controller.imports.import(driveId, destination, entries);
     } catch (failure) {
       controller.reportError(failure);
     }
@@ -71,6 +73,23 @@ class FileActions {
   Future<void> open(FileNode node) async {
     if (node.kind == NodeKind.folder) {
       await controller.enter(node);
+      return;
+    }
+    final opener = controller.openFile;
+    if (opener == null) {
+      controller.reportError(StateError('Native file opening is unavailable.'));
+      return;
+    }
+    try {
+      await opener(node);
+    } catch (failure) {
+      controller.reportError(failure);
+    }
+  }
+
+  Future<void> edit(FileNode node) async {
+    if (!isTextFile(node.name)) {
+      controller.reportError(StateError('This file cannot be edited as text.'));
       return;
     }
     final saved = await showDialog<FileNode>(
@@ -105,6 +124,8 @@ class FileActions {
     switch (action) {
       case 'open':
         await open(node);
+      case 'edit':
+        await edit(node);
       case 'export':
         await export(node);
       case 'rename':

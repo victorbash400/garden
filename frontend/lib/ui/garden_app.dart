@@ -5,6 +5,7 @@ import '../components/error_notice.dart';
 import '../components/finder_status_observer.dart';
 import '../components/files/import_status_bar.dart';
 import '../components/garden_sidebar.dart';
+import '../components/garden_menu_bar.dart';
 import '../components/settings/settings_sidebar.dart';
 import '../components/settings/settings_transition.dart';
 import '../views/account_form.dart';
@@ -25,50 +26,54 @@ class GardenApp extends StatelessWidget {
     title: 'Garden',
     debugShowCheckedModeBanner: false,
     theme: GardenTheme.light,
-    home: FinderStatusObserver(
+    home: GardenMenuBar(
       controller: controller,
-      child: ListenableBuilder(
-        listenable: controller,
-        builder: (context, _) => Scaffold(
-          body: Row(
-            children: [
-              if (_showSidebar)
-                AnimatedSize(
-                  duration: MediaQuery.disableAnimationsOf(context)
-                      ? Duration.zero
-                      : const Duration(milliseconds: 200),
-                  curve: Curves.easeOutCubic,
-                  alignment: Alignment.centerLeft,
-                  child: controller.page == GardenPage.settings
-                      ? SettingsSidebar(controller: controller)
-                      : GardenSidebar(controller: controller),
-                ),
-              Expanded(
-                child: Column(
-                  children: [
-                    if (controller.error != null)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 28),
-                        child: ErrorNotice(
-                          message: controller.error!,
-                          onDismiss: () => controller.navigate(controller.page),
+      child: FinderStatusObserver(
+        controller: controller,
+        child: ListenableBuilder(
+          listenable: controller,
+          builder: (context, _) => Scaffold(
+            body: Row(
+              children: [
+                if (_showSidebar)
+                  AnimatedSize(
+                    duration: MediaQuery.disableAnimationsOf(context)
+                        ? Duration.zero
+                        : const Duration(milliseconds: 200),
+                    curve: Curves.easeOutCubic,
+                    alignment: Alignment.centerLeft,
+                    child: controller.page == GardenPage.settings
+                        ? SettingsSidebar(controller: controller)
+                        : GardenSidebar(controller: controller),
+                  ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      if (controller.error != null)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 28),
+                          child: ErrorNotice(
+                            message: controller.error!,
+                            onDismiss: () =>
+                                controller.navigate(controller.page),
+                          ),
+                        ),
+                      Expanded(
+                        child: SettingsTransition(
+                          enabled: _showSidebar,
+                          child: KeyedSubtree(
+                            key: ValueKey(controller.page),
+                            child: _content(),
+                          ),
                         ),
                       ),
-                    Expanded(
-                      child: SettingsTransition(
-                        enabled: _showSidebar,
-                        child: KeyedSubtree(
-                          key: ValueKey(controller.page),
-                          child: _content(),
-                        ),
-                      ),
-                    ),
-                    if (controller.files != null)
-                      ImportStatusBar(controller: controller.files!.imports),
-                  ],
+                      if (controller.files != null)
+                        ImportStatusBar(controller: controller.files!.imports),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

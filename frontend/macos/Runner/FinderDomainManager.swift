@@ -117,20 +117,32 @@ enum FinderDomainManager {
     return status
   }
 
-  static func open(accountID: String, driveID: Int) async throws {
+  static func open(accountID: String, driveID: Int, nodeID: Int? = nil) async throws -> String {
     let id = identifier(accountID: accountID, driveID: driveID)
     guard let domain = try await domains().first(where: { $0.identifier.rawValue == id }),
           let manager = NSFileProviderManager(for: domain) else {
       throw FinderBridgeError.domainMissing
     }
     let url = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<URL, Error>) in
-      manager.getUserVisibleURL(for: .rootContainer) { url, error in
+      let item = nodeID.map { NSFileProviderItemIdentifier(String($0)) } ?? .rootContainer
+      manager.getUserVisibleURL(for: item) { url, error in
         if let error { continuation.resume(throwing: error) }
         else if let url { continuation.resume(returning: url) }
         else { continuation.resume(throwing: FinderBridgeError.domainMissing) }
       }
     }
-    guard NSWorkspace.shared.open(url) else { throw FinderBridgeError.cannotOpen }
+    let scoped = url.startAccessingSecurityScopedResource()
+    defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+    return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<String, Error>) in
+      DispatchQueue.main.async {
+        NSWorkspace.shared.open(url, configuration: NSWorkspace.OpenConfiguration()) { application, error in
+          if let error { continuation.resume(throwing: error) }
+          else if let identifier = application?.bundleIdentifier {
+            continuation.resume(returning: identifier)
+          } else { continuation.resume(throwing: FinderBridgeError.cannotOpen) }
+        }
+      }
+    }
   }
 
   static func openSettings() throws {

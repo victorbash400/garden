@@ -118,6 +118,7 @@ class TestFinder implements FinderMounts {
   Set<int> enabledIDs = {};
   bool requiresPermission = false;
   int? openedID;
+  int? openedNodeID;
   bool openedSettings = false;
 
   @override
@@ -143,6 +144,12 @@ class TestFinder implements FinderMounts {
   @override
   Future<void> open(AccountInfo account, int driveID) async {
     openedID = driveID;
+  }
+
+  @override
+  Future<void> openNode(AccountInfo account, int driveID, int nodeID) async {
+    openedID = driveID;
+    openedNodeID = nodeID;
   }
 
   @override

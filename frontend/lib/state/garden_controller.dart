@@ -41,6 +41,13 @@ class GardenController extends ChangeNotifier {
   }) {
     finderUpdates?.addListener(notifyListeners);
     nativeSetup?.addListener(notifyListeners);
+    files?.openFile = (node) async {
+      final current = account;
+      if (current == null || finder == null) {
+        throw StateError('Sign in and enable Finder to open files.');
+      }
+      await finder!.openNode(current, node.gardenId, node.id!);
+    };
   }
   final AccountSecurityController? security;
   final FinderMounts? finder;

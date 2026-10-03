@@ -5,6 +5,7 @@ import '../../state/files_controller.dart';
 import 'toolbar_button.dart';
 import 'toolbar_group.dart';
 import '../connection_notice_button.dart';
+import 'file_view_selector.dart';
 
 class FilesToolbar extends StatelessWidget {
   const FilesToolbar({
@@ -103,6 +104,8 @@ class FilesToolbar extends StatelessWidget {
               ),
             ),
           ),
+          FileViewSelector(controller: controller),
+          const SizedBox(width: 8),
           ToolbarGroup(
             children: [
               if (onConnections != null)

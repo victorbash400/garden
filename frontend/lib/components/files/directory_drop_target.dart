@@ -9,9 +9,11 @@ class DirectoryDropTarget extends StatefulWidget {
     super.key,
     required this.controller,
     required this.child,
+    this.parentId,
   });
   final FilesController controller;
   final Widget child;
+  final int? parentId;
 
   @override
   State<DirectoryDropTarget> createState() => _DirectoryDropTargetState();
@@ -24,7 +26,7 @@ class _DirectoryDropTargetState extends State<DirectoryDropTarget> {
     setState(() => dragging = false);
     final files = widget.controller;
     final driveId = files.drive!.id;
-    final parentId = files.parentId;
+    final parentId = widget.parentId ?? files.parentId;
     try {
       await DropImport.run(files.imports, driveId, parentId, details.files);
     } catch (failure) {

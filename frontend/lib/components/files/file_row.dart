@@ -6,6 +6,7 @@ import '../../ui/garden_theme.dart';
 import '../list_row.dart';
 import '../folder_icon.dart';
 import 'file_row_values.dart';
+import 'node_menu_items.dart';
 
 class FileRow extends StatelessWidget {
   const FileRow({
@@ -29,7 +30,8 @@ class FileRow extends StatelessWidget {
     child: ListRow(
       selected: selected,
       striped: striped,
-      onTap: node.kind == NodeKind.folder ? onOpen : onSelect,
+      onTap: onSelect,
+      onDoubleTap: onOpen,
       child: SizedBox(
         height: 32,
         child: LayoutBuilder(
@@ -37,7 +39,7 @@ class FileRow extends StatelessWidget {
             children: [
               const SizedBox(width: 9),
               if (node.kind == NodeKind.folder)
-                const FolderIcon(size: 24)
+                FolderIcon(size: 24, open: selected)
               else
                 const Icon(
                   LucideIcons.file,
@@ -62,24 +64,7 @@ class FileRow extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 icon: const Icon(LucideIcons.ellipsis, size: 16),
                 onSelected: onAction,
-                itemBuilder: (_) => [
-                  PopupMenuItem(
-                    value: 'open',
-                    child: Text(
-                      node.kind == NodeKind.folder
-                          ? 'Open folder'
-                          : 'Edit text',
-                    ),
-                  ),
-                  if (node.kind == NodeKind.file)
-                    const PopupMenuItem(
-                      value: 'export',
-                      child: Text('Export…'),
-                    ),
-                  const PopupMenuItem(value: 'rename', child: Text('Rename…')),
-                  const PopupMenuItem(value: 'move', child: Text('Move…')),
-                  const PopupMenuItem(value: 'delete', child: Text('Delete…')),
-                ],
+                itemBuilder: (_) => nodeMenuItems(node),
               ),
             ],
           ),

@@ -1,0 +1,76 @@
+import 'package:flutter/material.dart';
+import 'package:garden_client/garden_client.dart';
+
+import '../../state/files_controller.dart';
+import 'file_actions.dart';
+import 'node_menu_items.dart';
+
+class NodeContextMenu extends StatelessWidget {
+  const NodeContextMenu({
+    super.key,
+    required this.controller,
+    required this.child,
+    this.node,
+    this.parentId,
+  });
+  final FilesController controller;
+  final FileNode? node;
+  final int? parentId;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    behavior: HitTestBehavior.opaque,
+    onSecondaryTapDown: controller.busy
+        ? null
+        : (details) async {
+            final actions = FileActions(context, controller);
+            if (node != null) controller.select(node);
+            final overlay =
+                Overlay.of(context).context.findRenderObject()! as RenderBox;
+            final action = await showMenu<String>(
+              context: context,
+              color: const Color(0xFFF5F5F3),
+              surfaceTintColor: Colors.transparent,
+              position: RelativeRect.fromRect(
+                Rect.fromLTWH(
+                  details.globalPosition.dx,
+                  details.globalPosition.dy,
+                  0,
+                  0,
+                ),
+                Offset.zero & overlay.size,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              items: node == null
+                  ? [
+                      const PopupMenuItem(
+                        value: 'folder',
+                        child: Text('New folder…'),
+                      ),
+                      const PopupMenuItem(
+                        value: 'file',
+                        child: Text('New text file…'),
+                      ),
+                      PopupMenuItem(
+                        value: 'import',
+                        enabled: !controller.imports.busy,
+                        child: const Text('Import files…'),
+                      ),
+                    ]
+                  : nodeMenuItems(node!),
+            );
+            if (action == null || !context.mounted) return;
+            if (node != null) {
+              await actions.perform(node!, action);
+            } else if (action == 'import') {
+              await actions.import(parentId: parentId);
+            } else {
+              await actions.create(action, parentId: parentId);
+            }
+          },
+    child: child,
+  );
+}
