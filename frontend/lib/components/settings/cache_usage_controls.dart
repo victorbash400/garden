@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../state/storage_controller.dart';
 import 'cache_usage_bar.dart';
+import 'cache_history_graph.dart';
 import 'settings_inline_button.dart';
 
 class CacheUsageControls extends StatelessWidget {
@@ -38,7 +39,13 @@ class CacheUsageControls extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           if (usage?.available == true)
-            CacheUsageBar(usage: usage!)
+            Column(
+              children: [
+                CacheUsageBar(usage: usage!),
+                const SizedBox(height: 20),
+                CacheHistoryGraph(samples: controller.history),
+              ],
+            )
           else
             Text(
               controller.busy

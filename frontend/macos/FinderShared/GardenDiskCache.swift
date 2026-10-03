@@ -5,6 +5,9 @@ actor GardenDiskCache {
   private let directory: URL
   private let initialLimit: Int64?
   private var database: GardenCacheDatabase?
+  private var watch: GardenCacheWatch?
+  private var lastPublished: GardenCacheStatus?
+  private var observers: [UUID: AsyncThrowingStream<GardenCacheStatus, Error>.Continuation] = [:]
 
   init(directory: URL? = nil, limit: Int64? = nil) {
     self.directory = (directory ?? FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
@@ -17,23 +20,63 @@ actor GardenDiskCache {
     return try db.transaction { try status(db) }
   }
 
+  func updates() throws -> AsyncThrowingStream<GardenCacheStatus, Error> {
+    let current = try status()
+    if watch == nil {
+      watch = try GardenCacheWatch(url: directory.appendingPathComponent("index.sqlite-wal")) { [weak self] in
+        Task { await self?.diskChanged() }
+      }
+    }
+    lastPublished = current
+    let id = UUID()
+    return AsyncThrowingStream(bufferingPolicy: .bufferingNewest(1)) { continuation in
+      observers[id] = continuation
+      continuation.yield(current)
+      continuation.onTermination = { _ in Task { await self.removeObserver(id) } }
+    }
+  }
+
+  private func removeObserver(_ id: UUID) {
+    observers.removeValue(forKey: id)
+    if observers.isEmpty { watch = nil; lastPublished = nil }
+  }
+
+  private func diskChanged() {
+    do { publish(try status()) }
+    catch {
+      for observer in observers.values { observer.finish(throwing: error) }
+      observers.removeAll()
+      watch = nil
+    }
+  }
+
+  private func publish(_ status: GardenCacheStatus) {
+    guard status != lastPublished else { return }
+    lastPublished = status
+    for observer in observers.values { observer.yield(status) }
+  }
+
   func setLimit(_ limit: Int64, persist: Bool = true) throws -> GardenCacheStatus {
     try GardenCachePolicy.validate(limit)
     let db = try initialize()
-    return try db.transaction {
+    let updated = try db.transaction {
       try trim(db, to: limit)
       if persist { try GardenCachePolicy.save(limit) }
       try db.execute("UPDATE budget SET bytes=? WHERE id=1", values: [Double(limit)])
       return try status(db)
     }
+    publish(updated)
+    return updated
   }
 
   func clear() throws -> GardenCacheStatus {
     let db = try initialize()
-    return try db.transaction {
+    let updated = try db.transaction {
       try trim(db, to: 0)
       return try status(db)
     }
+    publish(updated)
+    return updated
   }
 
   func read(_ key: String, expected: Int) throws -> Data? {
@@ -81,6 +124,7 @@ actor GardenDiskCache {
         throw error
       }
     }
+    if !observers.isEmpty { publish(try status()) }
   }
 
   private func status(_ db: GardenCacheDatabase) throws -> GardenCacheStatus {

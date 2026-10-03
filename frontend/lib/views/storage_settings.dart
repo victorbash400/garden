@@ -18,8 +18,17 @@ class _StorageSettingsState extends State<StorageSettings> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) widget.controller.storage?.refresh();
+      if (mounted) {
+        widget.controller.storage?.watch();
+        widget.controller.storage?.refresh();
+      }
     });
+  }
+
+  @override
+  void dispose() {
+    widget.controller.storage?.stopWatching();
+    super.dispose();
   }
 
   @override

@@ -22,6 +22,8 @@ final class GardenCacheReply: @unchecked Sendable {
 
 enum GardenCacheBridge {
   static func install(on messenger: FlutterBinaryMessenger) {
+    FlutterEventChannel(name: "garden/cache/updates", binaryMessenger: messenger)
+      .setStreamHandler(GardenCacheEvents())
     FlutterMethodChannel(name: "garden/cache", binaryMessenger: messenger).setMethodCallHandler { call, result in
       Task { @MainActor in
         do {
@@ -48,11 +50,19 @@ enum GardenCacheBridge {
   }
 
   private static func request(_ method: String, limit: Int64?) async throws -> [String: Any] {
+    guard let connection = try await connect() else {
+      if let limit { try GardenCachePolicy.save(limit) }
+      return ["limitBytes": try GardenCachePolicy.read(), "available": false]
+    }
+    defer { connection.invalidate() }
+    return try await perform(method, limit: limit, connection: connection)
+  }
+
+  static func connect() async throws -> NSXPCConnection? {
     let domains = try await NSFileProviderManager.domains()
     guard let domain = domains.first(where: { $0.userEnabled && !$0.isDisconnected }),
           let manager = NSFileProviderManager(for: domain) else {
-      if let limit { try GardenCachePolicy.save(limit) }
-      return ["limitBytes": try GardenCachePolicy.read(), "available": false]
+      return nil
     }
     let url: URL = try await withCheckedThrowingContinuation { continuation in
       manager.getUserVisibleURL(for: .rootContainer) { url, error in
@@ -80,7 +90,10 @@ enum GardenCacheBridge {
         else { continuation.resume(throwing: GardenAPIError.invalidResponse) }
       }
     }
-    defer { connection.invalidate() }
+    return connection
+  }
+
+  private static func perform(_ method: String, limit: Int64?, connection: NSXPCConnection) async throws -> [String: Any] {
     return try await withCheckedThrowingContinuation { continuation in
       let reply = GardenCacheReply(continuation)
       connection.remoteObjectInterface = NSXPCInterface(with: GardenCacheServiceProtocol.self)

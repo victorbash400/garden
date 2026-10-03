@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_flutter/components/cache_limit_control.dart';
 import 'package:garden_flutter/model/cache_usage.dart';
+import 'package:garden_flutter/components/settings/cache_history_graph.dart';
 import 'package:garden_flutter/services/cache_store.dart';
 import 'package:garden_flutter/state/garden_controller.dart';
 import 'package:garden_flutter/ui/garden_app.dart';
@@ -15,8 +18,12 @@ class TestCacheStore implements CacheStore {
     usedBytes: CacheUsage.gib ~/ 2,
     blocks: 512,
   );
+  final updates = StreamController<CacheUsage>.broadcast();
   String? failure;
   int requests = 0;
+
+  @override
+  Stream<CacheUsage> get cacheUpdates => updates.stream;
 
   @override
   Future<int> readCacheLimit() async => usage.limitGiB;
@@ -87,6 +94,38 @@ void main() {
             .first,
       );
       expect(control.data.overlayShape, SliderComponentShape.noOverlay);
+    },
+  );
+
+  testWidgets(
+    'native usage events update the graph and stop when Storage closes',
+    (tester) async {
+      final store = TestCacheStore();
+      final controller = GardenController(TestGateway(), store);
+      controller.page = GardenPage.settings;
+      controller.settingsSection = SettingsSection.storage;
+      await tester.pumpWidget(GardenApp(controller: controller));
+      await tester.pumpAndSettle();
+      expect(store.updates.hasListener, isTrue);
+      store.updates.add(
+        const CacheUsage(
+          limitBytes: 4 * CacheUsage.gib,
+          available: true,
+          usedBytes: CacheUsage.gib,
+          blocks: 1024,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('1.0 GiB used'), findsOneWidget);
+      final graph = tester.widget<CacheHistoryGraph>(
+        find.byType(CacheHistoryGraph),
+      );
+      expect(graph.samples.last.bytes, CacheUsage.gib);
+      expect(store.requests, 1);
+      await tester.pumpWidget(const SizedBox());
+      expect(store.updates.hasListener, isFalse);
+      controller.dispose();
+      await store.updates.close();
     },
   );
 

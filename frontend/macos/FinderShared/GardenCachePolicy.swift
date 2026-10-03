@@ -1,7 +1,7 @@
 import Foundation
 import Security
 
-struct GardenCacheStatus {
+struct GardenCacheStatus: Equatable, Sendable {
   let limit: Int64
   let used: Int64
   let blocks: Int

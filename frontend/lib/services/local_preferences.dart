@@ -20,6 +20,13 @@ class LocalPreferences implements CacheStore {
   @override
   Future<void> saveCacheLimit(int gib) async => setCacheLimit(gib);
 
+  static const _events = EventChannel('garden/cache/updates');
+
+  @override
+  Stream<CacheUsage> get cacheUpdates => _events.receiveBroadcastStream().map(
+    (value) => CacheUsage.fromMap(Map<Object?, Object?>.from(value as Map)),
+  );
+
   @override
   Future<CacheUsage> cacheUsage() => _request('status');
 
