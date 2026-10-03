@@ -61,6 +61,9 @@ void main() {
       await files.goTo(0);
       files.live = false;
       await files.openFolder(empty);
+      expect(gateway.listCalls, calls);
+      files.folders.invalidate();
+      await files.goTo(0);
       expect(gateway.listCalls, calls + 1);
       await files.close();
       await gateway.events.close();

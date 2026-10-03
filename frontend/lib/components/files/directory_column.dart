@@ -10,9 +10,11 @@ class DirectoryColumn extends StatelessWidget {
     super.key,
     required this.controller,
     required this.depth,
+    required this.width,
   });
   final FilesController controller;
   final int depth;
+  final double width;
   @override
   Widget build(BuildContext context) {
     final parent = depth == 0 ? 0 : controller.path[depth - 1].id!;
@@ -20,10 +22,12 @@ class DirectoryColumn extends StatelessWidget {
         ? controller.nodes
         : controller.folders.directory(parent);
     return SizedBox(
-      width: 240,
+      width: width,
       child: DecoratedBox(
-        decoration: const BoxDecoration(
-          border: Border(right: BorderSide(color: Color(0xFFE8E8EB))),
+        decoration: BoxDecoration(
+          border: depth < controller.path.length
+              ? const Border(right: BorderSide(color: Color(0xFFE8E8EB)))
+              : null,
         ),
         child: DirectoryDropTarget(
           controller: controller,

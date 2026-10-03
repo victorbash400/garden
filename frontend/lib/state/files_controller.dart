@@ -21,6 +21,9 @@ class FilesController extends ChangeNotifier {
   final FilesGateway gateway;
   late final FileImportController imports;
   final Map<int, DriveBrowserState> _sessions = {};
+  final Map<int, DriveFolderIndex> _indexes = {};
+  DriveFolderIndex folderIndex(int driveId) =>
+      _indexes.putIfAbsent(driveId, DriveFolderIndex.new);
   var folders = DriveFolderIndex();
   GardenInfo? drive;
   List<FileNode> nodes = [];
@@ -48,7 +51,6 @@ class FilesController extends ChangeNotifier {
   Future<void> open(GardenInfo garden) async {
     if (drive?.id == garden.id) return;
     if (drive != null) {
-      if (!live) folders.invalidate();
       _sessions[drive!.id] = DriveBrowserState(
         folders: folders,
         path: path.toList(),
@@ -58,6 +60,8 @@ class FilesController extends ChangeNotifier {
     }
     await _detach();
     drive = garden;
+    folders = folderIndex(garden.id);
+    folders.expandedRoot = true;
     final session = _sessions.remove(garden.id);
     if (session != null) {
       folders = session.folders;
@@ -170,7 +174,7 @@ class FilesController extends ChangeNotifier {
   Future<void> _navigate(List<FileNode> destination) {
     final parent = destination.isEmpty ? 0 : destination.last.id!;
     if (busy) return Future.value();
-    if (folders.isLoaded(parent) && live) {
+    if (folders.isLoaded(parent)) {
       path = destination;
       nodes = folders.directory(parent);
       selected = null;
@@ -196,7 +200,7 @@ class FilesController extends ChangeNotifier {
   }
 
   Future<void> loadFolderChildren(int folderId) async {
-    if (folders.isLoaded(folderId) && live) return;
+    if (folders.isLoaded(folderId)) return;
     await _request(() async {
       final generation = _generation;
       _treeBuffer = [];
@@ -217,6 +221,59 @@ class FilesController extends ChangeNotifier {
     });
   }
 
+  Future<void> loadDriveChildren(int driveId, int parentId) async {
+    if (drive?.id == driveId) return loadFolderChildren(parentId);
+    final index = folderIndex(driveId);
+    if (index.isLoaded(parentId)) return;
+    try {
+      final listing = await gateway.list(driveId, parentId);
+      index.replaceDirectory(parentId, listing.nodes);
+      _sessions.putIfAbsent(
+        driveId,
+        () => DriveBrowserState(
+          folders: index,
+          path: [],
+          selected: null,
+          revision: listing.revision,
+        ),
+      );
+      notifyListeners();
+    } catch (failure) {
+      reportError(failure);
+    }
+  }
+
+  Future<void> moveWithin(int driveId, FileNode node, int destination) async {
+    final index = folderIndex(driveId);
+    if (node.parentId == destination) return;
+    if (node.kind == NodeKind.folder) {
+      var parent = destination;
+      final visited = <int>{};
+      while (parent != 0) {
+        if (!visited.add(parent)) {
+          throw StateError('Invalid folder hierarchy.');
+        }
+        if (parent == node.id) {
+          throw StateError('A folder cannot be moved into itself.');
+        }
+        final folder = index.folder(parent);
+        if (folder == null) {
+          throw StateError('Destination folder is not loaded.');
+        }
+        parent = folder.parentId;
+      }
+    }
+    final moved = await gateway.move(node.id!, destination, node.name);
+    index.update(moved);
+    if (drive?.id == driveId) {
+      _upsert(moved);
+      if (path.any((folder) => folder.id == moved.id)) {
+        path = index.pathTo(path.last);
+      }
+    }
+    notifyListeners();
+  }
+
   void _subscribe(int id, int cursor) {
     final generation = _generation;
     _subscription = gateway
@@ -228,14 +285,12 @@ class FilesController extends ChangeNotifier {
           onError: (Object failure) {
             if (generation != _generation) return;
             live = false;
-            folders.invalidate();
             error = errorMessage(failure);
             notifyListeners();
           },
           onDone: () {
             if (generation != _generation) return;
             live = false;
-            folders.invalidate();
             notifyListeners();
           },
         );
@@ -314,6 +369,7 @@ class FilesController extends ChangeNotifier {
   Future<void> close() async {
     await imports.cancelAndWait();
     _sessions.clear();
+    _indexes.clear();
     await _detach();
   }
 

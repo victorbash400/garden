@@ -32,14 +32,27 @@ class _DirectoryColumnsState extends State<DirectoryColumns> {
   }
 
   @override
-  Widget build(BuildContext context) => SingleChildScrollView(
-    controller: scroll,
-    scrollDirection: Axis.horizontal,
-    child: Row(
-      children: [
-        for (var depth = 0; depth <= widget.controller.path.length; depth++)
-          DirectoryColumn(controller: widget.controller, depth: depth),
-      ],
-    ),
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (_, constraints) {
+      final count = widget.controller.path.length + 1;
+      final width = (constraints.maxWidth / count).clamp(
+        240.0,
+        double.infinity,
+      );
+      return SingleChildScrollView(
+        controller: scroll,
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            for (var depth = 0; depth < count; depth++)
+              DirectoryColumn(
+                controller: widget.controller,
+                depth: depth,
+                width: width,
+              ),
+          ],
+        ),
+      );
+    },
   );
 }

@@ -4,6 +4,7 @@ import 'package:garden_client/garden_client.dart';
 import '../../state/files_controller.dart';
 import 'file_actions.dart';
 import 'node_menu_items.dart';
+import 'node_drag_surface.dart';
 
 class NodeContextMenu extends StatelessWidget {
   const NodeContextMenu({
@@ -71,6 +72,12 @@ class NodeContextMenu extends StatelessWidget {
               await actions.create(action, parentId: parentId);
             }
           },
-    child: child,
+    child: NodeDragSurface(
+      controller: controller,
+      driveId: controller.drive!.id,
+      node: node,
+      parentId: node == null ? (parentId ?? controller.parentId) : null,
+      child: child,
+    ),
   );
 }

@@ -36,7 +36,9 @@ class ColumnNodeRow extends StatelessWidget {
             if (controller.path.length == depth) controller.select(node);
           }
         },
-        onDoubleTap: () => FileActions(context, controller).open(node),
+        onDoubleTap: node.kind == NodeKind.folder
+            ? null
+            : () => FileActions(context, controller).open(node),
         child: SizedBox(
           height: 29,
           child: Row(

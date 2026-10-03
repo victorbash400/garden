@@ -2,6 +2,9 @@ import 'package:garden_client/garden_client.dart';
 
 class DriveFolderIndex {
   final Set<int> _loaded = {};
+  final Set<int> expanded = {};
+  bool expandedRoot = false;
+  FileNode? folder(int id) => _folders[id];
   bool isLoaded(int parentId) => _loaded.contains(parentId);
   void invalidate() => _loaded.clear();
   void markEmpty(int parentId) => _loaded.add(parentId);
