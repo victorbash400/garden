@@ -31,7 +31,7 @@ actor GardenRangeCache {
     tickets.removeAll()
   }
 
-  func read(node: GardenNode, offset: Int, length: Int) async throws -> Data {
+  func read(node: GardenNode, offset: Int, length: Int, persist: Bool = true) async throws -> Data {
     guard offset >= 0, length >= 0, length <= 16 * Self.blockSize else { throw GardenAPIError.invalidResponse }
     if offset >= node.size { return Data() }
     let end = offset + min(length, node.size - offset)
@@ -40,7 +40,7 @@ actor GardenRangeCache {
     while cursor < end {
       try Task.checkCancellation()
       let index = cursor / Self.blockSize
-      let bytes = try await block(node: node, index: index)
+      let bytes = try await block(node: node, index: index, persist: persist)
       let start = cursor % Self.blockSize
       let count = min(end - cursor, bytes.count - start)
       guard count > 0 else { throw GardenAPIError.invalidResponse }
@@ -60,11 +60,17 @@ actor GardenRangeCache {
     return ticket
   }
 
-  private func block(node: GardenNode, index: Int) async throws -> Data {
+  private func block(node: GardenNode, index: Int, persist: Bool) async throws -> Data {
     let key = "\(node.id)-\(node.version)-\(index)"
     let length = min(Self.blockSize, node.size - index * Self.blockSize)
     let diskKey = "\(namespace)/\(key)"
-    if let data = try await disk.read(diskKey, expected: length) {
+    if let data = await GardenReadBuffer.shared.read(diskKey) {
+      guard data.count == length else { throw GardenAPIError.invalidResponse }
+      cacheHits += 1
+      return data
+    }
+    if persist, let data = try await disk.read(diskKey, expected: length) {
+      await GardenReadBuffer.shared.store(data, key: diskKey)
       cacheHits += 1
       return data
     }
@@ -103,7 +109,8 @@ actor GardenRangeCache {
     defer { flights.removeValue(forKey: key) }
     let data = try await flight.value
     remoteBytes += data.count
-    try await disk.store(data, key: diskKey)
+    await GardenReadBuffer.shared.store(data, key: diskKey)
+    if persist { try await disk.store(data, key: diskKey) }
     return data
   }
 }

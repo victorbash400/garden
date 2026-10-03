@@ -69,7 +69,8 @@ actor GardenDiskCache {
     return updated
   }
 
-  func clear() throws -> GardenCacheStatus {
+  func clear() async throws -> GardenCacheStatus {
+    await GardenReadBuffer.shared.clear()
     let db = try initialize()
     let updated = try db.transaction {
       try trim(db, to: 0)
@@ -129,18 +130,22 @@ actor GardenDiskCache {
 
   private func status(_ db: GardenCacheDatabase) throws -> GardenCacheStatus {
     let limit = try db.rows("SELECT '',bytes FROM budget WHERE id=1").first!.1
-    let used = try db.rows("SELECT '',COALESCE(SUM(size),0) FROM blocks").first!.1
-    let blocks = try db.rows("SELECT '',COUNT(*) FROM blocks").first!.1
+    let used = try db.rows("SELECT '',used FROM totals WHERE id=1").first!.1
+    let blocks = try db.rows("SELECT '',blocks FROM totals WHERE id=1").first!.1
     return GardenCacheStatus(limit: limit, used: used, blocks: Int(blocks))
   }
 
   private func trim(_ db: GardenCacheDatabase, to limit: Int64) throws {
-    var used = try db.rows("SELECT '',COALESCE(SUM(size),0) FROM blocks").first!.1
+    var used = try db.rows("SELECT '',used FROM totals WHERE id=1").first!.1
     if used <= limit { return }
-    for (key, size) in try db.rows("SELECT key,size FROM blocks ORDER BY used") {
-      try remove(db, key: key)
-      used -= size
-      if used <= limit { break }
+    while used > limit {
+      let oldest = try db.rows("SELECT key,size FROM blocks ORDER BY used LIMIT 128")
+      guard !oldest.isEmpty else { throw GardenAPIError.invalidResponse }
+      for (key, size) in oldest {
+        try remove(db, key: key)
+        used -= size
+        if used <= limit { break }
+      }
     }
   }
 

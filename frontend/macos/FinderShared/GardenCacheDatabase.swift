@@ -14,6 +14,11 @@ final class GardenCacheDatabase {
     try execute("CREATE TABLE IF NOT EXISTS blocks (key TEXT PRIMARY KEY, size INTEGER NOT NULL, used REAL NOT NULL)")
     try execute("CREATE INDEX IF NOT EXISTS block_age ON blocks(used)")
     try execute("CREATE TABLE IF NOT EXISTS budget (id INTEGER PRIMARY KEY CHECK(id=1), bytes INTEGER NOT NULL)")
+    try execute("CREATE TABLE IF NOT EXISTS totals (id INTEGER PRIMARY KEY CHECK(id=1), used INTEGER NOT NULL, blocks INTEGER NOT NULL)")
+    try execute("INSERT OR IGNORE INTO totals SELECT 1,COALESCE(SUM(size),0),COUNT(*) FROM blocks")
+    try execute("CREATE TRIGGER IF NOT EXISTS block_insert AFTER INSERT ON blocks BEGIN UPDATE totals SET used=used+NEW.size,blocks=blocks+1 WHERE id=1; END")
+    try execute("CREATE TRIGGER IF NOT EXISTS block_delete AFTER DELETE ON blocks BEGIN UPDATE totals SET used=used-OLD.size,blocks=blocks-1 WHERE id=1; END")
+    try execute("CREATE TRIGGER IF NOT EXISTS block_resize AFTER UPDATE OF size ON blocks BEGIN UPDATE totals SET used=used+NEW.size-OLD.size WHERE id=1; END")
   }
 
   deinit { sqlite3_close(database) }

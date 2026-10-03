@@ -64,7 +64,7 @@ final class GardenFileProvider: NSObject, NSFileProviderReplicatedExtension, NSF
           throw NSFileProviderError(.versionNoLongerAvailable)
         }
         let url = try temporaryFile()
-        try await writeRange(node: node, start: 0, end: node.size, to: url, progress: progress)
+        try await writeRange(node: node, start: 0, end: node.size, to: url, progress: progress, persist: false)
         completionHandler(url, GardenItem(node: node), nil)
       } catch { completionHandler(nil, nil, GardenProviderError.wrap(error)) }
       progress.completedUnitCount = progress.totalUnitCount
@@ -237,28 +237,12 @@ final class GardenFileProvider: NSObject, NSFileProviderReplicatedExtension, NSF
     return try manager.temporaryDirectoryURL().appendingPathComponent(UUID().uuidString)
   }
 
-  private func writeRange(node: GardenNode, start: Int, end: Int, to url: URL, progress: Progress) async throws {
+  private func writeRange(node: GardenNode, start: Int, end: Int, to url: URL, progress: Progress, persist: Bool = true) async throws {
     guard start >= 0, end >= start, end <= node.size else {
       throw GardenAPIError.invalidResponse
     }
-    FileManager.default.createFile(atPath: url.path, contents: nil)
-    let handle = try FileHandle(forWritingTo: url)
-    defer { try? handle.close() }
-    var complete = false
-    defer { if !complete { try? FileManager.default.removeItem(at: url) } }
-    try handle.truncate(atOffset: UInt64(end))
-    try handle.seek(toOffset: UInt64(start))
-    progress.totalUnitCount = Int64(max(end - start, 1))
-    var offset = start
-    while offset < end {
-      try Task.checkCancellation()
-      let bytes = try await ranges.read(node: node, offset: offset,
-        length: min(GardenRangeCache.blockSize, end - offset))
-      guard !bytes.isEmpty else { throw GardenAPIError.invalidResponse }
-      try handle.write(contentsOf: bytes)
-      offset += bytes.count
-      progress.completedUnitCount = Int64(offset - start)
+    try await GardenRangeWriter.write(start: start, end: end, to: url, progress: progress) { [ranges] offset, count in
+      try await ranges.read(node: node, offset: offset, length: count, persist: persist)
     }
-    complete = true
   }
 }

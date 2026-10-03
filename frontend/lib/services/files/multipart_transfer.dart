@@ -3,10 +3,10 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:crypto/crypto.dart';
 import 'package:garden_client/garden_client.dart';
 
 import 'direct_files_gateway.dart';
+import 'part_checksum.dart';
 import 'transfer_cancellation.dart';
 
 class MultipartTransfer {
@@ -36,7 +36,8 @@ class MultipartTransfer {
     try {
       await for (final bytes in parts(input, version.partSize!)) {
         cancellation?.check();
-        final checksum = md5.convert(bytes).toString();
+        final checksum = await partChecksum(bytes);
+        cancellation?.check();
         expected[part] = (bytes.length, checksum);
         final previous = completed[part];
         if (previous != null &&

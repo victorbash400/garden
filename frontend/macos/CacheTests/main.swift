@@ -30,8 +30,39 @@ import Foundation
       }
       return
     }
+    let buffer = GardenReadBuffer(capacity: 2 * 1024 * 1024)
+    let buffered = Data(repeating: 9, count: 1024 * 1024)
+    await buffer.store(buffered, key: "first")
+    await buffer.store(buffered, key: "second")
+    _ = await buffer.read("first")
+    await buffer.store(buffered, key: "third")
+    try require(await buffer.used == 2 * 1024 * 1024, "RAM buffer exceeded its bound")
+    try require(await buffer.read("second") == nil, "RAM buffer evicted the wrong block")
+    await buffer.clear()
+    try require(await buffer.used == 0, "RAM buffer did not clear")
     let root = FileManager.default.temporaryDirectory.appendingPathComponent("garden-cache-\(UUID())")
     defer { try? FileManager.default.removeItem(at: root) }
+    try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+    let written = root.appendingPathComponent("range-write")
+    let progress = Progress(totalUnitCount: 0)
+    let begin = 17
+    let end = 4 * 1024 * 1024 + 93
+    try await GardenRangeWriter.write(start: begin, end: end, to: written, progress: progress) { offset, count in
+      await Task.yield()
+      return Data(repeating: UInt8((offset - begin) / (1024 * 1024)), count: count)
+    }
+    let contents = try Data(contentsOf: written)
+    try require(contents.count == end && contents.prefix(begin) == Data(repeating: 0, count: begin), "Sparse range boundaries changed")
+    for position in begin..<end {
+      try require(contents[position] == UInt8((position - begin) / (1024 * 1024)), "Parallel writes reordered bytes")
+    }
+    try require(progress.completedUnitCount == Int64(end - begin), "Parallel write progress is incorrect")
+    let incomplete = root.appendingPathComponent("incomplete-write")
+    do {
+      try await GardenRangeWriter.write(start: 0, end: 100, to: incomplete, progress: Progress()) { _, _ in Data() }
+      throw NSError(domain: "CacheTests", code: 1)
+    } catch GardenAPIError.invalidResponse { }
+    try require(!FileManager.default.fileExists(atPath: incomplete.path), "Failed range write retained an incomplete file")
     let cache = GardenDiskCache(directory: root, limit: 4 * 1024 * 1024)
     let peer = GardenDiskCache(directory: root, limit: 4 * 1024 * 1024)
     let a = String(repeating: "a", count: 64)

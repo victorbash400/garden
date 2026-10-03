@@ -6,8 +6,20 @@ import 'package:garden_flutter/services/files/direct_files_gateway.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_flutter/services/files/multipart_transfer.dart';
+import 'package:garden_flutter/services/files/part_checksum.dart';
 
 void main() {
+  test('large part hashing leaves the caller event loop available', () async {
+    final bytes = Uint8List(8 * 1024 * 1024)..fillRange(0, 8 * 1024 * 1024, 7);
+    var eventProcessed = false;
+    final hash = partChecksum(bytes);
+    await Future<void>(() {
+      eventProcessed = true;
+    });
+    expect(eventProcessed, isTrue);
+    expect(await hash, md5.convert(bytes).toString());
+  });
+
   test(
     'stream segmentation preserves bytes across arbitrary input boundaries',
     () async {
