@@ -50,6 +50,8 @@ class _DriveFolderBranchState extends State<DriveFolderBranch> {
                       ? files.parentId == node.id
                       : files.selected?.id == node.id),
               expanded: index.expanded.contains(node.id),
+              folderOpen:
+                  active && files.path.any((folder) => folder.id == node.id),
               onOpen: files.busy
                   ? null
                   : () async {

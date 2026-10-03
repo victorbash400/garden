@@ -13,6 +13,7 @@ class TreeRow extends StatelessWidget {
     required this.onOpen,
     this.onToggle,
     this.expanded = false,
+    this.folderOpen,
     this.depth = 0,
     this.connected = false,
     this.actions,
@@ -22,6 +23,7 @@ class TreeRow extends StatelessWidget {
   final IconData icon;
   final bool selected;
   final bool expanded;
+  final bool? folderOpen;
   final bool connected;
   final int depth;
   final VoidCallback? onOpen;
@@ -80,7 +82,7 @@ class TreeRow extends StatelessWidget {
                               icon == LucideIcons.hardDrive
                           ? TreeFolderIcon(
                               connected: connected,
-                              open: expanded || selected,
+                              open: folderOpen ?? (expanded || selected),
                               drive: icon == LucideIcons.hardDrive,
                             )
                           : SizedBox(
