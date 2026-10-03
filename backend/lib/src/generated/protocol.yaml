@@ -23,6 +23,10 @@ collaboration:
   - release:
 content:
   - begin:
+  - beginMultipart:
+  - uploadParts:
+  - uploadedParts:
+  - download:
   - writeChunk:
   - finish:
   - read:

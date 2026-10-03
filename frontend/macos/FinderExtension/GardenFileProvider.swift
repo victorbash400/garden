@@ -1,17 +1,22 @@
 import FileProvider
 import Foundation
+import OSLog
 
 final class GardenFileProvider: NSObject, NSFileProviderReplicatedExtension, NSFileProviderPartialContentFetching {
+  private let logger = Logger(subsystem: "com.victorbash.garden.finder", category: "ranges")
   private let domain: NSFileProviderDomain
   private let api: GardenAPI
+  private let ranges: GardenRangeCache
 
   required init(domain: NSFileProviderDomain) {
     self.domain = domain
-    self.api = GardenAPI(domainID: domain.identifier.rawValue)
+    let api = GardenAPI(domainID: domain.identifier.rawValue)
+    self.api = api
+    self.ranges = GardenRangeCache(api: api, domainID: domain.identifier.rawValue)
     super.init()
   }
 
-  func invalidate() {}
+  func invalidate() { Task { await ranges.invalidate() } }
 
   func item(
     for identifier: NSFileProviderItemIdentifier,
@@ -28,8 +33,8 @@ final class GardenFileProvider: NSObject, NSFileProviderReplicatedExtension, NSF
           item = GardenItem(node: try await api.get(nodeID(identifier)))
         }
         completionHandler(item, nil)
-      } catch { completionHandler(nil, error) }
-      progress.completedUnitCount = 1
+      } catch { completionHandler(nil, GardenProviderError.wrap(error)) }
+      progress.completedUnitCount = progress.totalUnitCount
     }
     return progress
   }
@@ -41,7 +46,7 @@ final class GardenFileProvider: NSObject, NSFileProviderReplicatedExtension, NSF
     completionHandler: @escaping (URL?, NSFileProviderItem?, Error?) -> Void
   ) -> Progress {
     let progress = Progress(totalUnitCount: 1)
-    Task {
+    let task = Task {
       do {
         let node = try await api.get(nodeID(itemIdentifier))
         guard !node.folder else { throw GardenAPIError.invalidResponse }
@@ -50,11 +55,12 @@ final class GardenFileProvider: NSObject, NSFileProviderReplicatedExtension, NSF
           throw NSFileProviderError(.versionNoLongerAvailable)
         }
         let url = try temporaryFile()
-        try await writeRange(node: node, start: 0, end: node.size, to: url)
+        try await writeRange(node: node, start: 0, end: node.size, to: url, progress: progress)
         completionHandler(url, GardenItem(node: node), nil)
-      } catch { completionHandler(nil, nil, error) }
-      progress.completedUnitCount = 1
+      } catch { completionHandler(nil, nil, GardenProviderError.wrap(error)) }
+      progress.completedUnitCount = progress.totalUnitCount
     }
+    progress.cancellationHandler = { task.cancel() }
     return progress
   }
 
@@ -68,24 +74,31 @@ final class GardenFileProvider: NSObject, NSFileProviderReplicatedExtension, NSF
     completionHandler: @escaping (URL?, NSFileProviderItem?, NSRange, NSFileProviderMaterializationFlags, Error?) -> Void
   ) -> Progress {
     let progress = Progress(totalUnitCount: 1)
-    Task {
+    let task = Task {
       do {
         let node = try await api.get(nodeID(itemIdentifier))
         guard !node.folder else { throw GardenAPIError.invalidResponse }
         if requestedVersion.contentVersion != Data(String(node.version).utf8) {
           throw NSFileProviderError(.versionNoLongerAvailable)
         }
+        guard minimalRange.location >= 0, minimalRange.length >= 0,
+          minimalRange.location <= node.size else {
+          throw GardenAPIError.invalidResponse
+        }
         let unit = max(alignment, 1)
         let start = (minimalRange.location / unit) * unit
-        let end = min(node.size, ((NSMaxRange(minimalRange) + unit - 1) / unit) * unit)
+        let requestedEnd = minimalRange.location + min(minimalRange.length, node.size - minimalRange.location)
+        let end = requestedEnd == node.size ? node.size : min(node.size, ((requestedEnd + unit - 1) / unit) * unit)
+        logger.info("Partial read node \(node.id), requested \(minimalRange.location):\(minimalRange.length), alignment \(alignment), returned \(start):\(end - start)")
         let url = try temporaryFile()
-        try await writeRange(node: node, start: start, end: end, to: url)
+        try await writeRange(node: node, start: start, end: end, to: url, progress: progress)
         completionHandler(
           url, GardenItem(node: node), NSRange(location: start, length: end - start), [], nil
         )
-      } catch { completionHandler(nil, nil, NSRange(location: 0, length: 0), [], error) }
-      progress.completedUnitCount = 1
+      } catch { completionHandler(nil, nil, NSRange(location: 0, length: 0), [], GardenProviderError.wrap(error)) }
+      progress.completedUnitCount = progress.totalUnitCount
     }
+    progress.cancellationHandler = { task.cancel() }
     return progress
   }
 
@@ -98,7 +111,7 @@ final class GardenFileProvider: NSObject, NSFileProviderReplicatedExtension, NSF
     completionHandler: @escaping (NSFileProviderItem?, NSFileProviderItemFields, Bool, Error?) -> Void
   ) -> Progress {
     let progress = Progress(totalUnitCount: 1)
-    Task {
+    let task = Task {
       do {
         let parent = try parentID(itemTemplate.parentItemIdentifier)
         guard let contentType = itemTemplate.contentType else {
@@ -124,9 +137,10 @@ final class GardenFileProvider: NSObject, NSFileProviderReplicatedExtension, NSF
           }
           throw uploadError
         }
-      } catch { completionHandler(nil, [], false, error) }
-      progress.completedUnitCount = 1
+      } catch { completionHandler(nil, [], false, GardenProviderError.wrap(error)) }
+      progress.completedUnitCount = progress.totalUnitCount
     }
+    progress.cancellationHandler = { task.cancel() }
     return progress
   }
 
@@ -140,7 +154,7 @@ final class GardenFileProvider: NSObject, NSFileProviderReplicatedExtension, NSF
     completionHandler: @escaping (NSFileProviderItem?, NSFileProviderItemFields, Bool, Error?) -> Void
   ) -> Progress {
     let progress = Progress(totalUnitCount: 1)
-    Task {
+    let task = Task {
       do {
         let originalID = try nodeID(item.itemIdentifier)
         var node = try await api.get(originalID)
@@ -155,7 +169,7 @@ final class GardenFileProvider: NSObject, NSFileProviderReplicatedExtension, NSF
           )
           if node.id != originalID {
             completionHandler(GardenItem(node: node), [], false, nil)
-            progress.completedUnitCount = 1
+            progress.completedUnitCount = progress.totalUnitCount
             return
           }
         }
@@ -164,9 +178,10 @@ final class GardenFileProvider: NSObject, NSFileProviderReplicatedExtension, NSF
           node = try await api.move(id: node.id, parentID: parent, name: item.filename)
         }
         completionHandler(GardenItem(node: node), [], false, nil)
-      } catch { completionHandler(nil, [], false, error) }
-      progress.completedUnitCount = 1
+      } catch { completionHandler(nil, [], false, GardenProviderError.wrap(error)) }
+      progress.completedUnitCount = progress.totalUnitCount
     }
+    progress.cancellationHandler = { task.cancel() }
     return progress
   }
 
@@ -182,8 +197,8 @@ final class GardenFileProvider: NSObject, NSFileProviderReplicatedExtension, NSF
       do {
         try await api.delete(nodeID(identifier))
         completionHandler(nil)
-      } catch { completionHandler(error) }
-      progress.completedUnitCount = 1
+      } catch { completionHandler(GardenProviderError.wrap(error)) }
+      progress.completedUnitCount = progress.totalUnitCount
     }
     return progress
   }
@@ -213,24 +228,28 @@ final class GardenFileProvider: NSObject, NSFileProviderReplicatedExtension, NSF
     return try manager.temporaryDirectoryURL().appendingPathComponent(UUID().uuidString)
   }
 
-  private func writeRange(node: GardenNode, start: Int, end: Int, to url: URL) async throws {
+  private func writeRange(node: GardenNode, start: Int, end: Int, to url: URL, progress: Progress) async throws {
     guard start >= 0, end >= start, end <= node.size else {
       throw GardenAPIError.invalidResponse
     }
     FileManager.default.createFile(atPath: url.path, contents: nil)
     let handle = try FileHandle(forWritingTo: url)
     defer { try? handle.close() }
-    try handle.truncate(atOffset: UInt64(node.size))
+    var complete = false
+    defer { if !complete { try? FileManager.default.removeItem(at: url) } }
+    try handle.truncate(atOffset: UInt64(end))
     try handle.seek(toOffset: UInt64(start))
+    progress.totalUnitCount = Int64(max(end - start, 1))
     var offset = start
     while offset < end {
-      let bytes = try await api.read(
-        id: node.id, version: node.version, offset: offset,
-        length: min(256 * 1024, end - offset)
-      )
+      try Task.checkCancellation()
+      let bytes = try await ranges.read(node: node, offset: offset,
+        length: min(GardenRangeCache.blockSize, end - offset))
       guard !bytes.isEmpty else { throw GardenAPIError.invalidResponse }
       try handle.write(contentsOf: bytes)
       offset += bytes.count
+      progress.completedUnitCount = Int64(offset - start)
     }
+    complete = true
   }
 }

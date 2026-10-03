@@ -21,6 +21,9 @@ abstract class FileVersion
     required this.baseVersion,
     required this.size,
     required this.chunkCount,
+    this.objectPath,
+    this.uploadId,
+    this.partSize,
     bool? committed,
     bool? aborted,
     required this.createdAt,
@@ -34,6 +37,9 @@ abstract class FileVersion
     required int baseVersion,
     required int size,
     required int chunkCount,
+    String? objectPath,
+    String? uploadId,
+    int? partSize,
     bool? committed,
     bool? aborted,
     required DateTime createdAt,
@@ -47,6 +53,9 @@ abstract class FileVersion
       baseVersion: jsonSerialization['baseVersion'] as int,
       size: jsonSerialization['size'] as int,
       chunkCount: jsonSerialization['chunkCount'] as int,
+      objectPath: jsonSerialization['objectPath'] as String?,
+      uploadId: jsonSerialization['uploadId'] as String?,
+      partSize: jsonSerialization['partSize'] as int?,
       committed: jsonSerialization['committed'] == null
           ? null
           : _is.BoolJsonExtension.fromJson(jsonSerialization['committed']),
@@ -76,6 +85,12 @@ abstract class FileVersion
 
   int chunkCount;
 
+  String? objectPath;
+
+  String? uploadId;
+
+  int? partSize;
+
   bool committed;
 
   bool aborted;
@@ -95,6 +110,9 @@ abstract class FileVersion
     int? baseVersion,
     int? size,
     int? chunkCount,
+    String? objectPath,
+    String? uploadId,
+    int? partSize,
     bool? committed,
     bool? aborted,
     DateTime? createdAt,
@@ -109,6 +127,9 @@ abstract class FileVersion
       'baseVersion': baseVersion,
       'size': size,
       'chunkCount': chunkCount,
+      if (objectPath != null) 'objectPath': objectPath,
+      if (uploadId != null) 'uploadId': uploadId,
+      if (partSize != null) 'partSize': partSize,
       'committed': committed,
       'aborted': aborted,
       'createdAt': createdAt.toJson(),
@@ -125,6 +146,9 @@ abstract class FileVersion
       'baseVersion': baseVersion,
       'size': size,
       'chunkCount': chunkCount,
+      if (objectPath != null) 'objectPath': objectPath,
+      if (uploadId != null) 'uploadId': uploadId,
+      if (partSize != null) 'partSize': partSize,
       'committed': committed,
       'aborted': aborted,
       'createdAt': createdAt.toJson(),
@@ -169,6 +193,9 @@ class _FileVersionImpl extends FileVersion {
     required int baseVersion,
     required int size,
     required int chunkCount,
+    String? objectPath,
+    String? uploadId,
+    int? partSize,
     bool? committed,
     bool? aborted,
     required DateTime createdAt,
@@ -179,6 +206,9 @@ class _FileVersionImpl extends FileVersion {
          baseVersion: baseVersion,
          size: size,
          chunkCount: chunkCount,
+         objectPath: objectPath,
+         uploadId: uploadId,
+         partSize: partSize,
          committed: committed,
          aborted: aborted,
          createdAt: createdAt,
@@ -195,6 +225,9 @@ class _FileVersionImpl extends FileVersion {
     int? baseVersion,
     int? size,
     int? chunkCount,
+    Object? objectPath = _Undefined,
+    Object? uploadId = _Undefined,
+    Object? partSize = _Undefined,
     bool? committed,
     bool? aborted,
     DateTime? createdAt,
@@ -206,6 +239,9 @@ class _FileVersionImpl extends FileVersion {
       baseVersion: baseVersion ?? this.baseVersion,
       size: size ?? this.size,
       chunkCount: chunkCount ?? this.chunkCount,
+      objectPath: objectPath is String? ? objectPath : this.objectPath,
+      uploadId: uploadId is String? ? uploadId : this.uploadId,
+      partSize: partSize is int? ? partSize : this.partSize,
       committed: committed ?? this.committed,
       aborted: aborted ?? this.aborted,
       createdAt: createdAt ?? this.createdAt,
@@ -238,6 +274,21 @@ class FileVersionUpdateTable extends _is.UpdateTable<FileVersionTable> {
 
   _is.ColumnValue<int, int> chunkCount(int value) => _is.ColumnValue(
     table.chunkCount,
+    value,
+  );
+
+  _is.ColumnValue<String, String> objectPath(String? value) => _is.ColumnValue(
+    table.objectPath,
+    value,
+  );
+
+  _is.ColumnValue<String, String> uploadId(String? value) => _is.ColumnValue(
+    table.uploadId,
+    value,
+  );
+
+  _is.ColumnValue<int, int> partSize(int? value) => _is.ColumnValue(
+    table.partSize,
     value,
   );
 
@@ -281,6 +332,18 @@ class FileVersionTable extends _is.Table<int?> {
       'chunkCount',
       this,
     );
+    objectPath = _is.ColumnString(
+      'objectPath',
+      this,
+    );
+    uploadId = _is.ColumnString(
+      'uploadId',
+      this,
+    );
+    partSize = _is.ColumnInt(
+      'partSize',
+      this,
+    );
     committed = _is.ColumnBool(
       'committed',
       this,
@@ -309,6 +372,12 @@ class FileVersionTable extends _is.Table<int?> {
 
   late final _is.ColumnInt chunkCount;
 
+  late final _is.ColumnString objectPath;
+
+  late final _is.ColumnString uploadId;
+
+  late final _is.ColumnInt partSize;
+
   late final _is.ColumnBool committed;
 
   late final _is.ColumnBool aborted;
@@ -323,6 +392,9 @@ class FileVersionTable extends _is.Table<int?> {
     baseVersion,
     size,
     chunkCount,
+    objectPath,
+    uploadId,
+    partSize,
     committed,
     aborted,
     createdAt,

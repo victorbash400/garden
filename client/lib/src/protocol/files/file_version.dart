@@ -21,6 +21,9 @@ abstract class FileVersion
     required this.baseVersion,
     required this.size,
     required this.chunkCount,
+    this.objectPath,
+    this.uploadId,
+    this.partSize,
     bool? committed,
     bool? aborted,
     required this.createdAt,
@@ -34,6 +37,9 @@ abstract class FileVersion
     required int baseVersion,
     required int size,
     required int chunkCount,
+    String? objectPath,
+    String? uploadId,
+    int? partSize,
     bool? committed,
     bool? aborted,
     required DateTime createdAt,
@@ -47,6 +53,9 @@ abstract class FileVersion
       baseVersion: jsonSerialization['baseVersion'] as int,
       size: jsonSerialization['size'] as int,
       chunkCount: jsonSerialization['chunkCount'] as int,
+      objectPath: jsonSerialization['objectPath'] as String?,
+      uploadId: jsonSerialization['uploadId'] as String?,
+      partSize: jsonSerialization['partSize'] as int?,
       committed: jsonSerialization['committed'] == null
           ? null
           : _isc.BoolJsonExtension.fromJson(jsonSerialization['committed']),
@@ -74,6 +83,12 @@ abstract class FileVersion
 
   int chunkCount;
 
+  String? objectPath;
+
+  String? uploadId;
+
+  int? partSize;
+
   bool committed;
 
   bool aborted;
@@ -90,6 +105,9 @@ abstract class FileVersion
     int? baseVersion,
     int? size,
     int? chunkCount,
+    String? objectPath,
+    String? uploadId,
+    int? partSize,
     bool? committed,
     bool? aborted,
     DateTime? createdAt,
@@ -104,6 +122,9 @@ abstract class FileVersion
       'baseVersion': baseVersion,
       'size': size,
       'chunkCount': chunkCount,
+      if (objectPath != null) 'objectPath': objectPath,
+      if (uploadId != null) 'uploadId': uploadId,
+      if (partSize != null) 'partSize': partSize,
       'committed': committed,
       'aborted': aborted,
       'createdAt': createdAt.toJson(),
@@ -120,6 +141,9 @@ abstract class FileVersion
       'baseVersion': baseVersion,
       'size': size,
       'chunkCount': chunkCount,
+      if (objectPath != null) 'objectPath': objectPath,
+      if (uploadId != null) 'uploadId': uploadId,
+      if (partSize != null) 'partSize': partSize,
       'committed': committed,
       'aborted': aborted,
       'createdAt': createdAt.toJson(),
@@ -142,6 +166,9 @@ class _FileVersionImpl extends FileVersion {
     required int baseVersion,
     required int size,
     required int chunkCount,
+    String? objectPath,
+    String? uploadId,
+    int? partSize,
     bool? committed,
     bool? aborted,
     required DateTime createdAt,
@@ -152,6 +179,9 @@ class _FileVersionImpl extends FileVersion {
          baseVersion: baseVersion,
          size: size,
          chunkCount: chunkCount,
+         objectPath: objectPath,
+         uploadId: uploadId,
+         partSize: partSize,
          committed: committed,
          aborted: aborted,
          createdAt: createdAt,
@@ -168,6 +198,9 @@ class _FileVersionImpl extends FileVersion {
     int? baseVersion,
     int? size,
     int? chunkCount,
+    Object? objectPath = _Undefined,
+    Object? uploadId = _Undefined,
+    Object? partSize = _Undefined,
     bool? committed,
     bool? aborted,
     DateTime? createdAt,
@@ -179,6 +212,9 @@ class _FileVersionImpl extends FileVersion {
       baseVersion: baseVersion ?? this.baseVersion,
       size: size ?? this.size,
       chunkCount: chunkCount ?? this.chunkCount,
+      objectPath: objectPath is String? ? objectPath : this.objectPath,
+      uploadId: uploadId is String? ? uploadId : this.uploadId,
+      partSize: partSize is int? ? partSize : this.partSize,
       committed: committed ?? this.committed,
       aborted: aborted ?? this.aborted,
       createdAt: createdAt ?? this.createdAt,

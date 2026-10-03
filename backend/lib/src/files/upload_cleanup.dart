@@ -1,5 +1,7 @@
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
+import 'multipart_object_store.dart';
+import 'package:aws_client/s3.dart' as aws;
 
 class UploadCleanup {
   static Future<void> expire(Session session, int versionId) async {
@@ -20,6 +22,28 @@ class UploadCleanup {
       return true;
     });
     if (!expired) return;
+    final version = await FileVersion.db.findById(session, versionId);
+    if (version?.objectPath != null) {
+      final store = MultipartObjectStore(session);
+      try {
+        try {
+          await store.abort(version!);
+        } on aws.NoSuchUpload {
+          /* A completed object has no pending parts. */
+        }
+        if (await session.storage.fileExists(
+          storageId: 'private',
+          path: version!.objectPath!,
+        )) {
+          await session.storage.deleteFile(
+            storageId: 'private',
+            path: version.objectPath!,
+          );
+        }
+      } finally {
+        store.close();
+      }
+    }
     final chunks = await FileChunk.db.find(
       session,
       where: (row) => row.versionId.equals(versionId),

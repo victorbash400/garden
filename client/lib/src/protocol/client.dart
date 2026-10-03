@@ -12,6 +12,8 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _ida;
 import 'dart:typed_data' as _idt;
+import 'package:garden_client/src/protocol/files/content_download.dart'
+    as _ic1eq1qp;
 import 'package:garden_client/src/protocol/files/directory_listing.dart'
     as _i6024znp;
 import 'package:garden_client/src/protocol/files/drive_event.dart' as _ib0wfils;
@@ -22,6 +24,8 @@ import 'package:garden_client/src/protocol/files/file_node.dart' as _i2qlj4hx;
 import 'package:garden_client/src/protocol/files/file_version.dart'
     as _ibt6e7l6;
 import 'package:garden_client/src/protocol/files/node_kind.dart' as _igh51ulr;
+import 'package:garden_client/src/protocol/files/uploaded_part.dart'
+    as _ieod4w9g;
 import 'package:garden_client/src/protocol/gardens/account_details.dart'
     as _i7n7hin1;
 import 'package:garden_client/src/protocol/gardens/finder_session.dart'
@@ -389,6 +393,53 @@ class EndpointContent extends _isc.EndpointRef {
       'nodeId': nodeId,
       'baseVersion': baseVersion,
       'size': size,
+    },
+  );
+
+  _ida.Future<_ibt6e7l6.FileVersion> beginMultipart(
+    int nodeId,
+    int baseVersion,
+    int size,
+  ) => caller.callServerEndpoint<_ibt6e7l6.FileVersion>(
+    'content',
+    'beginMultipart',
+    {
+      'nodeId': nodeId,
+      'baseVersion': baseVersion,
+      'size': size,
+    },
+  );
+
+  _ida.Future<List<String>> uploadParts(
+    int versionId,
+    int first,
+    int count,
+  ) => caller.callServerEndpoint<List<String>>(
+    'content',
+    'uploadParts',
+    {
+      'versionId': versionId,
+      'first': first,
+      'count': count,
+    },
+  );
+
+  _ida.Future<List<_ieod4w9g.UploadedPart>> uploadedParts(int versionId) =>
+      caller.callServerEndpoint<List<_ieod4w9g.UploadedPart>>(
+        'content',
+        'uploadedParts',
+        {'versionId': versionId},
+      );
+
+  _ida.Future<_ic1eq1qp.ContentDownload> download(
+    int nodeId,
+    int versionId,
+  ) => caller.callServerEndpoint<_ic1eq1qp.ContentDownload>(
+    'content',
+    'download',
+    {
+      'nodeId': nodeId,
+      'versionId': versionId,
     },
   );
 

@@ -3,6 +3,9 @@ import 'dart:typed_data';
 import 'package:garden_client/garden_client.dart';
 
 import 'files_gateway.dart';
+import 'direct_files_gateway.dart';
+import 'direct_download.dart';
+import 'multipart_transfer.dart';
 import 'transfer_cancellation.dart';
 
 class FileTransfer {
@@ -19,6 +22,19 @@ class FileTransfer {
     void Function()? onCommit,
   }) async {
     cancellation?.check();
+    if (gateway is DirectFilesGateway && size > chunkSize) {
+      final direct = gateway as DirectFilesGateway;
+      final version = await direct.beginMultipart(node.id!, node.version, size);
+      await MultipartTransfer(direct).upload(
+        version,
+        input,
+        onProgress: onProgress,
+        cancellation: cancellation,
+      );
+      cancellation?.check();
+      onCommit?.call();
+      return gateway.finish(version.id!);
+    }
     final version = await gateway.begin(node.id!, node.version, size);
     var buffer = BytesBuilder(copy: false);
     var index = 0;
@@ -64,6 +80,17 @@ class FileTransfer {
   Stream<List<int>> download(FileNode node, {FileVersion? version}) async* {
     final size = version?.size ?? node.size;
     final id = version?.id ?? node.version;
+    if (gateway is DirectFilesGateway && size > 0) {
+      final direct = gateway as DirectFilesGateway;
+      final ticket = await direct.downloadTicket(node.id!, id);
+      if (ticket.size != size) {
+        throw StateError('File version size does not match.');
+      }
+      if (ticket.url != null) {
+        yield* DirectDownload(direct).read(node.id!, id, ticket);
+        return;
+      }
+    }
     var offset = 0;
     while (offset < size) {
       final length = (size - offset).clamp(0, chunkSize);

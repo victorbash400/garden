@@ -14,6 +14,8 @@
 import 'dart:async' as _ida;
 import 'dart:io' as _idi;
 import 'dart:typed_data' as _idt;
+import 'package:garden_server/src/generated/files/content_download.dart'
+    as _i5r508c4;
 import 'package:garden_server/src/generated/files/directory_listing.dart'
     as _i1pn1l7f;
 import 'package:garden_server/src/generated/files/drive_event.dart'
@@ -25,6 +27,8 @@ import 'package:garden_server/src/generated/files/file_node.dart' as _il49blua;
 import 'package:garden_server/src/generated/files/file_version.dart'
     as _iwzwya1z;
 import 'package:garden_server/src/generated/files/node_kind.dart' as _iso8aj7z;
+import 'package:garden_server/src/generated/files/uploaded_part.dart'
+    as _izqf04mm;
 import 'package:garden_server/src/generated/future_calls.dart' as _id1va6nu;
 import 'package:garden_server/src/generated/future_calls_generated_models/upload_cleanup_future_call_expire_model.dart'
     as _izf17ijw;
@@ -953,6 +957,146 @@ class _ContentEndpoint {
                   _localCallContext.arguments,
                 )
                 as _ida.Future<_iwzwya1z.FileVersion>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_iwzwya1z.FileVersion> beginMultipart(
+    _ist.TestSessionBuilder sessionBuilder,
+    int nodeId,
+    int baseVersion,
+    int size,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'content',
+            method: 'beginMultipart',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'content',
+          methodName: 'beginMultipart',
+          parameters: _ist.testObjectToJson({
+            'nodeId': nodeId,
+            'baseVersion': baseVersion,
+            'size': size,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_iwzwya1z.FileVersion>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<String>> uploadParts(
+    _ist.TestSessionBuilder sessionBuilder,
+    int versionId,
+    int first,
+    int count,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'content',
+            method: 'uploadParts',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'content',
+          methodName: 'uploadParts',
+          parameters: _ist.testObjectToJson({
+            'versionId': versionId,
+            'first': first,
+            'count': count,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<String>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_izqf04mm.UploadedPart>> uploadedParts(
+    _ist.TestSessionBuilder sessionBuilder,
+    int versionId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'content',
+            method: 'uploadedParts',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'content',
+          methodName: 'uploadedParts',
+          parameters: _ist.testObjectToJson({'versionId': versionId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_izqf04mm.UploadedPart>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_i5r508c4.ContentDownload> download(
+    _ist.TestSessionBuilder sessionBuilder,
+    int nodeId,
+    int versionId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'content',
+            method: 'download',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'content',
+          methodName: 'download',
+          parameters: _ist.testObjectToJson({
+            'nodeId': nodeId,
+            'versionId': versionId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_i5r508c4.ContentDownload>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

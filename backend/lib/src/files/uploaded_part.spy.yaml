@@ -1,0 +1,5 @@
+class: UploadedPart
+fields:
+  number: int
+  size: int
+  checksum: String

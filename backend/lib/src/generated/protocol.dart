@@ -19,6 +19,8 @@ import 'package:garden_server/src/generated/files/file_comment.dart'
 import 'package:garden_server/src/generated/files/file_node.dart' as _il49blua;
 import 'package:garden_server/src/generated/files/file_version.dart'
     as _iwzwya1z;
+import 'package:garden_server/src/generated/files/uploaded_part.dart'
+    as _izqf04mm;
 import 'package:garden_server/src/generated/gardens/garden_summary.dart'
     as _itk3qnhp;
 import 'package:serverpod/protocol.dart' as _isp;
@@ -27,6 +29,7 @@ import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _iacs;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _iais;
+import 'files/content_download.dart' as _id6mrfn8;
 import 'files/directory_listing.dart' as _i8kiawn9;
 import 'files/drive_event.dart' as _i4wn0cbe;
 import 'files/file_chunk.dart' as _imjz65yx;
@@ -35,6 +38,7 @@ import 'files/file_lease.dart' as _ifu05pz5;
 import 'files/file_node.dart' as _iqxechne;
 import 'files/file_version.dart' as _inq2edz5;
 import 'files/node_kind.dart' as _idxfoob7;
+import 'files/uploaded_part.dart' as _ivsra0vz;
 import 'future_calls_generated_models/upload_cleanup_future_call_expire_model.dart'
     as _i4nkt2dm;
 import 'gardens/account_details.dart' as _i4muwn5e;
@@ -44,6 +48,7 @@ import 'gardens/garden_member.dart' as _icenu3t8;
 import 'gardens/garden_record.dart' as _iwqk3oef;
 import 'gardens/garden_summary.dart' as _i5zbrq86;
 import 'greetings/greeting.dart' as _izw8z7ou;
+export 'files/content_download.dart';
 export 'files/directory_listing.dart';
 export 'files/drive_event.dart';
 export 'files/file_chunk.dart';
@@ -52,6 +57,7 @@ export 'files/file_lease.dart';
 export 'files/file_node.dart';
 export 'files/file_version.dart';
 export 'files/node_kind.dart';
+export 'files/uploaded_part.dart';
 export 'gardens/account_details.dart';
 export 'gardens/finder_session.dart';
 export 'gardens/garden_exception.dart';
@@ -539,6 +545,24 @@ class Protocol extends _is.DatabaseSerializationManager {
           dartType: 'int',
         ),
         _isp.ColumnDefinition(
+          name: 'objectPath',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'uploadId',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'partSize',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _isp.ColumnDefinition(
           name: 'committed',
           columnType: _isp.ColumnType.boolean,
           isNullable: false,
@@ -752,6 +776,9 @@ class Protocol extends _is.DatabaseSerializationManager {
       }
     }
 
+    if (t == _id6mrfn8.ContentDownload) {
+      return _id6mrfn8.ContentDownload.fromJson(data) as T;
+    }
     if (t == _i8kiawn9.DirectoryListing) {
       return _i8kiawn9.DirectoryListing.fromJson(data) as T;
     }
@@ -775,6 +802,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (t == _idxfoob7.NodeKind) {
       return _idxfoob7.NodeKind.fromJson(data) as T;
+    }
+    if (t == _ivsra0vz.UploadedPart) {
+      return _ivsra0vz.UploadedPart.fromJson(data) as T;
     }
     if (t == _i4nkt2dm.UploadCleanupFutureCallExpireModel) {
       return _i4nkt2dm.UploadCleanupFutureCallExpireModel.fromJson(data) as T;
@@ -800,6 +830,10 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _izw8z7ou.Greeting) {
       return _izw8z7ou.Greeting.fromJson(data) as T;
     }
+    if (t == _is.getType<_id6mrfn8.ContentDownload?>()) {
+      return (data != null ? _id6mrfn8.ContentDownload.fromJson(data) : null)
+          as T;
+    }
     if (t == _is.getType<_i8kiawn9.DirectoryListing?>()) {
       return (data != null ? _i8kiawn9.DirectoryListing.fromJson(data) : null)
           as T;
@@ -824,6 +858,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (t == _is.getType<_idxfoob7.NodeKind?>()) {
       return (data != null ? _idxfoob7.NodeKind.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_ivsra0vz.UploadedPart?>()) {
+      return (data != null ? _ivsra0vz.UploadedPart.fromJson(data) : null) as T;
     }
     if (t == _is.getType<_i4nkt2dm.UploadCleanupFutureCallExpireModel?>()) {
       return (data != null
@@ -921,6 +958,15 @@ class Protocol extends _is.DatabaseSerializationManager {
               .toList()
           as T;
     }
+    if (t == List<String>) {
+      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    }
+    if (t == List<_izqf04mm.UploadedPart>) {
+      return (data as List)
+              .map((e) => deserialize<_izqf04mm.UploadedPart>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_iwzwya1z.FileVersion>) {
       return (data as List)
               .map((e) => deserialize<_iwzwya1z.FileVersion>(e))
@@ -938,9 +984,6 @@ class Protocol extends _is.DatabaseSerializationManager {
               .map((e) => deserialize<_il49blua.FileNode>(e))
               .toList()
           as T;
-    }
-    if (t == List<String>) {
-      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
     if (t == List<_itk3qnhp.GardenSummary>) {
       return (data as List)
@@ -962,6 +1005,7 @@ class Protocol extends _is.DatabaseSerializationManager {
 
   static String? getClassNameForType(Type type) {
     return switch (type) {
+      _id6mrfn8.ContentDownload => 'ContentDownload',
       _i8kiawn9.DirectoryListing => 'DirectoryListing',
       _i4wn0cbe.DriveEvent => 'DriveEvent',
       _imjz65yx.FileChunk => 'FileChunk',
@@ -970,6 +1014,7 @@ class Protocol extends _is.DatabaseSerializationManager {
       _iqxechne.FileNode => 'FileNode',
       _inq2edz5.FileVersion => 'FileVersion',
       _idxfoob7.NodeKind => 'NodeKind',
+      _ivsra0vz.UploadedPart => 'UploadedPart',
       _i4nkt2dm.UploadCleanupFutureCallExpireModel =>
         'UploadCleanupFutureCallExpireModel',
       _i4muwn5e.AccountDetails => 'AccountDetails',
@@ -993,6 +1038,8 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
 
     switch (data) {
+      case _id6mrfn8.ContentDownload():
+        return 'ContentDownload';
       case _i8kiawn9.DirectoryListing():
         return 'DirectoryListing';
       case _i4wn0cbe.DriveEvent():
@@ -1009,6 +1056,8 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'FileVersion';
       case _idxfoob7.NodeKind():
         return 'NodeKind';
+      case _ivsra0vz.UploadedPart():
+        return 'UploadedPart';
       case _i4nkt2dm.UploadCleanupFutureCallExpireModel():
         return 'UploadCleanupFutureCallExpireModel';
       case _i4muwn5e.AccountDetails():
@@ -1051,6 +1100,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (dataClassName is! String) {
       return super.deserializeByClassName(data);
     }
+    if (dataClassName == 'ContentDownload') {
+      return deserialize<_id6mrfn8.ContentDownload>(data['data']);
+    }
     if (dataClassName == 'DirectoryListing') {
       return deserialize<_i8kiawn9.DirectoryListing>(data['data']);
     }
@@ -1074,6 +1126,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (dataClassName == 'NodeKind') {
       return deserialize<_idxfoob7.NodeKind>(data['data']);
+    }
+    if (dataClassName == 'UploadedPart') {
+      return deserialize<_ivsra0vz.UploadedPart>(data['data']);
     }
     if (dataClassName == 'UploadCleanupFutureCallExpireModel') {
       return deserialize<_i4nkt2dm.UploadCleanupFutureCallExpireModel>(

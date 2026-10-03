@@ -532,6 +532,112 @@ class Endpoints extends _is.EndpointDispatch {
                     params['size'],
                   ),
         ),
+        'beginMultipart': _is.MethodConnector(
+          name: 'beginMultipart',
+          params: {
+            'nodeId': _is.ParameterDescription(
+              name: 'nodeId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'baseVersion': _is.ParameterDescription(
+              name: 'baseVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'size': _is.ParameterDescription(
+              name: 'size',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['content'] as _iqqtuyco.ContentEndpoint)
+                  .beginMultipart(
+                    session,
+                    params['nodeId'],
+                    params['baseVersion'],
+                    params['size'],
+                  ),
+        ),
+        'uploadParts': _is.MethodConnector(
+          name: 'uploadParts',
+          params: {
+            'versionId': _is.ParameterDescription(
+              name: 'versionId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'first': _is.ParameterDescription(
+              name: 'first',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'count': _is.ParameterDescription(
+              name: 'count',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['content'] as _iqqtuyco.ContentEndpoint)
+                  .uploadParts(
+                    session,
+                    params['versionId'],
+                    params['first'],
+                    params['count'],
+                  ),
+        ),
+        'uploadedParts': _is.MethodConnector(
+          name: 'uploadedParts',
+          params: {
+            'versionId': _is.ParameterDescription(
+              name: 'versionId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['content'] as _iqqtuyco.ContentEndpoint)
+                  .uploadedParts(
+                    session,
+                    params['versionId'],
+                  ),
+        ),
+        'download': _is.MethodConnector(
+          name: 'download',
+          params: {
+            'nodeId': _is.ParameterDescription(
+              name: 'nodeId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'versionId': _is.ParameterDescription(
+              name: 'versionId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['content'] as _iqqtuyco.ContentEndpoint).download(
+                    session,
+                    params['nodeId'],
+                    params['versionId'],
+                  ),
+        ),
         'writeChunk': _is.MethodConnector(
           name: 'writeChunk',
           params: {

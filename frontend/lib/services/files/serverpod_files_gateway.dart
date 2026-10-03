@@ -3,10 +3,23 @@ import 'dart:typed_data';
 import 'package:garden_client/garden_client.dart';
 
 import 'files_gateway.dart';
+import 'direct_files_gateway.dart';
 
-class ServerpodFilesGateway implements FilesGateway {
+class ServerpodFilesGateway implements FilesGateway, DirectFilesGateway {
   const ServerpodFilesGateway(this.client);
   final Client client;
+  @override
+  Future<FileVersion> beginMultipart(int nodeId, int baseVersion, int size) =>
+      client.content.beginMultipart(nodeId, baseVersion, size);
+  @override
+  Future<List<String>> uploadParts(int versionId, int first, int count) =>
+      client.content.uploadParts(versionId, first, count);
+  @override
+  Future<List<UploadedPart>> uploadedParts(int versionId) =>
+      client.content.uploadedParts(versionId);
+  @override
+  Future<ContentDownload> downloadTicket(int nodeId, int versionId) =>
+      client.content.download(nodeId, versionId);
   @override
   Future<String> invite(int driveId) => client.garden.invite(driveId);
   @override

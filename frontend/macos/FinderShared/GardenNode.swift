@@ -2,7 +2,7 @@ import FileProvider
 import Foundation
 import UniformTypeIdentifiers
 
-struct GardenNode {
+struct GardenNode: Sendable {
   let id: Int
   let parentID: Int
   let name: String

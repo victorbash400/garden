@@ -125,9 +125,25 @@ actor GardenAPI {
     return bytes
   }
 
+  func download(id: Int, version: Int) async throws -> GardenDownload {
+    let value = try object(await call("content", "download", ["nodeId": id, "versionId": version]))
+    guard let size = value["size"] as? Int, let expiry = value["expiresAt"] as? String else {
+      throw GardenAPIError.invalidResponse
+    }
+    let formatter = ISO8601DateFormatter()
+    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    guard let date = formatter.date(from: expiry) else { throw GardenAPIError.invalidResponse }
+    let url = (value["url"] as? String).flatMap(URL.init(string:))
+    if let url, url.scheme != "https" { throw GardenAPIError.invalidResponse }
+    return GardenDownload(url: url, size: size, expiresAt: date)
+  }
+
   func upload(id: Int, baseVersion: Int, fileURL: URL) async throws -> GardenNode {
     let values = try fileURL.resourceValues(forKeys: [.fileSizeKey])
     guard let size = values.fileSize else { throw GardenAPIError.invalidResponse }
+    if size > 256 * 1024 {
+      return try await uploadMultipart(id: id, baseVersion: baseVersion, fileURL: fileURL, size: size)
+    }
     let version = try object(await call("content", "begin", [
       "nodeId": id,
       "baseVersion": baseVersion,
@@ -167,14 +183,14 @@ actor GardenAPI {
     return value
   }
 
-  private func object(_ value: Any) throws -> [String: Any] {
+  func object(_ value: Any) throws -> [String: Any] {
     guard let object = value as? [String: Any] else {
       throw GardenAPIError.invalidResponse
     }
     return object
   }
 
-  private func call(_ endpoint: String, _ method: String, _ arguments: [String: Any]) async throws -> Any {
+  func call(_ endpoint: String, _ method: String, _ arguments: [String: Any]) async throws -> Any {
     let current = try credential()
     do {
       return try await send(endpoint, method, arguments, token: current.token)
@@ -239,7 +255,14 @@ actor GardenAPI {
     if response.statusCode == 401 { throw GardenAPIError.unauthorized }
     guard response.statusCode == 200 else {
       let value = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-      let message = value?["message"] as? String
+      let type = value?["className"] as? String
+      if type == "serverpod_auth_core.RefreshTokenNotFoundException" ||
+         type == "serverpod_auth_core.RefreshTokenExpiredException" ||
+         type == "serverpod_auth_core.RefreshTokenInvalidSecretException" {
+        throw GardenAPIError.unauthorized
+      }
+      let details = value?["data"] as? [String: Any]
+      let message = details?["message"] as? String ?? value?["message"] as? String
         ?? HTTPURLResponse.localizedString(forStatusCode: response.statusCode)
       throw GardenAPIError.http(response.statusCode, message)
     }

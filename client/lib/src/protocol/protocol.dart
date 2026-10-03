@@ -18,6 +18,8 @@ import 'package:garden_client/src/protocol/files/file_comment.dart'
 import 'package:garden_client/src/protocol/files/file_node.dart' as _i2qlj4hx;
 import 'package:garden_client/src/protocol/files/file_version.dart'
     as _ibt6e7l6;
+import 'package:garden_client/src/protocol/files/uploaded_part.dart'
+    as _ieod4w9g;
 import 'package:garden_client/src/protocol/gardens/garden_summary.dart'
     as _iwcj6pye;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
@@ -25,6 +27,7 @@ import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
     as _iaic;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
+import 'files/content_download.dart' as _id6mrfn8;
 import 'files/directory_listing.dart' as _i8kiawn9;
 import 'files/drive_event.dart' as _i4wn0cbe;
 import 'files/file_chunk.dart' as _imjz65yx;
@@ -33,6 +36,7 @@ import 'files/file_lease.dart' as _ifu05pz5;
 import 'files/file_node.dart' as _iqxechne;
 import 'files/file_version.dart' as _inq2edz5;
 import 'files/node_kind.dart' as _idxfoob7;
+import 'files/uploaded_part.dart' as _ivsra0vz;
 import 'gardens/account_details.dart' as _i4muwn5e;
 import 'gardens/finder_session.dart' as _i14hlkad;
 import 'gardens/garden_exception.dart' as _icsgmcpa;
@@ -40,6 +44,7 @@ import 'gardens/garden_member.dart' as _icenu3t8;
 import 'gardens/garden_record.dart' as _iwqk3oef;
 import 'gardens/garden_summary.dart' as _i5zbrq86;
 import 'greetings/greeting.dart' as _izw8z7ou;
+export 'files/content_download.dart';
 export 'files/directory_listing.dart';
 export 'files/drive_event.dart';
 export 'files/file_chunk.dart';
@@ -48,6 +53,7 @@ export 'files/file_lease.dart';
 export 'files/file_node.dart';
 export 'files/file_version.dart';
 export 'files/node_kind.dart';
+export 'files/uploaded_part.dart';
 export 'gardens/account_details.dart';
 export 'gardens/finder_session.dart';
 export 'gardens/garden_exception.dart';
@@ -91,6 +97,9 @@ class Protocol extends _isc.SerializationManager {
       }
     }
 
+    if (t == _id6mrfn8.ContentDownload) {
+      return _id6mrfn8.ContentDownload.fromJson(data) as T;
+    }
     if (t == _i8kiawn9.DirectoryListing) {
       return _i8kiawn9.DirectoryListing.fromJson(data) as T;
     }
@@ -115,6 +124,9 @@ class Protocol extends _isc.SerializationManager {
     if (t == _idxfoob7.NodeKind) {
       return _idxfoob7.NodeKind.fromJson(data) as T;
     }
+    if (t == _ivsra0vz.UploadedPart) {
+      return _ivsra0vz.UploadedPart.fromJson(data) as T;
+    }
     if (t == _i4muwn5e.AccountDetails) {
       return _i4muwn5e.AccountDetails.fromJson(data) as T;
     }
@@ -135,6 +147,10 @@ class Protocol extends _isc.SerializationManager {
     }
     if (t == _izw8z7ou.Greeting) {
       return _izw8z7ou.Greeting.fromJson(data) as T;
+    }
+    if (t == _isc.getType<_id6mrfn8.ContentDownload?>()) {
+      return (data != null ? _id6mrfn8.ContentDownload.fromJson(data) : null)
+          as T;
     }
     if (t == _isc.getType<_i8kiawn9.DirectoryListing?>()) {
       return (data != null ? _i8kiawn9.DirectoryListing.fromJson(data) : null)
@@ -160,6 +176,9 @@ class Protocol extends _isc.SerializationManager {
     }
     if (t == _isc.getType<_idxfoob7.NodeKind?>()) {
       return (data != null ? _idxfoob7.NodeKind.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_ivsra0vz.UploadedPart?>()) {
+      return (data != null ? _ivsra0vz.UploadedPart.fromJson(data) : null) as T;
     }
     if (t == _isc.getType<_i4muwn5e.AccountDetails?>()) {
       return (data != null ? _i4muwn5e.AccountDetails.fromJson(data) : null)
@@ -251,6 +270,15 @@ class Protocol extends _isc.SerializationManager {
               .toList()
           as T;
     }
+    if (t == List<String>) {
+      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    }
+    if (t == List<_ieod4w9g.UploadedPart>) {
+      return (data as List)
+              .map((e) => deserialize<_ieod4w9g.UploadedPart>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_ibt6e7l6.FileVersion>) {
       return (data as List)
               .map((e) => deserialize<_ibt6e7l6.FileVersion>(e))
@@ -269,9 +297,6 @@ class Protocol extends _isc.SerializationManager {
               .toList()
           as T;
     }
-    if (t == List<String>) {
-      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
-    }
     if (t == List<_iwcj6pye.GardenSummary>) {
       return (data as List)
               .map((e) => deserialize<_iwcj6pye.GardenSummary>(e))
@@ -289,6 +314,7 @@ class Protocol extends _isc.SerializationManager {
 
   static String? getClassNameForType(Type type) {
     return switch (type) {
+      _id6mrfn8.ContentDownload => 'ContentDownload',
       _i8kiawn9.DirectoryListing => 'DirectoryListing',
       _i4wn0cbe.DriveEvent => 'DriveEvent',
       _imjz65yx.FileChunk => 'FileChunk',
@@ -297,6 +323,7 @@ class Protocol extends _isc.SerializationManager {
       _iqxechne.FileNode => 'FileNode',
       _inq2edz5.FileVersion => 'FileVersion',
       _idxfoob7.NodeKind => 'NodeKind',
+      _ivsra0vz.UploadedPart => 'UploadedPart',
       _i4muwn5e.AccountDetails => 'AccountDetails',
       _i14hlkad.FinderSession => 'FinderSession',
       _icsgmcpa.GardenException => 'GardenException',
@@ -318,6 +345,8 @@ class Protocol extends _isc.SerializationManager {
     }
 
     switch (data) {
+      case _id6mrfn8.ContentDownload():
+        return 'ContentDownload';
       case _i8kiawn9.DirectoryListing():
         return 'DirectoryListing';
       case _i4wn0cbe.DriveEvent():
@@ -334,6 +363,8 @@ class Protocol extends _isc.SerializationManager {
         return 'FileVersion';
       case _idxfoob7.NodeKind():
         return 'NodeKind';
+      case _ivsra0vz.UploadedPart():
+        return 'UploadedPart';
       case _i4muwn5e.AccountDetails():
         return 'AccountDetails';
       case _i14hlkad.FinderSession():
@@ -370,6 +401,9 @@ class Protocol extends _isc.SerializationManager {
     if (dataClassName is! String) {
       return super.deserializeByClassName(data);
     }
+    if (dataClassName == 'ContentDownload') {
+      return deserialize<_id6mrfn8.ContentDownload>(data['data']);
+    }
     if (dataClassName == 'DirectoryListing') {
       return deserialize<_i8kiawn9.DirectoryListing>(data['data']);
     }
@@ -393,6 +427,9 @@ class Protocol extends _isc.SerializationManager {
     }
     if (dataClassName == 'NodeKind') {
       return deserialize<_idxfoob7.NodeKind>(data['data']);
+    }
+    if (dataClassName == 'UploadedPart') {
+      return deserialize<_ivsra0vz.UploadedPart>(data['data']);
     }
     if (dataClassName == 'AccountDetails') {
       return deserialize<_i4muwn5e.AccountDetails>(data['data']);

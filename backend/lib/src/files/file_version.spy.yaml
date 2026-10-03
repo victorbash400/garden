@@ -6,6 +6,9 @@ fields:
   baseVersion: int
   size: int
   chunkCount: int
+  objectPath: String?
+  uploadId: String?
+  partSize: int?
   committed: bool, default=false
   aborted: bool, default=false
   createdAt: DateTime

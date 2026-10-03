@@ -24,7 +24,10 @@ enum FinderDomainManager {
       }
       do {
         _ = try FinderCredentialStore.read(name)
+        _ = try await GardenAPI(domainID: name).revision()
       } catch FinderCredentialError.keychain(errSecItemNotFound) {
+        missing.append(id)
+      } catch GardenAPIError.unauthorized {
         missing.append(id)
       }
     }

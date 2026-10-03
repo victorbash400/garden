@@ -40,7 +40,7 @@ final class GardenEnumerator: NSObject, NSFileProviderEnumerator {
           ? NSFileProviderPage(Data(String(nodes.last!.id).utf8)) : nil
         observer.finishEnumerating(upTo: next)
       } catch {
-        observer.finishEnumeratingWithError(error)
+        observer.finishEnumeratingWithError(GardenProviderError.wrap(error))
       }
     }
   }
@@ -84,7 +84,7 @@ final class GardenEnumerator: NSObject, NSFileProviderEnumerator {
           moreComing: events.count == 256
         )
       } catch {
-        observer.finishEnumeratingWithError(error)
+        observer.finishEnumeratingWithError(GardenProviderError.wrap(error))
       }
     }
   }
