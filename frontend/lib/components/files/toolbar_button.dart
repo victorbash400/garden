@@ -6,7 +6,9 @@ class ToolbarButton extends StatelessWidget {
     required this.tooltip,
     required this.icon,
     required this.onPressed,
+    this.selected = false,
   });
+  final bool selected;
   final String tooltip;
   final IconData icon;
   final VoidCallback? onPressed;
@@ -24,7 +26,11 @@ class ToolbarButton extends StatelessWidget {
   Widget build(BuildContext context) => IconButton(
     tooltip: tooltip,
     onPressed: onPressed,
-    style: style,
+    style: selected
+        ? style.copyWith(
+            backgroundColor: const WidgetStatePropertyAll(Color(0xFFE6E6E3)),
+          )
+        : style,
     icon: Icon(icon, size: 15),
   );
 }
