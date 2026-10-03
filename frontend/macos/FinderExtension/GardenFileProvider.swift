@@ -2,8 +2,9 @@ import FileProvider
 import Foundation
 import OSLog
 
-final class GardenFileProvider: NSObject, NSFileProviderReplicatedExtension, NSFileProviderPartialContentFetching {
+final class GardenFileProvider: NSObject, NSFileProviderReplicatedExtension, NSFileProviderPartialContentFetching, NSFileProviderServicing {
   private let logger = Logger(subsystem: "com.victorbash.garden.finder", category: "ranges")
+  private let cacheService = GardenCacheService()
   private let domain: NSFileProviderDomain
   private let api: GardenAPI
   private let ranges: GardenRangeCache
@@ -14,6 +15,14 @@ final class GardenFileProvider: NSObject, NSFileProviderReplicatedExtension, NSF
     self.api = api
     self.ranges = GardenRangeCache(api: api, domainID: domain.identifier.rawValue)
     super.init()
+  }
+
+  func supportedServiceSources(
+    for itemIdentifier: NSFileProviderItemIdentifier,
+    completionHandler: @escaping ([NSFileProviderServiceSource]?, Error?) -> Void
+  ) -> Progress {
+    completionHandler([cacheService], nil)
+    return Progress(totalUnitCount: 0)
   }
 
   func invalidate() { Task { await ranges.invalidate() } }

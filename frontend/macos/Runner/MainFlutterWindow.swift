@@ -25,6 +25,7 @@ class MainFlutterWindow: NSWindow {
     self.setFrame(windowFrame, display: true)
 
     RegisterGeneratedPlugins(registry: flutterViewController)
+    GardenCacheBridge.install(on: flutterViewController.engine.binaryMessenger)
     NativeSetupBridge.install(on: flutterViewController.engine.binaryMessenger)
     FlutterMethodChannel(
       name: "garden/native_auth", binaryMessenger: flutterViewController.engine.binaryMessenger

@@ -66,6 +66,19 @@
 		EAE0ACEB69D452E5B8A04ED2 /* GardenReadPermits.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64DDB6D8FE3F6399EF15AAFC /* GardenReadPermits.swift */; };
 		F8E5D28E858EC92180A95955 /* FinderCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7A65DF6BF53C6D521B7B380 /* FinderCredential.swift */; };
 		FAC358EF6047694223FE0EF2 /* GardenReadPermits.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64DDB6D8FE3F6399EF15AAFC /* GardenReadPermits.swift */; };
+		7EF3F7F393AF45A5B910C736 /* GardenCachePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069245FCE6A249A7A6536F02 /* GardenCachePolicy.swift */; };
+		A1DEC0D7956D4F9297DE037A /* GardenCachePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069245FCE6A249A7A6536F02 /* GardenCachePolicy.swift */; };
+		393E997DDC4C488B9B06C373 /* GardenCachePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069245FCE6A249A7A6536F02 /* GardenCachePolicy.swift */; };
+		099CB23AC6D34B529606D55B /* GardenCacheDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56137C3140D747C598124039 /* GardenCacheDatabase.swift */; };
+		A2749ED569784F99A750DCD7 /* GardenCacheDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56137C3140D747C598124039 /* GardenCacheDatabase.swift */; };
+		67F108BB685D4A38812118D4 /* GardenCacheDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56137C3140D747C598124039 /* GardenCacheDatabase.swift */; };
+		2C939C18A4F24976A86B4E89 /* GardenDiskCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC157F51BB04B9283619829 /* GardenDiskCache.swift */; };
+		7D0D93AF2FA64EE2A4301A72 /* GardenDiskCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC157F51BB04B9283619829 /* GardenDiskCache.swift */; };
+		241445FE0E744946B63A8191 /* GardenDiskCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC157F51BB04B9283619829 /* GardenDiskCache.swift */; };
+		E3ACD150CE7F4E3BA3B02196 /* GardenCacheServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9808E926A3D14C11A2170496 /* GardenCacheServiceProtocol.swift */; };
+		A8062E88EB334727A4D87816 /* GardenCacheServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9808E926A3D14C11A2170496 /* GardenCacheServiceProtocol.swift */; };
+		7CB957B8934B4E58B9F940A7 /* GardenCacheService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37CEECE5078747818CCB549F /* GardenCacheService.swift */; };
+		28760F7B4D574A6098B00E65 /* GardenCacheBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA40A17468B04DCCAA176F08 /* GardenCacheBridge.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -160,6 +173,12 @@
 		DF1A3B90C9289C040C23D814 /* GardenProviderError.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenProviderError.swift; path = FinderShared/GardenProviderError.swift; sourceTree = "<group>"; };
 		E80EEA4C2EDA2C0390B33422 /* GardenNode.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenNode.swift; path = FinderShared/GardenNode.swift; sourceTree = "<group>"; };
 		F07FABA2C16CC1A29711B2AF /* GardenStreamingReadOnly.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GardenStreamingReadOnly.swift; sourceTree = "<group>"; };
+		069245FCE6A249A7A6536F02 /* GardenCachePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GardenCachePolicy.swift; path = FinderShared/GardenCachePolicy.swift; sourceTree = "<group>"; };
+		56137C3140D747C598124039 /* GardenCacheDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GardenCacheDatabase.swift; path = FinderShared/GardenCacheDatabase.swift; sourceTree = "<group>"; };
+		6EC157F51BB04B9283619829 /* GardenDiskCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GardenDiskCache.swift; path = FinderShared/GardenDiskCache.swift; sourceTree = "<group>"; };
+		9808E926A3D14C11A2170496 /* GardenCacheServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GardenCacheServiceProtocol.swift; path = FinderShared/GardenCacheServiceProtocol.swift; sourceTree = "<group>"; };
+		37CEECE5078747818CCB549F /* GardenCacheService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GardenCacheService.swift; path = FinderExtension/GardenCacheService.swift; sourceTree = "<group>"; };
+		EA40A17468B04DCCAA176F08 /* GardenCacheBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GardenCacheBridge.swift; path = Runner/GardenCacheBridge.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -237,6 +256,12 @@
 				D73912EC22F37F3D000D13A0 /* Frameworks */,
 				2B3A901D6B118F0A0A68AB03 /* FinderExtension */,
 				B15DA367A708CFAC0D4F7B0B /* FinderShared */,
+				EA40A17468B04DCCAA176F08 /* GardenCacheBridge.swift */,
+				37CEECE5078747818CCB549F /* GardenCacheService.swift */,
+				9808E926A3D14C11A2170496 /* GardenCacheServiceProtocol.swift */,
+				6EC157F51BB04B9283619829 /* GardenDiskCache.swift */,
+				56137C3140D747C598124039 /* GardenCacheDatabase.swift */,
+				069245FCE6A249A7A6536F02 /* GardenCachePolicy.swift */,
 				081BAFC548A1CD53E423E5FC /* GardenRangeCache.swift */,
 				76F3200B441B18D31AA1194D /* StreamingExtension */,
 				64DDB6D8FE3F6399EF15AAFC /* GardenReadPermits.swift */,
@@ -554,6 +579,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				241445FE0E744946B63A8191 /* GardenDiskCache.swift in Sources */,
+				67F108BB685D4A38812118D4 /* GardenCacheDatabase.swift in Sources */,
+				393E997DDC4C488B9B06C373 /* GardenCachePolicy.swift in Sources */,
 				4A3042E7B3BE7D7A34B9E08F /* GardenStreamingExtension.swift in Sources */,
 				5B8DD50F11B8E7820F4DFF61 /* GardenStreamingFileSystem.swift in Sources */,
 				C0482349DBE085A07660D385 /* GardenStreamingIndex.swift in Sources */,
@@ -583,6 +611,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				28760F7B4D574A6098B00E65 /* GardenCacheBridge.swift in Sources */,
+				E3ACD150CE7F4E3BA3B02196 /* GardenCacheServiceProtocol.swift in Sources */,
+				2C939C18A4F24976A86B4E89 /* GardenDiskCache.swift in Sources */,
+				099CB23AC6D34B529606D55B /* GardenCacheDatabase.swift in Sources */,
+				7EF3F7F393AF45A5B910C736 /* GardenCachePolicy.swift in Sources */,
 				33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */,
 				A10000000000000000000001 /* NativeAuthenticationConfiguration.swift in Sources */,
 				33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */,
@@ -604,6 +637,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7CB957B8934B4E58B9F940A7 /* GardenCacheService.swift in Sources */,
+				A8062E88EB334727A4D87816 /* GardenCacheServiceProtocol.swift in Sources */,
+				7D0D93AF2FA64EE2A4301A72 /* GardenDiskCache.swift in Sources */,
+				A2749ED569784F99A750DCD7 /* GardenCacheDatabase.swift in Sources */,
+				A1DEC0D7956D4F9297DE037A /* GardenCachePolicy.swift in Sources */,
 				49D52B7A5FA59A146655C404 /* GardenFileProvider.swift in Sources */,
 				932E11ADD36A74FD71E1BCD1 /* GardenEnumerator.swift in Sources */,
 				14F8DF57F2F53B0521DFDBF0 /* FinderCredential.swift in Sources */,

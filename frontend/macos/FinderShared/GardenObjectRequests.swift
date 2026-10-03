@@ -1,6 +1,13 @@
 import Foundation
 
 struct GardenObjectRequests {
+  private static let reads: URLSession = {
+    let configuration = URLSessionConfiguration.ephemeral
+    configuration.urlCache = nil
+    configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+    return URLSession(configuration: configuration)
+  }()
+
   static func upload(_ request: URLRequest, data: Data) async throws {
     for attempt in 0..<3 {
       do {
@@ -24,7 +31,7 @@ struct GardenObjectRequests {
 
   static func read(_ request: URLRequest) async throws -> (Data, URLResponse) {
     for attempt in 0..<3 {
-      do { return try await URLSession.shared.data(for: request) }
+      do { return try await reads.data(for: request) }
       catch {
         guard attempt < 2, retryable(error) else { throw error }
         try await Task.sleep(for: .milliseconds(250 * (attempt + 1)))

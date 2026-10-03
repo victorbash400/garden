@@ -9,23 +9,20 @@ struct GardenDownload: Sendable {
 
 actor GardenRangeCache {
   static let blockSize = 1024 * 1024
-  private let permits = GardenReadPermits()
+  private let permits = GardenReadPermits.shared
   private let api: GardenAPI
-  private let directory: URL
-  private let diskLimit: Int
+  private let disk: GardenDiskCache
+  private let namespace: String
   private var tickets: [String: GardenDownload] = [:]
   private var flights: [String: Task<Data, Error>] = [:]
-  private var entries: [String: (size: Int, used: Date)] = [:]
-  private var initialized = false
   private(set) var remoteBytes = 0
   private(set) var cacheHits = 0
 
-  init(api: GardenAPI, domainID: String, diskLimit: Int = 512 * 1024 * 1024, directory: URL? = nil) {
+  init(api: GardenAPI, domainID: String, diskLimit: Int? = nil, directory: URL? = nil) {
     self.api = api
-    self.diskLimit = diskLimit
-    let name = SHA256.hash(data: Data(domainID.utf8)).map { String(format: "%02x", $0) }.joined()
-    self.directory = directory ?? FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-      .appendingPathComponent("GardenRanges/\(name)", isDirectory: true)
+    namespace = SHA256.hash(data: Data(domainID.utf8)).map { String(format: "%02x", $0) }.joined()
+    disk = directory != nil || diskLimit != nil
+      ? GardenDiskCache(directory: directory, limit: diskLimit.map(Int64.init)) : .shared
   }
 
   func invalidate() {
@@ -35,7 +32,7 @@ actor GardenRangeCache {
   }
 
   func read(node: GardenNode, offset: Int, length: Int) async throws -> Data {
-    guard diskLimit >= Self.blockSize, offset >= 0, length >= 0, length <= 16 * Self.blockSize else { throw GardenAPIError.invalidResponse }
+    guard offset >= 0, length >= 0, length <= 16 * Self.blockSize else { throw GardenAPIError.invalidResponse }
     if offset >= node.size { return Data() }
     let end = offset + min(length, node.size - offset)
     var result = Data()
@@ -54,28 +51,6 @@ actor GardenRangeCache {
     return result
   }
 
-  private func initialize() throws {
-    if initialized { return }
-    try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true,
-      attributes: [.posixPermissions: 0o700])
-    for url in try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: [.fileSizeKey, .contentModificationDateKey]) {
-      let values = try url.resourceValues(forKeys: [.fileSizeKey, .contentModificationDateKey])
-      entries[url.lastPathComponent] = (values.fileSize ?? 0, values.contentModificationDate ?? .distantPast)
-    }
-    initialized = true
-    try evict(adding: 0)
-  }
-
-  private func evict(adding: Int) throws {
-    var total = entries.values.reduce(0) { $0 + $1.size }
-    for (key, entry) in entries.sorted(by: { $0.value.used < $1.value.used }) {
-      if total + adding <= diskLimit { break }
-      try FileManager.default.removeItem(at: directory.appendingPathComponent(key))
-      entries.removeValue(forKey: key)
-      total -= entry.size
-    }
-  }
-
   private func ticket(node: GardenNode) async throws -> GardenDownload {
     let key = "\(node.id)-\(node.version)"
     if let current = tickets[key], current.expiresAt.timeIntervalSinceNow > 30 { return current }
@@ -86,14 +61,10 @@ actor GardenRangeCache {
   }
 
   private func block(node: GardenNode, index: Int) async throws -> Data {
-    try initialize()
     let key = "\(node.id)-\(node.version)-\(index)"
     let length = min(Self.blockSize, node.size - index * Self.blockSize)
-    let path = directory.appendingPathComponent(key)
-    if entries[key] != nil {
-      let data = try Data(contentsOf: path)
-      guard data.count == length else { throw GardenAPIError.invalidResponse }
-      entries[key] = (length, Date())
+    let diskKey = "\(namespace)/\(key)"
+    if let data = try await disk.read(diskKey, expected: length) {
       cacheHits += 1
       return data
     }
@@ -132,9 +103,7 @@ actor GardenRangeCache {
     defer { flights.removeValue(forKey: key) }
     let data = try await flight.value
     remoteBytes += data.count
-    try evict(adding: data.count)
-    try data.write(to: path, options: .atomic)
-    entries[key] = (data.count, Date())
+    try await disk.store(data, key: diskKey)
     return data
   }
 }

@@ -1,23 +1,53 @@
 import 'package:flutter/material.dart';
 
 import '../components/cache_limit_control.dart';
+import '../components/settings/cache_usage_controls.dart';
 import '../components/settings/settings_group.dart';
 import '../state/garden_controller.dart';
 
-class StorageSettings extends StatelessWidget {
+class StorageSettings extends StatefulWidget {
   const StorageSettings({super.key, required this.controller});
   final GardenController controller;
+
   @override
-  Widget build(BuildContext context) => SettingsGroup(
-    children: [
-      Padding(
-        padding: const EdgeInsets.all(16),
-        child: CacheLimitControl(
-          limit: controller.cacheLimit,
-          busy: controller.busy,
-          onSave: controller.setCacheLimit,
+  State<StorageSettings> createState() => _StorageSettingsState();
+}
+
+class _StorageSettingsState extends State<StorageSettings> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) widget.controller.storage?.refresh();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = widget.controller;
+    final storage = controller.storage;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SettingsGroup(
+          children: [
+            if (storage != null) CacheUsageControls(controller: storage),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: CacheLimitControl(
+                limit: storage?.usage?.limitGiB ?? controller.cacheLimit,
+                busy: controller.busy || storage?.busy == true,
+                onSave: controller.setCacheLimit,
+              ),
+            ),
+          ],
         ),
-      ),
-    ],
-  );
+        const SizedBox(height: 12),
+        const Text(
+          'Caps fetched file blocks. Finder downloads, app-created previews, and pending uploads are separate.',
+          style: TextStyle(fontSize: 12, color: Color(0xFF77777A)),
+        ),
+      ],
+    );
+  }
 }

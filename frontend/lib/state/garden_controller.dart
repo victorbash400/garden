@@ -12,6 +12,8 @@ import '../native/finder_status.dart';
 import 'native_setup_controller.dart';
 import 'files_controller.dart';
 import 'account_security_controller.dart';
+import 'storage_controller.dart';
+import '../services/cache_store.dart';
 
 enum SettingsSection { account, storage, connections }
 
@@ -38,7 +40,10 @@ class GardenController extends ChangeNotifier {
     this.finderUpdates,
     this.nativeSetup,
     this.localServer = false,
-  }) {
+  }) : storage = preferences is CacheStore
+           ? StorageController(preferences)
+           : null {
+    storage?.addListener(notifyListeners);
     finderUpdates?.addListener(notifyListeners);
     nativeSetup?.addListener(notifyListeners);
     files?.openFile = (node) async {
@@ -63,6 +68,7 @@ class GardenController extends ChangeNotifier {
   final FilesController? files;
   final GardenGateway gateway;
   final PreferencesStore preferences;
+  final StorageController? storage;
   GardenPage page = GardenPage.starting;
   SettingsSection settingsSection = SettingsSection.account;
   GardenPage _settingsReturn = GardenPage.gardens;
@@ -341,10 +347,15 @@ class GardenController extends ChangeNotifier {
     page = GardenPage.signIn;
   });
   Future<void> setCacheLimit(int gib) => _request(() async {
-    if (gib < 1 || gib > 100) {
-      throw ArgumentError('Cache limit must be between 1 and 100 GiB.');
+    if (gib < 0 || gib > 100) {
+      throw ArgumentError('Cache limit must be between 0 and 100 GiB.');
     }
-    await preferences.saveCacheLimit(gib);
+    if (storage != null) {
+      await storage!.setLimit(gib);
+      if (storage!.error != null) throw StateError(storage!.error!);
+    } else {
+      await preferences.saveCacheLimit(gib);
+    }
     cacheLimit = gib;
   });
 
@@ -386,6 +397,8 @@ class GardenController extends ChangeNotifier {
 
   @override
   void dispose() {
+    storage?.removeListener(notifyListeners);
+    storage?.dispose();
     finderUpdates?.removeListener(notifyListeners);
     nativeSetup?.removeListener(notifyListeners);
     super.dispose();

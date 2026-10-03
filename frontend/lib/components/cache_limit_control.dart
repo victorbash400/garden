@@ -31,16 +31,32 @@ class _CacheLimitControlState extends State<CacheLimitControl> {
         children: [
           const Text('Cache limit'),
           const Spacer(),
-          Text('${value.round()} GiB'),
+          Text(value.round() == 0 ? 'No disk cache' : '${value.round()} GiB'),
         ],
       ),
-      Slider(
-        value: value,
-        min: 1,
-        max: 100,
-        divisions: 99,
-        onChanged: widget.busy ? null : (next) => setState(() => value = next),
-        onChangeEnd: widget.busy ? null : (next) => widget.onSave(next.round()),
+      SliderTheme(
+        data: SliderTheme.of(context).copyWith(
+          overlayShape: SliderComponentShape.noOverlay,
+          overlayColor: Colors.transparent,
+          trackHeight: 3,
+          tickMarkShape: SliderTickMarkShape.noTickMark,
+          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+          activeTrackColor: const Color(0xFF313133),
+          inactiveTrackColor: const Color(0xFFE0E0E3),
+          thumbColor: const Color(0xFF313133),
+        ),
+        child: Slider(
+          value: value,
+          min: 0,
+          max: 100,
+          divisions: 100,
+          onChanged: widget.busy
+              ? null
+              : (next) => setState(() => value = next),
+          onChangeEnd: widget.busy
+              ? null
+              : (next) => widget.onSave(next.round()),
+        ),
       ),
     ],
   );

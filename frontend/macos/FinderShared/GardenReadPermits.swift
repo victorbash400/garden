@@ -1,6 +1,7 @@
 import Foundation
 
 actor GardenReadPermits {
+  static let shared = GardenReadPermits()
   private var available = 3
   private var waiting: [(UUID, CheckedContinuation<Void, Error>)] = []
 

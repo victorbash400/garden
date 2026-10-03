@@ -39,7 +39,7 @@ class GardenSidebar extends StatelessWidget {
           ),
         ),
         SidebarItem(
-          icon: LucideIcons.settings2,
+          icon: LucideIcons.settings,
           label: 'Settings',
           selected: controller.page == GardenPage.settings,
           onTap: controller.busy
