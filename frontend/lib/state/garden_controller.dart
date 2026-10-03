@@ -269,14 +269,11 @@ class GardenController extends ChangeNotifier {
       (!serviceAvailable ||
           nativeSetup?.needsAttention == true ||
           finderUpdates?.error != null ||
-          (finder != null &&
-              !finderSyncing &&
-              (finderIssue != null ||
-                  gardens
-                      .map((drive) => drive.id)
-                      .toSet()
-                      .difference(finderEnabledDriveIDs)
-                      .isNotEmpty)));
+          finderIssue != null ||
+          (!finderSyncing &&
+              (finderStatus.disconnected.isNotEmpty ||
+                  finderStatus.registered.isNotEmpty &&
+                      nativeSetup?.status?.finderAvailable == false)));
 
   void openConnections() {
     selectSettings(SettingsSection.connections);

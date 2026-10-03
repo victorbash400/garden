@@ -10,7 +10,7 @@ class ConnectionNoticeButton extends StatelessWidget {
   Widget build(BuildContext context) => SizedBox.square(
     dimension: 32,
     child: IconButton(
-      tooltip: 'Finder needs attention',
+      tooltip: 'Connection needs attention',
       padding: EdgeInsets.zero,
       onPressed: onPressed,
       icon: const Badge(

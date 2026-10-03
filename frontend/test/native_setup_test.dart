@@ -4,6 +4,7 @@ import 'package:garden_flutter/components/settings/finder_setup_row.dart';
 import 'package:garden_flutter/model/account_info.dart';
 import 'package:garden_flutter/model/garden_info.dart';
 import 'package:garden_flutter/native/finder_updates.dart';
+import 'package:garden_flutter/native/finder_status.dart';
 import 'package:garden_flutter/native/mac_finder_updates.dart';
 import 'package:garden_flutter/native/system_setup.dart';
 import 'package:garden_flutter/state/native_setup_controller.dart';
@@ -39,6 +40,53 @@ class TestSystem implements SystemSetup {
 }
 
 void main() {
+  test(
+    'optional setup does not create alerts, broken connections do',
+    () async {
+      final system = TestSystem()..login = LoginItemState.notFound;
+      final setup = NativeSetupController(system);
+      await setup.refresh();
+      expect(setup.needsAttention, isFalse);
+      final controller = GardenController(
+        TestGateway(),
+        MemoryPreferences(),
+        finder: TestFinder(),
+        nativeSetup: setup,
+      );
+      controller.account = const AccountInfo(
+        id: 'account',
+        email: 'test@example.com',
+      );
+      controller.serviceAvailable = true;
+      controller.gardens = [
+        const GardenInfo(id: 1, name: 'Work', role: 'Owner', members: 1),
+      ];
+      expect(controller.needsFinderAttention, isFalse);
+      controller.finderStatus = const FinderStatus(
+        registered: {1},
+        disabled: {1},
+      );
+      expect(controller.needsFinderAttention, isFalse);
+      controller.finderStatus = const FinderStatus(
+        registered: {1},
+        disconnected: {1},
+      );
+      expect(controller.needsFinderAttention, isTrue);
+      controller.finderStatus = const FinderStatus(
+        registered: {1},
+        enabled: {1},
+      );
+      expect(controller.needsFinderAttention, isFalse);
+      controller.serviceAvailable = false;
+      expect(controller.needsFinderAttention, isTrue);
+      controller.serviceAvailable = true;
+      controller.finderUpdateError(StateError('Finder connection failed'));
+      expect(controller.needsFinderAttention, isTrue);
+      controller.dispose();
+      setup.dispose();
+    },
+  );
+
   test(
     'wake restarts background streams even before an idle error arrives',
     () async {

@@ -11,10 +11,7 @@ class NativeSetupController extends ChangeNotifier {
   bool busy = false;
 
   bool get needsAttention =>
-      error != null ||
-      status?.finderAvailable == false ||
-      status?.launchAtLogin == LoginItemState.requiresApproval ||
-      status?.launchAtLogin == LoginItemState.notFound;
+      error != null || status?.launchAtLogin == LoginItemState.requiresApproval;
 
   Future<void> refresh() => _request(() async {
     status = await system.status();
