@@ -13,6 +13,8 @@ import 'files_gateway_fixture.dart';
 import 'widget_test.dart' show TestFinder, TestGateway, MemoryPreferences;
 
 class TestSystem implements SystemSetup {
+  @override
+  Stream<void> get wakeEvents => const Stream.empty();
   bool active = false;
   bool settingsOpened = false;
   LoginItemState login = LoginItemState.disabled;
@@ -37,6 +39,42 @@ class TestSystem implements SystemSetup {
 }
 
 void main() {
+  test(
+    'wake restarts background streams even before an idle error arrives',
+    () async {
+      final gateway = FilesFixture();
+      final finder = TestFinder();
+      final system = TestSystem();
+      final updates = MacFinderUpdates(gateway, finder, system);
+      final controller = GardenController(
+        TestGateway(),
+        MemoryPreferences(),
+        finder: finder,
+        finderUpdates: updates,
+      );
+      controller.account = const AccountInfo(
+        id: 'account',
+        email: 'test@example.com',
+      );
+      controller.gardens = [
+        const GardenInfo(id: 1, name: 'Work', role: 'Owner', members: 1),
+      ];
+      await controller.handleSystemWake();
+      await Future<void>.delayed(Duration.zero);
+      expect(updates.state, FinderUpdateState.running);
+      final calls = gateway.listCalls;
+      await controller.handleSystemWake();
+      await Future<void>.delayed(Duration.zero);
+      expect(gateway.listCalls, calls + 1);
+      expect(updates.state, FinderUpdateState.running);
+      expect(updates.error, isNull);
+      controller.dispose();
+      await updates.close();
+      updates.dispose();
+      await gateway.events.close();
+    },
+  );
+
   testWidgets('approval remains unverified before the first drive', (
     tester,
   ) async {

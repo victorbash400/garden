@@ -341,7 +341,14 @@ class GardenController extends ChangeNotifier {
     cacheLimit = gib;
   });
 
-  void _queueFinderSync() {
+  Future<void> handleSystemWake() async {
+    if (account == null) return;
+    _queueFinderSync(restart: true);
+    await _finderWork;
+    if (files?.drive != null) await files!.reconnect();
+  }
+
+  void _queueFinderSync({bool restart = false}) {
     final current = account;
     if (current == null) return;
     final drives = gardens.toList();
@@ -350,6 +357,7 @@ class GardenController extends ChangeNotifier {
     _finderWork = _finderWork.then((_) async {
       if (account?.id != current.id) return;
       try {
+        if (restart) await finderUpdates?.close();
         await finder?.sync(current, drives);
         finderStatus =
             await finder?.status(current, drives) ?? const FinderStatus();

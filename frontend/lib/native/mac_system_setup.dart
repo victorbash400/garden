@@ -1,9 +1,20 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 
 import 'system_setup.dart';
 
 class MacSystemSetup implements SystemSetup {
+  MacSystemSetup() {
+    channel.setMethodCallHandler((call) async {
+      if (call.method != 'wake') throw MissingPluginException(call.method);
+      _wakeEvents.add(null);
+    });
+  }
   static const channel = MethodChannel('garden/setup');
+  final _wakeEvents = StreamController<void>.broadcast();
+  @override
+  Stream<void> get wakeEvents => _wakeEvents.stream;
 
   Future<SystemSetupStatus> _status(String method, [Object? arguments]) async {
     final result = await channel.invokeMapMethod<Object?, Object?>(

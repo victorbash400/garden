@@ -4,36 +4,43 @@ import ServiceManagement
 
 enum NativeSetupBridge {
   private static var backgroundActivity: NSObjectProtocol?
+  private static var wakeObserver: NSObjectProtocol?
 
   static func install(on messenger: FlutterBinaryMessenger) {
-    FlutterMethodChannel(name: "garden/setup", binaryMessenger: messenger)
-      .setMethodCallHandler { call, result in
-        do {
-          switch call.method {
-          case "status":
-            result(status())
-          case "setLaunchAtLogin":
-            guard let enabled = call.arguments as? Bool else {
-              throw FinderBridgeError.invalidArguments
-            }
-            try setLaunchAtLogin(enabled)
-            result(status())
-          case "openLoginSettings":
-            try openLoginSettings()
-            result(nil)
-          case "setBackgroundActive":
-            guard let active = call.arguments as? Bool else {
-              throw FinderBridgeError.invalidArguments
-            }
-            setBackgroundActive(active)
-            result(nil)
-          default:
-            result(FlutterMethodNotImplemented)
+    let channel = FlutterMethodChannel(name: "garden/setup", binaryMessenger: messenger)
+    if let observer = wakeObserver {
+      NSWorkspace.shared.notificationCenter.removeObserver(observer)
+    }
+    wakeObserver = NSWorkspace.shared.notificationCenter.addObserver(
+      forName: NSWorkspace.didWakeNotification, object: nil, queue: .main
+    ) { _ in channel.invokeMethod("wake", arguments: nil) }
+    channel.setMethodCallHandler { call, result in
+      do {
+        switch call.method {
+        case "status":
+          result(status())
+        case "setLaunchAtLogin":
+          guard let enabled = call.arguments as? Bool else {
+            throw FinderBridgeError.invalidArguments
           }
-        } catch {
-          result(FlutterError(code: "setup_error", message: error.localizedDescription, details: nil))
+          try setLaunchAtLogin(enabled)
+          result(status())
+        case "openLoginSettings":
+          try openLoginSettings()
+          result(nil)
+        case "setBackgroundActive":
+          guard let active = call.arguments as? Bool else {
+            throw FinderBridgeError.invalidArguments
+          }
+          setBackgroundActive(active)
+          result(nil)
+        default:
+          result(FlutterMethodNotImplemented)
         }
+      } catch {
+        result(FlutterError(code: "setup_error", message: error.localizedDescription, details: nil))
       }
+    }
   }
 
   static func status() -> [String: Any] {

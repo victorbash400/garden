@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../state/garden_controller.dart';
@@ -18,15 +20,27 @@ class FinderStatusObserver extends StatefulWidget {
 
 class _FinderStatusObserverState extends State<FinderStatusObserver>
     with WidgetsBindingObserver {
+  StreamSubscription<void>? _wakeSubscription;
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _wakeSubscription = widget.controller.nativeSetup?.system.wakeEvents.listen(
+      (_) {
+        unawaited(
+          widget.controller.handleSystemWake().catchError(
+            widget.controller.finderUpdateError,
+          ),
+        );
+      },
+      onError: widget.controller.finderUpdateError,
+    );
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _wakeSubscription?.cancel();
     super.dispose();
   }
 

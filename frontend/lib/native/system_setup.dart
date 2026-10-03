@@ -29,6 +29,7 @@ class SystemSetupStatus {
 }
 
 abstract interface class SystemSetup {
+  Stream<void> get wakeEvents;
   Future<SystemSetupStatus> status();
   Future<SystemSetupStatus> setLaunchAtLogin(bool enabled);
   Future<void> openLoginSettings();
