@@ -14,6 +14,7 @@ actor GardenRangeCache {
   private let disk: GardenDiskCache
   private let namespace: String
   private var tickets: [String: GardenDownload] = [:]
+  private var ticketFlights: [String: Task<GardenDownload, Error>] = [:]
   private var flights: [String: Task<Data, Error>] = [:]
   private(set) var remoteBytes = 0
   private(set) var cacheHits = 0
@@ -28,6 +29,8 @@ actor GardenRangeCache {
   func invalidate() {
     for task in flights.values { task.cancel() }
     flights.removeAll()
+    for task in ticketFlights.values { task.cancel() }
+    ticketFlights.removeAll()
     tickets.removeAll()
   }
 
@@ -35,27 +38,53 @@ actor GardenRangeCache {
     guard offset >= 0, length >= 0, length <= 16 * Self.blockSize else { throw GardenAPIError.invalidResponse }
     if offset >= node.size { return Data() }
     let end = offset + min(length, node.size - offset)
-    var result = Data()
-    var cursor = offset
-    while cursor < end {
+    guard end > offset else { return Data() }
+    let first = offset / Self.blockSize
+    let last = (end - 1) / Self.blockSize
+    let blocks = try await withThrowingTaskGroup(of: (Int, Data).self) { group in
+      var next = first
+      for _ in 0..<min(3, last - first + 1) {
+        let index = next
+        group.addTask { (index, try await self.block(node: node, index: index, persist: persist)) }
+        next += 1
+      }
+      var result: [Int: Data] = [:]
+      while let (index, bytes) = try await group.next() {
+        result[index] = bytes
+        if next <= last {
+          let index = next
+          group.addTask { (index, try await self.block(node: node, index: index, persist: persist)) }
+          next += 1
+        }
+      }
+      return result
+    }
+    var result = Data(capacity: end - offset)
+    for index in first...last {
       try Task.checkCancellation()
-      let index = cursor / Self.blockSize
-      let bytes = try await block(node: node, index: index, persist: persist)
-      let start = cursor % Self.blockSize
-      let count = min(end - cursor, bytes.count - start)
+      guard let bytes = blocks[index] else { throw GardenAPIError.invalidResponse }
+      let start = max(offset - index * Self.blockSize, 0)
+      let count = min(end - (index * Self.blockSize + start), bytes.count - start)
       guard count > 0 else { throw GardenAPIError.invalidResponse }
       result.append(bytes[start..<(start + count)])
-      cursor += count
     }
-    try Task.checkCancellation()
+    guard result.count == end - offset else { throw GardenAPIError.invalidResponse }
     return result
   }
 
   private func ticket(node: GardenNode) async throws -> GardenDownload {
     let key = "\(node.id)-\(node.version)"
     if let current = tickets[key], current.expiresAt.timeIntervalSinceNow > 30 { return current }
-    let ticket = try await api.download(id: node.id, version: node.version)
-    guard ticket.size == node.size else { throw GardenAPIError.invalidResponse }
+    if let flight = ticketFlights[key] { return try await flight.value }
+    let api = self.api
+    let flight = Task {
+      let ticket = try await api.download(id: node.id, version: node.version)
+      guard ticket.size == node.size else { throw GardenAPIError.invalidResponse }
+      return ticket
+    }
+    ticketFlights[key] = flight
+    defer { ticketFlights.removeValue(forKey: key) }
+    let ticket = try await flight.value
     tickets[key] = ticket
     return ticket
   }

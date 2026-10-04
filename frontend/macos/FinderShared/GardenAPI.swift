@@ -32,6 +32,12 @@ actor GardenAPI {
     self.domainID = domainID
   }
 
+  func streamCredential() throws -> FinderCredential { try credential() }
+
+  func refreshStreamCredential() async throws {
+    _ = try await refresh(staleToken: credential().token)
+  }
+
   func list(parentID: Int, after nodeID: Int) async throws -> [GardenNode] {
     guard let records = try await call("files", "listPage", [
       "gardenId": try credential().driveID,
