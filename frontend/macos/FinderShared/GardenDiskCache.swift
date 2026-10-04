@@ -181,7 +181,8 @@ actor GardenDiskCache {
           includingPropertiesForKeys: [.isRegularFileKey, .fileAllocatedSizeKey, .contentModificationDateKey])
         for url in files {
           let numbers = url.lastPathComponent.split(separator: "-")
-          guard numbers.count == 3, numbers.allSatisfy({ Int($0) != nil }) else { continue }
+          guard numbers.count == 3 || numbers.count == 4,
+            numbers.allSatisfy({ Int($0) != nil }) else { continue }
           let values = try url.resourceValues(forKeys: [.isRegularFileKey, .fileAllocatedSizeKey, .contentModificationDateKey])
           guard values.isRegularFile == true, let size = values.fileAllocatedSize else { continue }
           let relative = "\(name)/\(url.lastPathComponent)"

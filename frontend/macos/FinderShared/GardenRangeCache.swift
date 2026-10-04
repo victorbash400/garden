@@ -9,6 +9,7 @@ struct GardenDownload: Sendable {
 
 actor GardenRangeCache {
   static let blockSize = 1024 * 1024
+  private static let smallBlockSize = 64 * 1024
   private let permits = GardenReadPermits.shared
   private let api: GardenAPI
   private let disk: GardenDiskCache
@@ -39,13 +40,14 @@ actor GardenRangeCache {
     if offset >= node.size { return Data() }
     let end = offset + min(length, node.size - offset)
     guard end > offset else { return Data() }
-    let first = offset / Self.blockSize
-    let last = (end - 1) / Self.blockSize
+    let blockSize = length <= 128 * 1024 ? Self.smallBlockSize : Self.blockSize
+    let first = offset / blockSize
+    let last = (end - 1) / blockSize
     let blocks = try await withThrowingTaskGroup(of: (Int, Data).self) { group in
       var next = first
       for _ in 0..<min(GardenReadPermits.capacity, last - first + 1) {
         let index = next
-        group.addTask { (index, try await self.block(node: node, index: index, persist: persist)) }
+        group.addTask { (index, try await self.block(node: node, index: index, blockSize: blockSize, persist: persist)) }
         next += 1
       }
       var result: [Int: Data] = [:]
@@ -53,7 +55,7 @@ actor GardenRangeCache {
         result[index] = bytes
         if next <= last {
           let index = next
-          group.addTask { (index, try await self.block(node: node, index: index, persist: persist)) }
+          group.addTask { (index, try await self.block(node: node, index: index, blockSize: blockSize, persist: persist)) }
           next += 1
         }
       }
@@ -63,8 +65,8 @@ actor GardenRangeCache {
     for index in first...last {
       try Task.checkCancellation()
       guard let bytes = blocks[index] else { throw GardenAPIError.invalidResponse }
-      let start = max(offset - index * Self.blockSize, 0)
-      let count = min(end - (index * Self.blockSize + start), bytes.count - start)
+      let start = max(offset - index * blockSize, 0)
+      let count = min(end - (index * blockSize + start), bytes.count - start)
       guard count > 0 else { throw GardenAPIError.invalidResponse }
       result.append(bytes[start..<(start + count)])
     }
@@ -89,9 +91,9 @@ actor GardenRangeCache {
     return ticket
   }
 
-  private func block(node: GardenNode, index: Int, persist: Bool) async throws -> Data {
-    let key = "\(node.id)-\(node.version)-\(index)"
-    let length = min(Self.blockSize, node.size - index * Self.blockSize)
+  private func block(node: GardenNode, index: Int, blockSize: Int, persist: Bool) async throws -> Data {
+    let key = "\(node.id)-\(node.version)-\(blockSize)-\(index)"
+    let length = min(blockSize, node.size - index * blockSize)
     let diskKey = "\(namespace)/\(key)"
     if let data = await GardenReadBuffer.shared.read(diskKey) {
       guard data.count == length else { throw GardenAPIError.invalidResponse }
@@ -105,7 +107,7 @@ actor GardenRangeCache {
     }
     if let flight = flights[key] { return try await flight.value }
     let api = self.api
-    let offset = index * Self.blockSize
+    let offset = index * blockSize
     let permits = self.permits
     let flight = Task<Data, Error> {
       let ticket = try await self.ticket(node: node)
