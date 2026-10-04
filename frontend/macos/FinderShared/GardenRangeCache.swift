@@ -10,6 +10,7 @@ struct GardenDownload: Sendable {
 actor GardenRangeCache {
   static let blockSize = 1024 * 1024
   private static let smallBlockSize = 64 * 1024
+  private static let traceReads = ProcessInfo.processInfo.environment["GARDEN_FUSE_TRACE"] == "1"
   private let permits = GardenReadPermits.shared
   private let api: GardenAPI
   private let disk: GardenDiskCache
@@ -110,9 +111,20 @@ actor GardenRangeCache {
     let offset = index * blockSize
     let permits = self.permits
     let flight = Task<Data, Error> {
+      let started = ContinuousClock.now
       let ticket = try await self.ticket(node: node)
+      let authorized = ContinuousClock.now
       try await permits.acquire()
+      let acquired = ContinuousClock.now
       defer { Task { await permits.release() } }
+      defer {
+        if Self.traceReads {
+          let message = "Range node=\(node.id) version=\(node.version) offset=\(offset) length=\(length) "
+            + "authorization=\(started.duration(to: authorized)) queue=\(authorized.duration(to: acquired)) "
+            + "transfer=\(acquired.duration(to: .now))\n"
+          FileHandle.standardError.write(Data(message.utf8))
+        }
+      }
       try Task.checkCancellation()
       if let url = ticket.url {
         var request = URLRequest(url: url)
