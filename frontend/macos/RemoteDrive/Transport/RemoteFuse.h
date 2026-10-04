@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <sys/stat.h>
 
-typedef int (*garden_entry_callback)(void *, const char *, uint64_t, int, int64_t, int64_t, int64_t);
+typedef int (*garden_entry_callback)(void *, const char *, const struct stat *, int64_t);
 void *garden_remote_start(void *engine, const char *mountpoint, const char *name);
 int garden_remote_run(void *mount);
 void garden_remote_stop(void *mount);
@@ -11,7 +11,7 @@ int garden_remote_attributes(void *engine, const char *path, uint64_t handle, st
 int garden_remote_open(void *engine, const char *path, int directory, uint64_t *handle);
 int garden_remote_close(void *engine, uint64_t handle);
 int garden_remote_read(void *engine, uint64_t handle, void *buffer, int64_t offset, int64_t length);
-int garden_remote_create(void *engine, const char *path, uint64_t *handle);
+int garden_remote_create(void *engine, const char *path, uint32_t permissions, int folder, uint64_t *handle);
 int garden_remote_write(void *engine, uint64_t handle, const void *buffer, int64_t offset, int64_t length, int append);
 int garden_remote_truncate(void *engine, const char *path, uint64_t handle, int64_t size);
 int garden_remote_flush(void *engine, uint64_t handle);

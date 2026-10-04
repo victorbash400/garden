@@ -15,10 +15,7 @@ static int load_attributes(const char *path, struct stat *out, struct fuse_file_
   return garden_remote_attributes(fuse_get_context()->private_data, path, file ? file->fh : 0, out);
 }
 
-static int attributes(const char *path, struct fuse_darwin_attr *out, struct fuse_file_info *file) {
-  struct stat item;
-  int result = load_attributes(path, &item, file);
-  if (result != 0) return result;
+static void copy_attributes(struct stat item, struct fuse_darwin_attr *out) {
   memset(out, 0, sizeof(*out));
   out->ino = item.st_ino;
   out->mode = item.st_mode;
@@ -33,6 +30,13 @@ static int attributes(const char *path, struct fuse_darwin_attr *out, struct fus
   out->ctimespec = item.st_ctimespec;
   out->btimespec = item.st_birthtimespec;
   out->flags = item.st_flags;
+}
+
+static int attributes(const char *path, struct fuse_darwin_attr *out, struct fuse_file_info *file) {
+  struct stat item;
+  int result = load_attributes(path, &item, file);
+  if (result != 0) return result;
+  copy_attributes(item, out);
   return 0;
 }
 
@@ -57,8 +61,9 @@ static int open_file(const char *path, struct fuse_file_info *file) {
 }
 
 static int create_file(const char *path, mode_t mode, struct fuse_file_info *file) {
+  if (mode & 07000) return -ENOTSUP;
   file->keep_cache = 0;
-  return garden_remote_create(fuse_get_context()->private_data, path, &file->fh);
+  return garden_remote_create(fuse_get_context()->private_data, path, mode & 0777, 0, &file->fh);
 }
 
 static int open_directory(const char *path, struct fuse_file_info *file) {
@@ -75,18 +80,11 @@ static int read_file(const char *path, char *buffer, size_t size, off_t offset, 
 
 struct directory_context { void *buffer; fuse_darwin_fill_dir_t fill; };
 
-static int entry(void *context, const char *name, uint64_t inode, int folder, int64_t size, int64_t modified, int64_t next) {
+static int entry(void *context, const char *name, const struct stat *item, int64_t next) {
   struct directory_context *directory = context;
+  if (!item) return directory->fill(directory->buffer, name, NULL, next, 0);
   struct fuse_darwin_attr attributes = {0};
-  attributes.ino = inode;
-  attributes.mode = folder ? S_IFDIR | 0755 : S_IFREG | 0644;
-  attributes.nlink = 1;
-  attributes.uid = getuid();
-  attributes.gid = getgid();
-  attributes.size = size;
-  attributes.mtimespec.tv_sec = modified;
-  attributes.ctimespec = attributes.mtimespec;
-  attributes.btimespec = attributes.mtimespec;
+  copy_attributes(*item, &attributes);
   return directory->fill(directory->buffer, name, &attributes, next, FUSE_FILL_DIR_PLUS);
 }
 
@@ -104,7 +102,8 @@ static int flush_file(const char *path, struct fuse_file_info *file) {
 }
 static int sync_file(const char *path, int data_only, struct fuse_file_info *file) { return flush_file(path, file); }
 static int mkdir_directory(const char *path, mode_t mode) {
-  return garden_remote_mutate(fuse_get_context()->private_data, 0, path, NULL, 0);
+  if (mode & 07000) return -ENOTSUP;
+  return garden_remote_create(fuse_get_context()->private_data, path, mode & 0777, 1, NULL);
 }
 static int unlink_file(const char *path) {
   return garden_remote_mutate(fuse_get_context()->private_data, 2, path, NULL, 0);

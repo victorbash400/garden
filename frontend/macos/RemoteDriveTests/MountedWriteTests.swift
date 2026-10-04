@@ -28,11 +28,17 @@ import Foundation
     var fixture: Int?
     var descriptor: Int32 = -1
     do {
-      guard mkdir(directory, 0o755) == 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
+      guard mkdir(directory, 0o700) == 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
       fixture = try await engine.lookup("/" + name)?.id
+      guard let folderID = fixture else { throw POSIXError(.ENOENT) }
+      try require(try await engine.api.get(folderID).attributes?.permissions == 0o700,
+        "Folder creation must commit its requested permissions with the node")
       let filePath = directory + "/Data.bin"
-      descriptor = open(filePath, O_CREAT | O_EXCL | O_RDWR, 0o644)
+      descriptor = open(filePath, O_CREAT | O_EXCL | O_RDWR, 0o600)
       guard descriptor >= 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
+      guard let created = try await engine.lookup("/" + name + "/Data.bin") else { throw POSIXError(.ENOENT) }
+      try require(try await engine.api.get(created.id).attributes?.permissions == 0o600,
+        "File creation must commit its requested permissions with the node")
       let unit = Data((0..<(256 * 1024)).map { UInt8($0 % 251) })
       for index in 0..<12 {
         let written = unit.withUnsafeBytes { write(descriptor, $0.baseAddress, unit.count) }
@@ -108,6 +114,15 @@ import Foundation
       let datedNode = try await engine.api.get(file.id)
       try require(abs(datedNode.modifiedDate.timeIntervalSince1970 - 1_700_000_001.456) < 0.001,
         "Cloud modification date must match the supplied filesystem date")
+      let entries = try FileManager.default.contentsOfDirectory(at: URL(fileURLWithPath: directory),
+        includingPropertiesForKeys: [.fileSizeKey, .creationDateKey, .contentModificationDateKey])
+      try require(entries.contains { $0.lastPathComponent == "Data.bin" }, "Directory enumeration must include the saved file")
+      var listed = stat()
+      try require(stat(filePath, &listed) == 0 && listed.st_mode & 0o777 == 0o600,
+        "Directory enumeration must not replace stored permissions with defaults")
+      let listedModified = Double(listed.st_mtimespec.tv_sec) + Double(listed.st_mtimespec.tv_nsec) / 1_000_000_000
+      try require(abs(listedModified - 1_700_000_001.456) < 0.001,
+        "Enumerated attributes must preserve the complete modification timestamp")
       print("Mounted permissions and binary extended attributes passed")
       let localCopy = root.appendingPathComponent("Local.bin")
       let copyBytes = Data((0..<4096).map { UInt8($0 % 251) })

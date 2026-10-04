@@ -2,14 +2,17 @@ import Darwin
 import Foundation
 
 @_cdecl("garden_remote_create")
-func remoteCreate(_ context: UnsafeMutableRawPointer?, _ path: UnsafePointer<CChar>?, _ handle: UnsafeMutablePointer<UInt64>?) -> Int32 {
+func remoteCreate(_ context: UnsafeMutableRawPointer?, _ path: UnsafePointer<CChar>?, _ permissions: UInt32,
+  _ folder: Int32, _ handle: UnsafeMutablePointer<UInt64>?) -> Int32 {
   status {
     let remote = try engine(context)
-    guard let path, let handle else { throw POSIXError(.EINVAL) }
+    guard let path, permissions <= 0o777, folder == 0 || folder == 1,
+      folder == 1 || handle != nil else { throw POSIXError(.EINVAL) }
     let name = String(cString: path)
-    handle.pointee = try wait {
-      try await remote.mutate(RemoteMutation(operation: .createFile, path: name))
-      return try await remote.open(name, directory: false)
+    try wait {
+      try await remote.mutate(RemoteMutation(operation: folder == 1 ? .createFolder : .createFile,
+        path: name, attributes: GardenFileAttributes(permissions: Int(permissions))))
+      if let handle { handle.pointee = try await remote.open(name, directory: false) }
     }
     return 0
   }
