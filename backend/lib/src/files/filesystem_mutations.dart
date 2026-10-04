@@ -2,6 +2,7 @@ import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
 import 'drive_journal.dart';
 import 'filesystem_paths.dart';
+import 'filesystem_attributes.dart';
 
 class FilesystemMutations {
   FilesystemMutations(this.session, this.drive, this.transaction)
@@ -40,23 +41,15 @@ class FilesystemMutations {
         );
         return [await event('create', created)];
       case FilesystemOperation.setAttributes:
+      case FilesystemOperation.setExtendedAttribute:
+      case FilesystemOperation.removeExtendedAttribute:
         if (node == null) {
           FilesystemPaths.fail(
             FilesystemError.notFound,
             'File or folder does not exist.',
           );
         }
-        final createdAt = request.createdAt;
-        if (createdAt == null ||
-            createdAt.year < 1970 ||
-            createdAt.year > 9999) {
-          FilesystemPaths.fail(
-            FilesystemError.invalid,
-            'Invalid creation date.',
-          );
-        }
-        if (node.createdAt == createdAt) return [];
-        node.createdAt = createdAt.toUtc();
+        if (!FilesystemAttributes.apply(node, request)) return [];
         await FileNode.db.updateRow(session, node, transaction: transaction);
         return [await event('update', node)];
       case FilesystemOperation.unlink:

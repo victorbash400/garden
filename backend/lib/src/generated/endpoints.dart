@@ -533,6 +533,11 @@ class Endpoints extends _is.EndpointDispatch {
               type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
+            'modifiedAt': _is.ParameterDescription(
+              name: 'modifiedAt',
+              type: _is.getType<DateTime?>(),
+              nullable: true,
+            ),
           },
           call:
               (
@@ -545,6 +550,7 @@ class Endpoints extends _is.EndpointDispatch {
                     params['baseVersion'],
                     params['size'],
                     params['operationId'],
+                    modifiedAt: params['modifiedAt'],
                   ),
         ),
         'begin': _is.MethodConnector(

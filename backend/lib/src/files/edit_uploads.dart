@@ -15,12 +15,22 @@ class EditUploads {
     int nodeId,
     int baseVersion,
     int size,
-    UuidValue operationId,
-  ) async {
+    UuidValue operationId, {
+    DateTime? modifiedAt,
+  }) async {
     if (size < 0 || size > 1 << 40) {
       throw GardenException(message: 'Invalid file size.');
     }
-    final request = jsonEncode([nodeId, baseVersion, size]);
+    if (modifiedAt != null &&
+        (modifiedAt.year < 1970 || modifiedAt.year > 9999)) {
+      throw GardenException(message: 'Invalid modification date.');
+    }
+    final request = jsonEncode([
+      nodeId,
+      baseVersion,
+      size,
+      if (modifiedAt != null) modifiedAt.toUtc().toIso8601String(),
+    ]);
     final author = DriveAccess.user(session);
     final receipt = await FileVersion.db.findFirstRow(
       session,
@@ -92,6 +102,7 @@ class EditUploads {
           chunkCount: (size + chunkSize - 1) ~/ chunkSize,
           operationId: operationId,
           editRequest: request,
+          modifiedAt: modifiedAt?.toUtc(),
           createdAt: DateTime.now().toUtc(),
         ),
         transaction: transaction,

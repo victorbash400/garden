@@ -10,7 +10,9 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:garden_server/src/generated/protocol.dart' as _ipujdd36;
 import 'package:serverpod/serverpod.dart' as _is;
+import '../files/file_attributes.dart' as _ikwv8ta6;
 import '../files/filesystem_operation.dart' as _i3gax0t1;
 
 abstract class FilesystemRequest
@@ -22,7 +24,13 @@ abstract class FilesystemRequest
     this.destination,
     bool? noReplace,
     this.createdAt,
-  }) : noReplace = noReplace ?? false;
+    this.modifiedAt,
+    this.attributes,
+    this.attributeName,
+    this.attributeValue,
+    int? attributeFlags,
+  }) : noReplace = noReplace ?? false,
+       attributeFlags = attributeFlags ?? 0;
 
   factory FilesystemRequest({
     required _is.UuidValue operationId,
@@ -31,6 +39,11 @@ abstract class FilesystemRequest
     String? destination,
     bool? noReplace,
     DateTime? createdAt,
+    DateTime? modifiedAt,
+    _ikwv8ta6.FileAttributes? attributes,
+    String? attributeName,
+    String? attributeValue,
+    int? attributeFlags,
   }) = _FilesystemRequestImpl;
 
   factory FilesystemRequest.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -49,6 +62,17 @@ abstract class FilesystemRequest
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _is.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+      modifiedAt: jsonSerialization['modifiedAt'] == null
+          ? null
+          : _is.DateTimeJsonExtension.fromJson(jsonSerialization['modifiedAt']),
+      attributes: jsonSerialization['attributes'] == null
+          ? null
+          : _ipujdd36.Protocol().deserialize<_ikwv8ta6.FileAttributes>(
+              jsonSerialization['attributes'],
+            ),
+      attributeName: jsonSerialization['attributeName'] as String?,
+      attributeValue: jsonSerialization['attributeValue'] as String?,
+      attributeFlags: jsonSerialization['attributeFlags'] as int?,
     );
   }
 
@@ -64,6 +88,16 @@ abstract class FilesystemRequest
 
   DateTime? createdAt;
 
+  DateTime? modifiedAt;
+
+  _ikwv8ta6.FileAttributes? attributes;
+
+  String? attributeName;
+
+  String? attributeValue;
+
+  int attributeFlags;
+
   /// Returns a shallow copy of this [FilesystemRequest]
   /// with some or all fields replaced by the given arguments.
   @_is.useResult
@@ -74,6 +108,11 @@ abstract class FilesystemRequest
     String? destination,
     bool? noReplace,
     DateTime? createdAt,
+    DateTime? modifiedAt,
+    _ikwv8ta6.FileAttributes? attributes,
+    String? attributeName,
+    String? attributeValue,
+    int? attributeFlags,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -85,6 +124,11 @@ abstract class FilesystemRequest
       if (destination != null) 'destination': destination,
       'noReplace': noReplace,
       if (createdAt != null) 'createdAt': createdAt?.toJson(),
+      if (modifiedAt != null) 'modifiedAt': modifiedAt?.toJson(),
+      if (attributes != null) 'attributes': attributes?.toJson(),
+      if (attributeName != null) 'attributeName': attributeName,
+      if (attributeValue != null) 'attributeValue': attributeValue,
+      'attributeFlags': attributeFlags,
     };
   }
 
@@ -98,6 +142,11 @@ abstract class FilesystemRequest
       if (destination != null) 'destination': destination,
       'noReplace': noReplace,
       if (createdAt != null) 'createdAt': createdAt?.toJson(),
+      if (modifiedAt != null) 'modifiedAt': modifiedAt?.toJson(),
+      if (attributes != null) 'attributes': attributes?.toJsonForProtocol(),
+      if (attributeName != null) 'attributeName': attributeName,
+      if (attributeValue != null) 'attributeValue': attributeValue,
+      'attributeFlags': attributeFlags,
     };
   }
 
@@ -117,6 +166,11 @@ class _FilesystemRequestImpl extends FilesystemRequest {
     String? destination,
     bool? noReplace,
     DateTime? createdAt,
+    DateTime? modifiedAt,
+    _ikwv8ta6.FileAttributes? attributes,
+    String? attributeName,
+    String? attributeValue,
+    int? attributeFlags,
   }) : super._(
          operationId: operationId,
          operation: operation,
@@ -124,6 +178,11 @@ class _FilesystemRequestImpl extends FilesystemRequest {
          destination: destination,
          noReplace: noReplace,
          createdAt: createdAt,
+         modifiedAt: modifiedAt,
+         attributes: attributes,
+         attributeName: attributeName,
+         attributeValue: attributeValue,
+         attributeFlags: attributeFlags,
        );
 
   /// Returns a shallow copy of this [FilesystemRequest]
@@ -137,6 +196,11 @@ class _FilesystemRequestImpl extends FilesystemRequest {
     Object? destination = _Undefined,
     bool? noReplace,
     Object? createdAt = _Undefined,
+    Object? modifiedAt = _Undefined,
+    Object? attributes = _Undefined,
+    Object? attributeName = _Undefined,
+    Object? attributeValue = _Undefined,
+    int? attributeFlags,
   }) {
     return FilesystemRequest(
       operationId: operationId ?? this.operationId,
@@ -145,6 +209,17 @@ class _FilesystemRequestImpl extends FilesystemRequest {
       destination: destination is String? ? destination : this.destination,
       noReplace: noReplace ?? this.noReplace,
       createdAt: createdAt is DateTime? ? createdAt : this.createdAt,
+      modifiedAt: modifiedAt is DateTime? ? modifiedAt : this.modifiedAt,
+      attributes: attributes is _ikwv8ta6.FileAttributes?
+          ? attributes
+          : this.attributes?.copyWith(),
+      attributeName: attributeName is String?
+          ? attributeName
+          : this.attributeName,
+      attributeValue: attributeValue is String?
+          ? attributeValue
+          : this.attributeValue,
+      attributeFlags: attributeFlags ?? this.attributeFlags,
     );
   }
 }

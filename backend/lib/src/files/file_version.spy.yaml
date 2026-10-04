@@ -11,6 +11,7 @@ fields:
   partSize: int?
   operationId: UuidValue?
   editRequest: String?
+  modifiedAt: DateTime?
   committed: bool, default=false
   aborted: bool, default=false
   createdAt: DateTime

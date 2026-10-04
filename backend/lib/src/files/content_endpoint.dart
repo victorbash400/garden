@@ -23,8 +23,16 @@ class ContentEndpoint extends Endpoint {
     int nodeId,
     int baseVersion,
     int size,
-    UuidValue operationId,
-  ) => EditUploads.begin(session, nodeId, baseVersion, size, operationId);
+    UuidValue operationId, {
+    DateTime? modifiedAt,
+  }) => EditUploads.begin(
+    session,
+    nodeId,
+    baseVersion,
+    size,
+    operationId,
+    modifiedAt: modifiedAt,
+  );
 
   Future<FileVersion> begin(
     Session session,
@@ -345,6 +353,8 @@ class ContentEndpoint extends Endpoint {
                 activeName: name.toLowerCase(),
                 kind: NodeKind.file,
                 updatedAt: DateTime.now().toUtc(),
+                createdAt: node.createdAt,
+                attributes: node.attributes?.copyWith(),
               ),
               transaction: transaction,
             );
@@ -391,7 +401,7 @@ class ContentEndpoint extends Endpoint {
           );
           node.version = versionId;
           node.size = version.size;
-          node.updatedAt = DateTime.now().toUtc();
+          node.updatedAt = version.modifiedAt ?? DateTime.now().toUtc();
           await FileNode.db.updateRow(session, node, transaction: transaction);
           return (
             node,

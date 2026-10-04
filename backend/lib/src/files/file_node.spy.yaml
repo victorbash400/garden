@@ -11,6 +11,7 @@ fields:
   deleted: bool, default=false
   updatedAt: DateTime
   createdAt: DateTime?
+  attributes: FileAttributes?
 indexes:
   node_sibling_unique:
     fields: gardenId, parentId, activeName

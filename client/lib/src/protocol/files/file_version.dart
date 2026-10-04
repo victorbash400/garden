@@ -26,6 +26,7 @@ abstract class FileVersion
     this.partSize,
     this.operationId,
     this.editRequest,
+    this.modifiedAt,
     bool? committed,
     bool? aborted,
     required this.createdAt,
@@ -44,6 +45,7 @@ abstract class FileVersion
     int? partSize,
     _isc.UuidValue? operationId,
     String? editRequest,
+    DateTime? modifiedAt,
     bool? committed,
     bool? aborted,
     required DateTime createdAt,
@@ -66,6 +68,11 @@ abstract class FileVersion
               jsonSerialization['operationId'],
             ),
       editRequest: jsonSerialization['editRequest'] as String?,
+      modifiedAt: jsonSerialization['modifiedAt'] == null
+          ? null
+          : _isc.DateTimeJsonExtension.fromJson(
+              jsonSerialization['modifiedAt'],
+            ),
       committed: jsonSerialization['committed'] == null
           ? null
           : _isc.BoolJsonExtension.fromJson(jsonSerialization['committed']),
@@ -103,6 +110,8 @@ abstract class FileVersion
 
   String? editRequest;
 
+  DateTime? modifiedAt;
+
   bool committed;
 
   bool aborted;
@@ -124,6 +133,7 @@ abstract class FileVersion
     int? partSize,
     _isc.UuidValue? operationId,
     String? editRequest,
+    DateTime? modifiedAt,
     bool? committed,
     bool? aborted,
     DateTime? createdAt,
@@ -143,6 +153,7 @@ abstract class FileVersion
       if (partSize != null) 'partSize': partSize,
       if (operationId != null) 'operationId': operationId?.toJson(),
       if (editRequest != null) 'editRequest': editRequest,
+      if (modifiedAt != null) 'modifiedAt': modifiedAt?.toJson(),
       'committed': committed,
       'aborted': aborted,
       'createdAt': createdAt.toJson(),
@@ -164,6 +175,7 @@ abstract class FileVersion
       if (partSize != null) 'partSize': partSize,
       if (operationId != null) 'operationId': operationId?.toJson(),
       if (editRequest != null) 'editRequest': editRequest,
+      if (modifiedAt != null) 'modifiedAt': modifiedAt?.toJson(),
       'committed': committed,
       'aborted': aborted,
       'createdAt': createdAt.toJson(),
@@ -191,6 +203,7 @@ class _FileVersionImpl extends FileVersion {
     int? partSize,
     _isc.UuidValue? operationId,
     String? editRequest,
+    DateTime? modifiedAt,
     bool? committed,
     bool? aborted,
     required DateTime createdAt,
@@ -206,6 +219,7 @@ class _FileVersionImpl extends FileVersion {
          partSize: partSize,
          operationId: operationId,
          editRequest: editRequest,
+         modifiedAt: modifiedAt,
          committed: committed,
          aborted: aborted,
          createdAt: createdAt,
@@ -227,6 +241,7 @@ class _FileVersionImpl extends FileVersion {
     Object? partSize = _Undefined,
     Object? operationId = _Undefined,
     Object? editRequest = _Undefined,
+    Object? modifiedAt = _Undefined,
     bool? committed,
     bool? aborted,
     DateTime? createdAt,
@@ -245,6 +260,7 @@ class _FileVersionImpl extends FileVersion {
           ? operationId
           : this.operationId,
       editRequest: editRequest is String? ? editRequest : this.editRequest,
+      modifiedAt: modifiedAt is DateTime? ? modifiedAt : this.modifiedAt,
       committed: committed ?? this.committed,
       aborted: aborted ?? this.aborted,
       createdAt: createdAt ?? this.createdAt,

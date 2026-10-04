@@ -39,6 +39,62 @@ void main() {
       }
 
       test(
+        'edits preserve modification time and file attributes through publication',
+        () async {
+          final node = await file('Edit metadata');
+          final stored = await endpoints.files.get(owner, node.id!);
+          await endpoints.filesystem.mutate(
+            owner,
+            stored.gardenId,
+            FilesystemRequest(
+              operationId: identifier(),
+              operation: FilesystemOperation.setExtendedAttribute,
+              path: '/' + stored.name,
+              attributeName: 'com.apple.FinderInfo',
+              attributeValue: 'AQ==',
+            ),
+          );
+          final date = DateTime.utc(2025, 1, 2, 3, 4, 5);
+          final operation = identifier();
+          final upload = await endpoints.content.beginEdit(
+            owner,
+            node.id!,
+            node.version,
+            0,
+            operation,
+            modifiedAt: date,
+          );
+          final committed = await endpoints.content.finish(owner, upload.id!);
+          expect(committed.updatedAt, date);
+          expect(committed.attributes!.extended, {
+            'com.apple.FinderInfo': 'AQ==',
+          });
+          expect(
+            (await endpoints.content.beginEdit(
+              owner,
+              node.id!,
+              node.version,
+              0,
+              operation,
+              modifiedAt: date,
+            )).id,
+            upload.id,
+          );
+          await expectLater(
+            endpoints.content.beginEdit(
+              owner,
+              node.id!,
+              node.version,
+              0,
+              operation,
+              modifiedAt: date.add(const Duration(seconds: 1)),
+            ),
+            throwsA(isA<GardenException>()),
+          );
+        },
+      );
+
+      test(
         'parallel retries deduplicate one edit while different edits stay separate',
         () async {
           final node = await file('Identity');

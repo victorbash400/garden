@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
 import 'drive_access.dart';
 import 'drive_journal.dart';
 import 'filesystem_mutations.dart';
 import 'filesystem_paths.dart';
+import 'filesystem_attributes.dart';
 
 class FilesystemEndpoint extends Endpoint {
   @override
@@ -14,10 +16,9 @@ class FilesystemEndpoint extends Endpoint {
     int gardenId,
     FilesystemRequest request,
   ) async {
+    FilesystemAttributes.validate(request);
     if ((request.operation != FilesystemOperation.rename &&
-            (request.destination != null || request.noReplace)) ||
-        (request.operation != FilesystemOperation.setAttributes &&
-            request.createdAt != null)) {
+        (request.destination != null || request.noReplace))) {
       FilesystemPaths.fail(
         FilesystemError.invalid,
         'Unexpected filesystem arguments.',
@@ -43,12 +44,8 @@ class FilesystemEndpoint extends Endpoint {
         transaction: transaction,
       );
       if (receipt != null) {
-        final original = receipt.request;
-        if (original.operation != request.operation ||
-            original.path != request.path ||
-            original.destination != request.destination ||
-            original.noReplace != request.noReplace ||
-            original.createdAt != request.createdAt) {
+        if (jsonEncode(receipt.request.toJson()) !=
+            jsonEncode(request.toJson())) {
           FilesystemPaths.fail(
             FilesystemError.invalid,
             'Operation ID was reused with different arguments.',

@@ -10,7 +10,9 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:garden_client/src/protocol/protocol.dart' as _iyvihoc1;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
+import '../files/file_attributes.dart' as _ikwv8ta6;
 import '../files/node_kind.dart' as _iiiid2sw;
 
 abstract class FileNode
@@ -27,6 +29,7 @@ abstract class FileNode
     bool? deleted,
     required this.updatedAt,
     this.createdAt,
+    this.attributes,
   }) : size = size ?? 0,
        version = version ?? 0,
        deleted = deleted ?? false;
@@ -43,6 +46,7 @@ abstract class FileNode
     bool? deleted,
     required DateTime updatedAt,
     DateTime? createdAt,
+    _ikwv8ta6.FileAttributes? attributes,
   }) = _FileNodeImpl;
 
   factory FileNode.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -64,6 +68,11 @@ abstract class FileNode
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+      attributes: jsonSerialization['attributes'] == null
+          ? null
+          : _iyvihoc1.Protocol().deserialize<_ikwv8ta6.FileAttributes>(
+              jsonSerialization['attributes'],
+            ),
     );
   }
 
@@ -92,6 +101,8 @@ abstract class FileNode
 
   DateTime? createdAt;
 
+  _ikwv8ta6.FileAttributes? attributes;
+
   /// Returns a shallow copy of this [FileNode]
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
@@ -107,6 +118,7 @@ abstract class FileNode
     bool? deleted,
     DateTime? updatedAt,
     DateTime? createdAt,
+    _ikwv8ta6.FileAttributes? attributes,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -123,6 +135,7 @@ abstract class FileNode
       'deleted': deleted,
       'updatedAt': updatedAt.toJson(),
       if (createdAt != null) 'createdAt': createdAt?.toJson(),
+      if (attributes != null) 'attributes': attributes?.toJson(),
     };
   }
 
@@ -141,6 +154,7 @@ abstract class FileNode
       'deleted': deleted,
       'updatedAt': updatedAt.toJson(),
       if (createdAt != null) 'createdAt': createdAt?.toJson(),
+      if (attributes != null) 'attributes': attributes?.toJsonForProtocol(),
     };
   }
 
@@ -165,6 +179,7 @@ class _FileNodeImpl extends FileNode {
     bool? deleted,
     required DateTime updatedAt,
     DateTime? createdAt,
+    _ikwv8ta6.FileAttributes? attributes,
   }) : super._(
          id: id,
          gardenId: gardenId,
@@ -177,6 +192,7 @@ class _FileNodeImpl extends FileNode {
          deleted: deleted,
          updatedAt: updatedAt,
          createdAt: createdAt,
+         attributes: attributes,
        );
 
   /// Returns a shallow copy of this [FileNode]
@@ -195,6 +211,7 @@ class _FileNodeImpl extends FileNode {
     bool? deleted,
     DateTime? updatedAt,
     Object? createdAt = _Undefined,
+    Object? attributes = _Undefined,
   }) {
     return FileNode(
       id: id is int? ? id : this.id,
@@ -208,6 +225,9 @@ class _FileNodeImpl extends FileNode {
       deleted: deleted ?? this.deleted,
       updatedAt: updatedAt ?? this.updatedAt,
       createdAt: createdAt is DateTime? ? createdAt : this.createdAt,
+      attributes: attributes is _ikwv8ta6.FileAttributes?
+          ? attributes
+          : this.attributes?.copyWith(),
     );
   }
 }

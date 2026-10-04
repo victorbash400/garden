@@ -10,7 +10,9 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:garden_server/src/generated/protocol.dart' as _ipujdd36;
 import 'package:serverpod/serverpod.dart' as _is;
+import '../files/file_attributes.dart' as _ikwv8ta6;
 import '../files/node_kind.dart' as _iiiid2sw;
 
 abstract class FileNode
@@ -27,6 +29,7 @@ abstract class FileNode
     bool? deleted,
     required this.updatedAt,
     this.createdAt,
+    this.attributes,
   }) : size = size ?? 0,
        version = version ?? 0,
        deleted = deleted ?? false;
@@ -43,6 +46,7 @@ abstract class FileNode
     bool? deleted,
     required DateTime updatedAt,
     DateTime? createdAt,
+    _ikwv8ta6.FileAttributes? attributes,
   }) = _FileNodeImpl;
 
   factory FileNode.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -64,6 +68,11 @@ abstract class FileNode
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _is.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+      attributes: jsonSerialization['attributes'] == null
+          ? null
+          : _ipujdd36.Protocol().deserialize<_ikwv8ta6.FileAttributes>(
+              jsonSerialization['attributes'],
+            ),
     );
   }
 
@@ -94,6 +103,8 @@ abstract class FileNode
 
   DateTime? createdAt;
 
+  _ikwv8ta6.FileAttributes? attributes;
+
   @override
   _is.Table<int?> get table => t;
 
@@ -112,6 +123,7 @@ abstract class FileNode
     bool? deleted,
     DateTime? updatedAt,
     DateTime? createdAt,
+    _ikwv8ta6.FileAttributes? attributes,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -128,6 +140,7 @@ abstract class FileNode
       'deleted': deleted,
       'updatedAt': updatedAt.toJson(),
       if (createdAt != null) 'createdAt': createdAt?.toJson(),
+      if (attributes != null) 'attributes': attributes?.toJson(),
     };
   }
 
@@ -146,6 +159,7 @@ abstract class FileNode
       'deleted': deleted,
       'updatedAt': updatedAt.toJson(),
       if (createdAt != null) 'createdAt': createdAt?.toJson(),
+      if (attributes != null) 'attributes': attributes?.toJsonForProtocol(),
     };
   }
 
@@ -192,6 +206,7 @@ class _FileNodeImpl extends FileNode {
     bool? deleted,
     required DateTime updatedAt,
     DateTime? createdAt,
+    _ikwv8ta6.FileAttributes? attributes,
   }) : super._(
          id: id,
          gardenId: gardenId,
@@ -204,6 +219,7 @@ class _FileNodeImpl extends FileNode {
          deleted: deleted,
          updatedAt: updatedAt,
          createdAt: createdAt,
+         attributes: attributes,
        );
 
   /// Returns a shallow copy of this [FileNode]
@@ -222,6 +238,7 @@ class _FileNodeImpl extends FileNode {
     bool? deleted,
     DateTime? updatedAt,
     Object? createdAt = _Undefined,
+    Object? attributes = _Undefined,
   }) {
     return FileNode(
       id: id is int? ? id : this.id,
@@ -235,6 +252,9 @@ class _FileNodeImpl extends FileNode {
       deleted: deleted ?? this.deleted,
       updatedAt: updatedAt ?? this.updatedAt,
       createdAt: createdAt is DateTime? ? createdAt : this.createdAt,
+      attributes: attributes is _ikwv8ta6.FileAttributes?
+          ? attributes
+          : this.attributes?.copyWith(),
     );
   }
 }
@@ -295,6 +315,12 @@ class FileNodeUpdateTable extends _is.UpdateTable<FileNodeTable> {
         table.createdAt,
         value,
       );
+
+  _is.ColumnValue<_ikwv8ta6.FileAttributes, _ikwv8ta6.FileAttributes>
+  attributes(_ikwv8ta6.FileAttributes? value) => _is.ColumnValue(
+    table.attributes,
+    value,
+  );
 }
 
 class FileNodeTable extends _is.Table<int?> {
@@ -344,6 +370,10 @@ class FileNodeTable extends _is.Table<int?> {
       'createdAt',
       this,
     );
+    attributes = _is.ColumnSerializable<_ikwv8ta6.FileAttributes>(
+      'attributes',
+      this,
+    );
   }
 
   late final FileNodeUpdateTable updateTable;
@@ -368,6 +398,8 @@ class FileNodeTable extends _is.Table<int?> {
 
   late final _is.ColumnDateTime createdAt;
 
+  late final _is.ColumnSerializable<_ikwv8ta6.FileAttributes> attributes;
+
   @override
   List<_is.Column> get columns => [
     id,
@@ -381,6 +413,7 @@ class FileNodeTable extends _is.Table<int?> {
     deleted,
     updatedAt,
     createdAt,
+    attributes,
   ];
 }
 

@@ -6,3 +6,8 @@ fields:
   destination: String?
   noReplace: bool, default=false
   createdAt: DateTime?
+  modifiedAt: DateTime?
+  attributes: FileAttributes?
+  attributeName: String?
+  attributeValue: String?
+  attributeFlags: int, default=0

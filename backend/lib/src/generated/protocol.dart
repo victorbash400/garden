@@ -32,6 +32,7 @@ import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
 import 'files/content_download.dart' as _id6mrfn8;
 import 'files/directory_listing.dart' as _i8kiawn9;
 import 'files/drive_event.dart' as _i4wn0cbe;
+import 'files/file_attributes.dart' as _ir46o6qz;
 import 'files/file_chunk.dart' as _imjz65yx;
 import 'files/file_comment.dart' as _i8jjzct9;
 import 'files/file_lease.dart' as _ifu05pz5;
@@ -56,6 +57,7 @@ import 'greetings/greeting.dart' as _izw8z7ou;
 export 'files/content_download.dart';
 export 'files/directory_listing.dart';
 export 'files/drive_event.dart';
+export 'files/file_attributes.dart';
 export 'files/file_chunk.dart';
 export 'files/file_comment.dart';
 export 'files/file_lease.dart';
@@ -458,6 +460,12 @@ class Protocol extends _is.DatabaseSerializationManager {
           isNullable: true,
           dartType: 'DateTime?',
         ),
+        _isp.ColumnDefinition(
+          name: 'attributes',
+          columnType: _isp.ColumnType.json,
+          isNullable: true,
+          dartType: 'protocol:FileAttributes?',
+        ),
       ],
       foreignKeys: [
         _isp.ForeignKeyDefinition(
@@ -589,6 +597,12 @@ class Protocol extends _is.DatabaseSerializationManager {
           columnType: _isp.ColumnType.text,
           isNullable: true,
           dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'modifiedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
         ),
         _isp.ColumnDefinition(
           name: 'committed',
@@ -911,6 +925,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _i4wn0cbe.DriveEvent) {
       return _i4wn0cbe.DriveEvent.fromJson(data) as T;
     }
+    if (t == _ir46o6qz.FileAttributes) {
+      return _ir46o6qz.FileAttributes.fromJson(data) as T;
+    }
     if (t == _imjz65yx.FileChunk) {
       return _imjz65yx.FileChunk.fromJson(data) as T;
     }
@@ -981,6 +998,10 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (t == _is.getType<_i4wn0cbe.DriveEvent?>()) {
       return (data != null ? _i4wn0cbe.DriveEvent.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_ir46o6qz.FileAttributes?>()) {
+      return (data != null ? _ir46o6qz.FileAttributes.fromJson(data) : null)
+          as T;
     }
     if (t == _is.getType<_imjz65yx.FileChunk?>()) {
       return (data != null ? _imjz65yx.FileChunk.fromJson(data) : null) as T;
@@ -1062,6 +1083,21 @@ class Protocol extends _is.DatabaseSerializationManager {
       return (data as List)
               .map((e) => deserialize<_iqxechne.FileNode>(e))
               .toList()
+          as T;
+    }
+    if (t == Map<String, String>) {
+      return (data as Map).map(
+            (k, v) => MapEntry(deserialize<String>(k), deserialize<String>(v)),
+          )
+          as T;
+    }
+    if (t == _is.getType<Map<String, String>?>()) {
+      return (data != null
+              ? (data as Map).map(
+                  (k, v) =>
+                      MapEntry(deserialize<String>(k), deserialize<String>(v)),
+                )
+              : null)
           as T;
     }
     if (t == List<_i4wn0cbe.DriveEvent>) {
@@ -1179,6 +1215,7 @@ class Protocol extends _is.DatabaseSerializationManager {
       _id6mrfn8.ContentDownload => 'ContentDownload',
       _i8kiawn9.DirectoryListing => 'DirectoryListing',
       _i4wn0cbe.DriveEvent => 'DriveEvent',
+      _ir46o6qz.FileAttributes => 'FileAttributes',
       _imjz65yx.FileChunk => 'FileChunk',
       _i8jjzct9.FileComment => 'FileComment',
       _ifu05pz5.FileLease => 'FileLease',
@@ -1220,6 +1257,8 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'DirectoryListing';
       case _i4wn0cbe.DriveEvent():
         return 'DriveEvent';
+      case _ir46o6qz.FileAttributes():
+        return 'FileAttributes';
       case _imjz65yx.FileChunk():
         return 'FileChunk';
       case _i8jjzct9.FileComment():
@@ -1294,6 +1333,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (dataClassName == 'DriveEvent') {
       return deserialize<_i4wn0cbe.DriveEvent>(data['data']);
+    }
+    if (dataClassName == 'FileAttributes') {
+      return deserialize<_ir46o6qz.FileAttributes>(data['data']);
     }
     if (dataClassName == 'FileChunk') {
       return deserialize<_imjz65yx.FileChunk>(data['data']);

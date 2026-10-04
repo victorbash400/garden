@@ -940,8 +940,9 @@ class _ContentEndpoint {
     int nodeId,
     int baseVersion,
     int size,
-    _is.UuidValue operationId,
-  ) async {
+    _is.UuidValue operationId, {
+    DateTime? modifiedAt,
+  }) async {
     return _ist.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
           (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
@@ -958,6 +959,7 @@ class _ContentEndpoint {
             'baseVersion': baseVersion,
             'size': size,
             'operationId': operationId,
+            'modifiedAt': modifiedAt,
           }),
           serializationManager: _serializationManager,
         );

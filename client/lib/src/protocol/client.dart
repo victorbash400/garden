@@ -388,8 +388,9 @@ class EndpointContent extends _isc.EndpointRef {
     int nodeId,
     int baseVersion,
     int size,
-    _isc.UuidValue operationId,
-  ) => caller.callServerEndpoint<_ibt6e7l6.FileVersion>(
+    _isc.UuidValue operationId, {
+    DateTime? modifiedAt,
+  }) => caller.callServerEndpoint<_ibt6e7l6.FileVersion>(
     'content',
     'beginEdit',
     {
@@ -397,6 +398,7 @@ class EndpointContent extends _isc.EndpointRef {
       'baseVersion': baseVersion,
       'size': size,
       'operationId': operationId,
+      'modifiedAt': modifiedAt,
     },
   );
 

@@ -20,7 +20,9 @@ enum FilesystemError implements _is.SerializableModel {
   notEmpty,
   invalid,
   accessDenied,
-  busy;
+  busy,
+  noAttribute,
+  tooLarge;
 
   static FilesystemError fromJson(String name) {
     switch (name) {
@@ -40,6 +42,10 @@ enum FilesystemError implements _is.SerializableModel {
         return FilesystemError.accessDenied;
       case 'busy':
         return FilesystemError.busy;
+      case 'noAttribute':
+        return FilesystemError.noAttribute;
+      case 'tooLarge':
+        return FilesystemError.tooLarge;
       default:
         throw ArgumentError(
           'Value "$name" cannot be converted to "FilesystemError"',

@@ -6,3 +6,5 @@ values:
   - unlink
   - rmdir
   - setAttributes
+  - setExtendedAttribute
+  - removeExtendedAttribute

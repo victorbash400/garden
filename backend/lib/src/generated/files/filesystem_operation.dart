@@ -18,7 +18,9 @@ enum FilesystemOperation implements _is.SerializableModel {
   rename,
   unlink,
   rmdir,
-  setAttributes;
+  setAttributes,
+  setExtendedAttribute,
+  removeExtendedAttribute;
 
   static FilesystemOperation fromJson(String name) {
     switch (name) {
@@ -34,6 +36,10 @@ enum FilesystemOperation implements _is.SerializableModel {
         return FilesystemOperation.rmdir;
       case 'setAttributes':
         return FilesystemOperation.setAttributes;
+      case 'setExtendedAttribute':
+        return FilesystemOperation.setExtendedAttribute;
+      case 'removeExtendedAttribute':
+        return FilesystemOperation.removeExtendedAttribute;
       default:
         throw ArgumentError(
           'Value "$name" cannot be converted to "FilesystemOperation"',

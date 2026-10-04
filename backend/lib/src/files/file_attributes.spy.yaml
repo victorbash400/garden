@@ -1,0 +1,6 @@
+class: FileAttributes
+fields:
+  accessedAt: DateTime?
+  permissions: int?
+  flags: int?
+  extended: Map<String, String>?

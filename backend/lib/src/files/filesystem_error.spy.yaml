@@ -8,3 +8,5 @@ values:
   - invalid
   - accessDenied
   - busy
+  - noAttribute
+  - tooLarge
