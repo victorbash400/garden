@@ -14,6 +14,7 @@ xcrun swiftc -O -parse-as-library -swift-version 5 -import-objc-header "$root/Re
   "$root/RemoteDrive/Engine/RemoteCallbacks.swift" "$root/RemoteDrive/Engine/RemoteChanges.swift" \
   "$root/RemoteDrive/Engine/RemoteEngine.swift" "$root/RemoteDrive/Engine/RemoteMetadata.swift" \
   "$root/RemoteDrive/Engine/RemoteMutation.swift" "$root/RemoteDrive/Engine/RemoteMutationJournal.swift" \
+  "$root/RemoteDrive/Engine/RemoteWriteDatabase.swift" "$root/RemoteDrive/Engine/RemoteWriteJournal.swift" \
   "$root/RemoteDrive/Engine/RemoteCompletion.swift" "$root/RemoteDrive/Engine/RemoteMount.swift" "$root/RemoteDrive/Engine/RemotePlatform.swift" "$root/RemoteDrive/Engine/RemoteSubscription.swift" "$entry" \
   "$root/RemoteDrive/Control/RemoteRegistration.swift" "$root/RemoteDrive/Control/RemoteManager.swift" \
   "$root/RemoteDrive/Control/RemoteControlService.swift" "$root/RemoteDrive/Control/RemoteCacheControl.swift" \

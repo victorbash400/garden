@@ -128,6 +128,8 @@
 		A8431B719E003BF184C01B80 /* GardenFinderBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CB7DD914B7CAE7939DB087 /* GardenFinderBridge.swift */; };
 		A10D20261004000000000000 /* RemoteMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20D20261004000000000000 /* RemoteMutation.swift */; };
 		A10D20261004000000000001 /* RemoteMutationJournal.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20D20261004000000000001 /* RemoteMutationJournal.swift */; };
+		A10D20261004000000000003 /* RemoteWriteJournal.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20D20261004000000000003 /* RemoteWriteJournal.swift */; };
+		A10D20261004000000000002 /* RemoteWriteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20D20261004000000000002 /* RemoteWriteDatabase.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -283,6 +285,8 @@
 		264689F7573263A6A2BAE211 /* GardenFinderEvents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenFinderEvents.swift; path = Runner/GardenFinderEvents.swift; sourceTree = "<group>"; };
 		A20D20261004000000000000 /* RemoteMutation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteMutation.swift; path = RemoteDrive/Engine/RemoteMutation.swift; sourceTree = "<group>"; };
 		A20D20261004000000000001 /* RemoteMutationJournal.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteMutationJournal.swift; path = RemoteDrive/Engine/RemoteMutationJournal.swift; sourceTree = "<group>"; };
+		A20D20261004000000000003 /* RemoteWriteJournal.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteWriteJournal.swift; path = RemoteDrive/Engine/RemoteWriteJournal.swift; sourceTree = "<group>"; };
+		A20D20261004000000000002 /* RemoteWriteDatabase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteWriteDatabase.swift; path = RemoteDrive/Engine/RemoteWriteDatabase.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -453,6 +457,8 @@
 				30EC59BB4CB4CE2D9830EDF3 /* RemoteCallbacks.swift */,
 				045347095E12F95F3EA3195D /* RemoteMetadata.swift */,
 				A20D20261004000000000001 /* RemoteMutationJournal.swift */,
+				A20D20261004000000000003 /* RemoteWriteJournal.swift */,
+				A20D20261004000000000002 /* RemoteWriteDatabase.swift */,
 				A20D20261004000000000000 /* RemoteMutation.swift */,
 				90CBD3FE3E862E8F6E930C16 /* RemoteManager.swift */,
 				8CECF5DDA1C9B7876F48FC27 /* RemoteRegistration.swift */,
@@ -865,6 +871,8 @@
 				373D33C6FD8111692ECD68B9 /* RemoteCallbacks.swift in Sources */,
 				888E62B09BF96D536FAF8E43 /* RemoteMetadata.swift in Sources */,
 				A10D20261004000000000001 /* RemoteMutationJournal.swift in Sources */,
+				A10D20261004000000000003 /* RemoteWriteJournal.swift in Sources */,
+				A10D20261004000000000002 /* RemoteWriteDatabase.swift in Sources */,
 				A10D20261004000000000000 /* RemoteMutation.swift in Sources */,
 				991CE2CBE68B6173075734BD /* RemoteManager.swift in Sources */,
 				77F93523375FFE030BCF36A8 /* RemoteRegistration.swift in Sources */,
