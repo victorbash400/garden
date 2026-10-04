@@ -78,6 +78,7 @@ class GardenController extends ChangeNotifier {
   GardenInfo? selected;
   bool _busy = false;
   Future<void> _finderWork = Future.value();
+  bool _changingDriveAccess = false;
   bool get busy => _busy || (files?.busy ?? false);
   String? error;
   int cacheLimit = 20;
@@ -313,35 +314,52 @@ class GardenController extends ChangeNotifier {
         if (root) await files!.goTo(0);
       });
   Future<void> deleteDrive(GardenInfo drive) => _request(() async {
-    if (files?.imports.driveId == drive.id) {
-      await files!.imports.cancelAndWait();
+    final current = account;
+    if (current == null || drive.role != 'Owner') {
+      throw StateError('Only the drive owner can delete this drive.');
     }
-    await gateway.deleteDrive(drive.id);
-    gardens = gardens.where((item) => item.id != drive.id).toList();
+    _changingDriveAccess = true;
+    try {
+      if (files?.imports.driveId == drive.id) {
+        await files!.imports.cancelAndWait();
+      }
+      await _finderWork;
+      final kept = gardens.where((item) => item.id != drive.id).toList();
+      await finder?.sync(current, kept);
+      await gateway.deleteDrive(drive.id);
+      gardens = kept;
+      if (files?.drive?.id == drive.id) {
+        await files!.close();
+        selected = null;
+        page = GardenPage.gardens;
+      }
+    } finally {
+      _changingDriveAccess = false;
+    }
     _queueFinderSync();
-    if (files?.drive?.id == drive.id) {
-      await files!.close();
-      selected = null;
-      page = GardenPage.gardens;
-    }
   });
   Future<void> signOut() => _request(() async {
-    await _finderWork;
-    if (account != null) await finder?.signOut(account!);
-    await finderUpdates?.close();
-    await files?.close();
-    await gateway.signOut();
-    account = null;
-    gardens = [];
-    selected = null;
-    finderStatus = const FinderStatus();
-    finderSyncing = false;
-    finderIssue = null;
-    serviceAvailable = false;
-    registrationPassword = '';
-    registrationId = null;
-    savedEmail = null;
-    page = GardenPage.signIn;
+    _changingDriveAccess = true;
+    try {
+      await _finderWork;
+      if (account != null) await finder?.signOut(account!);
+      await finderUpdates?.close();
+      await files?.close();
+      await gateway.signOut();
+      account = null;
+      gardens = [];
+      selected = null;
+      finderStatus = const FinderStatus();
+      finderSyncing = false;
+      finderIssue = null;
+      serviceAvailable = false;
+      registrationPassword = '';
+      registrationId = null;
+      savedEmail = null;
+      page = GardenPage.signIn;
+    } finally {
+      _changingDriveAccess = false;
+    }
   });
   Future<void> setCacheLimit(int gib) => _request(() async {
     if (gib < 0 || gib > 100) {
@@ -357,7 +375,7 @@ class GardenController extends ChangeNotifier {
   });
 
   Future<void> handleSystemWake() async {
-    if (account == null) return;
+    if (account == null || _changingDriveAccess) return;
     _queueFinderSync(restart: true);
     await _finderWork;
     if (files?.drive != null) await files!.reconnect();
@@ -365,13 +383,13 @@ class GardenController extends ChangeNotifier {
 
   void _queueFinderSync({bool restart = false}) {
     final current = account;
-    if (current == null) return;
-    final drives = gardens.toList();
+    if (current == null || _changingDriveAccess) return;
     finderSyncing = true;
     notifyListeners();
     _finderWork = _finderWork.then((_) async {
-      if (account?.id != current.id) return;
       try {
+        if (account?.id != current.id || _changingDriveAccess) return;
+        final drives = gardens.toList();
         if (restart) await finderUpdates?.close();
         await finder?.sync(current, drives);
         finderStatus =
