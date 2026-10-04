@@ -11,15 +11,18 @@ actor RemoteSubscription {
   private var reader: Task<Void, Never>?
   private var stopped = false
   private let changed: @Sendable () async -> Void
+  private let connected: @Sendable () async -> Void
   private(set) var issue: String?
 
   init(api: GardenAPI, revision: @escaping @Sendable () async throws -> Int,
     changed: @escaping @Sendable () async -> Void = {},
+    connected: @escaping @Sendable () async -> Void = {},
     receive: @escaping @Sendable (GardenChange) async throws -> Void) {
     self.api = api
     self.revision = revision
     self.receive = receive
     self.changed = changed
+    self.connected = connected
   }
 
   func start() async throws {
@@ -65,6 +68,7 @@ actor RemoteSubscription {
           if !Task.isCancelled { await self.failed(error, stream: stream, retry: retryConnectionFailure) }
         }
       }
+      await connected()
     } catch { issue = error.localizedDescription; await changed(); throw error }
   }
 

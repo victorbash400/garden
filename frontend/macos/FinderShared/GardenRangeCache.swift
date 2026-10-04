@@ -108,10 +108,10 @@ actor GardenRangeCache {
     let offset = index * Self.blockSize
     let permits = self.permits
     let flight = Task<Data, Error> {
+      let ticket = try await self.ticket(node: node)
       try await permits.acquire()
       defer { Task { await permits.release() } }
       try Task.checkCancellation()
-      let ticket = try await self.ticket(node: node)
       if let url = ticket.url {
         var request = URLRequest(url: url)
         request.timeoutInterval = 60

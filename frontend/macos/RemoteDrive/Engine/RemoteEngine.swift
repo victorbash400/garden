@@ -58,7 +58,8 @@ actor RemoteEngine {
     try await catchUp()
     try await recoverMutations()
     try await flushAll()
-    let stream = RemoteSubscription(api: api, revision: { try await self.currentRevision() }, changed: changed) { change in
+    let stream = RemoteSubscription(api: api, revision: { try await self.currentRevision() }, changed: changed,
+      connected: { await self.connectionRestored() }) { change in
       try await self.receive(change)
     }
     subscription = stream
@@ -143,6 +144,11 @@ actor RemoteEngine {
     try await flushAll()
     try await subscription?.reconnect()
     await settled()
+  }
+
+  func connectionRestored() async {
+    do { try await flushAll() }
+    catch { RemoteLog.error(error) }
   }
 
   func path(_ nodeID: Int?) throws -> String {
