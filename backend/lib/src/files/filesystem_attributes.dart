@@ -8,13 +8,15 @@ class FilesystemAttributes {
   static void validate(FilesystemRequest request) {
     final operation = request.operation;
     final metadata = operation == FilesystemOperation.setAttributes;
+    final creation =
+        operation == FilesystemOperation.createFile ||
+        operation == FilesystemOperation.createFolder;
     final extended =
         operation == FilesystemOperation.setExtendedAttribute ||
         operation == FilesystemOperation.removeExtendedAttribute;
     if ((!metadata &&
-            (request.createdAt != null ||
-                request.modifiedAt != null ||
-                request.attributes != null)) ||
+            (request.createdAt != null || request.modifiedAt != null)) ||
+        (!metadata && !creation && request.attributes != null) ||
         (!extended &&
             (request.attributeName != null ||
                 request.attributeValue != null ||
@@ -24,12 +26,15 @@ class FilesystemAttributes {
         'Unexpected attribute arguments.',
       );
     }
-    if (metadata) {
+    if (metadata || creation) {
       final attributes = request.attributes;
-      if ((request.createdAt == null &&
+      if ((metadata &&
+              request.createdAt == null &&
               request.modifiedAt == null &&
               attributes == null) ||
-          attributes?.extended != null) {
+          attributes?.extended != null ||
+          (creation &&
+              (attributes?.accessedAt != null || attributes?.flags != null))) {
         FilesystemPaths.fail(
           FilesystemError.invalid,
           'Missing or invalid file attributes.',

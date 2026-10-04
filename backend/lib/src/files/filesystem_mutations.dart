@@ -36,6 +36,7 @@ class FilesystemMutations {
                 : NodeKind.file,
             updatedAt: DateTime.now().toUtc(),
             createdAt: DateTime.now().toUtc(),
+            attributes: request.attributes,
           ),
           transaction: transaction,
         );

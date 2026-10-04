@@ -38,6 +38,95 @@ void main() {
         authentication: AuthenticationOverride.authenticationInfo('guest', {}),
       );
 
+      test('creation permissions commit atomically and bind replay', () async {
+        final drive = await endpoints.garden.create(owner, 'Creation modes');
+        for (final operation in [
+          FilesystemOperation.createFile,
+          FilesystemOperation.createFolder,
+        ]) {
+          final path = '/${operation.name}';
+          final create = request(
+            operation,
+            path,
+            attributes: FileAttributes(permissions: 0x180),
+          );
+          final event = (await endpoints.filesystem.mutate(
+            owner,
+            drive.id,
+            create,
+          )).single;
+          expect(event.node!.attributes!.permissions, 0x180);
+          expect(
+            (await endpoints.files.get(
+              owner,
+              event.node!.id!,
+            )).attributes!.permissions,
+            0x180,
+          );
+          expect(
+            (await endpoints.filesystem.mutate(
+              owner,
+              drive.id,
+              create,
+            )).single.id,
+            event.id,
+          );
+          await expectLater(
+            endpoints.filesystem.mutate(
+              owner,
+              drive.id,
+              create.copyWith(attributes: FileAttributes(permissions: 0x1ff)),
+            ),
+            throwsA(error(FilesystemError.invalid)),
+          );
+        }
+        final invalid = request(
+          FilesystemOperation.createFile,
+          '/Invalid',
+          attributes: FileAttributes(permissions: 0x800),
+        );
+        await expectLater(
+          endpoints.filesystem.mutate(owner, drive.id, invalid),
+          throwsA(error(FilesystemError.invalid)),
+        );
+        final corrected = (await endpoints.filesystem.mutate(
+          owner,
+          drive.id,
+          invalid.copyWith(attributes: FileAttributes(permissions: 0)),
+        )).single.node!;
+        expect(corrected.attributes!.permissions, 0);
+        for (final attributes in [
+          FileAttributes(flags: 0),
+          FileAttributes(accessedAt: DateTime.utc(2025)),
+          FileAttributes(extended: {'test': 'AQ=='}),
+        ]) {
+          await expectLater(
+            endpoints.filesystem.mutate(
+              owner,
+              drive.id,
+              request(
+                FilesystemOperation.createFolder,
+                '/Rejected',
+                attributes: attributes,
+              ),
+            ),
+            throwsA(error(FilesystemError.invalid)),
+          );
+        }
+        await expectLater(
+          endpoints.filesystem.mutate(
+            guest,
+            drive.id,
+            request(
+              FilesystemOperation.createFile,
+              '/Guest',
+              attributes: FileAttributes(permissions: 0x1ff),
+            ),
+          ),
+          throwsA(error(FilesystemError.accessDenied)),
+        );
+      });
+
       test(
         'dates and permissions persist without changing content identity; replay binds every argument',
         () async {
