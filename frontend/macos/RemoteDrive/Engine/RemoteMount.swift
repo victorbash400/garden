@@ -49,9 +49,10 @@ final class RemoteMount: @unchecked Sendable {
         settled: { [weak mount] in await mount?.flushInvalidations() })
       return mount
     } catch {
-      mount.stop()
-      _ = try? await mount.finished.wait()
-      _ = try? await mount.stopped.wait()
+      do {
+        try await mount.requestStop().wait()
+        _ = try await mount.finished.wait()
+      } catch { RemoteLog.error(error) }
       throw error
     }
   }
@@ -116,21 +117,17 @@ final class RemoteMount: @unchecked Sendable {
       return stopped
     }
     guard let attempt else { return stopLock.withLock { stopped } }
-    DispatchQueue.global(qos: .userInitiated).async {
+    Task {
       do {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/sbin/umount")
-        process.arguments = [self.path]
-        try process.run()
-        process.waitUntilExit()
-        guard process.terminationReason == .exit, process.terminationStatus == 0 else {
-          throw NSError(domain: "GardenRemoteUnmount", code: Int(process.terminationStatus),
-            userInfo: [NSLocalizedDescriptionKey: "macOS could not unmount \(self.path)."])
+        try await RemoteUnmountCommand(path: path).run { result in
+          // A timeout keeps the attempt reserved until the process actually exits.
+          switch result {
+          case .success: garden_remote_stop(self.handle)
+          case .failure: self.stopLock.withLock { self.stopRequested = false }
+          }
         }
-        garden_remote_stop(self.handle)
         attempt.resolve(.success(()))
       } catch {
-        self.stopLock.withLock { self.stopRequested = false }
         attempt.resolve(.failure(error))
         RemoteLog.error(error)
       }

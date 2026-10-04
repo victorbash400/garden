@@ -92,6 +92,7 @@
 		08F89A7E59DB5EF1246880F6 /* GardenReadPermits.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64DDB6D8FE3F6399EF15AAFC /* GardenReadPermits.swift */; };
 		099C8CADC3ABF9F64E443556 /* GardenCacheWatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139AF11EBF884621B5881DDD /* GardenCacheWatch.swift */; };
 		113D0BF6E0193BE1DC70D1E6 /* RemoteMount.swift in Sources */ = {isa = PBXBuildFile; fileRef = B686408E84C457F2E2FBE0CA /* RemoteMount.swift */; };
+		A10D20261004000000000031 /* RemoteUnmountCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10D20261004000000000032 /* RemoteUnmountCommand.swift */; };
 		139BEABACED83768D54D279D /* RemoteControlService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B8D2CB2912F4647B2828AB4 /* RemoteControlService.swift */; };
 		1BFFC000E8FEFA788BB6B3FB /* GardenRemoteControlProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E288565348303873EB2732F /* GardenRemoteControlProtocol.swift */; };
 		1DC0F3157F1C8CB8AC4ADBBF /* GardenRemote.app in Embed remote drive engine */ = {isa = PBXBuildFile; fileRef = F10B84BBFAB2ED3B1CCE9520 /* GardenRemote.app */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -287,6 +288,7 @@
 		8CECF5DDA1C9B7876F48FC27 /* RemoteRegistration.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteRegistration.swift; path = RemoteDrive/Control/RemoteRegistration.swift; sourceTree = "<group>"; };
 		90CBD3FE3E862E8F6E930C16 /* RemoteManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteManager.swift; path = RemoteDrive/Control/RemoteManager.swift; sourceTree = "<group>"; };
 		B686408E84C457F2E2FBE0CA /* RemoteMount.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteMount.swift; path = RemoteDrive/Engine/RemoteMount.swift; sourceTree = "<group>"; };
+		A10D20261004000000000032 /* RemoteUnmountCommand.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteUnmountCommand.swift; path = RemoteDrive/Engine/RemoteUnmountCommand.swift; sourceTree = "<group>"; };
 		DE097E844B0F66BA23BACBCF /* com.victorbash.garden.remote.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = com.victorbash.garden.remote.plist; path = RemoteDrive/com.victorbash.garden.remote.plist; sourceTree = "<group>"; };
 		EB4BBB5548123B6CB2337348 /* RemoteCompletion.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteCompletion.swift; path = RemoteDrive/Engine/RemoteCompletion.swift; sourceTree = "<group>"; };
 		EE8CA78F3FD310A1CB90A7F5 /* RemoteChanges.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteChanges.swift; path = RemoteDrive/Engine/RemoteChanges.swift; sourceTree = "<group>"; };
@@ -470,6 +472,7 @@
 			children = (
 				FF57F17610F0AA664F2708A1 /* RemotePlatform.swift */,
 				B686408E84C457F2E2FBE0CA /* RemoteMount.swift */,
+				A10D20261004000000000032 /* RemoteUnmountCommand.swift */,
 				3CCCBBA090E8F3713EB62172 /* RemoteSubscription.swift */,
 				EE8CA78F3FD310A1CB90A7F5 /* RemoteChanges.swift */,
 				7EE4F45F95CB476DF71DDDF4 /* RemoteEngine.swift */,
@@ -895,6 +898,7 @@
 				F59A2F16A372EF882F687ED4 /* RemoteCompletion.swift in Sources */,
 				62A28E488851126D1C09FD08 /* RemotePlatform.swift in Sources */,
 				113D0BF6E0193BE1DC70D1E6 /* RemoteMount.swift in Sources */,
+				A10D20261004000000000031 /* RemoteUnmountCommand.swift in Sources */,
 				4F43B44DC9B175BDFA4E1512 /* RemoteSubscription.swift in Sources */,
 				E2398474F096391BA972A07D /* RemoteChanges.swift in Sources */,
 				87B97F76521E649F87D01283 /* RemoteEngine.swift in Sources */,

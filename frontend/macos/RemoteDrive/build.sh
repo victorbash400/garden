@@ -19,7 +19,7 @@ xcrun swiftc -O -parse-as-library -swift-version 5 -import-objc-header "$root/Re
   "$root/RemoteDrive/Engine/RemoteEngineAttributes.swift" "$root/RemoteDrive/Engine/RemoteAttributeCallbacks.swift" \
   "$root/RemoteDrive/Engine/RemoteExtendedAttributeCallbacks.swift" \
   "$root/RemoteDrive/Engine/RemoteEngineWrites.swift" "$root/RemoteDrive/Engine/RemoteWriteCallbacks.swift" \
-  "$root/RemoteDrive/Engine/RemoteCompletion.swift" "$root/RemoteDrive/Engine/RemoteMount.swift" "$root/RemoteDrive/Engine/RemotePlatform.swift" "$root/RemoteDrive/Engine/RemoteSubscription.swift" "$entry" \
+  "$root/RemoteDrive/Engine/RemoteCompletion.swift" "$root/RemoteDrive/Engine/RemoteUnmountCommand.swift" "$root/RemoteDrive/Engine/RemoteMount.swift" "$root/RemoteDrive/Engine/RemotePlatform.swift" "$root/RemoteDrive/Engine/RemoteSubscription.swift" "$entry" \
   "$root/RemoteDrive/Control/RemoteRegistration.swift" "$root/RemoteDrive/Control/RemoteManager.swift" \
   "$root/RemoteDrive/Control/RemoteControlService.swift" "$root/RemoteDrive/Control/RemoteCacheControl.swift" \
   "$root/FinderShared/GardenRemoteControlProtocol.swift" "$root/FinderShared/GardenCacheServiceProtocol.swift" \
