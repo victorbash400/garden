@@ -19,6 +19,56 @@ enum FinderBridgeError: LocalizedError {
 
 class MainFlutterWindow: NSWindow {
   override func awakeFromNib() {
+#if DEBUG
+    if CommandLine.arguments.contains("--unregister-remote-service") {
+      Task { @MainActor in
+        do {
+          try await GardenRemoteBridge.unregisterService()
+          FileHandle.standardOutput.write(Data("Garden background service unregistered.\n".utf8))
+          exit(0)
+        } catch {
+          FileHandle.standardError.write(Data("Garden background service: \(error.localizedDescription)\n".utf8))
+          exit(1)
+        }
+      }
+      super.awakeFromNib()
+      return
+    }
+    if CommandLine.arguments.contains("--check-remote-service") {
+      Task { @MainActor in
+        do {
+          let arguments = CommandLine.arguments
+          guard arguments.count == 4, let driveID = Int(arguments[3]) else {
+            throw FinderBridgeError.invalidArguments
+          }
+          let request = GardenRemoteRequest(accountID: arguments[2], driveIDs: [driveID], driveID: driveID)
+          guard let path = try await GardenRemoteBridge.request("location", request) as? String,
+                let status = try await GardenRemoteBridge.request("status", request) as? [String: [Int]],
+                status["enabled"] == [driveID],
+                path == "/Volumes/Garden-\(arguments[2])-\(driveID)" else {
+            throw GardenAPIError.invalidResponse
+          }
+          FileHandle.standardOutput.write(Data("Signed Garden control verified: \(path)\n".utf8))
+          exit(0)
+        } catch {
+          FileHandle.standardError.write(Data("Garden background service: \(error.localizedDescription)\n".utf8))
+          exit(1)
+        }
+      }
+      super.awakeFromNib()
+      return
+    }
+    if CommandLine.arguments.contains("--register-remote-service") {
+      do {
+        try GardenRemoteBridge.registerService()
+        FileHandle.standardOutput.write(Data("Garden background service registered.\n".utf8))
+        exit(0)
+      } catch {
+        FileHandle.standardError.write(Data("Garden background service: \(error.localizedDescription)\n".utf8))
+        exit(1)
+      }
+    }
+#endif
     let flutterViewController = FlutterViewController()
     let windowFrame = self.frame
     self.contentViewController = flutterViewController
