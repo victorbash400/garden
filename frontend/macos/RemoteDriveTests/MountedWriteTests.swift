@@ -115,6 +115,11 @@ import Foundation
       let copiedPath = directory + "/Copied.bin"
       try FileManager.default.copyItem(at: localCopy, to: URL(fileURLWithPath: copiedPath))
       try require(try Data(contentsOf: URL(fileURLWithPath: copiedPath)) == copyBytes, "Ordinary FileManager copy must preserve bytes")
+      let replacement = Data([4, 3, 2, 1])
+      try replacement.write(to: URL(fileURLWithPath: copiedPath), options: .atomic)
+      try require(try Data(contentsOf: URL(fileURLWithPath: copiedPath)) == replacement,
+        "Application atomic save must replace the file with the complete new contents")
+      print("Mounted application atomic replacement passed")
       try require(unlink(copiedPath) == 0, "Copied file must delete normally")
       print("Mounted FileManager copy and cleanup passed")
       try require(rename(filePath, directory + "/Renamed.bin") == 0, "A written file must rename normally")
