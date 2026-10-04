@@ -10,7 +10,10 @@ resolution: workspace
 
 dependencies:
   aws_client: ^0.10.0
+  aws_common: ^0.7.15
+  aws_signature_v4: ^0.6.13
   crypto: ^3.0.7
+  http: ^1.6.0
   passkeys_server: ^1.0.0
   serverpod: ^4.0.3
   serverpod_auth_idp_server: ^4.0.3

@@ -8,6 +8,7 @@ import 'package:serverpod_cloud_storage_s3/serverpod_cloud_storage_s3.dart';
 import 'package:serverpod_cloud_storage_s3_compat/serverpod_cloud_storage_s3_compat.dart';
 
 import '../generated/protocol.dart';
+import 's3_signed_client.dart';
 
 class MultipartObjectStore {
   MultipartObjectStore(Session session) {
@@ -22,6 +23,7 @@ class MultipartObjectStore {
     }
     client = aws.S3(
       region: region,
+      client: transport = S3SignedClient(access, secret, region),
       credentials: aws.AwsClientCredentials(
         accessKey: access,
         secretKey: secret,
@@ -38,6 +40,7 @@ class MultipartObjectStore {
 
   late final String bucket;
   late final aws.S3 client;
+  late final S3SignedClient transport;
   late final S3Client signer;
 
   static int partSizeFor(int size) {
@@ -47,6 +50,7 @@ class MultipartObjectStore {
 
   void close() {
     client.close();
+    transport.close();
     signer.close();
   }
 
