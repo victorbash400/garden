@@ -18,7 +18,8 @@ private final class ReadTiming: NSObject, URLSessionTaskDelegate, @unchecked Sen
   static func main() async throws {
     setbuf(stdout, nil)
     let args = CommandLine.arguments
-    guard args.count == 5, let offset = Int(args[4]) else { throw POSIXError(.EINVAL) }
+    guard args.count == 5 || args.count == 6, let offset = Int(args[4]),
+      args.count == 5 || args[5] == "blocks" else { throw POSIXError(.EINVAL) }
     let root = FileManager.default.temporaryDirectory.appendingPathComponent("garden-read-concurrency-\(UUID())")
     defer { try? FileManager.default.removeItem(at: root) }
     let engine = try RemoteEngine(domainID: args[1], state: root, cache: root.appendingPathComponent("cache"), limit: 0)
@@ -28,8 +29,7 @@ private final class ReadTiming: NSObject, URLSessionTaskDelegate, @unchecked Sen
     }
     let source = try FileHandle(forReadingFrom: URL(fileURLWithPath: args[3]))
     defer { try? source.close() }
-    let block = 1024 * 1024
-    let length = 8 * block
+    let length = 8 * 1024 * 1024
     try source.seek(toOffset: UInt64(offset))
     guard let expected = try source.read(upToCount: length), expected.count == length else { throw POSIXError(.EIO) }
     let configuration = URLSessionConfiguration.ephemeral
@@ -37,7 +37,11 @@ private final class ReadTiming: NSObject, URLSessionTaskDelegate, @unchecked Sen
     configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
     let session = URLSession(configuration: configuration)
     defer { session.invalidateAndCancel() }
-    for concurrency in [3, 6, 1, 6, 3, 1] {
+    let trials = args.count == 6
+      ? [1024 * 1024, 256 * 1024, 64 * 1024, 256 * 1024, 1024 * 1024].map { ($0, 6) }
+      : [3, 6, 1, 6, 3, 1].map { (1024 * 1024, $0) }
+    for (block, concurrency) in trials {
+      let count = length / block
       let started = ContinuousClock.now
       let results = try await withThrowingTaskGroup(of: (Int, Data, Double, Double, String).self) { group in
         var next = 0
@@ -55,11 +59,11 @@ private final class ReadTiming: NSObject, URLSessionTaskDelegate, @unchecked Sen
             return (index, bytes, metrics.0, metrics.1, metrics.2)
           }
         }
-        for index in 0..<min(concurrency, 8) { schedule(index); next += 1 }
+        for index in 0..<min(concurrency, count) { schedule(index); next += 1 }
         var result: [(Int, Data, Double, Double, String)] = []
         while let received = try await group.next() {
           result.append(received)
-          if next < 8 { schedule(next); next += 1 }
+          if next < count { schedule(next); next += 1 }
         }
         return result.sorted { $0.0 < $1.0 }
       }
@@ -68,11 +72,12 @@ private final class ReadTiming: NSObject, URLSessionTaskDelegate, @unchecked Sen
       guard actual == expected else { throw POSIXError(.EIO) }
       let responses = results.map { $0.2 }.sorted()
       let transfers = results.map { $0.3 }.sorted()
-      let ttfb = (responses[3] + responses[4]) / 2
-      let transfer = (transfers[3] + transfers[4]) / 2
-      print("Concurrency \(concurrency): total \(started.duration(to: .now)), median response \(ttfb)s, median transfer \(transfer)s, slowest transfer \(transfers[7])s, protocols \(Set(results.map { $0.4 }).sorted())")
+      let middle = count / 2
+      let ttfb = (responses[middle - 1] + responses[middle]) / 2
+      let transfer = (transfers[middle - 1] + transfers[middle]) / 2
+      print("Block \(block / 1024) KiB, concurrency \(concurrency): total \(started.duration(to: .now)), median response \(ttfb)s, median transfer \(transfer)s, slowest transfer \(transfers.last!)s, protocols \(Set(results.map { $0.4 }).sorted())")
     }
     await engine.stop()
-    print("Six byte-correct 8 MiB trials; no disk read cache")
+    print("\(trials.count) byte-correct 8 MiB trials; no disk read cache")
   }
 }
