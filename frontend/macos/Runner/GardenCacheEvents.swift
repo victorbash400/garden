@@ -13,15 +13,11 @@ final class GardenCacheEvents: NSObject, FlutterStreamHandler, GardenCacheObserv
     Task { @MainActor [self] in
       do {
         let connected = try await GardenCacheBridge.connect()
-        guard generation == session else { connected?.invalidate(); return }
-        guard let connected else {
-          events(["limitBytes": try GardenCachePolicy.read(), "available": false])
-          return
-        }
+        guard generation == session else { connected.invalidate(); return }
         connection = connected
         connected.exportedInterface = NSXPCInterface(with: GardenCacheObserverProtocol.self)
         connected.exportedObject = self
-        connected.remoteObjectInterface = NSXPCInterface(with: GardenCacheServiceProtocol.self)
+        connected.remoteObjectInterface = NSXPCInterface(with: GardenRemoteControlProtocol.self)
         connected.invalidationHandler = { [weak self] in self?.fail("Cache usage connection closed.", session: session) }
         connected.interruptionHandler = { [weak self] in self?.fail("Cache usage connection interrupted.", session: session) }
         connected.resume()

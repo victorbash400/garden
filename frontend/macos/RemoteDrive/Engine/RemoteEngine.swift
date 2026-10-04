@@ -16,7 +16,7 @@ actor RemoteEngine {
     metadata = try RemoteMetadata(url: state.appendingPathComponent("metadata.sqlite"), namespace: domainID)
   }
 
-  func prepare() async throws {
+  func prepare(changed: @escaping @Sendable () async -> Void = {}) async throws {
     if try metadata.revision == nil {
       let revision = try await api.revision()
       try metadata.beginSnapshot()
@@ -42,7 +42,7 @@ actor RemoteEngine {
       for change in changes { try metadata.apply(change) }
       if changes.count < 256 { break }
     }
-    let stream = RemoteSubscription(api: api, revision: { try await self.currentRevision() }) { change in
+    let stream = RemoteSubscription(api: api, revision: { try await self.currentRevision() }, changed: changed) { change in
       try await self.receive(change)
     }
     subscription = stream

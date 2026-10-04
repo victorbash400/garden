@@ -53,7 +53,7 @@ class _StorageSettingsState extends State<StorageSettings> {
         ),
         const SizedBox(height: 12),
         const Text(
-          'Caps fetched file blocks. Finder downloads, app-created previews, and pending uploads are separate.',
+          'Caps Garden’s fetched file blocks. Other apps’ previews and copies are separate.',
           style: TextStyle(fontSize: 12, color: Color(0xFF77777A)),
         ),
       ],

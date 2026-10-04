@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_flutter/components/settings/finder_setup_row.dart';
@@ -10,7 +12,6 @@ import 'package:garden_flutter/native/system_setup.dart';
 import 'package:garden_flutter/state/native_setup_controller.dart';
 import 'package:garden_flutter/state/garden_controller.dart';
 
-import 'files_gateway_fixture.dart';
 import 'widget_test.dart' show TestFinder, TestGateway, MemoryPreferences;
 
 class TestSystem implements SystemSetup {
@@ -88,12 +89,20 @@ void main() {
   );
 
   test(
-    'wake restarts background streams even before an idle error arrives',
+    'wake reconnects local drive status without a second server stream',
     () async {
-      final gateway = FilesFixture();
       final finder = TestFinder();
-      final system = TestSystem();
-      final updates = MacFinderUpdates(gateway, finder, system);
+      var subscriptions = 0;
+      final streams = <StreamController<FinderStatus>>[];
+      final updates = MacFinderUpdates(
+        watch: (account, drives) {
+          subscriptions++;
+          final stream = StreamController<FinderStatus>();
+          stream.add(const FinderStatus(registered: {1}, enabled: {1}));
+          streams.add(stream);
+          return stream.stream;
+        },
+      );
       final controller = GardenController(
         TestGateway(),
         MemoryPreferences(),
@@ -110,16 +119,18 @@ void main() {
       await controller.handleSystemWake();
       await Future<void>.delayed(Duration.zero);
       expect(updates.state, FinderUpdateState.running);
-      final calls = gateway.listCalls;
+      final calls = subscriptions;
       await controller.handleSystemWake();
       await Future<void>.delayed(Duration.zero);
-      expect(gateway.listCalls, calls + 1);
+      expect(subscriptions, calls + 1);
       expect(updates.state, FinderUpdateState.running);
       expect(updates.error, isNull);
       controller.dispose();
       await updates.close();
       updates.dispose();
-      await gateway.events.close();
+      for (final stream in streams) {
+        await stream.close();
+      }
     },
   );
 
@@ -168,31 +179,36 @@ void main() {
   );
 
   test(
-    'background status uses stream readiness and disconnects visibly',
+    'helper status events report readiness and disconnect visibly',
     () async {
-      final gateway = FilesFixture();
-      final finder = TestFinder();
-      final system = TestSystem();
-      final updates = MacFinderUpdates(gateway, finder, system);
+      final events = StreamController<FinderStatus>.broadcast();
+      final updates = MacFinderUpdates(
+        watch: (account, drives) => events.stream,
+      );
       const account = AccountInfo(id: 'account', email: 'test@example.com');
       const drive = GardenInfo(id: 1, name: 'Work', role: 'Owner', members: 1);
       await updates.sync(account, [drive]);
+      events.add(const FinderStatus(registered: {1}, enabled: {1}));
       await Future<void>.delayed(Duration.zero);
       expect(updates.state, FinderUpdateState.running);
-      expect(system.active, isTrue);
-      gateway.events.addError(StateError('Connection lost'));
+      expect(updates.status?.enabled, {1});
+      events.add(const FinderStatus(registered: {1}, disconnected: {1}));
+      await Future<void>.delayed(Duration.zero);
+      expect(updates.state, FinderUpdateState.disconnected);
+      expect(updates.status?.disconnected, {1});
+      events.addError(StateError('Connection lost'));
       await Future<void>.delayed(Duration.zero);
       expect(updates.state, FinderUpdateState.disconnected);
       expect(updates.error, contains('Connection lost'));
       await updates.sync(account, [drive]);
+      events.add(const FinderStatus(registered: {1}, enabled: {1}));
       await Future<void>.delayed(Duration.zero);
       expect(updates.state, FinderUpdateState.running);
       await updates.close();
-      expect(system.active, isFalse);
       expect(updates.state, FinderUpdateState.idle);
-      expect(gateway.events.hasListener, isFalse);
+      expect(events.hasListener, isFalse);
       updates.dispose();
-      await gateway.events.close();
+      await events.close();
     },
   );
 }

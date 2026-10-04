@@ -1,4 +1,5 @@
 import Foundation
+import Security
 
 private final class RemoteDriveEntry {
   var registration: RemoteRegistration
@@ -15,6 +16,31 @@ actor RemoteManager {
   private let cache: URL
   private var entries: [String: RemoteDriveEntry] = [:]
   private var stopping = false
+  private struct Observer {
+    let account: String
+    let driveIDs: [Int]
+    let continuation: AsyncThrowingStream<[String: [Int]], Error>.Continuation
+  }
+  private var observers: [UUID: Observer] = [:]
+
+  func updates(accountID: String, driveIDs: [Int]) async throws -> AsyncThrowingStream<[String: [Int]], Error> {
+    let current = try await status(accountID: accountID, driveIDs: driveIDs)
+    let id = UUID()
+    return AsyncThrowingStream(bufferingPolicy: .bufferingNewest(1)) { continuation in
+      observers[id] = Observer(account: accountID, driveIDs: driveIDs, continuation: continuation)
+      continuation.yield(current)
+      continuation.onTermination = { _ in Task { await self.removeObserver(id) } }
+    }
+  }
+
+  private func removeObserver(_ id: UUID) { observers.removeValue(forKey: id) }
+
+  func publish() async {
+    for observer in Array(observers.values) {
+      do { observer.continuation.yield(try await status(accountID: observer.account, driveIDs: observer.driveIDs)) }
+      catch { observer.continuation.finish(throwing: error) }
+    }
+  }
 
   init(root: URL, cache: URL) throws {
     self.root = root
@@ -68,6 +94,21 @@ actor RemoteManager {
       else { result["disconnected"]!.append(driveID) }
     }
     return result
+  }
+
+  func missing(accountID: String, driveIDs: [Int]) async throws -> [Int] {
+    try validateAccount(accountID)
+    var missing: [Int] = []
+    for driveID in driveIDs {
+      let id = domainID(accountID, driveID)
+      guard entries[id] != nil else { missing.append(driveID); continue }
+      do {
+        let current = try await mount(id)
+        if await current.engine.issue != nil { try await current.engine.reconnect() }
+      } catch GardenAPIError.unauthorized { missing.append(driveID) }
+      catch FinderCredentialError.keychain(errSecItemNotFound) { missing.append(driveID) }
+    }
+    return missing
   }
 
   func tokenIDs(accountID: String, keeping driveIDs: [Int]? = nil) throws -> [String] {
@@ -140,7 +181,7 @@ actor RemoteManager {
       }
       let engine = try RemoteEngine(domainID: id, state: state, cache: cache, limit: GardenCachePolicy.read())
       do {
-        try await engine.prepare()
+        try await engine.prepare { await self.publish() }
         try Task.checkCancellation()
         return try await RemoteMount.start(engine: engine, path: registration.mountPath, name: "Garden - " + registration.name)
       } catch { await engine.stop(); throw error }
@@ -154,12 +195,13 @@ actor RemoteManager {
       }
       entry.mount = mounted
       entry.issue = nil
+      await publish()
       Task {
         do { try await mounted.run(); await self.ended(id, mount: mounted, issue: nil) }
         catch { await self.ended(id, mount: mounted, issue: error.localizedDescription) }
       }
       return mounted
-    } catch { entry.issue = error.localizedDescription; throw error }
+    } catch { entry.issue = error.localizedDescription; await publish(); throw error }
   }
 
   private func ended(_ id: String, mount: RemoteMount, issue: String?) async {
@@ -167,6 +209,7 @@ actor RemoteManager {
     guard let entry = entries[id], entry.mount === mount else { return }
     entry.mount = nil
     entry.issue = issue ?? "Drive was unmounted."
+    await publish()
   }
 
   private func remove(_ id: String) async throws {
@@ -192,6 +235,7 @@ actor RemoteManager {
     do { try save() }
     catch { entries[id] = entry; throw error }
     try FinderCredentialStore.remove(id)
+    await publish()
   }
 
   private func save() throws { try registry.save(entries.values.map(\.registration)) }

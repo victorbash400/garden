@@ -13,7 +13,7 @@ class FinderSetupRow extends StatelessWidget {
     final available = controller.nativeSetup?.status?.finderAvailable;
     final status = controller.finderStatus;
     final label = available == false
-        ? 'Extension missing'
+        ? 'Mount helper missing'
         : controller.finderSyncing
         ? 'Connecting'
         : controller.finderIssue != null
@@ -30,7 +30,7 @@ class FinderSetupRow extends StatelessWidget {
         ? 'Not connected'
         : 'Connected';
     return SettingsRow(
-      label: 'Finder File Provider',
+      label: 'Finder drives',
       value: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

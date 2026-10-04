@@ -9,6 +9,12 @@ enum GardenRemoteService {
 
 @objc protocol GardenRemoteControlProtocol: GardenCacheServiceProtocol {
   func request(_ method: String, payload: Data, reply: @escaping (Data?, String?) -> Void)
+  func subscribeDrives(_ payload: Data, reply: @escaping (String?) -> Void)
+}
+
+@objc protocol GardenRemoteObserverProtocol: GardenCacheObserverProtocol {
+  func drivesChanged(_ value: NSDictionary)
+  func drivesFailed(_ message: String)
 }
 
 struct GardenRemoteRequest: Codable {

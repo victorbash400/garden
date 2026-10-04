@@ -10,5 +10,4 @@ abstract interface class FinderMounts {
   Future<void> openNode(AccountInfo account, int driveID, int nodeID);
   Future<void> openSettings();
   Future<void> signOut(AccountInfo account);
-  Future<void> signal(AccountInfo account, int driveID, List<int> parentIDs);
 }

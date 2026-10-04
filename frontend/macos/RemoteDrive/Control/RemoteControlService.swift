@@ -14,7 +14,7 @@ final class RemoteControlService: NSObject, NSXPCListenerDelegate, GardenRemoteC
     connection.setCodeSigningRequirement(GardenRemoteService.clientRequirement)
     connection.exportedInterface = NSXPCInterface(with: GardenRemoteControlProtocol.self)
     connection.exportedObject = self
-    connection.remoteObjectInterface = NSXPCInterface(with: GardenCacheObserverProtocol.self)
+    connection.remoteObjectInterface = NSXPCInterface(with: GardenRemoteObserverProtocol.self)
     connection.resume()
     return true
   }
@@ -31,12 +31,13 @@ final class RemoteControlService: NSObject, NSXPCListenerDelegate, GardenRemoteC
 
   private func perform(_ method: String, request: GardenRemoteRequest) async throws -> Any {
     switch method {
-    case "status", "missing":
+    case "missing":
+      guard let ids = request.driveIDs else { throw POSIXError(.EINVAL) }
+      return try await manager.missing(accountID: request.accountID, driveIDs: ids)
+    case "status":
       guard let ids = request.driveIDs else { throw POSIXError(.EINVAL) }
       let status = try await manager.status(accountID: request.accountID, driveIDs: ids)
-      if method == "status" { return status }
-      let enabled = Set(status["enabled"]!)
-      return ids.filter { !enabled.contains($0) }
+      return status
     case "register":
       guard let driveID = request.driveID, let name = request.name, let credential = request.credential else {
         throw POSIXError(.EINVAL)
@@ -62,6 +63,32 @@ final class RemoteControlService: NSObject, NSXPCListenerDelegate, GardenRemoteC
   }
 
   func subscribeCache(reply: @escaping (String?) -> Void) { cache.subscribe(reply: reply) }
+  func subscribeDrives(_ payload: Data, reply: @escaping (String?) -> Void) {
+    guard let connection = NSXPCConnection.current(),
+      let observer = connection.remoteObjectProxy as? GardenRemoteObserverProtocol else {
+      reply("Drive status connection is unavailable.")
+      return
+    }
+    let task = Task {
+      var subscribed = false
+      do {
+        let request = try JSONDecoder().decode(GardenRemoteRequest.self, from: payload)
+        guard let ids = request.driveIDs else { throw POSIXError(.EINVAL) }
+        let updates = try await manager.updates(accountID: request.accountID, driveIDs: ids)
+        reply(nil)
+        subscribed = true
+        for try await status in updates {
+          try Task.checkCancellation()
+          observer.drivesChanged(status as NSDictionary)
+        }
+      } catch {
+        if !subscribed { reply(error.localizedDescription) }
+        else if !Task.isCancelled { observer.drivesFailed(error.localizedDescription) }
+      }
+    }
+    connection.invalidationHandler = { task.cancel() }
+    connection.interruptionHandler = { task.cancel() }
+  }
   func cacheStatus(reply: @escaping (NSDictionary?, String?) -> Void) { cache.perform("status", reply: reply) }
   func clearCache(reply: @escaping (NSDictionary?, String?) -> Void) { cache.perform("clear", reply: reply) }
   func setCacheLimit(_ bytes: Int64, reply: @escaping (NSDictionary?, String?) -> Void) { cache.perform("setLimit", bytes: bytes, reply: reply) }

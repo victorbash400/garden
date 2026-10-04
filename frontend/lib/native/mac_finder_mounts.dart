@@ -116,18 +116,4 @@ class MacFinderMounts implements FinderMounts {
     if (!Platform.isMacOS) return;
     await _channel.invokeMethod<void>('openSettings');
   }
-
-  @override
-  Future<void> signal(
-    AccountInfo account,
-    int driveID,
-    List<int> parentIDs,
-  ) async {
-    if (!Platform.isMacOS) return;
-    await _channel.invokeMethod<void>('signal', {
-      'accountID': account.id,
-      'driveID': driveID,
-      'parentIDs': parentIDs,
-    });
-  }
 }

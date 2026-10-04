@@ -10,13 +10,16 @@ actor RemoteSubscription {
   private var connecting: Task<RemoteChanges, Error>?
   private var reader: Task<Void, Never>?
   private var stopped = false
+  private let changed: @Sendable () async -> Void
   private(set) var issue: String?
 
   init(api: GardenAPI, revision: @escaping @Sendable () async throws -> Int,
+    changed: @escaping @Sendable () async -> Void = {},
     receive: @escaping @Sendable (GardenChange) async throws -> Void) {
     self.api = api
     self.revision = revision
     self.receive = receive
+    self.changed = changed
   }
 
   func start() async throws {
@@ -54,6 +57,7 @@ actor RemoteSubscription {
       guard !stopped else { stream.close(); throw CancellationError() }
       connection = stream
       issue = nil
+      await changed()
       connecting = nil
       reader = Task {
         do { try await stream.run(receive: receive) }
@@ -61,12 +65,13 @@ actor RemoteSubscription {
           if !Task.isCancelled { await self.failed(error, stream: stream, retry: retryConnectionFailure) }
         }
       }
-    } catch { issue = error.localizedDescription; throw error }
+    } catch { issue = error.localizedDescription; await changed(); throw error }
   }
 
   private func failed(_ error: Error, stream: RemoteChanges, retry: Bool) async {
     guard !stopped, connection === stream else { return }
     issue = error.localizedDescription
+    await changed()
     RemoteLog.error(error)
     // Retry once after a broken connection; further retries require a network or user event.
     if retry, error is URLError {

@@ -124,6 +124,8 @@
 		F59A2F16A372EF882F687ED4 /* RemoteCompletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB4BBB5548123B6CB2337348 /* RemoteCompletion.swift */; };
 		F8DFA53480F857115380FAD8 /* GardenCacheDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56137C3140D747C598124039 /* GardenCacheDatabase.swift */; };
 		F9AAD1BCE539DECF8A7B1A49 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8AB1F02B9F6E420FC69954F5 /* Cocoa.framework */; };
+		50E13B6CE830811A706F40AC /* GardenFinderEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 264689F7573263A6A2BAE211 /* GardenFinderEvents.swift */; };
+		A8431B719E003BF184C01B80 /* GardenFinderBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CB7DD914B7CAE7939DB087 /* GardenFinderBridge.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -275,6 +277,8 @@
 		EE8CA78F3FD310A1CB90A7F5 /* RemoteChanges.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteChanges.swift; path = RemoteDrive/Engine/RemoteChanges.swift; sourceTree = "<group>"; };
 		F10B84BBFAB2ED3B1CCE9520 /* GardenRemote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GardenRemote.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF57F17610F0AA664F2708A1 /* RemotePlatform.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemotePlatform.swift; path = RemoteDrive/Engine/RemotePlatform.swift; sourceTree = "<group>"; };
+		21CB7DD914B7CAE7939DB087 /* GardenFinderBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenFinderBridge.swift; path = Runner/GardenFinderBridge.swift; sourceTree = "<group>"; };
+		264689F7573263A6A2BAE211 /* GardenFinderEvents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenFinderEvents.swift; path = Runner/GardenFinderEvents.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -378,6 +382,8 @@
 				DF1A3B90C9289C040C23D814 /* GardenProviderError.swift */,
 				7467EC0833FF3CBDC8E543CC /* RemoteControl */,
 				5191359337A5F282F6B03B41 /* RemoteDrive */,
+				21CB7DD914B7CAE7939DB087 /* GardenFinderBridge.swift */,
+				264689F7573263A6A2BAE211 /* GardenFinderEvents.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -810,6 +816,8 @@
 				D020BD67412B77D4CA6A07C9 /* GardenRemoteControlProtocol.swift in Sources */,
 				E907D08C287BF6B465210D80 /* RemoteCompletion.swift in Sources */,
 				8E6CD48B6019612F85E93BF2 /* GardenRemoteBridge.swift in Sources */,
+				A8431B719E003BF184C01B80 /* GardenFinderBridge.swift in Sources */,
+				50E13B6CE830811A706F40AC /* GardenFinderEvents.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1158,10 +1166,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = GardenIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/DebugProfile.entitlements;
-				ENABLE_APP_SANDBOX = NO;
-				ENABLE_HARDENED_RUNTIME = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1291,10 +1299,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = GardenIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/DebugProfile.entitlements;
-				ENABLE_APP_SANDBOX = NO;
-				ENABLE_HARDENED_RUNTIME = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1312,10 +1320,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = GardenIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Release.entitlements;
-				ENABLE_APP_SANDBOX = NO;
-				ENABLE_HARDENED_RUNTIME = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

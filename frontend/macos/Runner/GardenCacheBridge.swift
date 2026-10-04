@@ -1,4 +1,3 @@
-import FileProvider
 import FlutterMacOS
 import Foundation
 
@@ -50,53 +49,20 @@ enum GardenCacheBridge {
   }
 
   private static func request(_ method: String, limit: Int64?) async throws -> [String: Any] {
-    guard let connection = try await connect() else {
-      if let limit { try GardenCachePolicy.save(limit) }
-      return ["limitBytes": try GardenCachePolicy.read(), "available": false]
-    }
+    let connection = try await connect()
     defer { connection.invalidate() }
     return try await perform(method, limit: limit, connection: connection)
   }
 
-  static func connect() async throws -> NSXPCConnection? {
-    let domains = try await NSFileProviderManager.domains()
-    guard let domain = domains.first(where: { $0.userEnabled && !$0.isDisconnected }),
-          let manager = NSFileProviderManager(for: domain) else {
-      return nil
-    }
-    let url: URL = try await withCheckedThrowingContinuation { continuation in
-      manager.getUserVisibleURL(for: .rootContainer) { url, error in
-        if let error { continuation.resume(throwing: error) }
-        else if let url { continuation.resume(returning: url) }
-        else { continuation.resume(throwing: FinderBridgeError.domainMissing) }
-      }
-    }
-    let scoped = url.startAccessingSecurityScopedResource()
-    defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-    let service: NSFileProviderService = try await withCheckedThrowingContinuation { continuation in
-      FileManager.default.getFileProviderServicesForItem(at: url) { services, error in
-        if let error { continuation.resume(throwing: error) }
-        else if let service = services?[GardenCacheServiceName.value] { continuation.resume(returning: service) }
-        else {
-          continuation.resume(throwing: NSError(domain: "GardenCache", code: 3,
-            userInfo: [NSLocalizedDescriptionKey: "Finder cache service is unavailable. Relaunch Garden with the updated extension."]))
-        }
-      }
-    }
-    let connection: NSXPCConnection = try await withCheckedThrowingContinuation { continuation in
-      service.getFileProviderConnection { connection, error in
-        if let error { continuation.resume(throwing: error) }
-        else if let connection { continuation.resume(returning: connection) }
-        else { continuation.resume(throwing: GardenAPIError.invalidResponse) }
-      }
-    }
-    return connection
+  @MainActor static func connect() async throws -> NSXPCConnection {
+    try GardenRemoteBridge.registerService()
+    return GardenRemoteBridge.connection()
   }
 
   private static func perform(_ method: String, limit: Int64?, connection: NSXPCConnection) async throws -> [String: Any] {
     return try await withCheckedThrowingContinuation { continuation in
       let reply = GardenCacheReply(continuation)
-      connection.remoteObjectInterface = NSXPCInterface(with: GardenCacheServiceProtocol.self)
+      connection.remoteObjectInterface = NSXPCInterface(with: GardenRemoteControlProtocol.self)
       connection.invalidationHandler = { reply.finish(error: CocoaError(.xpcConnectionInvalid)) }
       connection.interruptionHandler = { reply.finish(error: CocoaError(.xpcConnectionInterrupted)) }
       connection.resume()

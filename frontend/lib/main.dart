@@ -34,7 +34,7 @@ Future<void> main() async {
   final finder = MacFinderMounts(gateway, serverUrl);
   final filesGateway = ServerpodFilesGateway(gateway.client);
   late final GardenController controller;
-  final finderUpdates = MacFinderUpdates(filesGateway, finder, system);
+  final finderUpdates = MacFinderUpdates();
   controller = GardenController(
     gateway,
     LocalPreferences(),

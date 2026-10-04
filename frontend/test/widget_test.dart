@@ -137,6 +137,7 @@ class TestFinder implements FinderMounts {
     return FinderStatus(
       registered: ids.intersection(mountedDriveIDs),
       enabled: ids.intersection(enabledIDs),
+      disconnected: ids.intersection(mountedDriveIDs).difference(enabledIDs),
       disabled: requiresPermission ? ids : {},
     );
   }
@@ -156,13 +157,6 @@ class TestFinder implements FinderMounts {
   Future<void> openSettings() async {
     openedSettings = true;
   }
-
-  @override
-  Future<void> signal(
-    AccountInfo account,
-    int driveID,
-    List<int> parentIDs,
-  ) async {}
 
   @override
   Future<void> signOut(AccountInfo account) async {
@@ -199,15 +193,15 @@ void main() {
     expect(controller.error, isNull);
     expect(controller.gardens.map((drive) => drive.id), [1]);
     expect(finder.mountedDriveIDs, {1});
-    expect(find.byTooltip('Finder needs attention'), findsOneWidget);
+    expect(find.byTooltip('Connection needs attention'), findsOneWidget);
     finder.requiresPermission = true;
     await controller.checkFinder();
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Finder needs attention'));
+    await tester.tap(find.byTooltip('Connection needs attention'));
     await tester.pumpAndSettle();
     expect(controller.settingsSection, SettingsSection.connections);
     expect(find.text('Garden service'), findsOneWidget);
-    expect(find.text('Finder File Provider'), findsOneWidget);
+    expect(find.text('Finder drives'), findsOneWidget);
     expect(find.text('Permission required'), findsOneWidget);
     expect(find.text('Projects'), findsNothing);
     expect(find.byType(Switch), findsNothing);
@@ -296,7 +290,7 @@ void main() {
       expect(find.text('Cache limit'), findsOneWidget);
       await tester.tap(find.text('Connections'));
       await tester.pumpAndSettle();
-      expect(find.text('Finder File Provider'), findsOneWidget);
+      expect(find.text('Finder drives'), findsOneWidget);
       await tester.tap(find.text('Back to drives'));
       await tester.pumpAndSettle();
       expect(find.byType(GardenSidebar), findsOneWidget);

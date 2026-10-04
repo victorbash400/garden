@@ -44,7 +44,7 @@ class GardenController extends ChangeNotifier {
            ? StorageController(preferences)
            : null {
     storage?.addListener(notifyListeners);
-    finderUpdates?.addListener(notifyListeners);
+    finderUpdates?.addListener(_finderChanged);
     nativeSetup?.addListener(notifyListeners);
     files?.openFile = (node) async {
       final current = account;
@@ -392,11 +392,17 @@ class GardenController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _finderChanged() {
+    final status = finderUpdates?.status;
+    if (status != null) finderStatus = status;
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     storage?.removeListener(notifyListeners);
     storage?.dispose();
-    finderUpdates?.removeListener(notifyListeners);
+    finderUpdates?.removeListener(_finderChanged);
     nativeSetup?.removeListener(notifyListeners);
     super.dispose();
   }

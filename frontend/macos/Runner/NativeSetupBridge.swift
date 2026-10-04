@@ -44,9 +44,9 @@ enum NativeSetupBridge {
   }
 
   static func status() -> [String: Any] {
-    let extensionURL = Bundle.main.builtInPlugInsURL?.appendingPathComponent("GardenFinder.appex")
-    let available = extensionURL.flatMap { Bundle(url: $0)?.bundleIdentifier }
-      == "com.victorbash.garden.finder"
+    let helper = Bundle.main.bundleURL.appendingPathComponent("Contents/Helpers/GardenRemote.app")
+    let available = Bundle(url: helper)?.bundleIdentifier == "com.victorbash.garden.remote"
+      && FileManager.default.fileExists(atPath: "/Library/Filesystems/macfuse.fs")
     var login = "unsupported"
     if #available(macOS 13.0, *) {
       switch SMAppService.mainApp.status {
