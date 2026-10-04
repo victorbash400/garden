@@ -70,9 +70,8 @@ actor RemoteManager {
       if entry.starting != nil { _ = try await mount(id); return }
       if let current = entry.mount {
         if await current.engine.issue == nil { return }
+        try await current.unmount()
         entry.mount = nil
-        current.stop()
-        try await current.run()
         await current.engine.stop()
       }
     } else {
@@ -144,24 +143,23 @@ actor RemoteManager {
   func shutdown() async throws {
     stopping = true
     let current = Array(entries.values)
-    for entry in current { entry.starting?.cancel(); entry.mount?.stop() }
+    for entry in current { entry.starting?.cancel() }
     var failure: Error?
     for entry in current {
       if let pending = entry.starting {
         do {
           let mounted = try await pending.value
-          mounted.stop()
-          try await mounted.run()
+          try await mounted.unmount()
           await mounted.engine.stop()
         } catch is CancellationError { }
         catch { failure = failure ?? error; RemoteLog.error(error) }
       }
       if let mount = entry.mount {
-        do { try await mount.run(); await mount.engine.stop() }
+        do { try await mount.unmount(); await mount.engine.stop() }
         catch { failure = failure ?? error; RemoteLog.error(error) }
       }
     }
-    if let failure { throw failure }
+    if let failure { stopping = false; throw failure }
     entries.removeAll()
   }
 
@@ -221,14 +219,12 @@ actor RemoteManager {
     if let pending = entry.starting {
       do {
         let mount = try await pending.value
-        mount.stop()
-        try await mount.run()
+        try await mount.unmount()
         await mount.engine.stop()
       } catch is CancellationError { }
     }
     if let mount = entry.mount {
-      mount.stop()
-      try await mount.run()
+      try await mount.unmount()
       await mount.engine.stop()
     }
     entries.removeValue(forKey: id)

@@ -12,6 +12,7 @@ struct GardenNode: Codable, Sendable {
   let modified: String
   let modifiedDate: Date
   let deleted: Bool
+  let createdDate: Date?
 
   init(_ value: [String: Any]) throws {
     guard let id = value["id"] as? Int,
@@ -41,6 +42,14 @@ struct GardenNode: Codable, Sendable {
     self.modified = modified
     self.modifiedDate = modifiedDate
     self.deleted = deleted
+    if let value = value["createdAt"], !(value is NSNull) {
+      guard let created = value as? String else { throw GardenAPIError.invalidResponse }
+      formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+      guard let date = formatter.date(from: created) else { throw GardenAPIError.invalidResponse }
+      createdDate = date
+    } else {
+      createdDate = nil
+    }
   }
 }
 

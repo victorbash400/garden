@@ -5,6 +5,7 @@ enum GardenAPIError: LocalizedError {
   case unauthorized
   case http(Int, String)
   case cleanup(String)
+  case filesystem(GardenFilesystemFailure)
 
   var errorDescription: String? {
     switch self {
@@ -12,6 +13,7 @@ enum GardenAPIError: LocalizedError {
     case .unauthorized: "Sign in to Garden to reconnect this drive."
     case .http(let status, let message): "Garden request failed (\(status)): \(message)"
     case .cleanup(let message): message
+    case .filesystem(let failure): failure.message
     }
   }
 }
@@ -21,6 +23,46 @@ struct GardenChange {
   let operation: String
   let node: GardenNode?
   let previousParentID: Int?
+
+  init(record: [String: Any]) throws {
+    guard let revision = record["revision"] as? Int, let operation = record["operation"] as? String else {
+      throw GardenAPIError.invalidResponse
+    }
+    self.revision = revision
+    self.operation = operation
+    node = try (record["node"] as? [String: Any]).map(GardenNode.init)
+    previousParentID = record["previousParentId"] as? Int
+  }
+
+  init(revision: Int, operation: String, node: GardenNode?, previousParentID: Int?) {
+    self.revision = revision
+    self.operation = operation
+    self.node = node
+    self.previousParentID = previousParentID
+  }
+}
+
+struct GardenFilesystemFailure {
+  let code: POSIXErrorCode
+  let message: String
+
+  init(_ details: [String: Any]) throws {
+    guard let value = details["code"] as? String, let message = details["message"] as? String else {
+      throw GardenAPIError.invalidResponse
+    }
+    switch value {
+    case "notFound": code = .ENOENT
+    case "alreadyExists": code = .EEXIST
+    case "notDirectory": code = .ENOTDIR
+    case "isDirectory": code = .EISDIR
+    case "notEmpty": code = .ENOTEMPTY
+    case "invalid": code = .EINVAL
+    case "accessDenied": code = .EACCES
+    case "busy": code = .EBUSY
+    default: throw GardenAPIError.invalidResponse
+    }
+    self.message = message
+  }
 }
 
 actor GardenAPI {
@@ -69,17 +111,7 @@ actor GardenAPI {
     ]) as? [[String: Any]] else {
       throw GardenAPIError.invalidResponse
     }
-    return try records.map { record in
-      guard let revision = record["revision"] as? Int,
-            let operation = record["operation"] as? String else {
-        throw GardenAPIError.invalidResponse
-      }
-      let node = try (record["node"] as? [String: Any]).map(GardenNode.init)
-      return GardenChange(
-        revision: revision, operation: operation, node: node,
-        previousParentID: record["previousParentId"] as? Int
-      )
-    }
+    return try records.map(GardenChange.init(record:))
   }
 
   func snapshot(after nodeID: Int) async throws -> [GardenNode] {
@@ -268,6 +300,9 @@ actor GardenAPI {
         throw GardenAPIError.unauthorized
       }
       let details = value?["data"] as? [String: Any]
+      if type == "FilesystemException", let details {
+        throw GardenAPIError.filesystem(try GardenFilesystemFailure(details))
+      }
       let message = details?["message"] as? String ?? value?["message"] as? String
         ?? HTTPURLResponse.localizedString(forStatusCode: response.statusCode)
       throw GardenAPIError.http(response.statusCode, message)

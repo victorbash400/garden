@@ -34,7 +34,7 @@ func remoteAttributes(_ context: UnsafeMutableRawPointer?, _ path: UnsafePointer
     let node = try wait { try await remoteEngine.lookup(name, handle: handle) }
     attributes.pointee = stat()
     attributes.pointee.st_ino = UInt64((node?.id ?? 0) + 2)
-    attributes.pointee.st_mode = mode_t(node?.folder ?? true ? S_IFDIR | 0o555 : S_IFREG | 0o444)
+    attributes.pointee.st_mode = mode_t(node?.folder ?? true ? S_IFDIR | 0o755 : S_IFREG | 0o444)
     attributes.pointee.st_nlink = 1
     attributes.pointee.st_uid = getuid()
     attributes.pointee.st_gid = getgid()
@@ -43,7 +43,43 @@ func remoteAttributes(_ context: UnsafeMutableRawPointer?, _ path: UnsafePointer
     attributes.pointee.st_blksize = 1024 * 1024
     attributes.pointee.st_mtimespec.tv_sec = Int(node?.modifiedDate.timeIntervalSince1970 ?? 0)
     attributes.pointee.st_ctimespec = attributes.pointee.st_mtimespec
-    attributes.pointee.st_birthtimespec = attributes.pointee.st_mtimespec
+    let birth = node?.createdDate ?? node?.modifiedDate ?? Date(timeIntervalSince1970: 0)
+    let seconds = birth.timeIntervalSince1970.rounded(.down)
+    attributes.pointee.st_birthtimespec = timespec(tv_sec: Int(seconds),
+      tv_nsec: min(999_999_999, max(0, Int((birth.timeIntervalSince1970 - seconds) * 1_000_000_000))))
+    return 0
+  }
+}
+
+@_cdecl("garden_remote_set_birthtime")
+func remoteSetBirthtime(_ context: UnsafeMutableRawPointer?, _ path: UnsafePointer<CChar>?, _ seconds: Int64, _ nanos: Int64) -> Int32 {
+  status {
+    let remoteEngine = try engine(context)
+    guard let path, nanos >= 0, nanos < 1_000_000_000 else { throw POSIXError(.EINVAL) }
+    let date = Date(timeIntervalSince1970: Double(seconds) + Double(nanos) / 1_000_000_000)
+    let mutation = try RemoteMutation(operation: .setAttributes, path: String(cString: path), createdAt: date)
+    try wait { try await remoteEngine.mutate(mutation) }
+    return 0
+  }
+}
+
+@_cdecl("garden_remote_mutate")
+func remoteMutate(_ context: UnsafeMutableRawPointer?, _ operation: Int32, _ path: UnsafePointer<CChar>?,
+  _ destination: UnsafePointer<CChar>?, _ noReplace: Int32) -> Int32 {
+  status {
+    let remoteEngine = try engine(context)
+    guard let path else { throw POSIXError(.EINVAL) }
+    let kind: RemoteMutation.Operation
+    switch operation {
+    case 0: kind = .createFolder
+    case 1: kind = .rename
+    case 2: kind = .unlink
+    case 3: kind = .rmdir
+    default: throw POSIXError(.EINVAL)
+    }
+    let mutation = try RemoteMutation(operation: kind, path: String(cString: path),
+      destination: destination.map { String(cString: $0) }, noReplace: noReplace != 0)
+    try wait { try await remoteEngine.mutate(mutation) }
     return 0
   }
 }

@@ -71,7 +71,7 @@ import Foundation
     try await engine.receive(GardenChange(revision: 53, operation: "update", node: try node(4, parent: 1, name: "Movie 4.mov", version: 2), previousParentID: nil))
     let old = try await engine.lookup("", handle: handle)
     let fresh = try await engine.lookup("/Videos/Movie 4.mov")
-    try require(old?.version == 1 && fresh?.version == 2, "Open handles must retain their immutable version")
+    try require(old?.version == 2 && fresh?.version == 2, "Content updates must refresh shared inode handles")
     try require(try await engine.path(4) == "Videos/Movie 4.mov", "Finder location must use the current ancestor path")
     try require(try await engine.path(nil) == "", "Drive root must resolve without a node")
     let empty = try await engine.open("/Empty", directory: true)
@@ -79,6 +79,11 @@ import Foundation
     await engine.close(handle)
     do { _ = try await engine.lookup("", handle: handle); throw NSError(domain: "RemoteTests", code: 4) }
     catch let error as POSIXError { try require(error.code == .EBADF, "Closed handles must fail") }
-    print("Remote metadata: paged snapshot recovery, large directories, empty folders, move/delete, restart, revision gaps, and immutable handles passed")
+    try await engine.receive(GardenChange(revision: 54, operation: "delete",
+      node: try node(1, name: "Videos", folder: true, deleted: true), previousParentID: nil))
+    try await engine.receive(GardenChange(revision: 55, operation: "delete",
+      node: try node(4, parent: 1, name: "Movie 4.mov", deleted: true), previousParentID: nil))
+    try require(try await engine.currentRevision() == 55, "Parent-first recursive deletion must advance through child events")
+    print("Remote metadata: paged snapshot recovery, large directories, empty folders, move/delete, restart, revision gaps, and shared inode updates passed")
   }
 }

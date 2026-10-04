@@ -5,11 +5,12 @@ final class RemoteMount: @unchecked Sendable {
   let engine: RemoteEngine
   private let path: String
   private let stopLock = NSLock()
+  private let invalidations = DispatchQueue(label: "garden.remote.invalidation", qos: .utility)
   private var stopRequested = false
   private let handle: UnsafeMutableRawPointer
   private let ready = RemoteCompletion<Void>()
   private let finished = RemoteCompletion<Int32>()
-  private let stopped = RemoteCompletion<Void>()
+  private var stopped = RemoteCompletion<Void>()
   private let unmounted = RemoteCompletion<Void>()
   private var observers: [NSObjectProtocol] = []
 
@@ -44,6 +45,8 @@ final class RemoteMount: @unchecked Sendable {
         mount.ready.resolve(.failure(CancellationError()))
         mount.stop()
       }
+      await engine.setInvalidation({ [weak mount] paths in mount?.invalidate(paths) },
+        settled: { [weak mount] in await mount?.flushInvalidations() })
       return mount
     } catch {
       mount.stop()
@@ -75,12 +78,15 @@ final class RemoteMount: @unchecked Sendable {
 
   func run() async throws {
     let result = try await finished.wait()
-    let requested = stopLock.withLock { stopRequested }
+    let (requested, completion) = stopLock.withLock { () -> (Bool, RemoteCompletion<Void>) in
+      if !stopRequested { stopped = RemoteCompletion<Void>() }
+      return (stopRequested, stopped)
+    }
     if !requested {
       garden_remote_stop(handle)
-      stopped.resolve(.success(()))
+      completion.resolve(.success(()))
     }
-    try await stopped.wait()
+    try await completion.wait()
     let deadline = Task {
       do { try await Task.sleep(for: .seconds(30)) }
       catch { return }
@@ -92,12 +98,23 @@ final class RemoteMount: @unchecked Sendable {
   }
 
   func stop() {
-    let shouldStop = stopLock.withLock {
-      guard !stopRequested else { return false }
+    _ = requestStop()
+  }
+
+  func unmount() async throws {
+    await flushInvalidations()
+    try await requestStop().wait()
+    try await run()
+  }
+
+  private func requestStop() -> RemoteCompletion<Void> {
+    let attempt = stopLock.withLock { () -> RemoteCompletion<Void>? in
+      guard !stopRequested else { return nil }
       stopRequested = true
-      return true
+      stopped = RemoteCompletion<Void>()
+      return stopped
     }
-    guard shouldStop else { return }
+    guard let attempt else { return stopLock.withLock { stopped } }
     DispatchQueue.global(qos: .userInitiated).async {
       do {
         let process = Process()
@@ -110,12 +127,41 @@ final class RemoteMount: @unchecked Sendable {
             userInfo: [NSLocalizedDescriptionKey: "macOS could not unmount \(self.path)."])
         }
         garden_remote_stop(self.handle)
-        self.stopped.resolve(.success(()))
+        attempt.resolve(.success(()))
       } catch {
-        self.stopped.resolve(.failure(error))
-        self.finished.resolve(.failure(error))
+        self.stopLock.withLock { self.stopRequested = false }
+        attempt.resolve(.failure(error))
+        RemoteLog.error(error)
       }
     }
+    return attempt
+  }
+
+  private func invalidate(_ paths: [String]) {
+    // Invalidation must run outside the filesystem callback that changed the path.
+    invalidations.async {
+      self.stopLock.withLock {
+        guard !self.stopRequested else { return }
+        for path in paths {
+          let result = path.withCString { garden_remote_invalidate(self.handle, $0) }
+          if result != 0 && result != -ENOENT { RemoteLog.error(POSIXError(POSIXErrorCode(rawValue: -result) ?? .EIO)) }
+          // macFUSE 5.4 keeps a separate cached EOF after acknowledging invalidation. Reapply the already
+          // committed size so FSKit updates it. The callback rejects any change to the authoritative size.
+          var attributes = stat()
+          let found = path.withCString { garden_remote_attributes(Unmanaged.passUnretained(self.engine).toOpaque(), $0, 0, &attributes) }
+          if found == -ENOENT { continue }
+          if found != 0 { RemoteLog.error(POSIXError(POSIXErrorCode(rawValue: -found) ?? .EIO)); continue }
+          let refreshed = attributes.st_mode & mode_t(S_IFMT) == mode_t(S_IFREG)
+            ? truncate(self.path + path, attributes.st_size) : chflags(self.path + path, 0)
+          if refreshed != 0 && errno != ENOENT { RemoteLog.error(POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO)) }
+          NSWorkspace.shared.noteFileSystemChanged(self.path + path)
+        }
+      }
+    }
+  }
+
+  private func flushInvalidations() async {
+    await withCheckedContinuation { continuation in invalidations.async { continuation.resume() } }
   }
   deinit {
     for observer in observers { NSWorkspace.shared.notificationCenter.removeObserver(observer) }

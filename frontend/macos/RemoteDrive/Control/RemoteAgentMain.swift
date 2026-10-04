@@ -30,7 +30,7 @@ import Foundation
       source.setEventHandler {
         Task {
           do { try await manager.shutdown(); exit(0) }
-          catch { RemoteLog.error(error); exit(1) }
+          catch { RemoteLog.error(error) }
         }
       }
       source.resume()
