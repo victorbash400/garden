@@ -1,0 +1,8 @@
+class: FilesystemRequest
+fields:
+  operationId: UuidValue
+  operation: FilesystemOperation
+  path: String
+  destination: String?
+  noReplace: bool, default=false
+  createdAt: DateTime?

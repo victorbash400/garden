@@ -1,0 +1,10 @@
+enum: FilesystemError
+values:
+  - notFound
+  - alreadyExists
+  - notDirectory
+  - isDirectory
+  - notEmpty
+  - invalid
+  - accessDenied
+  - busy

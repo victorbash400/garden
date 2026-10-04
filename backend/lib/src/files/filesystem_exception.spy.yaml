@@ -1,0 +1,4 @@
+exception: FilesystemException
+fields:
+  code: FilesystemError
+  message: String

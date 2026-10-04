@@ -26,6 +26,8 @@ import 'package:garden_server/src/generated/files/file_lease.dart' as _iyyn59dv;
 import 'package:garden_server/src/generated/files/file_node.dart' as _il49blua;
 import 'package:garden_server/src/generated/files/file_version.dart'
     as _iwzwya1z;
+import 'package:garden_server/src/generated/files/filesystem_request.dart'
+    as _ia306jky;
 import 'package:garden_server/src/generated/files/node_kind.dart' as _iso8aj7z;
 import 'package:garden_server/src/generated/files/uploaded_part.dart'
     as _izqf04mm;
@@ -194,6 +196,8 @@ class TestEndpoints {
 
   late final _FilesEndpoint files;
 
+  late final _FilesystemEndpoint filesystem;
+
   late final _GardenEndpoint garden;
 
   late final _GreetingEndpoint greeting;
@@ -227,6 +231,10 @@ class _InternalTestEndpoints extends TestEndpoints
       serializationManager,
     );
     files = _FilesEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    filesystem = _FilesystemEndpoint(
       endpoints,
       serializationManager,
     );
@@ -1599,6 +1607,52 @@ class _FilesEndpoint {
       _localTestStreamManager.outputStreamController,
     );
     return _localTestStreamManager.outputStreamController.stream;
+  }
+}
+
+class _FilesystemEndpoint {
+  _FilesystemEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _is.EndpointDispatch _endpointDispatch;
+
+  final _is.SerializationManager _serializationManager;
+
+  _ida.Future<List<_ipqwe4ae.DriveEvent>> mutate(
+    _ist.TestSessionBuilder sessionBuilder,
+    int gardenId,
+    _ia306jky.FilesystemRequest request,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'filesystem',
+            method: 'mutate',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'filesystem',
+          methodName: 'mutate',
+          parameters: _ist.testObjectToJson({
+            'gardenId': gardenId,
+            'request': request,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_ipqwe4ae.DriveEvent>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
   }
 }
 

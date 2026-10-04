@@ -23,6 +23,8 @@ import 'package:garden_client/src/protocol/files/file_lease.dart' as _iiqvbxq9;
 import 'package:garden_client/src/protocol/files/file_node.dart' as _i2qlj4hx;
 import 'package:garden_client/src/protocol/files/file_version.dart'
     as _ibt6e7l6;
+import 'package:garden_client/src/protocol/files/filesystem_request.dart'
+    as _igspcefl;
 import 'package:garden_client/src/protocol/files/node_kind.dart' as _igh51ulr;
 import 'package:garden_client/src/protocol/files/uploaded_part.dart'
     as _ieod4w9g;
@@ -613,6 +615,26 @@ class EndpointFiles extends _isc.EndpointRef {
 }
 
 /// {@category Endpoint}
+class EndpointFilesystem extends _isc.EndpointRef {
+  EndpointFilesystem(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'filesystem';
+
+  _ida.Future<List<_ib0wfils.DriveEvent>> mutate(
+    int gardenId,
+    _igspcefl.FilesystemRequest request,
+  ) => caller.callServerEndpoint<List<_ib0wfils.DriveEvent>>(
+    'filesystem',
+    'mutate',
+    {
+      'gardenId': gardenId,
+      'request': request,
+    },
+  );
+}
+
+/// {@category Endpoint}
 class EndpointGarden extends _isc.EndpointRef {
   EndpointGarden(_isc.EndpointCaller caller) : super(caller);
 
@@ -743,6 +765,7 @@ class Client extends _isc.ServerpodClientShared {
     collaboration = EndpointCollaboration(this);
     content = EndpointContent(this);
     files = EndpointFiles(this);
+    filesystem = EndpointFilesystem(this);
     garden = EndpointGarden(this);
     greeting = EndpointGreeting(this);
     modules = Modules(this);
@@ -760,6 +783,8 @@ class Client extends _isc.ServerpodClientShared {
 
   late final EndpointFiles files;
 
+  late final EndpointFilesystem filesystem;
+
   late final EndpointGarden garden;
 
   late final EndpointGreeting greeting;
@@ -774,6 +799,7 @@ class Client extends _isc.ServerpodClientShared {
     'collaboration': collaboration,
     'content': content,
     'files': files,
+    'filesystem': filesystem,
     'garden': garden,
     'greeting': greeting,
   };

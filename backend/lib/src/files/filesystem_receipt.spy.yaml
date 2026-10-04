@@ -1,0 +1,12 @@
+class: FilesystemReceipt
+table: filesystem_receipt
+fields:
+  gardenId: int, relation(parent=garden_record)
+  authorId: String
+  request: FilesystemRequest
+  operationId: UuidValue
+  events: List<DriveEvent>
+indexes:
+  filesystem_operation_unique:
+    fields: gardenId, authorId, operationId
+    unique: true

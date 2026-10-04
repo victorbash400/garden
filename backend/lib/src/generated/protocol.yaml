@@ -42,6 +42,8 @@ files:
   - move:
   - delete:
   - watch:
+filesystem:
+  - mutate:
 garden:
   - account:
   - finderSession:

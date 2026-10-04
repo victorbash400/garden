@@ -43,6 +43,15 @@ class DriveAccess {
     return node;
   }
 
+  static Future<FileNode> contentNode(Session session, int id) async {
+    final node = await FileNode.db.findById(session, id);
+    if (node == null || node.kind != NodeKind.file) {
+      throw GardenException(message: 'This file version is unavailable.');
+    }
+    await require(session, node.gardenId);
+    return node;
+  }
+
   static Future<GardenRecord> lock(
     Session session,
     int gardenId,

@@ -143,7 +143,7 @@ class ContentEndpoint extends Endpoint {
     int nodeId,
     int versionId,
   ) async {
-    await DriveAccess.node(session, nodeId);
+    await DriveAccess.contentNode(session, nodeId);
     final version = await FileVersion.db.findById(session, versionId);
     if (version == null || version.nodeId != nodeId || !version.committed) {
       throw GardenException(
@@ -354,7 +354,7 @@ class ContentEndpoint extends Endpoint {
     int offset,
     int length,
   ) async {
-    final node = await DriveAccess.node(session, nodeId);
+    final node = await DriveAccess.contentNode(session, nodeId);
     if (node.kind != NodeKind.file ||
         offset < 0 ||
         length < 0 ||

@@ -11,6 +11,8 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:typed_data' as _idt;
+import 'package:garden_server/src/generated/files/filesystem_request.dart'
+    as _ia306jky;
 import 'package:garden_server/src/generated/files/node_kind.dart' as _iso8aj7z;
 import 'package:garden_server/src/generated/future_calls.dart' as _id1va6nu;
 import 'package:garden_server/src/generated/protocol.dart' as _ipujdd36;
@@ -25,6 +27,7 @@ import '../auth/passkey_idp_endpoint.dart' as _ia8doutj;
 import '../files/collaboration_endpoint.dart' as _iiks30z9;
 import '../files/content_endpoint.dart' as _iqqtuyco;
 import '../files/files_endpoint.dart' as _idx8vriz;
+import '../files/filesystem_endpoint.dart' as _im12bomv;
 import '../gardens/garden_endpoint.dart' as _isd11de7;
 import '../greetings/greeting_endpoint.dart' as _il624ik7;
 export 'future_calls.dart' show ServerpodFutureCallsGetter;
@@ -67,6 +70,12 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'files',
+          null,
+        ),
+      'filesystem': _im12bomv.FilesystemEndpoint()
+        ..initialize(
+          server,
+          'filesystem',
           null,
         ),
       'garden': _isd11de7.GardenEndpoint()
@@ -1002,6 +1011,38 @@ class Endpoints extends _is.EndpointDispatch {
                 params['gardenId'],
                 params['afterRevision'],
               ),
+        ),
+      },
+    );
+    connectors['filesystem'] = _is.EndpointConnector(
+      name: 'filesystem',
+      endpoint: endpoints['filesystem']!,
+      methodConnectors: {
+        'mutate': _is.MethodConnector(
+          name: 'mutate',
+          params: {
+            'gardenId': _is.ParameterDescription(
+              name: 'gardenId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'request': _is.ParameterDescription(
+              name: 'request',
+              type: _is.getType<_ia306jky.FilesystemRequest>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['filesystem'] as _im12bomv.FilesystemEndpoint)
+                      .mutate(
+                        session,
+                        params['gardenId'],
+                        params['request'],
+                      ),
         ),
       },
     );

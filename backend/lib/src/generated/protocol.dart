@@ -37,6 +37,11 @@ import 'files/file_comment.dart' as _i8jjzct9;
 import 'files/file_lease.dart' as _ifu05pz5;
 import 'files/file_node.dart' as _iqxechne;
 import 'files/file_version.dart' as _inq2edz5;
+import 'files/filesystem_error.dart' as _i0zf8lre;
+import 'files/filesystem_exception.dart' as _i97gk0ac;
+import 'files/filesystem_operation.dart' as _ioqlevl0;
+import 'files/filesystem_receipt.dart' as _iorf3lk3;
+import 'files/filesystem_request.dart' as _irlkgwt0;
 import 'files/node_kind.dart' as _idxfoob7;
 import 'files/uploaded_part.dart' as _ivsra0vz;
 import 'future_calls_generated_models/upload_cleanup_future_call_expire_model.dart'
@@ -56,6 +61,11 @@ export 'files/file_comment.dart';
 export 'files/file_lease.dart';
 export 'files/file_node.dart';
 export 'files/file_version.dart';
+export 'files/filesystem_error.dart';
+export 'files/filesystem_exception.dart';
+export 'files/filesystem_operation.dart';
+export 'files/filesystem_receipt.dart';
+export 'files/filesystem_request.dart';
 export 'files/node_kind.dart';
 export 'files/uploaded_part.dart';
 export 'gardens/account_details.dart';
@@ -442,6 +452,12 @@ class Protocol extends _is.DatabaseSerializationManager {
           isNullable: false,
           dartType: 'DateTime',
         ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
       ],
       foreignKeys: [
         _isp.ForeignKeyDefinition(
@@ -615,6 +631,87 @@ class Protocol extends _is.DatabaseSerializationManager {
           ],
           type: 'btree',
           isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'filesystem_receipt',
+      dartName: 'FilesystemReceipt',
+      schema: 'public',
+      module: 'garden',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'gardenId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'authorId',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'request',
+          columnType: _isp.ColumnType.json,
+          isNullable: false,
+          dartType: 'protocol:FilesystemRequest',
+        ),
+        _isp.ColumnDefinition(
+          name: 'operationId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'events',
+          columnType: _isp.ColumnType.json,
+          isNullable: false,
+          dartType: 'List<protocol:DriveEvent>',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'filesystem_receipt_fk_0',
+          columns: ['gardenId'],
+          referenceTable: 'garden_record',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'filesystem_operation_unique',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'gardenId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'authorId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'operationId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
           isPrimary: false,
         ),
       ],
@@ -800,6 +897,21 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _inq2edz5.FileVersion) {
       return _inq2edz5.FileVersion.fromJson(data) as T;
     }
+    if (t == _i0zf8lre.FilesystemError) {
+      return _i0zf8lre.FilesystemError.fromJson(data) as T;
+    }
+    if (t == _i97gk0ac.FilesystemException) {
+      return _i97gk0ac.FilesystemException.fromJson(data) as T;
+    }
+    if (t == _ioqlevl0.FilesystemOperation) {
+      return _ioqlevl0.FilesystemOperation.fromJson(data) as T;
+    }
+    if (t == _iorf3lk3.FilesystemReceipt) {
+      return _iorf3lk3.FilesystemReceipt.fromJson(data) as T;
+    }
+    if (t == _irlkgwt0.FilesystemRequest) {
+      return _irlkgwt0.FilesystemRequest.fromJson(data) as T;
+    }
     if (t == _idxfoob7.NodeKind) {
       return _idxfoob7.NodeKind.fromJson(data) as T;
     }
@@ -856,6 +968,30 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _is.getType<_inq2edz5.FileVersion?>()) {
       return (data != null ? _inq2edz5.FileVersion.fromJson(data) : null) as T;
     }
+    if (t == _is.getType<_i0zf8lre.FilesystemError?>()) {
+      return (data != null ? _i0zf8lre.FilesystemError.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_i97gk0ac.FilesystemException?>()) {
+      return (data != null
+              ? _i97gk0ac.FilesystemException.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_ioqlevl0.FilesystemOperation?>()) {
+      return (data != null
+              ? _ioqlevl0.FilesystemOperation.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_iorf3lk3.FilesystemReceipt?>()) {
+      return (data != null ? _iorf3lk3.FilesystemReceipt.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_irlkgwt0.FilesystemRequest?>()) {
+      return (data != null ? _irlkgwt0.FilesystemRequest.fromJson(data) : null)
+          as T;
+    }
     if (t == _is.getType<_idxfoob7.NodeKind?>()) {
       return (data != null ? _idxfoob7.NodeKind.fromJson(data) : null) as T;
     }
@@ -896,6 +1032,12 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == List<_iqxechne.FileNode>) {
       return (data as List)
               .map((e) => deserialize<_iqxechne.FileNode>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i4wn0cbe.DriveEvent>) {
+      return (data as List)
+              .map((e) => deserialize<_i4wn0cbe.DriveEvent>(e))
               .toList()
           as T;
     }
@@ -1013,6 +1155,11 @@ class Protocol extends _is.DatabaseSerializationManager {
       _ifu05pz5.FileLease => 'FileLease',
       _iqxechne.FileNode => 'FileNode',
       _inq2edz5.FileVersion => 'FileVersion',
+      _i0zf8lre.FilesystemError => 'FilesystemError',
+      _i97gk0ac.FilesystemException => 'FilesystemException',
+      _ioqlevl0.FilesystemOperation => 'FilesystemOperation',
+      _iorf3lk3.FilesystemReceipt => 'FilesystemReceipt',
+      _irlkgwt0.FilesystemRequest => 'FilesystemRequest',
       _idxfoob7.NodeKind => 'NodeKind',
       _ivsra0vz.UploadedPart => 'UploadedPart',
       _i4nkt2dm.UploadCleanupFutureCallExpireModel =>
@@ -1054,6 +1201,16 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'FileNode';
       case _inq2edz5.FileVersion():
         return 'FileVersion';
+      case _i0zf8lre.FilesystemError():
+        return 'FilesystemError';
+      case _i97gk0ac.FilesystemException():
+        return 'FilesystemException';
+      case _ioqlevl0.FilesystemOperation():
+        return 'FilesystemOperation';
+      case _iorf3lk3.FilesystemReceipt():
+        return 'FilesystemReceipt';
+      case _irlkgwt0.FilesystemRequest():
+        return 'FilesystemRequest';
       case _idxfoob7.NodeKind():
         return 'NodeKind';
       case _ivsra0vz.UploadedPart():
@@ -1123,6 +1280,21 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (dataClassName == 'FileVersion') {
       return deserialize<_inq2edz5.FileVersion>(data['data']);
+    }
+    if (dataClassName == 'FilesystemError') {
+      return deserialize<_i0zf8lre.FilesystemError>(data['data']);
+    }
+    if (dataClassName == 'FilesystemException') {
+      return deserialize<_i97gk0ac.FilesystemException>(data['data']);
+    }
+    if (dataClassName == 'FilesystemOperation') {
+      return deserialize<_ioqlevl0.FilesystemOperation>(data['data']);
+    }
+    if (dataClassName == 'FilesystemReceipt') {
+      return deserialize<_iorf3lk3.FilesystemReceipt>(data['data']);
+    }
+    if (dataClassName == 'FilesystemRequest') {
+      return deserialize<_irlkgwt0.FilesystemRequest>(data['data']);
     }
     if (dataClassName == 'NodeKind') {
       return deserialize<_idxfoob7.NodeKind>(data['data']);
@@ -1209,6 +1381,8 @@ class Protocol extends _is.DatabaseSerializationManager {
         return _iqxechne.FileNode.t;
       case _inq2edz5.FileVersion:
         return _inq2edz5.FileVersion.t;
+      case _iorf3lk3.FilesystemReceipt:
+        return _iorf3lk3.FilesystemReceipt.t;
       case _icenu3t8.GardenMember:
         return _icenu3t8.GardenMember.t;
       case _iwqk3oef.GardenRecord:

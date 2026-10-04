@@ -26,6 +26,7 @@ abstract class FileNode
     int? version,
     bool? deleted,
     required this.updatedAt,
+    this.createdAt,
   }) : size = size ?? 0,
        version = version ?? 0,
        deleted = deleted ?? false;
@@ -41,6 +42,7 @@ abstract class FileNode
     int? version,
     bool? deleted,
     required DateTime updatedAt,
+    DateTime? createdAt,
   }) = _FileNodeImpl;
 
   factory FileNode.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -59,6 +61,9 @@ abstract class FileNode
       updatedAt: _isc.DateTimeJsonExtension.fromJson(
         jsonSerialization['updatedAt'],
       ),
+      createdAt: jsonSerialization['createdAt'] == null
+          ? null
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
     );
   }
 
@@ -85,6 +90,8 @@ abstract class FileNode
 
   DateTime updatedAt;
 
+  DateTime? createdAt;
+
   /// Returns a shallow copy of this [FileNode]
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
@@ -99,6 +106,7 @@ abstract class FileNode
     int? version,
     bool? deleted,
     DateTime? updatedAt,
+    DateTime? createdAt,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -114,6 +122,7 @@ abstract class FileNode
       'version': version,
       'deleted': deleted,
       'updatedAt': updatedAt.toJson(),
+      if (createdAt != null) 'createdAt': createdAt?.toJson(),
     };
   }
 
@@ -131,6 +140,7 @@ abstract class FileNode
       'version': version,
       'deleted': deleted,
       'updatedAt': updatedAt.toJson(),
+      if (createdAt != null) 'createdAt': createdAt?.toJson(),
     };
   }
 
@@ -154,6 +164,7 @@ class _FileNodeImpl extends FileNode {
     int? version,
     bool? deleted,
     required DateTime updatedAt,
+    DateTime? createdAt,
   }) : super._(
          id: id,
          gardenId: gardenId,
@@ -165,6 +176,7 @@ class _FileNodeImpl extends FileNode {
          version: version,
          deleted: deleted,
          updatedAt: updatedAt,
+         createdAt: createdAt,
        );
 
   /// Returns a shallow copy of this [FileNode]
@@ -182,6 +194,7 @@ class _FileNodeImpl extends FileNode {
     int? version,
     bool? deleted,
     DateTime? updatedAt,
+    Object? createdAt = _Undefined,
   }) {
     return FileNode(
       id: id is int? ? id : this.id,
@@ -194,6 +207,7 @@ class _FileNodeImpl extends FileNode {
       version: version ?? this.version,
       deleted: deleted ?? this.deleted,
       updatedAt: updatedAt ?? this.updatedAt,
+      createdAt: createdAt is DateTime? ? createdAt : this.createdAt,
     );
   }
 }

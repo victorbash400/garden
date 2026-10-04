@@ -10,6 +10,7 @@ fields:
   version: int, default=0
   deleted: bool, default=false
   updatedAt: DateTime
+  createdAt: DateTime?
 indexes:
   node_sibling_unique:
     fields: gardenId, parentId, activeName
