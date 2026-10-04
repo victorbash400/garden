@@ -40,6 +40,59 @@ void main() {
       });
 
       test(
+        'multipart copies enforce upload ownership and source identity',
+        () async {
+          final drive = await endpoints.garden.create(owner, 'Copy access');
+          final file = (await endpoints.filesystem.mutate(
+            owner,
+            drive.id,
+            operation(FilesystemOperation.createFile, '/copy.bin'),
+          )).single.node!;
+          final upload = await endpoints.content.begin(
+            owner,
+            file.id!,
+            0,
+            24 * 1024 * 1024,
+          );
+          await expectLater(
+            endpoints.content.copyParts(guest, upload.id!, 1, 1),
+            throwsA(
+              isA<GardenException>().having(
+                (e) => e.message,
+                'message',
+                'This upload is unavailable.',
+              ),
+            ),
+          );
+          await expectLater(
+            endpoints.content.copyParts(owner, upload.id!, 1, 1),
+            throwsA(
+              isA<GardenException>().having(
+                (e) => e.message,
+                'message',
+                'This base file version is unavailable.',
+              ),
+            ),
+          );
+          await endpoints.filesystem.mutate(
+            owner,
+            drive.id,
+            operation(FilesystemOperation.unlink, '/copy.bin'),
+          );
+          await expectLater(
+            endpoints.content.copyParts(owner, upload.id!, 1, 1),
+            throwsA(
+              isA<GardenException>().having(
+                (e) => e.message,
+                'message',
+                'This file or folder no longer exists.',
+              ),
+            ),
+          );
+        },
+      );
+
+      test(
         'creation dates persist and replay without changing content identity',
         () async {
           final drive = await endpoints.garden.create(owner, 'Attributes');

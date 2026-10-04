@@ -426,6 +426,20 @@ class EndpointContent extends _isc.EndpointRef {
     },
   );
 
+  _ida.Future<void> copyParts(
+    int versionId,
+    int first,
+    int count,
+  ) => caller.callServerEndpoint<void>(
+    'content',
+    'copyParts',
+    {
+      'versionId': versionId,
+      'first': first,
+      'count': count,
+    },
+  );
+
   _ida.Future<List<_ieod4w9g.UploadedPart>> uploadedParts(int versionId) =>
       caller.callServerEndpoint<List<_ieod4w9g.UploadedPart>>(
         'content',

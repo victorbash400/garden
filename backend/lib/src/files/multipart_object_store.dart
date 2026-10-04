@@ -122,6 +122,31 @@ class MultipartObjectStore {
     return parts;
   }
 
+  Future<void> copyParts(
+    FileVersion upload,
+    FileVersion base,
+    int first,
+    List<String> ranges,
+  ) async {
+    final source = '$bucket/${base.objectPath!}'
+        .split('/')
+        .map(Uri.encodeComponent)
+        .join('/');
+    for (var index = 0; index < ranges.length; index++) {
+      final result = await client.uploadPartCopy(
+        bucket: bucket,
+        key: upload.objectPath!,
+        uploadId: upload.uploadId!,
+        partNumber: first + index,
+        copySource: source,
+        copySourceRange: ranges[index],
+      );
+      if (result.copyPartResult?.eTag == null) {
+        throw StateError('S3 did not confirm the copied part.');
+      }
+    }
+  }
+
   Future<void> complete(FileVersion version) async {
     final parts = await this.parts(version);
     validateParts(version, parts);

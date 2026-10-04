@@ -25,6 +25,7 @@ content:
   - begin:
   - beginMultipart:
   - uploadParts:
+  - copyParts:
   - uploadedParts:
   - download:
   - writeChunk:

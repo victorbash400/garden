@@ -8,6 +8,7 @@ import '../generated/protocol.dart';
 import 'drive_access.dart';
 import 'drive_journal.dart';
 import 'multipart_object_store.dart';
+import 'multipart_copy.dart';
 import 'upload_cleanup_tasks.dart';
 
 class ContentEndpoint extends Endpoint {
@@ -105,6 +106,30 @@ class ContentEndpoint extends Endpoint {
     final store = MultipartObjectStore(session);
     try {
       return store.partUrls(version, first, count);
+    } finally {
+      store.close();
+    }
+  });
+
+  Future<void> copyParts(
+    Session session,
+    int versionId,
+    int first,
+    int count,
+  ) => session.db.transaction((transaction) async {
+    final upload = await _upload(session, versionId, transaction);
+    final base = await FileVersion.db.findById(
+      session,
+      upload.baseVersion,
+      transaction: transaction,
+    );
+    if (base == null) {
+      throw GardenException(message: 'This base file version is unavailable.');
+    }
+    final ranges = MultipartCopy.ranges(upload, base, first, count);
+    final store = MultipartObjectStore(session);
+    try {
+      await store.copyParts(upload, base, first, ranges);
     } finally {
       store.close();
     }

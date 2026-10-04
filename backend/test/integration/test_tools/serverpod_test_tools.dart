@@ -1046,6 +1046,43 @@ class _ContentEndpoint {
     });
   }
 
+  _ida.Future<void> copyParts(
+    _ist.TestSessionBuilder sessionBuilder,
+    int versionId,
+    int first,
+    int count,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'content',
+            method: 'copyParts',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'content',
+          methodName: 'copyParts',
+          parameters: _ist.testObjectToJson({
+            'versionId': versionId,
+            'first': first,
+            'count': count,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<void>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _ida.Future<List<_izqf04mm.UploadedPart>> uploadedParts(
     _ist.TestSessionBuilder sessionBuilder,
     int versionId,

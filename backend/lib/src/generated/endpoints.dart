@@ -603,6 +603,37 @@ class Endpoints extends _is.EndpointDispatch {
                     params['count'],
                   ),
         ),
+        'copyParts': _is.MethodConnector(
+          name: 'copyParts',
+          params: {
+            'versionId': _is.ParameterDescription(
+              name: 'versionId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'first': _is.ParameterDescription(
+              name: 'first',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'count': _is.ParameterDescription(
+              name: 'count',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['content'] as _iqqtuyco.ContentEndpoint).copyParts(
+                    session,
+                    params['versionId'],
+                    params['first'],
+                    params['count'],
+                  ),
+        ),
         'uploadedParts': _is.MethodConnector(
           name: 'uploadedParts',
           params: {
