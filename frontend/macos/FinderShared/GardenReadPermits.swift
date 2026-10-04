@@ -1,8 +1,9 @@
 import Foundation
 
 actor GardenReadPermits {
+  static let capacity = 6
   static let shared = GardenReadPermits()
-  private var available = 3
+  private var available = capacity
   private var waiting: [(UUID, CheckedContinuation<Void, Error>)] = []
 
   func acquire() async throws {

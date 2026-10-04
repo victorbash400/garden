@@ -43,7 +43,7 @@ actor GardenRangeCache {
     let last = (end - 1) / Self.blockSize
     let blocks = try await withThrowingTaskGroup(of: (Int, Data).self) { group in
       var next = first
-      for _ in 0..<min(3, last - first + 1) {
+      for _ in 0..<min(GardenReadPermits.capacity, last - first + 1) {
         let index = next
         group.addTask { (index, try await self.block(node: node, index: index, persist: persist)) }
         next += 1
