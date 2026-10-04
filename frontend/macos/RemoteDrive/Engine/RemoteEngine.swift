@@ -19,16 +19,22 @@ actor RemoteEngine {
   func prepare() async throws {
     if try metadata.revision == nil {
       let revision = try await api.revision()
-      var nodes: [GardenNode] = []
-      var after = 0
-      while true {
-        let page = try await api.snapshot(after: after)
-        nodes.append(contentsOf: page)
-        if page.count < 256 { break }
-        guard let next = page.last?.id, next > after else { throw GardenAPIError.invalidResponse }
-        after = next
+      try metadata.beginSnapshot()
+      do {
+        var after = 0
+        while true {
+          try Task.checkCancellation()
+          let page = try await api.snapshot(after: after)
+          try metadata.appendSnapshot(page)
+          if page.count < 256 { break }
+          guard let next = page.last?.id, next > after else { throw GardenAPIError.invalidResponse }
+          after = next
+        }
+        try metadata.finishSnapshot(revision: revision)
+      } catch {
+        try metadata.discardSnapshot()
+        throw error
       }
-      try metadata.reset(nodes: nodes, revision: revision)
     }
     // Catch up once before mount. Subsequent changes arrive through the stream.
     while true {
@@ -46,6 +52,22 @@ actor RemoteEngine {
   func currentRevision() throws -> Int { try metadata.revision ?? 0 }
 
   func reconnect() async throws { try await subscription?.reconnect() }
+
+  func path(_ nodeID: Int?) throws -> String {
+    guard let nodeID else { return "" }
+    var current = nodeID
+    var seen: Set<Int> = []
+    var names: [String] = []
+    while current != 0 {
+      guard seen.insert(current).inserted else { throw POSIXError(.ELOOP) }
+      guard let node = try metadata.node(current) else { throw POSIXError(.ENOENT) }
+      guard !node.name.isEmpty, node.name != ".", node.name != "..", !node.name.contains("/"),
+        !node.name.contains("\0") else { throw POSIXError(.EINVAL) }
+      names.append(node.name)
+      current = node.parentID
+    }
+    return names.reversed().joined(separator: "/")
+  }
 
   func receive(_ change: GardenChange) throws { try metadata.apply(change) }
 

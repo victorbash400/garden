@@ -59,6 +59,36 @@ final class RemoteMetadata {
     }
   }
 
+  func beginSnapshot() throws {
+    try execute("DROP TABLE IF EXISTS snapshot_nodes")
+    try execute("CREATE TABLE snapshot_nodes(id INTEGER PRIMARY KEY,parent INTEGER NOT NULL,name TEXT NOT NULL,payload BLOB NOT NULL)")
+  }
+
+  func appendSnapshot(_ nodes: [GardenNode]) throws {
+    try transaction {
+      let statement = try prepare("INSERT INTO snapshot_nodes(id,parent,name,payload) VALUES(?,?,?,?)")
+      defer { sqlite3_finalize(statement) }
+      for node in nodes {
+        guard !node.deleted else { throw GardenAPIError.invalidResponse }
+        sqlite3_reset(statement)
+        sqlite3_clear_bindings(statement)
+        try bind(node, to: statement)
+        guard sqlite3_step(statement) == SQLITE_DONE else { throw failure() }
+      }
+    }
+  }
+
+  func finishSnapshot(revision: Int) throws {
+    try transaction {
+      try execute("DELETE FROM nodes")
+      try execute("INSERT INTO nodes SELECT * FROM snapshot_nodes")
+      try saveRevision(revision)
+      try execute("DROP TABLE snapshot_nodes")
+    }
+  }
+
+  func discardSnapshot() throws { try execute("DROP TABLE IF EXISTS snapshot_nodes") }
+
   func apply(_ change: GardenChange) throws {
     try transaction {
       let current = try revision ?? 0
@@ -103,12 +133,17 @@ final class RemoteMetadata {
     defer { sqlite3_finalize(statement) }
     sqlite3_bind_int64(statement, 1, Int64(node.id))
     if !node.deleted {
-      sqlite3_bind_int64(statement, 2, Int64(node.parentID))
-      sqlite3_bind_text(statement, 3, node.name, -1, transient)
-      let payload = try JSONEncoder().encode(node)
-      _ = payload.withUnsafeBytes { sqlite3_bind_blob(statement, 4, $0.baseAddress, Int32($0.count), transient) }
+      try bind(node, to: statement)
     }
     guard sqlite3_step(statement) == SQLITE_DONE else { throw failure() }
+  }
+
+  private func bind(_ node: GardenNode, to statement: OpaquePointer) throws {
+    sqlite3_bind_int64(statement, 1, Int64(node.id))
+    sqlite3_bind_int64(statement, 2, Int64(node.parentID))
+    sqlite3_bind_text(statement, 3, node.name, -1, transient)
+    let payload = try JSONEncoder().encode(node)
+    _ = payload.withUnsafeBytes { sqlite3_bind_blob(statement, 4, $0.baseAddress, Int32($0.count), transient) }
   }
 
   private func saveRevision(_ revision: Int) throws {

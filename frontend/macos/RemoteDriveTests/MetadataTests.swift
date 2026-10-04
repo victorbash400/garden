@@ -18,7 +18,30 @@ import Foundation
     let metadata = try RemoteMetadata(url: url, namespace: "test")
     var nodes = [try node(1, name: "Videos", folder: true), try node(2, name: "Empty", folder: true)]
     for id in 3...4002 { nodes.append(try node(id, parent: 1, name: "Movie \(id).mov")) }
-    try metadata.reset(nodes: nodes, revision: 50)
+    try metadata.beginSnapshot()
+    try metadata.appendSnapshot(Array(nodes.prefix(256)))
+    try require(try metadata.revision == nil && metadata.children(0).isEmpty,
+      "An interrupted snapshot must not publish partial directories")
+    do {
+      let recovery = try RemoteMetadata(url: url, namespace: "test")
+      try recovery.beginSnapshot()
+      for start in stride(from: 0, to: nodes.count, by: 256) {
+        try recovery.appendSnapshot(Array(nodes[start..<min(start + 256, nodes.count)]))
+      }
+      try recovery.finishSnapshot(revision: 50)
+    }
+    try require(try metadata.revision == 50, "A recovered snapshot must publish its cursor atomically")
+    try metadata.beginSnapshot()
+    try metadata.appendSnapshot([nodes[0]])
+    do {
+      try metadata.appendSnapshot([nodes[1], nodes[0]])
+      throw NSError(domain: "RemoteTests", code: 6)
+    } catch let error as NSError {
+      try require(error.domain == "GardenRemoteMetadata", "Duplicate snapshot entries must fail")
+    }
+    try metadata.discardSnapshot()
+    try require(try metadata.children(0).count == 2 && metadata.revision == 50,
+      "A rejected replacement snapshot must preserve the published index")
     try require(try metadata.children(1).count == 4000, "Large directory must not truncate")
     try require(try metadata.children(2).isEmpty, "Empty directory must be valid")
     try require(try metadata.lookup("/videos/MOVIE 3.MOV")?.size == 5_000_000_000, "Case-insensitive lookup and 64-bit size")
@@ -49,11 +72,13 @@ import Foundation
     let old = try await engine.lookup("", handle: handle)
     let fresh = try await engine.lookup("/Videos/Movie 4.mov")
     try require(old?.version == 1 && fresh?.version == 2, "Open handles must retain their immutable version")
+    try require(try await engine.path(4) == "Videos/Movie 4.mov", "Finder location must use the current ancestor path")
+    try require(try await engine.path(nil) == "", "Drive root must resolve without a node")
     let empty = try await engine.open("/Empty", directory: true)
     try require(try await engine.list(empty).isEmpty, "Empty folder must open")
     await engine.close(handle)
     do { _ = try await engine.lookup("", handle: handle); throw NSError(domain: "RemoteTests", code: 4) }
     catch let error as POSIXError { try require(error.code == .EBADF, "Closed handles must fail") }
-    print("Remote metadata: large directories, empty folders, move/delete, restart, revision gaps, and immutable handles passed")
+    print("Remote metadata: paged snapshot recovery, large directories, empty folders, move/delete, restart, revision gaps, and immutable handles passed")
   }
 }
