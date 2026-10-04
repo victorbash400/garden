@@ -7,6 +7,7 @@ import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
 import 'drive_access.dart';
 import 'drive_journal.dart';
+import 'edit_uploads.dart';
 import 'multipart_object_store.dart';
 import 'multipart_copy.dart';
 import 'upload_cleanup_tasks.dart';
@@ -16,6 +17,14 @@ class ContentEndpoint extends Endpoint {
   @override
   bool get requireLogin => true;
   String _path(int version, int index) => 'versions/$version/$index';
+
+  Future<FileVersion> beginEdit(
+    Session session,
+    int nodeId,
+    int baseVersion,
+    int size,
+    UuidValue operationId,
+  ) => EditUploads.begin(session, nodeId, baseVersion, size, operationId);
 
   Future<FileVersion> begin(
     Session session,
@@ -71,6 +80,7 @@ class ContentEndpoint extends Endpoint {
             row.size.equals(size) &
             row.committed.equals(false) &
             row.aborted.equals(false) &
+            row.operationId.equals(null) &
             row.objectPath.notEquals(null),
         orderBy: (row) => row.createdAt.desc(),
       );
@@ -192,8 +202,9 @@ class ContentEndpoint extends Endpoint {
   Future<FileVersion> _upload(
     Session session,
     int id,
-    Transaction transaction,
-  ) async {
+    Transaction transaction, {
+    bool allowCommitted = false,
+  }) async {
     final version = await FileVersion.db.findById(
       session,
       id,
@@ -201,7 +212,7 @@ class ContentEndpoint extends Endpoint {
       lockMode: LockMode.forUpdate,
     );
     if (version == null ||
-        version.committed ||
+        (version.committed && !allowCommitted) ||
         version.aborted ||
         version.authorId != DriveAccess.user(session)) {
       throw GardenException(message: 'This upload is unavailable.');
@@ -269,107 +280,132 @@ class ContentEndpoint extends Endpoint {
     }
     final original = await DriveAccess.node(session, initial.nodeId);
     if (initial.committed) return original;
-    final event = await session.db.transaction((transaction) async {
-      final drive = await DriveAccess.lock(
-        session,
-        original.gardenId,
-        transaction,
-      );
-      final version = await _upload(session, versionId, transaction);
-      var node = await DriveAccess.node(
-        session,
-        version.nodeId,
-        transaction: transaction,
-      );
-      final lease = await FileLease.db.findFirstRow(
-        session,
-        where: (row) => row.nodeId.equals(node.id!),
-        transaction: transaction,
-      );
-      if (lease != null &&
-          lease.expiresAt.isAfter(DateTime.now().toUtc()) &&
-          lease.holderId != DriveAccess.user(session)) {
-        throw GardenException(
-          message:
-              'Someone else is editing this file. Your upload is retained.',
-        );
-      }
-      var operation = 'write';
-      if (node.version != version.baseVersion) {
-        var attempt = 0;
-        var name = DriveAccess.conflictName(node.name, versionId, attempt);
-        while (await FileNode.db.count(
-              session,
-              where: (row) =>
-                  row.gardenId.equals(node.gardenId) &
-                  row.parentId.equals(node.parentId) &
-                  row.activeName.equals(name.toLowerCase()),
-              transaction: transaction,
-            ) !=
-            0) {
-          name = DriveAccess.conflictName(node.name, versionId, ++attempt);
-        }
-        node = await FileNode.db.insertRow(
-          session,
-          FileNode(
-            gardenId: node.gardenId,
-            parentId: node.parentId,
-            name: name,
-            activeName: name.toLowerCase(),
-            kind: NodeKind.file,
-            updatedAt: DateTime.now().toUtc(),
-          ),
-          transaction: transaction,
-        );
-        version.nodeId = node.id!;
-        operation = 'conflict';
-      }
-      if (version.objectPath != null) {
-        final exists = await session.storage.fileExists(
-          storageId: 'private',
-          path: version.objectPath!,
-        );
-        if (!exists) {
-          final store = MultipartObjectStore(session);
-          try {
-            await store.complete(version);
-          } finally {
-            store.close();
-          }
-        }
-        final stat = await session.storage.statFile(
-          storageId: 'private',
-          path: version.objectPath!,
-        );
-        if (stat.size != version.size) {
-          throw GardenException(
-            message: 'The uploaded file size does not match.',
+    final (result, event) = await session.db
+        .transaction<(FileNode, DriveEvent?)>((transaction) async {
+          final drive = await DriveAccess.lock(
+            session,
+            original.gardenId,
+            transaction,
           );
-        }
-      } else {
-        final count = await FileChunk.db.count(
-          session,
-          where: (row) => row.versionId.equals(versionId),
-          transaction: transaction,
-        );
-        if (count != version.chunkCount) {
-          throw GardenException(message: 'The upload is incomplete.');
-        }
-      }
-      version.committed = true;
-      await FileVersion.db.updateRow(
-        session,
-        version,
-        transaction: transaction,
-      );
-      node.version = versionId;
-      node.size = version.size;
-      node.updatedAt = DateTime.now().toUtc();
-      await FileNode.db.updateRow(session, node, transaction: transaction);
-      return DriveJournal.append(session, drive, transaction, operation, node);
-    });
-    await DriveJournal.publish(session, event);
-    return event.node!;
+          final version = await _upload(
+            session,
+            versionId,
+            transaction,
+            allowCommitted: true,
+          );
+          if (version.committed) {
+            return (
+              await DriveAccess.node(
+                session,
+                version.nodeId,
+                transaction: transaction,
+              ),
+              null,
+            );
+          }
+          var node = await DriveAccess.node(
+            session,
+            version.nodeId,
+            transaction: transaction,
+          );
+          final lease = await FileLease.db.findFirstRow(
+            session,
+            where: (row) => row.nodeId.equals(node.id!),
+            transaction: transaction,
+          );
+          if (lease != null &&
+              lease.expiresAt.isAfter(DateTime.now().toUtc()) &&
+              lease.holderId != DriveAccess.user(session)) {
+            throw GardenException(
+              message:
+                  'Someone else is editing this file. Your upload is retained.',
+            );
+          }
+          var operation = 'write';
+          if (node.version != version.baseVersion) {
+            var attempt = 0;
+            var name = DriveAccess.conflictName(node.name, versionId, attempt);
+            while (await FileNode.db.count(
+                  session,
+                  where: (row) =>
+                      row.gardenId.equals(node.gardenId) &
+                      row.parentId.equals(node.parentId) &
+                      row.activeName.equals(name.toLowerCase()),
+                  transaction: transaction,
+                ) !=
+                0) {
+              name = DriveAccess.conflictName(node.name, versionId, ++attempt);
+            }
+            node = await FileNode.db.insertRow(
+              session,
+              FileNode(
+                gardenId: node.gardenId,
+                parentId: node.parentId,
+                name: name,
+                activeName: name.toLowerCase(),
+                kind: NodeKind.file,
+                updatedAt: DateTime.now().toUtc(),
+              ),
+              transaction: transaction,
+            );
+            version.nodeId = node.id!;
+            operation = 'conflict';
+          }
+          if (version.objectPath != null) {
+            final exists = await session.storage.fileExists(
+              storageId: 'private',
+              path: version.objectPath!,
+            );
+            if (!exists) {
+              final store = MultipartObjectStore(session);
+              try {
+                await store.complete(version);
+              } finally {
+                store.close();
+              }
+            }
+            final stat = await session.storage.statFile(
+              storageId: 'private',
+              path: version.objectPath!,
+            );
+            if (stat.size != version.size) {
+              throw GardenException(
+                message: 'The uploaded file size does not match.',
+              );
+            }
+          } else {
+            final count = await FileChunk.db.count(
+              session,
+              where: (row) => row.versionId.equals(versionId),
+              transaction: transaction,
+            );
+            if (count != version.chunkCount) {
+              throw GardenException(message: 'The upload is incomplete.');
+            }
+          }
+          version.committed = true;
+          await FileVersion.db.updateRow(
+            session,
+            version,
+            transaction: transaction,
+          );
+          node.version = versionId;
+          node.size = version.size;
+          node.updatedAt = DateTime.now().toUtc();
+          await FileNode.db.updateRow(session, node, transaction: transaction);
+          return (
+            node,
+            await DriveJournal.append(
+              session,
+              drive,
+              transaction,
+              operation,
+              node,
+            ),
+          );
+        });
+    if (event != null) await DriveJournal.publish(session, event);
+    return result;
   }
 
   Future<ByteData> read(

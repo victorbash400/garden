@@ -579,6 +579,18 @@ class Protocol extends _is.DatabaseSerializationManager {
           dartType: 'int?',
         ),
         _isp.ColumnDefinition(
+          name: 'operationId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'editRequest',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
           name: 'committed',
           columnType: _isp.ColumnType.boolean,
           isNullable: false,
@@ -612,6 +624,23 @@ class Protocol extends _is.DatabaseSerializationManager {
         ),
       ],
       indexes: [
+        _isp.IndexDefinition(
+          indexName: 'version_edit_operation',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'authorId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'operationId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
         _isp.IndexDefinition(
           indexName: 'version_node',
           tableSpace: null,

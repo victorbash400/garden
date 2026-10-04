@@ -24,6 +24,8 @@ abstract class FileVersion
     this.objectPath,
     this.uploadId,
     this.partSize,
+    this.operationId,
+    this.editRequest,
     bool? committed,
     bool? aborted,
     required this.createdAt,
@@ -40,6 +42,8 @@ abstract class FileVersion
     String? objectPath,
     String? uploadId,
     int? partSize,
+    _isc.UuidValue? operationId,
+    String? editRequest,
     bool? committed,
     bool? aborted,
     required DateTime createdAt,
@@ -56,6 +60,12 @@ abstract class FileVersion
       objectPath: jsonSerialization['objectPath'] as String?,
       uploadId: jsonSerialization['uploadId'] as String?,
       partSize: jsonSerialization['partSize'] as int?,
+      operationId: jsonSerialization['operationId'] == null
+          ? null
+          : _isc.UuidValueJsonExtension.fromJson(
+              jsonSerialization['operationId'],
+            ),
+      editRequest: jsonSerialization['editRequest'] as String?,
       committed: jsonSerialization['committed'] == null
           ? null
           : _isc.BoolJsonExtension.fromJson(jsonSerialization['committed']),
@@ -89,6 +99,10 @@ abstract class FileVersion
 
   int? partSize;
 
+  _isc.UuidValue? operationId;
+
+  String? editRequest;
+
   bool committed;
 
   bool aborted;
@@ -108,6 +122,8 @@ abstract class FileVersion
     String? objectPath,
     String? uploadId,
     int? partSize,
+    _isc.UuidValue? operationId,
+    String? editRequest,
     bool? committed,
     bool? aborted,
     DateTime? createdAt,
@@ -125,6 +141,8 @@ abstract class FileVersion
       if (objectPath != null) 'objectPath': objectPath,
       if (uploadId != null) 'uploadId': uploadId,
       if (partSize != null) 'partSize': partSize,
+      if (operationId != null) 'operationId': operationId?.toJson(),
+      if (editRequest != null) 'editRequest': editRequest,
       'committed': committed,
       'aborted': aborted,
       'createdAt': createdAt.toJson(),
@@ -144,6 +162,8 @@ abstract class FileVersion
       if (objectPath != null) 'objectPath': objectPath,
       if (uploadId != null) 'uploadId': uploadId,
       if (partSize != null) 'partSize': partSize,
+      if (operationId != null) 'operationId': operationId?.toJson(),
+      if (editRequest != null) 'editRequest': editRequest,
       'committed': committed,
       'aborted': aborted,
       'createdAt': createdAt.toJson(),
@@ -169,6 +189,8 @@ class _FileVersionImpl extends FileVersion {
     String? objectPath,
     String? uploadId,
     int? partSize,
+    _isc.UuidValue? operationId,
+    String? editRequest,
     bool? committed,
     bool? aborted,
     required DateTime createdAt,
@@ -182,6 +204,8 @@ class _FileVersionImpl extends FileVersion {
          objectPath: objectPath,
          uploadId: uploadId,
          partSize: partSize,
+         operationId: operationId,
+         editRequest: editRequest,
          committed: committed,
          aborted: aborted,
          createdAt: createdAt,
@@ -201,6 +225,8 @@ class _FileVersionImpl extends FileVersion {
     Object? objectPath = _Undefined,
     Object? uploadId = _Undefined,
     Object? partSize = _Undefined,
+    Object? operationId = _Undefined,
+    Object? editRequest = _Undefined,
     bool? committed,
     bool? aborted,
     DateTime? createdAt,
@@ -215,6 +241,10 @@ class _FileVersionImpl extends FileVersion {
       objectPath: objectPath is String? ? objectPath : this.objectPath,
       uploadId: uploadId is String? ? uploadId : this.uploadId,
       partSize: partSize is int? ? partSize : this.partSize,
+      operationId: operationId is _isc.UuidValue?
+          ? operationId
+          : this.operationId,
+      editRequest: editRequest is String? ? editRequest : this.editRequest,
       committed: committed ?? this.committed,
       aborted: aborted ?? this.aborted,
       createdAt: createdAt ?? this.createdAt,

@@ -24,6 +24,8 @@ abstract class FileVersion
     this.objectPath,
     this.uploadId,
     this.partSize,
+    this.operationId,
+    this.editRequest,
     bool? committed,
     bool? aborted,
     required this.createdAt,
@@ -40,6 +42,8 @@ abstract class FileVersion
     String? objectPath,
     String? uploadId,
     int? partSize,
+    _is.UuidValue? operationId,
+    String? editRequest,
     bool? committed,
     bool? aborted,
     required DateTime createdAt,
@@ -56,6 +60,12 @@ abstract class FileVersion
       objectPath: jsonSerialization['objectPath'] as String?,
       uploadId: jsonSerialization['uploadId'] as String?,
       partSize: jsonSerialization['partSize'] as int?,
+      operationId: jsonSerialization['operationId'] == null
+          ? null
+          : _is.UuidValueJsonExtension.fromJson(
+              jsonSerialization['operationId'],
+            ),
+      editRequest: jsonSerialization['editRequest'] as String?,
       committed: jsonSerialization['committed'] == null
           ? null
           : _is.BoolJsonExtension.fromJson(jsonSerialization['committed']),
@@ -91,6 +101,10 @@ abstract class FileVersion
 
   int? partSize;
 
+  _is.UuidValue? operationId;
+
+  String? editRequest;
+
   bool committed;
 
   bool aborted;
@@ -113,6 +127,8 @@ abstract class FileVersion
     String? objectPath,
     String? uploadId,
     int? partSize,
+    _is.UuidValue? operationId,
+    String? editRequest,
     bool? committed,
     bool? aborted,
     DateTime? createdAt,
@@ -130,6 +146,8 @@ abstract class FileVersion
       if (objectPath != null) 'objectPath': objectPath,
       if (uploadId != null) 'uploadId': uploadId,
       if (partSize != null) 'partSize': partSize,
+      if (operationId != null) 'operationId': operationId?.toJson(),
+      if (editRequest != null) 'editRequest': editRequest,
       'committed': committed,
       'aborted': aborted,
       'createdAt': createdAt.toJson(),
@@ -149,6 +167,8 @@ abstract class FileVersion
       if (objectPath != null) 'objectPath': objectPath,
       if (uploadId != null) 'uploadId': uploadId,
       if (partSize != null) 'partSize': partSize,
+      if (operationId != null) 'operationId': operationId?.toJson(),
+      if (editRequest != null) 'editRequest': editRequest,
       'committed': committed,
       'aborted': aborted,
       'createdAt': createdAt.toJson(),
@@ -196,6 +216,8 @@ class _FileVersionImpl extends FileVersion {
     String? objectPath,
     String? uploadId,
     int? partSize,
+    _is.UuidValue? operationId,
+    String? editRequest,
     bool? committed,
     bool? aborted,
     required DateTime createdAt,
@@ -209,6 +231,8 @@ class _FileVersionImpl extends FileVersion {
          objectPath: objectPath,
          uploadId: uploadId,
          partSize: partSize,
+         operationId: operationId,
+         editRequest: editRequest,
          committed: committed,
          aborted: aborted,
          createdAt: createdAt,
@@ -228,6 +252,8 @@ class _FileVersionImpl extends FileVersion {
     Object? objectPath = _Undefined,
     Object? uploadId = _Undefined,
     Object? partSize = _Undefined,
+    Object? operationId = _Undefined,
+    Object? editRequest = _Undefined,
     bool? committed,
     bool? aborted,
     DateTime? createdAt,
@@ -242,6 +268,10 @@ class _FileVersionImpl extends FileVersion {
       objectPath: objectPath is String? ? objectPath : this.objectPath,
       uploadId: uploadId is String? ? uploadId : this.uploadId,
       partSize: partSize is int? ? partSize : this.partSize,
+      operationId: operationId is _is.UuidValue?
+          ? operationId
+          : this.operationId,
+      editRequest: editRequest is String? ? editRequest : this.editRequest,
       committed: committed ?? this.committed,
       aborted: aborted ?? this.aborted,
       createdAt: createdAt ?? this.createdAt,
@@ -289,6 +319,18 @@ class FileVersionUpdateTable extends _is.UpdateTable<FileVersionTable> {
 
   _is.ColumnValue<int, int> partSize(int? value) => _is.ColumnValue(
     table.partSize,
+    value,
+  );
+
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> operationId(
+    _is.UuidValue? value,
+  ) => _is.ColumnValue(
+    table.operationId,
+    value,
+  );
+
+  _is.ColumnValue<String, String> editRequest(String? value) => _is.ColumnValue(
+    table.editRequest,
     value,
   );
 
@@ -344,6 +386,14 @@ class FileVersionTable extends _is.Table<int?> {
       'partSize',
       this,
     );
+    operationId = _is.ColumnUuid(
+      'operationId',
+      this,
+    );
+    editRequest = _is.ColumnString(
+      'editRequest',
+      this,
+    );
     committed = _is.ColumnBool(
       'committed',
       this,
@@ -378,6 +428,10 @@ class FileVersionTable extends _is.Table<int?> {
 
   late final _is.ColumnInt partSize;
 
+  late final _is.ColumnUuid operationId;
+
+  late final _is.ColumnString editRequest;
+
   late final _is.ColumnBool committed;
 
   late final _is.ColumnBool aborted;
@@ -395,6 +449,8 @@ class FileVersionTable extends _is.Table<int?> {
     objectPath,
     uploadId,
     partSize,
+    operationId,
+    editRequest,
     committed,
     aborted,
     createdAt,

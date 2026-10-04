@@ -384,6 +384,22 @@ class EndpointContent extends _isc.EndpointRef {
   @override
   String get name => 'content';
 
+  _ida.Future<_ibt6e7l6.FileVersion> beginEdit(
+    int nodeId,
+    int baseVersion,
+    int size,
+    _isc.UuidValue operationId,
+  ) => caller.callServerEndpoint<_ibt6e7l6.FileVersion>(
+    'content',
+    'beginEdit',
+    {
+      'nodeId': nodeId,
+      'baseVersion': baseVersion,
+      'size': size,
+      'operationId': operationId,
+    },
+  );
+
   _ida.Future<_ibt6e7l6.FileVersion> begin(
     int nodeId,
     int baseVersion,

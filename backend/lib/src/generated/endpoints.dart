@@ -510,6 +510,43 @@ class Endpoints extends _is.EndpointDispatch {
       name: 'content',
       endpoint: endpoints['content']!,
       methodConnectors: {
+        'beginEdit': _is.MethodConnector(
+          name: 'beginEdit',
+          params: {
+            'nodeId': _is.ParameterDescription(
+              name: 'nodeId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'baseVersion': _is.ParameterDescription(
+              name: 'baseVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'size': _is.ParameterDescription(
+              name: 'size',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'operationId': _is.ParameterDescription(
+              name: 'operationId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['content'] as _iqqtuyco.ContentEndpoint).beginEdit(
+                    session,
+                    params['nodeId'],
+                    params['baseVersion'],
+                    params['size'],
+                    params['operationId'],
+                  ),
+        ),
         'begin': _is.MethodConnector(
           name: 'begin',
           params: {

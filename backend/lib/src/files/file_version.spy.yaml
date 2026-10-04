@@ -9,9 +9,14 @@ fields:
   objectPath: String?
   uploadId: String?
   partSize: int?
+  operationId: UuidValue?
+  editRequest: String?
   committed: bool, default=false
   aborted: bool, default=false
   createdAt: DateTime
 indexes:
+  version_edit_operation:
+    fields: authorId, operationId
+    unique: true
   version_node:
     fields: nodeId, committed, createdAt
