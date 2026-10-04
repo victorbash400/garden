@@ -7,12 +7,13 @@ struct GardenNode: Codable, Sendable {
   let parentID: Int
   let name: String
   let folder: Bool
-  let size: Int
+  var size: Int
   let version: Int
-  let modified: String
-  let modifiedDate: Date
+  var modified: String
+  var modifiedDate: Date
   let deleted: Bool
-  let createdDate: Date?
+  var createdDate: Date?
+  var attributes: GardenFileAttributes?
 
   init(_ value: [String: Any]) throws {
     guard let id = value["id"] as? Int,
@@ -50,6 +51,10 @@ struct GardenNode: Codable, Sendable {
     } else {
       createdDate = nil
     }
+    if let value = value["attributes"], !(value is NSNull) {
+      attributes = try JSONDecoder().decode(GardenFileAttributes.self, from: JSONSerialization.data(withJSONObject: value))
+      try attributes?.validate()
+    } else { attributes = nil }
   }
 }
 

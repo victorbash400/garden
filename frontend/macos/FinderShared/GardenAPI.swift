@@ -59,6 +59,8 @@ struct GardenFilesystemFailure {
     case "invalid": code = .EINVAL
     case "accessDenied": code = .EACCES
     case "busy": code = .EBUSY
+    case "noAttribute": code = .ENOATTR
+    case "tooLarge": code = .E2BIG
     default: throw GardenAPIError.invalidResponse
     }
     self.message = message

@@ -102,6 +102,7 @@ final class RemoteMount: @unchecked Sendable {
   }
 
   func unmount() async throws {
+    try await engine.flushAll()
     await flushInvalidations()
     try await requestStop().wait()
     try await run()
@@ -154,7 +155,6 @@ final class RemoteMount: @unchecked Sendable {
           let refreshed = attributes.st_mode & mode_t(S_IFMT) == mode_t(S_IFREG)
             ? truncate(self.path + path, attributes.st_size) : chflags(self.path + path, 0)
           if refreshed != 0 && errno != ENOENT { RemoteLog.error(POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO)) }
-          NSWorkspace.shared.noteFileSystemChanged(self.path + path)
         }
       }
     }

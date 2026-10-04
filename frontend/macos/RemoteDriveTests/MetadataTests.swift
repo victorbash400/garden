@@ -67,6 +67,15 @@ import Foundation
     do { _ = try metadata.lookup("/Videos/../Empty"); throw NSError(domain: "RemoteTests", code: 3) }
     catch let error as POSIXError { try require(error.code == .EINVAL, "Traversal must fail") }
     let engine = try RemoteEngine(domainID: "test", state: directory, cache: directory.appendingPathComponent("blocks"), limit: 0)
+    try await engine.setExtendedAttribute("/", key: "com.apple.FinderInfo", bytes: Data([1, 2, 3]), options: 2)
+    try require(try await engine.extendedAttributes("/").value("com.apple.FinderInfo") == Data([1, 2, 3]), "Volume metadata must persist locally")
+    let volume = try RemoteMetadata(url: directory.appendingPathComponent("metadata.sqlite"), namespace: "test").volumeNode()
+    try require(try volume.attributes?.value("com.apple.FinderInfo") == Data([1, 2, 3]), "Volume attributes must survive reopening")
+    do {
+      try await engine.setExtendedAttribute("/", key: "com.apple.FinderInfo", bytes: Data(), options: 2)
+      throw NSError(domain: "RemoteTests", code: 7)
+    } catch let error as POSIXError { try require(error.code == .EEXIST, "Create-only attributes must reject duplicates") }
+    try await engine.setExtendedAttribute("/", key: "com.apple.FinderInfo", bytes: nil, options: 0)
     let handle = try await engine.open("/Videos/Movie 4.mov", directory: false)
     try await engine.receive(GardenChange(revision: 53, operation: "update", node: try node(4, parent: 1, name: "Movie 4.mov", version: 2), previousParentID: nil))
     let old = try await engine.lookup("", handle: handle)
@@ -76,7 +85,7 @@ import Foundation
     try require(try await engine.path(nil) == "", "Drive root must resolve without a node")
     let empty = try await engine.open("/Empty", directory: true)
     try require(try await engine.list(empty).isEmpty, "Empty folder must open")
-    await engine.close(handle)
+    try await engine.close(handle)
     do { _ = try await engine.lookup("", handle: handle); throw NSError(domain: "RemoteTests", code: 4) }
     catch let error as POSIXError { try require(error.code == .EBADF, "Closed handles must fail") }
     try await engine.receive(GardenChange(revision: 54, operation: "delete",

@@ -32,6 +32,13 @@ import Foundation
     defer { try? FileManager.default.removeItem(at: root) }
     let url = root.appendingPathComponent("writes.sqlite")
     let file = try node()
+    let legacy = RemoteWriteState(operationID: UUID(), base: file, size: file.size, baseLimit: file.size, generation: 1)
+    var record = try JSONSerialization.jsonObject(with: JSONEncoder().encode(legacy)) as! [String: Any]
+    record.removeValue(forKey: "sealed")
+    record.removeValue(forKey: "modified")
+    let migrated = try JSONDecoder().decode(RemoteWriteState.self, from: JSONSerialization.data(withJSONObject: record))
+    try require(!migrated.sealed && migrated.modified == file.modifiedDate && migrated.operationID == legacy.operationID,
+      "Legacy pending journals must preserve their edit identity when publication fields are introduced")
     let original = Data((0..<512).map { UInt8($0 % 251) })
     var expected = original
     do {
@@ -67,7 +74,13 @@ import Foundation
     }
     let reopened = try RemoteWriteJournal(url: url, namespace: "account-drive", limit: 4096)
     try require(try contents(reopened, file, original: original) == expected, "Reopen must retain exact edits and logical size")
-    let current = try reopened.state(file.id)!
+    let current = try reopened.seal(file.id)
+    do { try reopened.write(file, offset: 0, bytes: Data([1])); throw POSIXError(.EINVAL) }
+    catch let error as POSIXError { try require(error.code == .EBUSY, "An in-flight publication must freeze its accepted bytes") }
+    do { try reopened.truncate(file, size: 0); throw POSIXError(.EINVAL) }
+    catch let error as POSIXError { try require(error.code == .EBUSY, "An in-flight publication must freeze its size") }
+    try require(try reopened.seal(file.id).operationID == current.operationID,
+      "A publication retry must reuse the same immutable edit identity")
     try reopened.acknowledge(current)
     try require(try reopened.used == 0 && reopened.pending().isEmpty, "Acknowledged edits must release staging space")
     do {

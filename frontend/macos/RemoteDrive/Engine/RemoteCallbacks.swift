@@ -1,12 +1,12 @@
 import Darwin
 import Foundation
 
-private func engine(_ context: UnsafeMutableRawPointer?) throws -> RemoteEngine {
+func engine(_ context: UnsafeMutableRawPointer?) throws -> RemoteEngine {
   guard let context else { throw POSIXError(.EINVAL) }
   return Unmanaged<RemoteEngine>.fromOpaque(context).takeUnretainedValue()
 }
 
-private func wait<T>(_ operation: @escaping () async throws -> T) throws -> T {
+func wait<T>(_ operation: @escaping () async throws -> T) throws -> T {
   let semaphore = DispatchSemaphore(value: 0)
   var result: Result<T, Error>!
   Task.detached {
@@ -18,7 +18,7 @@ private func wait<T>(_ operation: @escaping () async throws -> T) throws -> T {
   return try result.get()
 }
 
-private func status(_ operation: () throws -> Int32) -> Int32 {
+func status(_ operation: () throws -> Int32) -> Int32 {
   do { return try operation() }
   catch let error as POSIXError { return -error.code.rawValue }
   catch GardenAPIError.unauthorized { RemoteLog.error(GardenAPIError.unauthorized); return -EACCES }
@@ -31,10 +31,12 @@ func remoteAttributes(_ context: UnsafeMutableRawPointer?, _ path: UnsafePointer
     let remoteEngine = try engine(context)
     guard let attributes else { throw POSIXError(.EINVAL) }
     let name = path.map { String(cString: $0) } ?? "/"
-    let node = try wait { try await remoteEngine.lookup(name, handle: handle) }
+    let node: GardenNode? = try wait { try await remoteEngine.attributeNode(name, handle: handle) }
     attributes.pointee = stat()
     attributes.pointee.st_ino = UInt64((node?.id ?? 0) + 2)
-    attributes.pointee.st_mode = mode_t(node?.folder ?? true ? S_IFDIR | 0o755 : S_IFREG | 0o444)
+    attributes.pointee.st_mode = mode_t((node?.folder ?? true ? S_IFDIR : S_IFREG) |
+      mode_t(node?.attributes?.permissions ?? (node?.folder ?? true ? 0o755 : 0o644)))
+    attributes.pointee.st_flags = UInt32(node?.attributes?.flags ?? 0)
     attributes.pointee.st_nlink = 1
     attributes.pointee.st_uid = getuid()
     attributes.pointee.st_gid = getgid()
@@ -43,6 +45,8 @@ func remoteAttributes(_ context: UnsafeMutableRawPointer?, _ path: UnsafePointer
     attributes.pointee.st_blksize = 1024 * 1024
     attributes.pointee.st_mtimespec.tv_sec = Int(node?.modifiedDate.timeIntervalSince1970 ?? 0)
     attributes.pointee.st_ctimespec = attributes.pointee.st_mtimespec
+    let accessed = try node?.attributes?.accessedAt.map(GardenFileAttributes.date) ?? node?.modifiedDate ?? Date(timeIntervalSince1970: 0)
+    attributes.pointee.st_atimespec.tv_sec = Int(accessed.timeIntervalSince1970)
     let birth = node?.createdDate ?? node?.modifiedDate ?? Date(timeIntervalSince1970: 0)
     let seconds = birth.timeIntervalSince1970.rounded(.down)
     attributes.pointee.st_birthtimespec = timespec(tv_sec: Int(seconds),
@@ -52,13 +56,13 @@ func remoteAttributes(_ context: UnsafeMutableRawPointer?, _ path: UnsafePointer
 }
 
 @_cdecl("garden_remote_set_birthtime")
-func remoteSetBirthtime(_ context: UnsafeMutableRawPointer?, _ path: UnsafePointer<CChar>?, _ seconds: Int64, _ nanos: Int64) -> Int32 {
+func remoteSetBirthtime(_ context: UnsafeMutableRawPointer?, _ path: UnsafePointer<CChar>?, _ handle: UInt64, _ seconds: Int64, _ nanos: Int64) -> Int32 {
   status {
     let remoteEngine = try engine(context)
-    guard let path, nanos >= 0, nanos < 1_000_000_000 else { throw POSIXError(.EINVAL) }
+    guard nanos >= 0, nanos < 1_000_000_000 else { throw POSIXError(.EINVAL) }
     let date = Date(timeIntervalSince1970: Double(seconds) + Double(nanos) / 1_000_000_000)
-    let mutation = try RemoteMutation(operation: .setAttributes, path: String(cString: path), createdAt: date)
-    try wait { try await remoteEngine.mutate(mutation) }
+    let name = path.map { String(cString: $0) }
+    try wait { try await remoteEngine.setBirthtime(name, handle: handle, date: date) }
     return 0
   }
 }
@@ -99,7 +103,7 @@ func remoteOpen(_ context: UnsafeMutableRawPointer?, _ path: UnsafePointer<CChar
 func remoteClose(_ context: UnsafeMutableRawPointer?, _ handle: UInt64) -> Int32 {
   status {
     let remoteEngine = try engine(context)
-    try wait { await remoteEngine.close(handle) }
+    try wait { try await remoteEngine.close(handle) }
     return 0
   }
 }

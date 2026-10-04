@@ -7,6 +7,33 @@ struct RemoteWriteState: Codable {
   var size: Int
   var baseLimit: Int
   var generation: Int
+  var sealed = false
+  var modified = Date()
+
+  private enum CodingKeys: String, CodingKey { case operationID, base, size, baseLimit, generation, sealed, modified }
+
+  init(operationID: UUID, base: GardenNode, size: Int, baseLimit: Int, generation: Int) {
+    self.operationID = operationID
+    self.base = base
+    self.size = size
+    self.baseLimit = baseLimit
+    self.generation = generation
+  }
+
+  init(from decoder: Decoder) throws {
+    let value = try decoder.container(keyedBy: CodingKeys.self)
+    operationID = try value.decode(UUID.self, forKey: .operationID)
+    base = try value.decode(GardenNode.self, forKey: .base)
+    size = try value.decode(Int.self, forKey: .size)
+    baseLimit = try value.decode(Int.self, forKey: .baseLimit)
+    generation = try value.decode(Int.self, forKey: .generation)
+    // Earlier journals predate publication sealing and recorded the base node's modification date.
+    sealed = try value.decodeIfPresent(Bool.self, forKey: .sealed) ?? false
+    modified = try value.decodeIfPresent(Date.self, forKey: .modified) ?? base.modifiedDate
+    guard size >= 0, size <= RemoteWriteJournal.fileLimit, baseLimit >= 0, baseLimit <= base.size, generation >= 0 else {
+      throw POSIXError(.EINVAL)
+    }
+  }
 }
 
 struct RemoteWriteExtent {
@@ -88,6 +115,7 @@ final class RemoteWriteJournal {
     try db.transaction {
       var draft = try state(node.id) ?? RemoteWriteState(operationID: UUID(), base: node,
         size: node.size, baseLimit: node.size, generation: 0)
+      guard !draft.sealed else { throw POSIXError(.EBUSY) }
       let end = offset + bytes.count
       for extent in try extents(node.id, offset: offset, length: bytes.count) {
         try db.execute("DELETE FROM extents WHERE node=? AND start=?", [.number(node.id), .number(extent.offset)])
@@ -108,8 +136,15 @@ final class RemoteWriteJournal {
       try capacity()
       draft.size = max(draft.size, end)
       draft.generation += 1
+      draft.modified = Date()
       try save(draft)
     }
+  }
+
+  func hasChanges(_ node: Int, offset: Int, length: Int) throws -> Bool {
+    guard offset >= 0, length > 0, offset <= Self.fileLimit, length <= Self.fileLimit - offset else { throw POSIXError(.EINVAL) }
+    return try db.statement("SELECT 1 FROM extents WHERE node=? AND start<? AND start+length(bytes)>? LIMIT 1",
+      [.number(node), .number(offset + length), .number(offset)]) { statement in try db.step(statement) }
   }
 
   func truncate(_ node: GardenNode, size: Int) throws {
@@ -117,6 +152,7 @@ final class RemoteWriteJournal {
     try db.transaction {
       var draft = try state(node.id) ?? RemoteWriteState(operationID: UUID(), base: node,
         size: node.size, baseLimit: node.size, generation: 0)
+      guard !draft.sealed else { throw POSIXError(.EBUSY) }
       if size < draft.size {
         for extent in try extents(node.id, offset: size, length: draft.size - size) {
           try db.execute("DELETE FROM extents WHERE node=? AND start=?", [.number(node.id), .number(extent.offset)])
@@ -128,6 +164,26 @@ final class RemoteWriteJournal {
       draft.size = size
       draft.baseLimit = min(draft.baseLimit, size)
       draft.generation += 1
+      draft.modified = Date()
+      try save(draft)
+    }
+  }
+
+  func seal(_ node: Int) throws -> RemoteWriteState {
+    try db.transaction {
+      guard var draft = try state(node) else { throw POSIXError(.ENOENT) }
+      draft.sealed = true
+      try save(draft)
+      return draft
+    }
+  }
+
+  func setModified(_ node: Int, date: Date) throws {
+    try db.transaction {
+      guard var draft = try state(node) else { throw POSIXError(.ENOENT) }
+      guard !draft.sealed else { throw POSIXError(.EBUSY) }
+      draft.modified = date
+      draft.generation += 1
       try save(draft)
     }
   }
@@ -135,7 +191,7 @@ final class RemoteWriteJournal {
   func acknowledge(_ state: RemoteWriteState) throws {
     try db.transaction {
       guard let current = try self.state(state.base.id), current.operationID == state.operationID,
-        current.generation == state.generation else { throw POSIXError(.EBUSY) }
+        current.generation == state.generation, current.sealed, state.sealed else { throw POSIXError(.EBUSY) }
       try db.execute("DELETE FROM extents WHERE node=?", [.number(state.base.id)])
       try db.execute("DELETE FROM edits WHERE node=?", [.number(state.base.id)])
     }

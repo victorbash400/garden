@@ -128,8 +128,19 @@
 		A8431B719E003BF184C01B80 /* GardenFinderBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CB7DD914B7CAE7939DB087 /* GardenFinderBridge.swift */; };
 		A10D20261004000000000000 /* RemoteMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20D20261004000000000000 /* RemoteMutation.swift */; };
 		A10D20261004000000000001 /* RemoteMutationJournal.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20D20261004000000000001 /* RemoteMutationJournal.swift */; };
+		A10D20261004000000000007 /* RemoteWriteCallbacks.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20D20261004000000000007 /* RemoteWriteCallbacks.swift */; };
+		A10D20261004000000000006 /* RemoteEngineWrites.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20D20261004000000000006 /* RemoteEngineWrites.swift */; };
+		A10D20261004000000000005 /* RemoteWritePublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20D20261004000000000005 /* RemoteWritePublisher.swift */; };
+		A10D20261004000000000004 /* RemoteWriteReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20D20261004000000000004 /* RemoteWriteReader.swift */; };
 		A10D20261004000000000003 /* RemoteWriteJournal.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20D20261004000000000003 /* RemoteWriteJournal.swift */; };
 		A10D20261004000000000002 /* RemoteWriteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20D20261004000000000002 /* RemoteWriteDatabase.swift */; };
+		A30D20261004000000000800 /* GardenFileAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20D20261004000000000008 /* GardenFileAttributes.swift */; };
+		A30D20261004000000000801 /* GardenFileAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20D20261004000000000008 /* GardenFileAttributes.swift */; };
+		A30D20261004000000000802 /* GardenFileAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20D20261004000000000008 /* GardenFileAttributes.swift */; };
+		A30D20261004000000000803 /* GardenFileAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20D20261004000000000008 /* GardenFileAttributes.swift */; };
+		A30D20261004000000000900 /* RemoteEngineAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20D20261004000000000009 /* RemoteEngineAttributes.swift */; };
+		A30D20261004000000000A00 /* RemoteAttributeCallbacks.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20D2026100400000000000A /* RemoteAttributeCallbacks.swift */; };
+		A30D20261004000000000B00 /* RemoteExtendedAttributeCallbacks.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20D2026100400000000000B /* RemoteExtendedAttributeCallbacks.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -285,8 +296,16 @@
 		264689F7573263A6A2BAE211 /* GardenFinderEvents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenFinderEvents.swift; path = Runner/GardenFinderEvents.swift; sourceTree = "<group>"; };
 		A20D20261004000000000000 /* RemoteMutation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteMutation.swift; path = RemoteDrive/Engine/RemoteMutation.swift; sourceTree = "<group>"; };
 		A20D20261004000000000001 /* RemoteMutationJournal.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteMutationJournal.swift; path = RemoteDrive/Engine/RemoteMutationJournal.swift; sourceTree = "<group>"; };
+		A20D20261004000000000007 /* RemoteWriteCallbacks.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteWriteCallbacks.swift; path = RemoteDrive/Engine/RemoteWriteCallbacks.swift; sourceTree = "<group>"; };
+		A20D20261004000000000006 /* RemoteEngineWrites.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteEngineWrites.swift; path = RemoteDrive/Engine/RemoteEngineWrites.swift; sourceTree = "<group>"; };
+		A20D20261004000000000005 /* RemoteWritePublisher.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteWritePublisher.swift; path = RemoteDrive/Engine/RemoteWritePublisher.swift; sourceTree = "<group>"; };
+		A20D20261004000000000004 /* RemoteWriteReader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteWriteReader.swift; path = RemoteDrive/Engine/RemoteWriteReader.swift; sourceTree = "<group>"; };
 		A20D20261004000000000003 /* RemoteWriteJournal.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteWriteJournal.swift; path = RemoteDrive/Engine/RemoteWriteJournal.swift; sourceTree = "<group>"; };
 		A20D20261004000000000002 /* RemoteWriteDatabase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteWriteDatabase.swift; path = RemoteDrive/Engine/RemoteWriteDatabase.swift; sourceTree = "<group>"; };
+		A20D20261004000000000008 /* GardenFileAttributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenFileAttributes.swift; path = FinderShared/GardenFileAttributes.swift; sourceTree = "<group>"; };
+		A20D20261004000000000009 /* RemoteEngineAttributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteEngineAttributes.swift; path = RemoteDrive/Engine/RemoteEngineAttributes.swift; sourceTree = "<group>"; };
+		A20D2026100400000000000A /* RemoteAttributeCallbacks.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteAttributeCallbacks.swift; path = RemoteDrive/Engine/RemoteAttributeCallbacks.swift; sourceTree = "<group>"; };
+		A20D2026100400000000000B /* RemoteExtendedAttributeCallbacks.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteExtendedAttributeCallbacks.swift; path = RemoteDrive/Engine/RemoteExtendedAttributeCallbacks.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -457,6 +476,13 @@
 				30EC59BB4CB4CE2D9830EDF3 /* RemoteCallbacks.swift */,
 				045347095E12F95F3EA3195D /* RemoteMetadata.swift */,
 				A20D20261004000000000001 /* RemoteMutationJournal.swift */,
+				A20D20261004000000000007 /* RemoteWriteCallbacks.swift */,
+				A20D20261004000000000006 /* RemoteEngineWrites.swift */,
+				A20D2026100400000000000B /* RemoteExtendedAttributeCallbacks.swift */,
+				A20D2026100400000000000A /* RemoteAttributeCallbacks.swift */,
+				A20D20261004000000000009 /* RemoteEngineAttributes.swift */,
+				A20D20261004000000000005 /* RemoteWritePublisher.swift */,
+				A20D20261004000000000004 /* RemoteWriteReader.swift */,
 				A20D20261004000000000003 /* RemoteWriteJournal.swift */,
 				A20D20261004000000000002 /* RemoteWriteDatabase.swift */,
 				A20D20261004000000000000 /* RemoteMutation.swift */,
@@ -508,6 +534,7 @@
 			children = (
 				B7A65DF6BF53C6D521B7B380 /* FinderCredential.swift */,
 				E80EEA4C2EDA2C0390B33422 /* GardenNode.swift */,
+				A20D20261004000000000008 /* GardenFileAttributes.swift */,
 				8681944F850AE3C8FBA3090E /* GardenAPI.swift */,
 			);
 			name = FinderShared;
@@ -780,6 +807,7 @@
 				A0CAC4CA25F0A9946B89177C /* GardenStreamingItem.swift in Sources */,
 				F8E5D28E858EC92180A95955 /* FinderCredential.swift in Sources */,
 				97AA4F544A35B9FBD5F34071 /* GardenNode.swift in Sources */,
+				A30D20261004000000000800 /* GardenFileAttributes.swift in Sources */,
 				0B73494BD26D4437DC235208 /* GardenAPI.swift in Sources */,
 				85DF0A9A69A75A375F6BC25E /* GardenRangeCache.swift in Sources */,
 				FAC358EF6047694223FE0EF2 /* GardenReadPermits.swift in Sources */,
@@ -821,6 +849,7 @@
 				7551C4C4EFC2E6825A2207BA /* GardenAPI.swift in Sources */,
 				E9C000109326835801B929D1 /* GardenRangeCache.swift in Sources */,
 				E6844C82A582C1A8ED500A78 /* GardenNode.swift in Sources */,
+				A30D20261004000000000802 /* GardenFileAttributes.swift in Sources */,
 				EAE0ACEB69D452E5B8A04ED2 /* GardenReadPermits.swift in Sources */,
 				2B72802255BA932831550A13 /* GardenMultipartUpload.swift in Sources */,
 				6B02FE73D811130673F45BF7 /* GardenObjectRequests.swift in Sources */,
@@ -849,6 +878,7 @@
 				932E11ADD36A74FD71E1BCD1 /* GardenEnumerator.swift in Sources */,
 				14F8DF57F2F53B0521DFDBF0 /* FinderCredential.swift in Sources */,
 				C36A5F1C0E9B80E1CEC20C8C /* GardenNode.swift in Sources */,
+				A30D20261004000000000801 /* GardenFileAttributes.swift in Sources */,
 				AA2A3E9AEDCB62FB57D5DFC4 /* GardenAPI.swift in Sources */,
 				E45EC7BF2C9DA709CF5B5B82 /* GardenRangeCache.swift in Sources */,
 				7CE6C00E3C2EEADBCF5DFFA0 /* GardenReadPermits.swift in Sources */,
@@ -871,6 +901,13 @@
 				373D33C6FD8111692ECD68B9 /* RemoteCallbacks.swift in Sources */,
 				888E62B09BF96D536FAF8E43 /* RemoteMetadata.swift in Sources */,
 				A10D20261004000000000001 /* RemoteMutationJournal.swift in Sources */,
+				A10D20261004000000000007 /* RemoteWriteCallbacks.swift in Sources */,
+				A10D20261004000000000006 /* RemoteEngineWrites.swift in Sources */,
+				A30D20261004000000000B00 /* RemoteExtendedAttributeCallbacks.swift in Sources */,
+				A30D20261004000000000A00 /* RemoteAttributeCallbacks.swift in Sources */,
+				A30D20261004000000000900 /* RemoteEngineAttributes.swift in Sources */,
+				A10D20261004000000000005 /* RemoteWritePublisher.swift in Sources */,
+				A10D20261004000000000004 /* RemoteWriteReader.swift in Sources */,
 				A10D20261004000000000003 /* RemoteWriteJournal.swift in Sources */,
 				A10D20261004000000000002 /* RemoteWriteDatabase.swift in Sources */,
 				A10D20261004000000000000 /* RemoteMutation.swift in Sources */,
@@ -887,6 +924,7 @@
 				26BAE73D6567562D297AFFC4 /* GardenObjectRequests.swift in Sources */,
 				F8DFA53480F857115380FAD8 /* GardenCacheDatabase.swift in Sources */,
 				7087302CEBDBAE4638DB9C01 /* GardenNode.swift in Sources */,
+				A30D20261004000000000803 /* GardenFileAttributes.swift in Sources */,
 				08F89A7E59DB5EF1246880F6 /* GardenReadPermits.swift in Sources */,
 				099C8CADC3ABF9F64E443556 /* GardenCacheWatch.swift in Sources */,
 				BDC98E11A7A53290130C740F /* GardenAPI.swift in Sources */,

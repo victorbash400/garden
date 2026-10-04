@@ -5,6 +5,10 @@ actor RemoteEngine {
   let ranges: GardenRangeCache
   let metadata: RemoteMetadata
   private let mutations: RemoteMutationJournal
+  let writes: RemoteWriteJournal
+  var publications: [Int: Task<Void, Error>] = [:]
+  var scheduledPublications: [Int: Task<Void, Never>] = [:]
+  private var writeIssue: String?
   private var mutationTask: Task<Void, Error>?
   private var invalidate: @Sendable ([String]) -> Void = { _ in }
   private var settled: @Sendable () async -> Void = {}
@@ -16,16 +20,18 @@ actor RemoteEngine {
   private var subscription: RemoteSubscription?
   var issue: String? {
     get async {
+      if let writeIssue { return writeIssue }
       if let mutationIssue { return mutationIssue }
       return await subscription?.issue
     }
   }
 
-  init(domainID: String, state: URL, cache: URL, limit: Int64) throws {
+  init(domainID: String, state: URL, cache: URL, limit: Int64, writeLimit: Int = 256 * 1024 * 1024) throws {
     api = GardenAPI(domainID: domainID)
     ranges = GardenRangeCache(api: api, domainID: domainID, diskLimit: Int(limit), directory: cache)
     metadata = try RemoteMetadata(url: state.appendingPathComponent("metadata.sqlite"), namespace: domainID)
     mutations = try RemoteMutationJournal(url: state.appendingPathComponent("mutations.sqlite"), namespace: domainID)
+    writes = try RemoteWriteJournal(url: state.appendingPathComponent("writes.sqlite"), namespace: domainID, limit: writeLimit)
   }
 
   func prepare(changed: @escaping @Sendable () async -> Void = {}) async throws {
@@ -51,6 +57,7 @@ actor RemoteEngine {
     }
     try await catchUp()
     try await recoverMutations()
+    try await flushAll()
     let stream = RemoteSubscription(api: api, revision: { try await self.currentRevision() }, changed: changed) { change in
       try await self.receive(change)
     }
@@ -58,7 +65,7 @@ actor RemoteEngine {
     try await stream.start()
   }
 
-  private func catchUp() async throws {
+  func catchUp() async throws {
     while true {
       let changes = try await api.changes(after: metadata.revision ?? 0)
       for change in changes { try receive(change) }
@@ -67,6 +74,15 @@ actor RemoteEngine {
   }
 
   func mutate(_ mutation: RemoteMutation) async throws {
+    if mutation.operation == .unlink || mutation.operation == .rename {
+      if let node = try metadata.lookup(mutation.path), !node.folder { try await publish(node.id) }
+      if let destination = mutation.destination {
+        let target: GardenNode?
+        do { target = try metadata.lookup(destination) }
+        catch let error as POSIXError where error.code == .ENOENT { target = nil }
+        if let target, !target.folder { try await publish(target.id) }
+      }
+    }
     try await serializeMutation(mutation)
   }
 
@@ -124,6 +140,7 @@ actor RemoteEngine {
 
   func reconnect() async throws {
     try await serializeMutation(nil)
+    try await flushAll()
     try await subscription?.reconnect()
     await settled()
   }
@@ -179,9 +196,9 @@ actor RemoteEngine {
     if handle != 0 {
       if directories[handle] != nil { return handles[handle] }
       guard let node = handles[handle] else { throw POSIXError(.EBADF) }
-      return node
+      return try visible(node)
     }
-    return try metadata.lookup(path)
+    return try visible(metadata.lookup(path))
   }
 
   func open(_ path: String, directory: Bool) throws -> UInt64 {
@@ -199,19 +216,45 @@ actor RemoteEngine {
     return handle
   }
 
-  func close(_ handle: UInt64) { handles.removeValue(forKey: handle); directories.removeValue(forKey: handle) }
+  func close(_ handle: UInt64) async throws {
+    defer { handles.removeValue(forKey: handle); directories.removeValue(forKey: handle) }
+    if let node = handles[handle], !node.folder { try await publish(node.id) }
+  }
 
   func list(_ handle: UInt64) throws -> [GardenNode] {
     guard let nodes = directories[handle] else { throw POSIXError(.EBADF) }
-    return nodes
+    return try nodes.map { try visible($0)! }
   }
 
   func read(_ handle: UInt64, offset: Int, length: Int) async throws -> Data {
     guard let node = handles[handle] else { throw POSIXError(.EBADF) }
+    if let draft = try writes.state(node.id) {
+      return try await RemoteWriteReader.read(draft, journal: writes, ranges: ranges, offset: offset, length: length)
+    }
     return try await ranges.read(node: node, offset: offset, length: length)
   }
 
-  func stop() async { await subscription?.stop(); await ranges.invalidate() }
+  func stop() async {
+    for task in scheduledPublications.values { task.cancel() }
+    scheduledPublications.removeAll()
+    await subscription?.stop()
+    await ranges.invalidate()
+  }
+
+  private func visible(_ node: GardenNode?) throws -> GardenNode? {
+    guard var node else { return nil }
+    if let draft = try writes.state(node.id) {
+      node.size = draft.size
+      node.modifiedDate = draft.modified
+    }
+    return node
+  }
+
+  func writeStatus(_ issue: String?, paths: [String] = []) async {
+    writeIssue = issue
+    if !paths.isEmpty { invalidate(paths) }
+    await changed()
+  }
 }
 
 enum RemoteLog {

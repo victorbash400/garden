@@ -20,6 +20,9 @@ final class RemoteMetadata {
 
   private func configure(namespace: String) throws {
     try execute("PRAGMA journal_mode=WAL")
+    try execute("PRAGMA synchronous=FULL")
+    try execute("PRAGMA fullfsync=ON")
+    try execute("CREATE TABLE IF NOT EXISTS volume_attributes(id INTEGER PRIMARY KEY CHECK(id=1),payload BLOB NOT NULL)")
     try execute("CREATE TABLE IF NOT EXISTS nodes(id INTEGER PRIMARY KEY,parent INTEGER NOT NULL,name TEXT NOT NULL,payload BLOB NOT NULL)")
     try execute("CREATE INDEX IF NOT EXISTS children_by_name ON nodes(parent,name COLLATE NOCASE,id)")
     try execute("DROP INDEX IF EXISTS children")
@@ -102,6 +105,21 @@ final class RemoteMetadata {
 
   func node(_ id: Int) throws -> GardenNode? {
     try query("SELECT payload FROM nodes WHERE id=?", number: id).first
+  }
+
+  func volumeNode() throws -> GardenNode {
+    if let node = try query("SELECT payload FROM volume_attributes WHERE id=?", number: 1).first { return node }
+    return try GardenNode(["id": 0, "parentId": 0, "name": "", "kind": "folder", "size": 0,
+      "version": 0, "updatedAt": "1970-01-01T00:00:00.000Z", "createdAt": "1970-01-01T00:00:00.000Z", "deleted": false])
+  }
+
+  func saveVolumeNode(_ node: GardenNode) throws {
+    guard node.id == 0, node.folder else { throw POSIXError(.EINVAL) }
+    let statement = try prepare("INSERT OR REPLACE INTO volume_attributes VALUES(1,?)")
+    defer { sqlite3_finalize(statement) }
+    let payload = try JSONEncoder().encode(node)
+    _ = payload.withUnsafeBytes { sqlite3_bind_blob(statement, 1, $0.baseAddress, Int32($0.count), transient) }
+    guard sqlite3_step(statement) == SQLITE_DONE else { throw failure() }
   }
 
   func children(_ parent: Int) throws -> [GardenNode] {
