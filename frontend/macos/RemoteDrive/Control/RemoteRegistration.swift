@@ -4,6 +4,7 @@ struct RemoteRegistration: Codable, Equatable, Sendable {
   let accountID: String
   let driveID: Int
   var name: String
+  var retiring: Bool? = nil
 
   var domainID: String { "account-\(accountID)-drive-\(driveID)" }
   var mountPath: String { "/Volumes/Garden-\(accountID)-\(driveID)" }

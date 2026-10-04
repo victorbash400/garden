@@ -327,8 +327,8 @@ class GardenController extends ChangeNotifier {
   });
   Future<void> signOut() => _request(() async {
     await _finderWork;
-    await finderUpdates?.close();
     if (account != null) await finder?.signOut(account!);
+    await finderUpdates?.close();
     await files?.close();
     await gateway.signOut();
     account = null;

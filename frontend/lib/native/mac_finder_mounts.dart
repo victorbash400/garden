@@ -40,7 +40,7 @@ class MacFinderMounts implements FinderMounts {
         'refreshToken': session.refreshToken,
       });
     }
-    final retired = await _channel.invokeListMethod<String>('retiredTokenIDs', {
+    final retired = await _channel.invokeListMethod<String>('prepareRemoval', {
       'accountID': account.id,
       'driveIDs': ids,
     });
@@ -62,8 +62,9 @@ class MacFinderMounts implements FinderMounts {
   @override
   Future<void> signOut(AccountInfo account) async {
     if (!Platform.isMacOS) return;
-    final ids = await _channel.invokeListMethod<String>('tokenIDs', {
+    final ids = await _channel.invokeListMethod<String>('prepareRemoval', {
       'accountID': account.id,
+      'driveIDs': <int>[],
     });
     if (ids == null) throw StateError('Finder did not return session IDs.');
     await gateway.client.garden.revokeFinderSessions(ids);

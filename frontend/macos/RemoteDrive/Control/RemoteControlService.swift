@@ -46,6 +46,9 @@ final class RemoteControlService: NSObject, NSXPCListenerDelegate, GardenRemoteC
     case "reconcile":
       guard let ids = request.driveIDs else { throw POSIXError(.EINVAL) }
       try await manager.reconcile(accountID: request.accountID, driveIDs: ids)
+    case "prepareRemoval":
+      guard let ids = request.driveIDs else { throw POSIXError(.EINVAL) }
+      return try await manager.prepareRemoval(accountID: request.accountID, keeping: ids)
     case "signOut": try await manager.reconcile(accountID: request.accountID, driveIDs: [])
     case "tokenIDs": return try await manager.tokenIDs(accountID: request.accountID)
     case "retiredTokenIDs":

@@ -52,6 +52,7 @@ actor RemoteManager {
   func restore() async {
     let registrations = entries.values.map(\.registration)
     for registration in registrations {
+      if registration.retiring == true { continue }
       do {
         if let existing = entries[registration.domainID]?.mount { try await existing.engine.reconnect() }
         else { _ = try await mount(registration.domainID) }
@@ -89,7 +90,7 @@ actor RemoteManager {
     for driveID in driveIDs {
       guard let entry = entries[domainID(accountID, driveID)] else { continue }
       result["registered"]!.append(driveID)
-      if let mount = entry.mount, await mount.engine.issue == nil { result["enabled"]!.append(driveID) }
+      if entry.registration.retiring != true, let mount = entry.mount, await mount.engine.issue == nil { result["enabled"]!.append(driveID) }
       else { result["disconnected"]!.append(driveID) }
     }
     return result
@@ -115,7 +116,13 @@ actor RemoteManager {
     let keep = driveIDs.map(Set.init)
     return try entries.values.filter {
       $0.registration.accountID == accountID && !(keep?.contains($0.registration.driveID) ?? false)
-    }.map { try FinderCredentialStore.read($0.registration.domainID).tokenID }
+    }.compactMap { entry in
+      do { return try FinderCredentialStore.read(entry.registration.domainID).tokenID }
+      catch FinderCredentialError.keychain(errSecItemNotFound) where entry.registration.retiring == true {
+        // Credential deletion precedes the final registry commit; an interrupted commit can replay this state.
+        return nil
+      }
+    }
   }
 
   func reconcile(accountID: String, driveIDs: [Int]) async throws {
@@ -125,6 +132,34 @@ actor RemoteManager {
       $0.registration.accountID == accountID && !keep.contains($0.registration.driveID)
     }.map(\.registration.domainID)
     for id in removed { try await remove(id) }
+  }
+
+  func prepareRemoval(accountID: String, keeping driveIDs: [Int]) async throws -> [String] {
+    try validateAccount(accountID)
+    let keep = Set(driveIDs)
+    let removed = entries.values.filter {
+      $0.registration.accountID == accountID && !keep.contains($0.registration.driveID)
+    }
+    for entry in removed {
+      guard !entry.removing else { throw POSIXError(.EBUSY) }
+      entry.removing = true
+      defer { entry.removing = false }
+      let previous = entry.registration
+      entry.registration.retiring = true
+      do { try save() }
+      catch { entry.registration = previous; throw error }
+      try await unmount(entry)
+      let state = root.appendingPathComponent(entry.registration.domainID)
+      if FileManager.default.fileExists(atPath: state.appendingPathComponent("writes.sqlite").path) {
+        let engine = try RemoteEngine(domainID: entry.registration.domainID, state: state,
+          cache: cache, limit: GardenCachePolicy.read())
+        do { try await engine.flushAll() }
+        catch { await engine.stop(); throw error }
+        await engine.stop()
+      }
+    }
+    await publish()
+    return try tokenIDs(accountID: accountID, keeping: driveIDs)
   }
 
   func location(accountID: String, driveID: Int, nodeID: Int?) async throws -> URL {
@@ -165,6 +200,10 @@ actor RemoteManager {
 
   private func mount(_ id: String) async throws -> RemoteMount {
     guard !stopping, let entry = entries[id], !entry.removing else { throw POSIXError(.ENODEV) }
+    guard entry.registration.retiring != true else {
+      throw NSError(domain: "GardenRemoteRemoval", code: Int(EBUSY), userInfo:
+        [NSLocalizedDescriptionKey: "Complete the pending drive removal before opening it."])
+    }
     if let mount = entry.mount { return mount }
     if let pending = entry.starting { return try await pending.value }
     let registration = entry.registration
@@ -212,9 +251,23 @@ actor RemoteManager {
 
   private func remove(_ id: String) async throws {
     guard let entry = entries[id] else { return }
-    guard !entry.removing else { throw POSIXError(.EBUSY) }
+    guard !entry.removing, entry.registration.retiring == true else { throw POSIXError(.EBUSY) }
     entry.removing = true
     defer { entry.removing = false }
+    try await unmount(entry)
+    let journalURL = root.appendingPathComponent(id).appendingPathComponent("writes.sqlite")
+    if FileManager.default.fileExists(atPath: journalURL.path) {
+      let journal = try RemoteWriteJournal(url: journalURL, namespace: id, limit: 256 * 1024 * 1024)
+      guard try journal.pending().isEmpty else { throw POSIXError(.EBUSY) }
+    }
+    try FinderCredentialStore.remove(id)
+    entries.removeValue(forKey: id)
+    do { try save() }
+    catch { entries[id] = entry; throw error }
+    await publish()
+  }
+
+  private func unmount(_ entry: RemoteDriveEntry) async throws {
     entry.starting?.cancel()
     if let pending = entry.starting {
       do {
@@ -226,12 +279,8 @@ actor RemoteManager {
     if let mount = entry.mount {
       try await mount.unmount()
       await mount.engine.stop()
+      entry.mount = nil
     }
-    entries.removeValue(forKey: id)
-    do { try save() }
-    catch { entries[id] = entry; throw error }
-    try FinderCredentialStore.remove(id)
-    await publish()
   }
 
   private func save() throws { try registry.save(entries.values.map(\.registration)) }
