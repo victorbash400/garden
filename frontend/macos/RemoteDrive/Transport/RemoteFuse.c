@@ -94,10 +94,13 @@ void *garden_remote_start(void *engine, const char *mountpoint, const char *name
   operations.truncate = truncate_file;
   char volume[512];
   if (snprintf(volume, sizeof(volume), "volname=%s", name) >= sizeof(volume)) { errno = EINVAL; return NULL; }
-  char *arguments[] = {"GardenRemote", "-o", "backend=fskit", "-o", volume};
+  char *escaped = NULL;
+  if (fuse_opt_add_opt_escaped(&escaped, volume) != 0) { errno = ENOMEM; return NULL; }
+  char *arguments[] = {"GardenRemote", "-o", "backend=fskit", "-o", escaped};
   struct fuse_args args = FUSE_ARGS_INIT(5, arguments);
   struct fuse *mount = fuse_new(&args, &operations, sizeof(operations), engine);
   fuse_opt_free_args(&args);
+  free(escaped);
   if (!mount) return NULL;
   if (fuse_mount(mount, mountpoint) != 0) { fuse_destroy(mount); errno = EIO; return NULL; }
   struct remote_mount *result = calloc(1, sizeof(*result));
@@ -118,7 +121,6 @@ void garden_remote_stop(void *handle) {
   if (!mount->stopped) {
     mount->stopped = 1;
     fuse_exit(mount->fuse);
-    fuse_unmount(mount->fuse);
   }
   pthread_mutex_unlock(&mount->lock);
 }
