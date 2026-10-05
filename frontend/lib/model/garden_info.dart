@@ -11,4 +11,6 @@ class GardenInfo {
   final String role;
   final int members;
   final String? invitationCode;
+  bool get canWrite =>
+      const ['Owner', 'Manager', 'Editor', 'Member'].contains(role);
 }

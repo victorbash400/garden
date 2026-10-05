@@ -40,11 +40,13 @@ class _DriveFolderBranchState extends State<DriveFolderBranch> {
           NodeDragSurface(
             controller: files,
             driveId: widget.drive.id,
+            canWrite: widget.drive.canWrite,
             node: node,
             child: HoverRename(
-              onRename: files.busy
+              onRename: files.busy || !widget.drive.canWrite
                   ? null
                   : () async {
+                      await widget.onNavigate(node);
                       if (context.mounted) {
                         await FileActions(
                           context,

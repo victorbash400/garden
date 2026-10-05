@@ -74,6 +74,17 @@ final class PermissionProtocol: URLProtocol {
       try await mounted.unmount(preserveWrites: true)
       try await loop.value
       await engine.stop()
+      let retainedRoot = root.appendingPathComponent("revoked")
+      let registration = RemoteRegistration(accountID: account, driveID: 1, name: "Revoked")
+      let registry = try RemoteRegistry(root: retainedRoot)
+      try registry.save([registration])
+      let journal = try RemoteWriteJournal(url: retainedRoot.appendingPathComponent(domain).appendingPathComponent("writes.sqlite"), namespace: domain, limit: 1024)
+      try journal.write(node, offset: 0, bytes: Data([1, 2, 3, 4]))
+      let manager = try RemoteManager(root: retainedRoot, cache: retainedRoot.appendingPathComponent("cache"))
+      _ = try await manager.prepareRemoval(accountID: account, keeping: [])
+      try await manager.reconcile(accountID: account, driveIDs: [])
+      try require(try registry.read().isEmpty && journal.used == 4 && journal.pending().count == 1,
+        "Revocation must remove the mount registration while retaining every unpublished byte privately")
       print("Mounted permissions: Viewer read access, zero payload blocks, write-open/mkdir/unlink denial and revoked cached access passed")
     } catch {
       mounted.stop()

@@ -1,16 +1,19 @@
 import 'package:garden_client/garden_client.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
+import 'package:serverpod_flutter/serverpod_flutter.dart';
 
 import '../model/account_info.dart';
 import '../model/garden_info.dart';
 import 'garden_gateway.dart';
+import 'sharing/drive_sharing_service.dart';
 import 'session_auth_storage.dart';
 import 'relaunch_session_gateway.dart';
 import 'passkey_service.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ServerpodGateway implements GardenGateway, RelaunchSessionGateway {
+class ServerpodGateway
+    implements GardenGateway, RelaunchSessionGateway, SharingGateway {
   ServerpodGateway(
     this.serverUrl, {
     String windowId = 'main',
@@ -21,7 +24,10 @@ class ServerpodGateway implements GardenGateway, RelaunchSessionGateway {
            ? 'garden.savedEmail.$serverUrl'
            : 'garden.savedEmail.$serverUrl.$windowId' {
     client.authSessionManager = FlutterAuthSessionManager(storage: storage);
+    client.connectivityMonitor = FlutterConnectivityMonitor();
   }
+  @override
+  late final DriveSharingService sharing = DriveSharingService(client);
   final String serverUrl;
   Map<String, Object?>? relaunchSession;
 
@@ -187,5 +193,8 @@ class ServerpodGateway implements GardenGateway, RelaunchSessionGateway {
   Future<GardenInfo> connect(int gardenId) async =>
       _garden(await client.garden.connect(gardenId));
   @override
-  void dispose() => client.close();
+  void dispose() {
+    client.connectivityMonitor?.dispose();
+    client.close();
+  }
 }

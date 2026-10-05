@@ -17,17 +17,20 @@ class NodeDragSurface extends StatelessWidget {
     required this.child,
     this.node,
     this.parentId,
+    this.canWrite,
   });
   final FilesController controller;
   final int driveId;
   final FileNode? node;
   final int? parentId;
+  final bool? canWrite;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
+    final writable = canWrite ?? controller.canWrite;
     Widget content = child;
-    if (node != null) {
+    if (node != null && writable) {
       content = Draggable<NodeDrag>(
         data: NodeDrag(driveId, node!),
         allowedButtonsFilter: (buttons) => buttons == 1,
@@ -47,6 +50,7 @@ class NodeDragSurface extends StatelessWidget {
     if (destination == null) return content;
     return DragTarget<NodeDrag>(
       onWillAcceptWithDetails: (details) =>
+          writable &&
           details.data.driveId == driveId &&
           details.data.node.id != destination &&
           details.data.node.parentId != destination,

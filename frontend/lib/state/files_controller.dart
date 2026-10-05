@@ -50,6 +50,11 @@ class FilesController extends ChangeNotifier {
   int _generation = 0;
   int get parentId => path.isEmpty ? 0 : path.last.id!;
 
+  bool get canWrite => drive?.canWrite ?? false;
+  void requireWrite() {
+    if (!canWrite) throw StateError('This drive is read-only.');
+  }
+
   Future<void> open(GardenInfo garden) async {
     if (drive?.id == garden.id) return;
     if (drive != null) {
@@ -320,6 +325,7 @@ class FilesController extends ChangeNotifier {
 
   Future<void> create(String name, NodeKind kind, {int? parentId}) =>
       _request(() async {
+        requireWrite();
         final node = await gateway.create(
           drive!.id,
           parentId ?? this.parentId,
@@ -336,6 +342,7 @@ class FilesController extends ChangeNotifier {
         await moveWithin(node.gardenId, node, destination, name: name);
       });
   Future<void> delete(FileNode node) => _request(() async {
+    requireWrite();
     await gateway.delete(node.id!);
     ActivityLog.instance.record(node.gardenId, node.name, 'Delete');
     _upsert(node.copyWith(deleted: true));
