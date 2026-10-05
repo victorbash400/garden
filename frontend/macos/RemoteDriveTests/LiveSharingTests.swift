@@ -52,7 +52,7 @@ import Foundation
       try await owner.prepare()
       try await recipient.prepare()
       let handle = try await recipient.open("/Shared.txt", directory: false)
-      let bytes = Data("Written by the invited account".utf8)
+      var bytes = Data("Written by the invited account".utf8)
       try await recipient.write(handle, offset: 0, bytes: bytes, append: false)
       try await recipient.flush(handle)
       try await recipient.close(handle)
@@ -61,6 +61,41 @@ import Foundation
       guard let versions = try await owner.api.call("content", "versions", ["nodeId": file.id]) as? [[String: Any]] else { throw GardenAPIError.invalidResponse }
       try require(versions.contains { $0["id"] as? Int == committed.version && $0["authorId"] as? String == recipientSource.accountID }, "Edits must be attributed only to the writing account")
       print("Hosted sharing: invitation accepted, exact cloud bytes and recipient-only edit attribution passed")
+      try await owner.catchUp()
+      try await recipient.catchUp()
+      let ownerHandle = try await owner.open("/Shared.txt", directory: false)
+      let recipientHandle = try await recipient.open("/Shared.txt", directory: false)
+      let ownerEdit = Data("Owner's concurrent edit".utf8)
+      let recipientEdit = Data("Recipient's concurrent edit".utf8)
+      try await owner.write(ownerHandle, offset: 0, bytes: ownerEdit, append: false)
+      await owner.scheduledPublications[file.id]?.cancel()
+      try await owner.truncate("/Shared.txt", handle: ownerHandle, size: ownerEdit.count)
+      await owner.scheduledPublications[file.id]?.cancel()
+      try await recipient.write(recipientHandle, offset: 0, bytes: recipientEdit, append: false)
+      await recipient.scheduledPublications[file.id]?.cancel()
+      try await recipient.truncate("/Shared.txt", handle: recipientHandle, size: recipientEdit.count)
+      await recipient.scheduledPublications[file.id]?.cancel()
+      try await owner.flush(ownerHandle)
+      do {
+        try await recipient.flush(recipientHandle)
+        throw POSIXError(.EIO)
+      } catch let error as NSError {
+        try require(error.domain == "GardenWriteConflict", "The second editor must receive a visible conflict")
+      }
+      let children = try await owner.api.list(parentID: 0, after: 0)
+      guard let original = children.first(where: { $0.id == file.id }),
+        let conflict = children.first(where: { $0.id != file.id }) else { throw GardenAPIError.invalidResponse }
+      try require(try await owner.api.read(id: original.id, version: original.version, offset: 0, length: ownerEdit.count) == ownerEdit,
+        "The original must preserve the owner's exact concurrent edit")
+      try require(try await owner.api.read(id: conflict.id, version: conflict.version, offset: 0, length: recipientEdit.count) == recipientEdit,
+        "The conflict copy must preserve the recipient's exact concurrent edit")
+      guard let conflictVersions = try await owner.api.call("content", "versions", ["nodeId": conflict.id]) as? [[String: Any]] else { throw GardenAPIError.invalidResponse }
+      try require(conflictVersions.contains { $0["authorId"] as? String == recipientSource.accountID },
+        "The conflict copy must be attributed to the account that wrote it")
+      try await owner.close(ownerHandle)
+      try await recipient.close(recipientHandle)
+      bytes = ownerEdit
+      print("Hosted two-account conflict: both exact edits preserved, visible conflict and separate authorship passed")
       _ = try await owner.api.call("driveMembers", "changeRole", ["gardenId": driveID, "userId": recipientSource.accountID, "role": "Viewer"])
       try await recipient.reconnect()
       let mountPath = "/Volumes/GardenSharingTest-\(UUID())"

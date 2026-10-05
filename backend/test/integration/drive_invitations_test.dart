@@ -9,6 +9,113 @@ import 'test_tools/serverpod_test_tools.dart';
 void main() {
   withServerpod('Recipient-bound invitations', (builder, endpoints) {
     test(
+      'duplicate, declined and downgraded-sender invitations stay closed',
+      () async {
+        final owner = builder.copyWith(
+          authentication: AuthenticationOverride.authenticationInfo(
+            'invitation-controls-owner',
+            {},
+          ),
+        );
+        final manager = builder.copyWith(
+          authentication: AuthenticationOverride.authenticationInfo(
+            'invitation-controls-manager',
+            {},
+          ),
+        );
+        final user = await auth.AuthUser.db.insertRow(
+          owner.build(),
+          auth.AuthUser(scopeNames: {}, blocked: false),
+        );
+        await email.EmailAccount.db.insertRow(
+          owner.build(),
+          email.EmailAccount(
+            authUserId: user.id!,
+            email: 'controls-recipient@example.com',
+            passwordHash: 'test-only-unused',
+          ),
+        );
+        final recipient = builder.copyWith(
+          authentication: AuthenticationOverride.authenticationInfo(
+            user.id!.toString(),
+            {},
+          ),
+        );
+        final drive = await endpoints.garden.create(
+          owner,
+          'Invitation controls',
+        );
+        await GardenMember.db.insertRow(
+          owner.build(),
+          GardenMember(
+            gardenId: drive.id,
+            userId: 'invitation-controls-manager',
+            role: 'Manager',
+          ),
+        );
+        final invitation = await endpoints.driveInvitations.invite(
+          manager,
+          drive.id,
+          'controls-recipient@example.com',
+          'Editor',
+        );
+        expect(invitation.deliveryStatus, 'notConfigured');
+        await expectLater(
+          endpoints.driveInvitations.invite(
+            owner,
+            drive.id,
+            ' CONTROLS-RECIPIENT@EXAMPLE.COM ',
+            'Viewer',
+          ),
+          throwsA(isA<GardenException>()),
+        );
+        await expectLater(
+          endpoints.driveInvitations.resend(manager, invitation.id!),
+          throwsA(isA<GardenException>()),
+        );
+        await endpoints.driveInvitations.decline(recipient, invitation.id!);
+        await expectLater(
+          endpoints.driveInvitations.accept(recipient, invitation.id!),
+          throwsA(isA<GardenException>()),
+        );
+        await expectLater(
+          endpoints.driveInvitations.resend(manager, invitation.id!),
+          throwsA(isA<GardenException>()),
+        );
+        final replacement = await endpoints.driveInvitations.invite(
+          manager,
+          drive.id,
+          'controls-recipient@example.com',
+          'Viewer',
+        );
+        await endpoints.driveMembers.changeRole(
+          owner,
+          drive.id,
+          'invitation-controls-manager',
+          'Viewer',
+        );
+        await expectLater(
+          endpoints.driveInvitations.accept(recipient, replacement.id!),
+          throwsA(isA<GardenException>()),
+        );
+        await expectLater(
+          endpoints.driveInvitations.resend(manager, replacement.id!),
+          throwsA(isA<GardenException>()),
+        );
+        expect(await endpoints.garden.list(recipient), isEmpty);
+        await endpoints.driveInvitations.revoke(owner, replacement.id!);
+        final values = await endpoints.driveInvitations.received(recipient);
+        expect(
+          values.firstWhere((item) => item.id == invitation.id).declinedAt,
+          isNotNull,
+        );
+        expect(
+          values.firstWhere((item) => item.id == replacement.id).revokedAt,
+          isNotNull,
+        );
+      },
+    );
+    test(
       'acceptance is email-bound, idempotent and cannot resurrect revoked access',
       () async {
         final owner = builder.copyWith(
