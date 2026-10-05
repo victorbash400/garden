@@ -140,6 +140,33 @@ class GardenEndpoint extends Endpoint {
     });
   }
 
+  Future<void> rename(Session session, int gardenId, String name) async {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty || trimmed.length > 80) {
+      throw GardenException(
+        message: 'Use a drive name between 1 and 80 characters.',
+      );
+    }
+    final user = _user(session);
+    await session.db.transaction((transaction) async {
+      final record = await GardenRecord.db.findById(
+        session,
+        gardenId,
+        transaction: transaction,
+        lockMode: LockMode.forUpdate,
+      );
+      if (record == null || record.deleted || record.ownerId != user) {
+        throw GardenException(message: 'Only the drive owner can rename it.');
+      }
+      record.name = trimmed;
+      await GardenRecord.db.updateRow(
+        session,
+        record,
+        transaction: transaction,
+      );
+    });
+  }
+
   Future<String> invite(Session session, int gardenId) async {
     final random = Random.secure();
     final code = base64Url.encode(

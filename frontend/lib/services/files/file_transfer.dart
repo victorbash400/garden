@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import '../activity_log.dart';
+
 import 'package:garden_client/garden_client.dart';
 
 import 'files_gateway.dart';
@@ -15,6 +17,44 @@ class FileTransfer {
   final FilesGateway gateway;
 
   Future<FileNode> upload(
+    FileNode node,
+    int size,
+    Stream<List<int>> input, {
+    void Function(int)? onProgress,
+    TransferCancellation? cancellation,
+    void Function()? onCommit,
+  }) async {
+    final watch = Stopwatch()..start();
+    try {
+      final saved = await _upload(
+        node,
+        size,
+        input,
+        onProgress: onProgress,
+        cancellation: cancellation,
+        onCommit: onCommit,
+      );
+      ActivityLog.instance.record(
+        node.gardenId,
+        node.name,
+        'Upload',
+        bytes: size,
+        milliseconds: watch.elapsedMicroseconds / 1000,
+      );
+      return saved;
+    } catch (failure) {
+      ActivityLog.instance.record(
+        node.gardenId,
+        node.name,
+        'Upload failed',
+        milliseconds: watch.elapsedMicroseconds / 1000,
+        error: failure.toString(),
+      );
+      rethrow;
+    }
+  }
+
+  Future<FileNode> _upload(
     FileNode node,
     int size,
     Stream<List<int>> input, {

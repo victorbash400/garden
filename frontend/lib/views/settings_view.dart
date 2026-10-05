@@ -6,12 +6,43 @@ import '../state/garden_controller.dart';
 import 'account_settings.dart';
 import 'connections_settings.dart';
 import 'storage_settings.dart';
+import 'activity_settings.dart';
 
 class SettingsView extends StatelessWidget {
   const SettingsView({super.key, required this.controller});
   final GardenController controller;
   @override
   Widget build(BuildContext context) {
+    if (controller.settingsSection == SettingsSection.activity) {
+      return ColoredBox(
+        color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 44),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 980),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Activity',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 32),
+                  Expanded(
+                    child: ActivitySettings(
+                      key: ValueKey(controller.account!.id),
+                      controller: controller,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     return SizedBox.expand(
       child: ColoredBox(
         color: Colors.white,
@@ -28,6 +59,7 @@ class SettingsView extends StatelessWidget {
                     children: [
                       Text(
                         switch (controller.settingsSection) {
+                          SettingsSection.activity => 'Activity',
                           SettingsSection.account => 'Account',
                           SettingsSection.storage => 'Storage',
                           SettingsSection.connections => 'Connections',
@@ -49,6 +81,7 @@ class SettingsView extends StatelessWidget {
                     child: KeyedSubtree(
                       key: ValueKey(controller.settingsSection),
                       child: switch (controller.settingsSection) {
+                        SettingsSection.activity => const SizedBox.shrink(),
                         SettingsSection.account => AccountSettings(
                           controller: controller,
                         ),

@@ -66,7 +66,10 @@ extension RemoteEngine {
     do {
       let draft = try writes.seal(node)
       let publisher = RemoteWritePublisher(api: api, ranges: ranges, journal: writes)
+      let started = Date()
       let committed = try await publisher.publish(draft)
+      await GardenActivity.shared.record(domain: activityDomain, name: draft.base.name, action: "Upload",
+        source: "Remote disk", bytes: draft.size, milliseconds: Date().timeIntervalSince(started) * 1000)
       try await catchUp()
       try writes.acknowledge(draft)
       if committed.id != node {

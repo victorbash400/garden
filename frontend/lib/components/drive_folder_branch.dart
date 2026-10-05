@@ -1,3 +1,6 @@
+import 'files/hover_rename.dart';
+import 'files/file_actions.dart';
+
 import 'package:flutter/material.dart';
 import 'package:garden_client/garden_client.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -38,45 +41,58 @@ class _DriveFolderBranchState extends State<DriveFolderBranch> {
             controller: files,
             driveId: widget.drive.id,
             node: node,
-            child: TreeRow(
-              label: node.name,
-              icon: node.kind == NodeKind.folder
-                  ? LucideIcons.folder
-                  : LucideIcons.file,
-              depth: widget.depth,
-              selected:
-                  active &&
-                  (node.kind == NodeKind.folder
-                      ? files.parentId == node.id
-                      : files.selected?.id == node.id),
-              expanded: index.expanded.contains(node.id),
-              folderOpen:
-                  active && files.path.any((folder) => folder.id == node.id),
-              onOpen: files.busy
+            child: HoverRename(
+              onRename: files.busy
                   ? null
                   : () async {
-                      await widget.onNavigate(node);
-                      if (node.kind == NodeKind.folder && mounted) {
-                        setState(() => index.expanded.add(node.id!));
+                      if (context.mounted) {
+                        await FileActions(
+                          context,
+                          files,
+                        ).perform(node, 'rename');
                       }
                     },
-              onToggle:
-                  node.kind != NodeKind.folder ||
-                      (index.isLoaded(node.id!) && !index.hasChildren(node.id!))
-                  ? null
-                  : () async {
-                      if (index.expanded.contains(node.id)) {
-                        setState(() => index.expanded.remove(node.id));
-                      } else {
-                        await files.loadDriveChildren(
-                          widget.drive.id,
-                          node.id!,
-                        );
-                        if (mounted && index.isLoaded(node.id!)) {
+              child: TreeRow(
+                label: node.name,
+                icon: node.kind == NodeKind.folder
+                    ? LucideIcons.folder
+                    : LucideIcons.file,
+                depth: widget.depth,
+                selected:
+                    active &&
+                    (node.kind == NodeKind.folder
+                        ? files.parentId == node.id
+                        : files.selected?.id == node.id),
+                expanded: index.expanded.contains(node.id),
+                folderOpen:
+                    active && files.path.any((folder) => folder.id == node.id),
+                onOpen: files.busy
+                    ? null
+                    : () async {
+                        await widget.onNavigate(node);
+                        if (node.kind == NodeKind.folder && mounted) {
                           setState(() => index.expanded.add(node.id!));
                         }
-                      }
-                    },
+                      },
+                onToggle:
+                    node.kind != NodeKind.folder ||
+                        (index.isLoaded(node.id!) &&
+                            !index.hasChildren(node.id!))
+                    ? null
+                    : () async {
+                        if (index.expanded.contains(node.id)) {
+                          setState(() => index.expanded.remove(node.id));
+                        } else {
+                          await files.loadDriveChildren(
+                            widget.drive.id,
+                            node.id!,
+                          );
+                          if (mounted && index.isLoaded(node.id!)) {
+                            setState(() => index.expanded.add(node.id!));
+                          }
+                        }
+                      },
+              ),
             ),
           ),
           if (node.kind == NodeKind.folder && index.expanded.contains(node.id))

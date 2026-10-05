@@ -1202,6 +1202,31 @@ class Endpoints extends _is.EndpointDispatch {
                     params['name'],
                   ),
         ),
+        'rename': _is.MethodConnector(
+          name: 'rename',
+          params: {
+            'gardenId': _is.ParameterDescription(
+              name: 'gardenId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'name': _is.ParameterDescription(
+              name: 'name',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['garden'] as _isd11de7.GardenEndpoint).rename(
+                    session,
+                    params['gardenId'],
+                    params['name'],
+                  ),
+        ),
         'invite': _is.MethodConnector(
           name: 'invite',
           params: {

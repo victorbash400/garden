@@ -54,6 +54,12 @@ class SettingsSidebar extends StatelessWidget {
               ? null
               : () => controller.selectSettings(SettingsSection.connections),
         ),
+        SettingsCategory(
+          label: 'Activity',
+          icon: LucideIcons.activity,
+          selected: controller.settingsSection == SettingsSection.activity,
+          onTap: () => controller.selectSettings(SettingsSection.activity),
+        ),
         const Spacer(),
         SettingsCategory(
           label: 'Back to drives',

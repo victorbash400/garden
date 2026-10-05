@@ -84,6 +84,25 @@ actor RemoteManager {
     _ = try await mount(id)
   }
 
+  func rename(accountID: String, driveID: Int, name: String) async throws {
+    let registration = RemoteRegistration(accountID: accountID, driveID: driveID, name: name)
+    try registration.validate()
+    let id = registration.domainID
+    guard let entry = entries[id], !entry.removing, entry.starting == nil else { throw POSIXError(.EBUSY) }
+    if entry.registration.name == name { return }
+    entry.removing = true
+    defer { entry.removing = false }
+    if let current = entry.mount { try await current.engine.flushAll() }
+    try await unmount(entry)
+    let previous = entry.registration
+    entry.registration.name = name
+    do { try save() }
+    catch { entry.registration = previous; throw error }
+    entry.removing = false
+    _ = try await mount(id)
+    await publish()
+  }
+
   func status(accountID: String, driveIDs: [Int]) async throws -> [String: [Int]] {
     try validateAccount(accountID)
     var result: [String: [Int]] = ["registered": [], "enabled": [], "disabled": [], "disconnected": []]

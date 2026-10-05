@@ -14,6 +14,7 @@ actor GardenRangeCache {
   private let permits = GardenReadPermits.shared
   private let api: GardenAPI
   private let disk: GardenDiskCache
+  private let domain: String
   private let namespace: String
   private var tickets: [String: GardenDownload] = [:]
   private var ticketFlights: [String: Task<GardenDownload, Error>] = [:]
@@ -23,6 +24,7 @@ actor GardenRangeCache {
 
   init(api: GardenAPI, domainID: String, diskLimit: Int? = nil, directory: URL? = nil) {
     self.api = api
+    domain = domainID
     namespace = SHA256.hash(data: Data(domainID.utf8)).map { String(format: "%02x", $0) }.joined()
     disk = directory != nil || diskLimit != nil
       ? GardenDiskCache(directory: directory, limit: diskLimit.map(Int64.init)) : .shared
@@ -36,7 +38,7 @@ actor GardenRangeCache {
     tickets.removeAll()
   }
 
-  func read(node: GardenNode, offset: Int, length: Int, persist: Bool = true) async throws -> Data {
+  func read(node: GardenNode, offset: Int, length: Int, persist: Bool = true, path: String? = nil) async throws -> Data {
     guard offset >= 0, length >= 0, length <= 16 * Self.blockSize else { throw GardenAPIError.invalidResponse }
     if offset >= node.size { return Data() }
     let end = offset + min(length, node.size - offset)
@@ -48,7 +50,7 @@ actor GardenRangeCache {
       var next = first
       for _ in 0..<min(GardenReadPermits.capacity, last - first + 1) {
         let index = next
-        group.addTask { (index, try await self.block(node: node, index: index, blockSize: blockSize, persist: persist)) }
+        group.addTask { (index, try await self.block(node: node, index: index, blockSize: blockSize, persist: persist, path: path)) }
         next += 1
       }
       var result: [Int: Data] = [:]
@@ -56,7 +58,7 @@ actor GardenRangeCache {
         result[index] = bytes
         if next <= last {
           let index = next
-          group.addTask { (index, try await self.block(node: node, index: index, blockSize: blockSize, persist: persist)) }
+          group.addTask { (index, try await self.block(node: node, index: index, blockSize: blockSize, persist: persist, path: path)) }
           next += 1
         }
       }
@@ -92,18 +94,21 @@ actor GardenRangeCache {
     return ticket
   }
 
-  private func block(node: GardenNode, index: Int, blockSize: Int, persist: Bool) async throws -> Data {
+  private func block(node: GardenNode, index: Int, blockSize: Int, persist: Bool, path: String?) async throws -> Data {
+    let started = Date()
     let key = "\(node.id)-\(node.version)-\(blockSize)-\(index)"
     let length = min(blockSize, node.size - index * blockSize)
     let diskKey = "\(namespace)/\(key)"
     if let data = await GardenReadBuffer.shared.read(diskKey) {
       guard data.count == length else { throw GardenAPIError.invalidResponse }
       cacheHits += 1
+      await GardenActivity.shared.record(domain: domain, name: path ?? node.name, action: "Read", source: "Memory cache", node: node.id, bytes: data.count, milliseconds: Date().timeIntervalSince(started) * 1000)
       return data
     }
     if persist, let data = try await disk.read(diskKey, expected: length) {
       await GardenReadBuffer.shared.store(data, key: diskKey)
       cacheHits += 1
+      await GardenActivity.shared.record(domain: domain, name: path ?? node.name, action: "Read", source: "Disk cache", node: node.id, bytes: data.count, milliseconds: Date().timeIntervalSince(started) * 1000)
       return data
     }
     if let flight = flights[key] { return try await flight.value }
@@ -150,8 +155,15 @@ actor GardenRangeCache {
     }
     flights[key] = flight
     defer { flights.removeValue(forKey: key) }
-    let data = try await flight.value
+    let data: Data
+    do { data = try await flight.value }
+    catch {
+      await GardenActivity.shared.record(domain: domain, name: path ?? node.name, action: "Read failed", source: "Cloud",
+        node: node.id, milliseconds: Date().timeIntervalSince(started) * 1000, error: error.localizedDescription)
+      throw error
+    }
     remoteBytes += data.count
+    await GardenActivity.shared.record(domain: domain, name: path ?? node.name, action: "Read", source: "Cloud", node: node.id, bytes: data.count, milliseconds: Date().timeIntervalSince(started) * 1000)
     await GardenReadBuffer.shared.store(data, key: diskKey)
     if persist { try await disk.store(data, key: diskKey) }
     return data

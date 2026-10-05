@@ -40,6 +40,13 @@ class MacFinderMounts implements FinderMounts {
         'refreshToken': session.refreshToken,
       });
     }
+    for (final drive in drives) {
+      await _channel.invokeMethod<void>('rename', {
+        'accountID': account.id,
+        'driveID': drive.id,
+        'name': drive.name,
+      });
+    }
     final retired = await _channel.invokeListMethod<String>('prepareRemoval', {
       'accountID': account.id,
       'driveIDs': ids,

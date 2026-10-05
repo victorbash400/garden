@@ -20,6 +20,33 @@ void main() {
       session.server.serverpod.addCloudStorage(DatabaseCloudStorage('private'));
     });
 
+    test('rename preserves files and is owner-only', () async {
+      final drive = await endpoints.garden.create(owner, 'Original');
+      await endpoints.garden.join(guest, drive.invitationCode!);
+      final node = await endpoints.files.create(
+        owner,
+        drive.id,
+        0,
+        'Keep.txt',
+        NodeKind.file,
+      );
+      await expectLater(
+        endpoints.garden.rename(guest, drive.id, 'Denied'),
+        throwsA(isA<GardenException>()),
+      );
+      await expectLater(
+        endpoints.garden.rename(owner, drive.id, ' '),
+        throwsA(isA<GardenException>()),
+      );
+      await endpoints.garden.rename(owner, drive.id, 'Renamed');
+      expect((await endpoints.garden.list(owner)).single.name, 'Renamed');
+      expect((await endpoints.garden.list(guest)).single.name, 'Renamed');
+      expect(
+        (await endpoints.files.list(owner, drive.id, 0)).nodes.single.id,
+        node.id,
+      );
+    });
+
     test(
       'drive deletion is owner-only, hides membership and blocks files',
       () async {
@@ -102,23 +129,43 @@ void main() {
     test('Finder pages directories and records both sides of a move', () async {
       final drive = await endpoints.garden.create(owner, 'Finder');
       final first = await endpoints.files.create(
-        owner, drive.id, 0, 'First', NodeKind.folder,
+        owner,
+        drive.id,
+        0,
+        'First',
+        NodeKind.folder,
       );
       final second = await endpoints.files.create(
-        owner, drive.id, 0, 'Second', NodeKind.folder,
+        owner,
+        drive.id,
+        0,
+        'Second',
+        NodeKind.folder,
       );
       final file = await endpoints.files.create(
-        owner, drive.id, first.id!, 'note.txt', NodeKind.file,
+        owner,
+        drive.id,
+        first.id!,
+        'note.txt',
+        NodeKind.file,
       );
       expect(await endpoints.files.revision(owner, drive.id), 3);
       expect(
-        (await endpoints.files.listPage(owner, drive.id, 0, 0))
-            .map((node) => node.name),
+        (await endpoints.files.listPage(
+          owner,
+          drive.id,
+          0,
+          0,
+        )).map((node) => node.name),
         ['First', 'Second'],
       );
       expect(
-        (await endpoints.files.listPage(owner, drive.id, 0, first.id!))
-            .single.id,
+        (await endpoints.files.listPage(
+          owner,
+          drive.id,
+          0,
+          first.id!,
+        )).single.id,
         second.id,
       );
       await endpoints.files.move(owner, file.id!, second.id!, 'renamed.txt');
@@ -127,8 +174,11 @@ void main() {
       expect(events.single.node?.parentId, second.id);
       await endpoints.files.delete(owner, second.id!);
       expect(
-        (await endpoints.files.snapshot(owner, drive.id, 0))
-            .map((node) => node.id),
+        (await endpoints.files.snapshot(
+          owner,
+          drive.id,
+          0,
+        )).map((node) => node.id),
         [first.id],
       );
     });

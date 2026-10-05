@@ -115,6 +115,9 @@ class ServerpodGateway implements GardenGateway {
   }
 
   @override
+  Future<void> renameDrive(int driveId, String name) =>
+      client.garden.rename(driveId, name);
+  @override
   Future<void> deleteDrive(int driveId) => client.garden.delete(driveId);
   @override
   Future<void> signOut() async {

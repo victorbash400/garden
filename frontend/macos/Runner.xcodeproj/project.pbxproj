@@ -26,6 +26,7 @@
 		14F8DF57F2F53B0521DFDBF0 /* FinderCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7A65DF6BF53C6D521B7B380 /* FinderCredential.swift */; };
 		176CBCB0588618B92ADB1967 /* GardenObjectRequests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 173EA74C13F90026956280D2 /* GardenObjectRequests.swift */; };
 		4AC39891C3A2234F11CAFE09 /* GardenBandwidth.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF8F409BC2E2A333913FB95C /* GardenBandwidth.swift */; };
+		2DB7542439B9F6887DAE5BDB /* GardenActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CEAF9DFC80D94DB4AEA3CAE /* GardenActivity.swift */; };
 		1CA837D6BAC00AD63BA96528 /* GardenStreamingReadOnly.swift in Sources */ = {isa = PBXBuildFile; fileRef = F07FABA2C16CC1A29711B2AF /* GardenStreamingReadOnly.swift */; };
 		2B72802255BA932831550A13 /* GardenMultipartUpload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 323C797BE6BBC8942382CA08 /* GardenMultipartUpload.swift */; };
 		327013FB001B5BE9DEB84197 /* GardenMultipartUpload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 323C797BE6BBC8942382CA08 /* GardenMultipartUpload.swift */; };
@@ -43,9 +44,11 @@
 		6617976E02028561036C4B6D /* GardenProviderError.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1A3B90C9289C040C23D814 /* GardenProviderError.swift */; };
 		6B02FE73D811130673F45BF7 /* GardenObjectRequests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 173EA74C13F90026956280D2 /* GardenObjectRequests.swift */; };
 		AD6E064B7B480BBF319B788E /* GardenBandwidth.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF8F409BC2E2A333913FB95C /* GardenBandwidth.swift */; };
+		9FAC500FA69A5D2D216FF6EF /* GardenActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CEAF9DFC80D94DB4AEA3CAE /* GardenActivity.swift */; };
 		7551C4C4EFC2E6825A2207BA /* GardenAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8681944F850AE3C8FBA3090E /* GardenAPI.swift */; };
 		7598515577DB805016E025DC /* GardenObjectRequests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 173EA74C13F90026956280D2 /* GardenObjectRequests.swift */; };
 		490A4852546B0F76CA3A3DB1 /* GardenBandwidth.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF8F409BC2E2A333913FB95C /* GardenBandwidth.swift */; };
+		A7E06CD39375C558E7A4C8D6 /* GardenActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CEAF9DFC80D94DB4AEA3CAE /* GardenActivity.swift */; };
 		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };
 		7CE6C00E3C2EEADBCF5DFFA0 /* GardenReadPermits.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64DDB6D8FE3F6399EF15AAFC /* GardenReadPermits.swift */; };
 		805B49A9BB38C082F1F565F1 /* FinderDomainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBFF06A0D3701CBA9BBF3EF2 /* FinderDomainManager.swift */; };
@@ -84,6 +87,7 @@
 		28760F7B4D574A6098B00E65 /* GardenCacheBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA40A17468B04DCCAA176F08 /* GardenCacheBridge.swift */; };
 		A909D7D4AB1E0E904CF9F445 /* GardenBandwidthBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AFB6573A8D4BDC4C909A043 /* GardenBandwidthBridge.swift */; };
 		B28DF98DF24A40839B1A3171 /* GardenCacheEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A7E92DE37B46B99BDB3DD4 /* GardenCacheEvents.swift */; };
+		2B465167F59A06215331D147 /* GardenActivityBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A932C8D73BC7AD7020825E0 /* GardenActivityBridge.swift */; };
 		E04FFF39FF5B4E4491DF6C9B /* GardenCacheWatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139AF11EBF884621B5881DDD /* GardenCacheWatch.swift */; };
 		B64B611127F344C6BEE48278 /* GardenCacheWatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139AF11EBF884621B5881DDD /* GardenCacheWatch.swift */; };
 		6F8849C716F84748896D2036 /* GardenCacheWatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139AF11EBF884621B5881DDD /* GardenCacheWatch.swift */; };
@@ -102,6 +106,7 @@
 		1DC0F3157F1C8CB8AC4ADBBF /* GardenRemote.app in Embed remote drive engine */ = {isa = PBXBuildFile; fileRef = F10B84BBFAB2ED3B1CCE9520 /* GardenRemote.app */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		26BAE73D6567562D297AFFC4 /* GardenObjectRequests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 173EA74C13F90026956280D2 /* GardenObjectRequests.swift */; };
 		88F7CA26569067E0C83C95B8 /* GardenBandwidth.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF8F409BC2E2A333913FB95C /* GardenBandwidth.swift */; };
+		B8B059DAE8B68C3019F3005E /* GardenActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CEAF9DFC80D94DB4AEA3CAE /* GardenActivity.swift */; };
 		2A58E3781CD8BB9C0424D1C7 /* RemoteAgentMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BFC4776448C9BFD5D76FF42 /* RemoteAgentMain.swift */; };
 		2AB59881DE60F818B53DBAEF /* RemoteFuse.c in Sources */ = {isa = PBXBuildFile; fileRef = 8769651791817B0B2E5ED2CC /* RemoteFuse.c */; };
 		373D33C6FD8111692ECD68B9 /* RemoteCallbacks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30EC59BB4CB4CE2D9830EDF3 /* RemoteCallbacks.swift */; };
@@ -230,6 +235,7 @@
 		081BAFC548A1CD53E423E5FC /* GardenRangeCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenRangeCache.swift; path = FinderShared/GardenRangeCache.swift; sourceTree = "<group>"; };
 		173EA74C13F90026956280D2 /* GardenObjectRequests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenObjectRequests.swift; path = FinderShared/GardenObjectRequests.swift; sourceTree = "<group>"; };
 		CF8F409BC2E2A333913FB95C /* GardenBandwidth.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenBandwidth.swift; path = FinderShared/GardenBandwidth.swift; sourceTree = "<group>"; };
+		2CEAF9DFC80D94DB4AEA3CAE /* GardenActivity.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenActivity.swift; path = FinderShared/GardenActivity.swift; sourceTree = "<group>"; };
 		1D55EB1D6DD2A8CAA3887D2D /* GardenStreamingFileSystem.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GardenStreamingFileSystem.swift; sourceTree = "<group>"; };
 		323C797BE6BBC8942382CA08 /* GardenMultipartUpload.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenMultipartUpload.swift; path = FinderShared/GardenMultipartUpload.swift; sourceTree = "<group>"; };
 		331C80D5294CF71000263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -279,6 +285,7 @@
 		EA40A17468B04DCCAA176F08 /* GardenCacheBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GardenCacheBridge.swift; path = Runner/GardenCacheBridge.swift; sourceTree = "<group>"; };
 		1AFB6573A8D4BDC4C909A043 /* GardenBandwidthBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GardenBandwidthBridge.swift; path = Runner/GardenBandwidthBridge.swift; sourceTree = "<group>"; };
 		55A7E92DE37B46B99BDB3DD4 /* GardenCacheEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GardenCacheEvents.swift; path = Runner/GardenCacheEvents.swift; sourceTree = "<group>"; };
+		4A932C8D73BC7AD7020825E0 /* GardenActivityBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GardenActivityBridge.swift; path = Runner/GardenActivityBridge.swift; sourceTree = "<group>"; };
 		139AF11EBF884621B5881DDD /* GardenCacheWatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GardenCacheWatch.swift; path = FinderShared/GardenCacheWatch.swift; sourceTree = "<group>"; };
 		8178C29FCB4348CB9F159D39 /* GardenReadBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GardenReadBuffer.swift; path = FinderShared/GardenReadBuffer.swift; sourceTree = "<group>"; };
 		930E53857DC5435CB9D756DB /* GardenRangeWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GardenRangeWriter.swift; path = FinderShared/GardenRangeWriter.swift; sourceTree = "<group>"; };
@@ -403,6 +410,7 @@
 				EA40A17468B04DCCAA176F08 /* GardenCacheBridge.swift */,
 				1AFB6573A8D4BDC4C909A043 /* GardenBandwidthBridge.swift */,
 				55A7E92DE37B46B99BDB3DD4 /* GardenCacheEvents.swift */,
+				4A932C8D73BC7AD7020825E0 /* GardenActivityBridge.swift */,
 				37CEECE5078747818CCB549F /* GardenCacheService.swift */,
 				9808E926A3D14C11A2170496 /* GardenCacheServiceProtocol.swift */,
 				6EC157F51BB04B9283619829 /* GardenDiskCache.swift */,
@@ -417,6 +425,7 @@
 				323C797BE6BBC8942382CA08 /* GardenMultipartUpload.swift */,
 				173EA74C13F90026956280D2 /* GardenObjectRequests.swift */,
 				CF8F409BC2E2A333913FB95C /* GardenBandwidth.swift */,
+				2CEAF9DFC80D94DB4AEA3CAE /* GardenActivity.swift */,
 				DF1A3B90C9289C040C23D814 /* GardenProviderError.swift */,
 				7467EC0833FF3CBDC8E543CC /* RemoteControl */,
 				5191359337A5F282F6B03B41 /* RemoteDrive */,
@@ -827,6 +836,7 @@
 				B49F2A8900DA9C67E918DD55 /* GardenMultipartUpload.swift in Sources */,
 				176CBCB0588618B92ADB1967 /* GardenObjectRequests.swift in Sources */,
 				4AC39891C3A2234F11CAFE09 /* GardenBandwidth.swift in Sources */,
+				2DB7542439B9F6887DAE5BDB /* GardenActivity.swift in Sources */,
 				6617976E02028561036C4B6D /* GardenProviderError.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -846,6 +856,7 @@
 				28760F7B4D574A6098B00E65 /* GardenCacheBridge.swift in Sources */,
 				A909D7D4AB1E0E904CF9F445 /* GardenBandwidthBridge.swift in Sources */,
 				B28DF98DF24A40839B1A3171 /* GardenCacheEvents.swift in Sources */,
+				2B465167F59A06215331D147 /* GardenActivityBridge.swift in Sources */,
 				E3ACD150CE7F4E3BA3B02196 /* GardenCacheServiceProtocol.swift in Sources */,
 				2C939C18A4F24976A86B4E89 /* GardenDiskCache.swift in Sources */,
 				099CB23AC6D34B529606D55B /* GardenCacheDatabase.swift in Sources */,
@@ -868,6 +879,7 @@
 				2B72802255BA932831550A13 /* GardenMultipartUpload.swift in Sources */,
 				6B02FE73D811130673F45BF7 /* GardenObjectRequests.swift in Sources */,
 				AD6E064B7B480BBF319B788E /* GardenBandwidth.swift in Sources */,
+				9FAC500FA69A5D2D216FF6EF /* GardenActivity.swift in Sources */,
 				34AB50ACF8B975702762DA5A /* GardenProviderError.swift in Sources */,
 				D020BD67412B77D4CA6A07C9 /* GardenRemoteControlProtocol.swift in Sources */,
 				E907D08C287BF6B465210D80 /* RemoteCompletion.swift in Sources */,
@@ -900,6 +912,7 @@
 				327013FB001B5BE9DEB84197 /* GardenMultipartUpload.swift in Sources */,
 				7598515577DB805016E025DC /* GardenObjectRequests.swift in Sources */,
 				490A4852546B0F76CA3A3DB1 /* GardenBandwidth.swift in Sources */,
+				A7E06CD39375C558E7A4C8D6 /* GardenActivity.swift in Sources */,
 				0B736C14FB9B44B900A472DD /* GardenProviderError.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -940,6 +953,7 @@
 				D64DE4D03D35E27CD67EEFE1 /* GardenRangeCache.swift in Sources */,
 				26BAE73D6567562D297AFFC4 /* GardenObjectRequests.swift in Sources */,
 				88F7CA26569067E0C83C95B8 /* GardenBandwidth.swift in Sources */,
+				B8B059DAE8B68C3019F3005E /* GardenActivity.swift in Sources */,
 				F8DFA53480F857115380FAD8 /* GardenCacheDatabase.swift in Sources */,
 				7087302CEBDBAE4638DB9C01 /* GardenNode.swift in Sources */,
 				A30D20261004000000000803 /* GardenFileAttributes.swift in Sources */,

@@ -43,6 +43,9 @@ final class RemoteControlService: NSObject, NSXPCListenerDelegate, GardenRemoteC
         throw POSIXError(.EINVAL)
       }
       try await manager.register(RemoteRegistration(accountID: request.accountID, driveID: driveID, name: name), credential: credential)
+    case "rename":
+      guard let driveID = request.driveID, let name = request.name else { throw POSIXError(.EINVAL) }
+      try await manager.rename(accountID: request.accountID, driveID: driveID, name: name)
     case "reconcile":
       guard let ids = request.driveIDs else { throw POSIXError(.EINVAL) }
       try await manager.reconcile(accountID: request.accountID, driveIDs: ids)
@@ -65,6 +68,30 @@ final class RemoteControlService: NSObject, NSXPCListenerDelegate, GardenRemoteC
     return NSNull()
   }
 
+  func subscribeActivity(_ account: String, reply: @escaping (String?) -> Void) {
+    guard let connection = NSXPCConnection.current(), UUID(uuidString: account) != nil else {
+      reply("Invalid activity account."); return
+    }
+    connection.remoteObjectInterface = NSXPCInterface(with: GardenActivityObserverProtocol.self)
+    guard let observer = connection.remoteObjectProxy as? GardenActivityObserverProtocol else {
+      reply("Activity connection is unavailable."); return
+    }
+    let task = Task {
+      let stream = await GardenActivity.shared.updates(account: account)
+      reply(nil)
+      do {
+        for try await data in stream {
+          if Task.isCancelled { break }
+          observer.activityChanged(data)
+        }
+      } catch { observer.activityFailed(error.localizedDescription) }
+    }
+    connection.invalidationHandler = { task.cancel() }
+    connection.interruptionHandler = { task.cancel() }
+  }
+  func clearActivity(_ account: String, reply: @escaping () -> Void) {
+    Task { await GardenActivity.shared.clear(account: account); reply() }
+  }
   func subscribeCache(reply: @escaping (String?) -> Void) { cache.subscribe(reply: reply) }
   func subscribeDrives(_ payload: Data, reply: @escaping (String?) -> Void) {
     guard let connection = NSXPCConnection.current(),

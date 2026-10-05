@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import '../services/activity_log.dart';
+
 import 'drive_folder_index.dart';
 import 'drive_browser_state.dart';
 import 'file_import_controller.dart';
@@ -243,9 +245,15 @@ class FilesController extends ChangeNotifier {
     }
   }
 
-  Future<void> moveWithin(int driveId, FileNode node, int destination) async {
+  Future<void> moveWithin(
+    int driveId,
+    FileNode node,
+    int destination, {
+    String? name,
+  }) async {
     final index = folderIndex(driveId);
-    if (node.parentId == destination) return;
+    final targetName = name ?? node.name;
+    if (node.parentId == destination && targetName == node.name) return;
     if (node.kind == NodeKind.folder) {
       var parent = destination;
       final visited = <int>{};
@@ -263,8 +271,13 @@ class FilesController extends ChangeNotifier {
         parent = folder.parentId;
       }
     }
-    final moved = await gateway.move(node.id!, destination, node.name);
+    final moved = await gateway.move(node.id!, destination, targetName);
     index.update(moved);
+    ActivityLog.instance.record(
+      driveId,
+      moved.name,
+      targetName == node.name ? 'Move' : 'Rename',
+    );
     if (drive?.id == driveId) {
       _upsert(moved);
       if (path.any((folder) => folder.id == moved.id)) {
@@ -314,15 +327,17 @@ class FilesController extends ChangeNotifier {
           kind,
         );
         _upsert(node);
+        ActivityLog.instance.record(node.gardenId, node.name, 'Create');
         if (kind == NodeKind.folder) folders.markEmpty(node.id!);
         if (node.parentId == this.parentId) selected = node;
       });
   Future<void> move(FileNode node, int destination, String name) =>
       _request(() async {
-        _upsert(await gateway.move(node.id!, destination, name));
+        await moveWithin(node.gardenId, node, destination, name: name);
       });
   Future<void> delete(FileNode node) => _request(() async {
     await gateway.delete(node.id!);
+    ActivityLog.instance.record(node.gardenId, node.name, 'Delete');
     _upsert(node.copyWith(deleted: true));
     folders.remove(node.id!);
     selected = null;
@@ -339,6 +354,11 @@ class FilesController extends ChangeNotifier {
 
   void _upsert(FileNode node) {
     folders.update(node);
+    if (!node.deleted) {
+      path = path
+          .map((folder) => folder.id == node.id ? node : folder)
+          .toList();
+    }
     final removedDepth = path.indexWhere((folder) => folder.id == node.id);
     if (node.deleted && removedDepth >= 0) {
       path = path.take(removedDepth).toList();

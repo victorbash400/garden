@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../model/garden_info.dart';
 import '../state/garden_controller.dart';
 import 'files/file_actions.dart';
+import 'files/node_name_dialog.dart';
 
 class DriveRowActions extends StatelessWidget {
   const DriveRowActions({
@@ -19,6 +20,14 @@ class DriveRowActions extends StatelessWidget {
     if (context.mounted && controller.error == null && files != null) {
       await FileActions(context, files).create('folder');
     }
+  }
+
+  Future<void> rename(BuildContext context) async {
+    final name = await showDialog<String>(
+      context: context,
+      builder: (_) => NodeNameDialog(action: 'Rename', value: drive.name),
+    );
+    if (name != null) await controller.renameDrive(drive, name);
   }
 
   Future<void> delete(BuildContext context) async {
@@ -83,10 +92,24 @@ class DriveRowActions extends StatelessWidget {
           color: Colors.white,
           elevation: 4,
           onSelected: (value) async {
-            if (value == 'folder') await createFolder(context);
+            if (value == 'rename') await rename(context);
+            if (value == 'folder' && context.mounted) {
+              await createFolder(context);
+            }
             if (value == 'delete' && context.mounted) await delete(context);
           },
           itemBuilder: (_) => [
+            if (drive.role == 'Owner')
+              const PopupMenuItem(
+                value: 'rename',
+                child: Row(
+                  children: [
+                    Icon(LucideIcons.squarePen, size: 16),
+                    SizedBox(width: 10),
+                    Text('Rename…'),
+                  ],
+                ),
+              ),
             const PopupMenuItem(
               value: 'folder',
               child: Row(

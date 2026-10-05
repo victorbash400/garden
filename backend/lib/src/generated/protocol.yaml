@@ -52,6 +52,7 @@ garden:
   - revokeFinderSessions:
   - list:
   - create:
+  - rename:
   - invite:
   - join:
   - connect:

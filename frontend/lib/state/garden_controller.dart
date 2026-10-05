@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../utils/error_message.dart';
+import '../services/activity_log.dart';
 
 import '../model/account_info.dart';
 import '../model/garden_info.dart';
@@ -15,7 +16,7 @@ import 'account_security_controller.dart';
 import 'storage_controller.dart';
 import '../services/cache_store.dart';
 
-enum SettingsSection { account, storage, connections }
+enum SettingsSection { account, storage, connections, activity }
 
 enum GardenPage {
   starting,
@@ -220,6 +221,7 @@ class GardenController extends ChangeNotifier {
 
   Future<void> _finishAuthentication(AccountInfo signedIn) async {
     account = signedIn;
+    ActivityLog.instance.account = signedIn.id;
     savedEmail = signedIn.email;
     page = GardenPage.starting;
     gardens = await gateway.listGardens();
@@ -313,6 +315,23 @@ class GardenController extends ChangeNotifier {
         await _showDrive(drive);
         if (root) await files!.goTo(0);
       });
+  Future<void> renameDrive(GardenInfo drive, String name) => _request(() async {
+    await gateway.renameDrive(drive.id, name.trim());
+    final renamed = GardenInfo(
+      id: drive.id,
+      name: name.trim(),
+      role: drive.role,
+      members: drive.members,
+    );
+    gardens = gardens
+        .map((item) => item.id == drive.id ? renamed : item)
+        .toList();
+    if (selected?.id == drive.id) selected = renamed;
+    if (files?.drive?.id == drive.id) files!.drive = renamed;
+    ActivityLog.instance.record(drive.id, renamed.name, 'Rename drive');
+    _queueFinderSync();
+  });
+
   Future<void> deleteDrive(GardenInfo drive) => _request(() async {
     final current = account;
     if (current == null || drive.role != 'Owner') {
@@ -347,6 +366,7 @@ class GardenController extends ChangeNotifier {
       await files?.close();
       await gateway.signOut();
       account = null;
+      ActivityLog.instance.account = null;
       gardens = [];
       selected = null;
       finderStatus = const FinderStatus();

@@ -708,6 +708,18 @@ class EndpointGarden extends _isc.EndpointRef {
         {'name': name},
       );
 
+  _ida.Future<void> rename(
+    int gardenId,
+    String name,
+  ) => caller.callServerEndpoint<void>(
+    'garden',
+    'rename',
+    {
+      'gardenId': gardenId,
+      'name': name,
+    },
+  );
+
   _ida.Future<String> invite(int gardenId) => caller.callServerEndpoint<String>(
     'garden',
     'invite',

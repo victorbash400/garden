@@ -26,7 +26,10 @@ actor RemoteEngine {
     }
   }
 
+  let activityDomain: String
+
   init(domainID: String, state: URL, cache: URL, limit: Int64, writeLimit: Int = 256 * 1024 * 1024) throws {
+    activityDomain = domainID
     api = GardenAPI(domainID: domainID)
     ranges = GardenRangeCache(api: api, domainID: domainID, diskLimit: Int(limit), directory: cache)
     metadata = try RemoteMetadata(url: state.appendingPathComponent("metadata.sqlite"), namespace: domainID)
@@ -85,6 +88,14 @@ actor RemoteEngine {
       }
     }
     try await serializeMutation(mutation)
+    let action: String?
+    switch mutation.operation {
+    case .createFile, .createFolder: action = "Create"
+    case .rename: action = "Rename"
+    case .unlink, .rmdir: action = "Delete"
+    default: action = nil
+    }
+    if let action { await GardenActivity.shared.record(domain: activityDomain, name: mutation.destination ?? mutation.path, action: action) }
   }
 
   private func serializeMutation(_ mutation: RemoteMutation?) async throws {
@@ -219,6 +230,9 @@ actor RemoteEngine {
     nextHandle += 1
     if let node { handles[handle] = node }
     if directory { directories[handle] = try metadata.children(node?.id ?? 0) }
+    if !directory {
+      Task { await GardenActivity.shared.record(domain: activityDomain, name: path, action: "Open") }
+    }
     return handle
   }
 
@@ -237,7 +251,7 @@ actor RemoteEngine {
     if let draft = try writes.state(node.id) {
       return try await RemoteWriteReader.read(draft, journal: writes, ranges: ranges, offset: offset, length: length)
     }
-    return try await ranges.read(node: node, offset: offset, length: length)
+    return try await ranges.read(node: node, offset: offset, length: length, path: try path(node.id))
   }
 
   func stop() async {

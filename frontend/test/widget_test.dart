@@ -28,6 +28,8 @@ class MemoryPreferences implements PreferencesStore {
 }
 
 class TestGateway implements GardenGateway {
+  @override
+  Future<void> renameDrive(int driveId, String name) async {}
   bool fail = false;
   bool failList = false;
   bool expiredSavedLogin = false;
