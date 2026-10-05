@@ -7,15 +7,40 @@ import '../model/account_window_info.dart';
 
 class AccountWindow extends ChangeNotifier {
   List<AccountWindowInfo> windows = const [];
+  Map<String, Object?>? relaunchSession;
+  Map<String, Object?> Function()? exportSession;
+  String? sessionError;
+  bool updateReady = false;
+  bool updateDismissed = false;
+  bool restarting = false;
+  String? updateError;
+  String? Function()? prepareRelaunch;
+  VoidCallback? cancelRelaunch;
   static const channel = MethodChannel('garden/window');
 
   Future<String> initialize() async {
     final menus = WindowMenuDelegate();
     WidgetsBinding.instance.platformMenuDelegate = menus;
     channel.setMethodCallHandler((call) async {
+      if (call.method == 'build') {
+        _setBuild(call.arguments);
+        return null;
+      }
+      if (call.method == 'prepareRelaunch') {
+        if (prepareRelaunch == null) {
+          return 'An account window is still starting.';
+        }
+        final error = prepareRelaunch!();
+        if (error != null) return error;
+        return exportSession?.call() ?? <String, Object?>{};
+      }
+      if (call.method == 'cancelRelaunch') {
+        cancelRelaunch?.call();
+        return null;
+      }
       if (call.method == 'windows') {
         _setWindows(call.arguments);
-        return;
+        return null;
       }
       if (call.method != 'active' || call.arguments is! bool) {
         throw MissingPluginException(call.method);
@@ -27,8 +52,41 @@ class AccountWindow extends ChangeNotifier {
       throw StateError('macOS did not return the account window.');
     }
     _setWindows(state['windows']);
+    _setBuild(state['build']);
+    final session = state['session'];
+    if (session is Map) relaunchSession = Map<String, Object?>.from(session);
+    sessionError = state['sessionError'] as String?;
     menus.setActive(state['active'] as bool);
     return state['id'] as String;
+  }
+
+  Future<void> ready() => channel.invokeMethod<void>('ready');
+
+  Future<void> relaunch() async {
+    try {
+      await channel.invokeMethod<void>('relaunch');
+    } catch (_) {
+      updateError = 'Could not relaunch Garden. Try again.';
+      notifyListeners();
+    }
+  }
+
+  void dismissUpdate() {
+    updateDismissed = true;
+    notifyListeners();
+  }
+
+  void _setBuild(Object? value) {
+    if (value is! Map ||
+        value['ready'] is! bool ||
+        value['restarting'] is! bool) {
+      throw StateError('Invalid build status.');
+    }
+    if (value['ready'] == true && !updateReady) updateDismissed = false;
+    updateReady = value['ready'] as bool;
+    restarting = value['restarting'] as bool;
+    updateError = value['error'] as String?;
+    notifyListeners();
   }
 
   void _setWindows(Object? value) {

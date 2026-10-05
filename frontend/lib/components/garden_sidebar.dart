@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../state/garden_controller.dart';
 import 'garden_mark.dart';
-import 'profile_button.dart';
+import 'sidebar_account_footer.dart';
 import 'sidebar_drives.dart';
 
 class GardenSidebar extends StatelessWidget {
@@ -37,8 +37,7 @@ class GardenSidebar extends StatelessWidget {
             child: SidebarDrives(controller: controller),
           ),
         ),
-        ProfileButton(controller: controller),
-        const SizedBox(height: 18),
+        SidebarAccountFooter(controller: controller),
       ],
     ),
   );

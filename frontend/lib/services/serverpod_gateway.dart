@@ -5,19 +5,59 @@ import '../model/account_info.dart';
 import '../model/garden_info.dart';
 import 'garden_gateway.dart';
 import 'session_auth_storage.dart';
+import 'relaunch_session_gateway.dart';
 import 'passkey_service.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ServerpodGateway implements GardenGateway {
-  ServerpodGateway(String serverUrl, {String windowId = 'main'})
-    : client = Client(serverUrl),
-      storage = SessionAuthStorage(serverUrl, windowId: windowId),
-      savedEmailKey = windowId == 'main'
-          ? 'garden.savedEmail.$serverUrl'
-          : 'garden.savedEmail.$serverUrl.$windowId' {
+class ServerpodGateway implements GardenGateway, RelaunchSessionGateway {
+  ServerpodGateway(
+    this.serverUrl, {
+    String windowId = 'main',
+    this.relaunchSession,
+  }) : client = Client(serverUrl),
+       storage = SessionAuthStorage(serverUrl, windowId: windowId),
+       savedEmailKey = windowId == 'main'
+           ? 'garden.savedEmail.$serverUrl'
+           : 'garden.savedEmail.$serverUrl.$windowId' {
     client.authSessionManager = FlutterAuthSessionManager(storage: storage);
   }
+  final String serverUrl;
+  Map<String, Object?>? relaunchSession;
+
+  @override
+  Map<String, Object?> exportSession(AccountInfo? account) {
+    final session = storage.value;
+    if (account == null) return {};
+    if (session == null) {
+      throw StateError('The account session is unavailable.');
+    }
+    return {
+      'serverUrl': serverUrl,
+      'email': account.email,
+      'auth': session.toJson(),
+      'remember': storage.remember,
+      'touchId': storage.touchId,
+    };
+  }
+
+  @override
+  Future<AccountInfo?> restoreRelaunch() async {
+    final session = relaunchSession;
+    relaunchSession = null;
+    if (session == null || session.isEmpty) return null;
+    if (session['serverUrl'] != serverUrl) {
+      throw StateError('The relaunched account belongs to a different server.');
+    }
+    storage.value = AuthSuccess.fromJson(
+      Map<String, dynamic>.from(session['auth'] as Map),
+    );
+    storage.remember = session['remember'] as bool;
+    storage.touchId = session['touchId'] as bool;
+    await client.auth.initialize();
+    return await _account();
+  }
+
   final Client client;
   final SessionAuthStorage storage;
   final String savedEmailKey;

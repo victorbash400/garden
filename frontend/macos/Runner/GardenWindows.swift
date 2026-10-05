@@ -8,6 +8,13 @@ import Cocoa
   private static let accounts = WindowAccounts()
   private static let savedKey = "garden.accountWindows"
 
+  private static var restored: [String: [String: Any]] = [:]
+  private static var sessions: [String: Any] = {
+    do { return try GardenSessionHandoff.consume(arguments: ProcessInfo.processInfo.arguments) }
+    catch { return ["error": "Could not restore the account sessions. Sign in again."] }
+  }()
+  private static let relaunchKey = "garden.relaunchWindows"
+
   static func attach(_ window: NSWindow, controller: FlutterViewController, slot: String) {
     windows[slot] = window
     let messenger = controller.engine.binaryMessenger
@@ -28,7 +35,23 @@ import Cocoa
         result(FlutterError(code: "window", message: "Account window is closed.", details: nil)); return
       }
       switch call.method {
-      case "initialize": result(["id": slot, "active": window.isMainWindow, "windows": list()])
+      case "initialize": result(["id": slot, "active": window.isMainWindow, "windows": list(), "build": GardenBuildUpdates.state, "session": sessions.removeValue(forKey: slot) ?? NSNull(), "sessionError": sessions["error"] ?? NSNull()])
+      case "ready":
+        if let state = restored.removeValue(forKey: slot), let frame = state["frame"] as? String {
+          window.setFrame(NSRectFromString(frame), display: true)
+          if state["visible"] as? Bool == false { window.orderOut(nil) }
+        }
+        result(nil)
+      case "relaunch":
+        Task {
+          await GardenBuildUpdates.relaunch(beforeLaunch: {
+            let state = windows.mapValues { window in
+              ["frame": NSStringFromRect(window.frame), "visible": window.isVisible] as [String: Any]
+            }
+            UserDefaults.standard.set(state, forKey: relaunchKey)
+          }, failed: { UserDefaults.standard.removeObject(forKey: relaunchKey) })
+        }
+        result(nil)
       case "new":
         if let hidden = windows.first(where: { $0.key != "main" && !$0.value.isVisible && !accounts.contains($0.key) }) {
           hidden.value.makeKeyAndOrderFront(nil)
@@ -63,6 +86,7 @@ import Cocoa
         forName: notification, object: window, queue: .main
       ) { _ in channel.invokeMethod("active", arguments: window.isMainWindow) })
     }
+    GardenBuildUpdates.install(channel, slot: slot)
     publish()
   }
 
@@ -76,7 +100,12 @@ import Cocoa
   }
 
   static func restore() {
-    for slot in UserDefaults.standard.stringArray(forKey: savedKey) ?? [] where slot != "main" {
+    _ = sessions
+    let snapshot = UserDefaults.standard.dictionary(forKey: relaunchKey) as? [String: [String: Any]]
+    restored = snapshot ?? [:]
+    UserDefaults.standard.removeObject(forKey: relaunchKey)
+    let slots = snapshot.map { Array($0.keys) } ?? (UserDefaults.standard.stringArray(forKey: savedKey) ?? [])
+    for slot in slots where slot != "main" {
       open(slot: slot)
     }
   }

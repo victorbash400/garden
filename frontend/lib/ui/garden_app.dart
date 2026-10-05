@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../state/garden_controller.dart';
 import '../components/error_notice.dart';
+import '../components/build_update_banner.dart';
 import '../components/finder_status_observer.dart';
 import '../components/files/import_status_bar.dart';
 import '../components/garden_sidebar.dart';
@@ -33,45 +34,63 @@ class GardenApp extends StatelessWidget {
         child: ListenableBuilder(
           listenable: controller,
           builder: (context, _) => Scaffold(
-            body: Row(
+            body: Stack(
               children: [
-                if (_showSidebar)
-                  AnimatedSize(
-                    duration: MediaQuery.disableAnimationsOf(context)
-                        ? Duration.zero
-                        : const Duration(milliseconds: 200),
-                    curve: Curves.easeOutCubic,
-                    alignment: Alignment.centerLeft,
-                    child: controller.page == GardenPage.settings
-                        ? SettingsSidebar(controller: controller)
-                        : GardenSidebar(controller: controller),
-                  ),
-                Expanded(
-                  child: Column(
+                AbsorbPointer(
+                  absorbing: controller.relaunching,
+                  child: Row(
                     children: [
-                      if (controller.error != null)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 28),
-                          child: ErrorNotice(
-                            message: controller.error!,
-                            onDismiss: () =>
-                                controller.navigate(controller.page),
-                          ),
+                      if (_showSidebar)
+                        AnimatedSize(
+                          duration: MediaQuery.disableAnimationsOf(context)
+                              ? Duration.zero
+                              : const Duration(milliseconds: 200),
+                          curve: Curves.easeOutCubic,
+                          alignment: Alignment.centerLeft,
+                          child: controller.page == GardenPage.settings
+                              ? SettingsSidebar(controller: controller)
+                              : GardenSidebar(controller: controller),
                         ),
                       Expanded(
-                        child: SettingsTransition(
-                          enabled: _showSidebar,
-                          child: KeyedSubtree(
-                            key: ValueKey(controller.page),
-                            child: _content(),
-                          ),
+                        child: Column(
+                          children: [
+                            if (controller.error != null)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 28,
+                                ),
+                                child: ErrorNotice(
+                                  message: controller.error!,
+                                  onDismiss: () =>
+                                      controller.navigate(controller.page),
+                                ),
+                              ),
+                            Expanded(
+                              child: SettingsTransition(
+                                enabled: _showSidebar,
+                                child: KeyedSubtree(
+                                  key: ValueKey(controller.page),
+                                  child: _content(),
+                                ),
+                              ),
+                            ),
+                            if (controller.files != null)
+                              ImportStatusBar(
+                                controller: controller.files!.imports,
+                              ),
+                          ],
                         ),
                       ),
-                      if (controller.files != null)
-                        ImportStatusBar(controller: controller.files!.imports),
                     ],
                   ),
                 ),
+                if (!_showSidebar && controller.accountWindow != null)
+                  Positioned(
+                    left: 0,
+                    bottom: 0,
+                    width: 240,
+                    child: BuildUpdateBanner(window: controller.accountWindow!),
+                  ),
               ],
             ),
           ),

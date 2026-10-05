@@ -32,7 +32,12 @@ Future<void> main() async {
   );
   final accountWindow = AccountWindow();
   final windowId = await accountWindow.initialize();
-  final gateway = ServerpodGateway(serverUrl, windowId: windowId);
+  final gateway = ServerpodGateway(
+    serverUrl,
+    windowId: windowId,
+    relaunchSession: accountWindow.relaunchSession,
+  );
+  accountWindow.relaunchSession = null;
   final system = MacSystemSetup();
   final finder = MacFinderMounts(gateway, serverUrl);
   final filesGateway = ServerpodFilesGateway(gateway.client);
@@ -58,6 +63,7 @@ Future<void> main() async {
     await windowManager.show();
     await windowManager.focus();
   });
+  await accountWindow.ready();
   runApp(GardenApp(controller: controller));
   unawaited(controller.initialize());
 }

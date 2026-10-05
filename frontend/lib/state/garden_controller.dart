@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../utils/error_message.dart';
 import '../native/account_window.dart';
 import '../services/activity_log.dart';
+import '../services/relaunch_session_gateway.dart';
 
 import '../model/account_info.dart';
 import '../model/garden_info.dart';
@@ -46,6 +47,12 @@ class GardenController extends ChangeNotifier {
   }) : storage = preferences is CacheStore
            ? StorageController(preferences)
            : null {
+    accountWindow?.prepareRelaunch = _prepareRelaunch;
+    if (gateway is RelaunchSessionGateway) {
+      accountWindow?.exportSession = () =>
+          (gateway as RelaunchSessionGateway).exportSession(account);
+    }
+    accountWindow?.cancelRelaunch = _cancelRelaunch;
     storage?.addListener(notifyListeners);
     finderUpdates?.addListener(_finderChanged);
     nativeSetup?.addListener(notifyListeners);
@@ -57,6 +64,31 @@ class GardenController extends ChangeNotifier {
       await finder!.openNode(current, node.gardenId, node.id!);
     };
   }
+  bool _relaunching = false;
+  bool get relaunching => _relaunching;
+
+  String? _prepareRelaunch() {
+    if (busy ||
+        finderSyncing ||
+        (security?.busy ?? false) ||
+        (files?.imports.busy ?? false)) {
+      return 'Finish the current operation before relaunching.';
+    }
+    if (registrationPassword.isNotEmpty) {
+      return 'Finish creating your account before relaunching.';
+    }
+    _relaunching = true;
+    files?.imports.paused = true;
+    notifyListeners();
+    return null;
+  }
+
+  void _cancelRelaunch() {
+    _relaunching = false;
+    files?.imports.paused = false;
+    notifyListeners();
+  }
+
   final AccountWindow? accountWindow;
   final AccountSecurityController? security;
   final FinderMounts? finder;
@@ -83,7 +115,7 @@ class GardenController extends ChangeNotifier {
   bool _busy = false;
   Future<void> _finderWork = Future.value();
   bool _changingDriveAccess = false;
-  bool get busy => _busy || (files?.busy ?? false);
+  bool get busy => _relaunching || _busy || (files?.busy ?? false);
   String? error;
   int cacheLimit = 20;
   String? registrationId;
@@ -101,6 +133,16 @@ class GardenController extends ChangeNotifier {
   Future<void> _loadStartup() async {
     await nativeSetup?.refresh();
     cacheLimit = await preferences.readCacheLimit();
+    final sessionError = accountWindow?.sessionError;
+    if (sessionError != null) throw StateError(sessionError);
+    if (gateway is RelaunchSessionGateway) {
+      final restored = await (gateway as RelaunchSessionGateway)
+          .restoreRelaunch();
+      if (restored != null) {
+        await _finishAuthentication(restored);
+        return;
+      }
+    }
     savedEmail = await gateway.savedLogin();
     await security?.checkConfiguration();
     if (savedEmail == null || security?.touchId == true) {

@@ -11,7 +11,6 @@ class AppDelegate: FlutterAppDelegate {
 
   override func applicationDidBecomeActive(_ notification: Notification) {
     updateDockIcon()
-    GardenWindows.restore()
   }
 
   private func updateDockIcon() {

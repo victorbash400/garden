@@ -4,7 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../state/garden_controller.dart';
 import 'settings_category.dart';
 import '../activity_icon.dart';
-import '../profile_button.dart';
+import '../sidebar_account_footer.dart';
 
 class SettingsSidebar extends StatelessWidget {
   const SettingsSidebar({super.key, required this.controller});
@@ -70,8 +70,7 @@ class SettingsSidebar extends StatelessWidget {
           onTap: controller.busy ? null : controller.back,
         ),
         const SizedBox(height: 8),
-        ProfileButton(controller: controller),
-        const SizedBox(height: 18),
+        SidebarAccountFooter(controller: controller),
       ],
     ),
   );

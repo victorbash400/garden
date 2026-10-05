@@ -17,6 +17,7 @@ class FileImportController extends ChangeNotifier {
   Completer<void>? _completion;
   int? driveId;
   bool busy = false;
+  bool paused = false;
   bool committing = false;
   String? name;
   String? error;
@@ -55,6 +56,7 @@ class FileImportController extends ChangeNotifier {
     int parentId,
     List<ImportEntry> entries,
   ) async {
+    if (paused) throw StateError('Garden is relaunching.');
     if (busy) throw StateError('An import is already running.');
     busy = true;
     this.driveId = driveId;
