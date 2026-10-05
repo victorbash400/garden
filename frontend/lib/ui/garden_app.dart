@@ -180,6 +180,10 @@ class GardenApp extends StatelessWidget {
       controller: controller.files!,
       userId: controller.account!.id,
       onBackToDrives: controller.back,
+      onManageDrive: () {
+        controller.selectSettings(SettingsSection.drives);
+        controller.navigate(GardenPage.settings);
+      },
       onConnections: controller.needsFinderAttention
           ? controller.openConnections
           : null,

@@ -23,7 +23,14 @@ import 'account_security_controller.dart';
 import 'storage_controller.dart';
 import '../services/cache_store.dart';
 
-enum SettingsSection { account, storage, connections, activity }
+enum SettingsSection {
+  account,
+  storage,
+  connections,
+  activity,
+  drives,
+  notifications,
+}
 
 enum GardenPage {
   starting,

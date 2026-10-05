@@ -27,7 +27,7 @@ class ColumnNodeRow extends StatelessWidget {
         controller.selected?.id == node.id;
     return HoverRename(
       right: 20,
-      onRename: controller.busy
+      onRename: controller.busy || !controller.canWrite
           ? null
           : () => FileActions(context, controller).perform(node, 'rename'),
       child: NodeContextMenu(

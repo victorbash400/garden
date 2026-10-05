@@ -7,6 +7,8 @@ import 'account_settings.dart';
 import 'connections_settings.dart';
 import 'storage_settings.dart';
 import 'activity_settings.dart';
+import 'drives_settings.dart';
+import 'notifications_settings.dart';
 
 class SettingsView extends StatelessWidget {
   const SettingsView({super.key, required this.controller});
@@ -59,6 +61,8 @@ class SettingsView extends StatelessWidget {
                     children: [
                       Text(
                         switch (controller.settingsSection) {
+                          SettingsSection.drives => 'Drives',
+                          SettingsSection.notifications => 'Notifications',
                           SettingsSection.activity => 'Activity',
                           SettingsSection.account => 'Account',
                           SettingsSection.storage => 'Storage',
@@ -81,6 +85,14 @@ class SettingsView extends StatelessWidget {
                     child: KeyedSubtree(
                       key: ValueKey(controller.settingsSection),
                       child: switch (controller.settingsSection) {
+                        SettingsSection.drives => DrivesSettings(
+                          key: ValueKey(controller.account!.id),
+                          controller: controller,
+                        ),
+                        SettingsSection.notifications => NotificationsSettings(
+                          key: ValueKey(controller.account!.id),
+                          controller: controller,
+                        ),
                         SettingsSection.activity => const SizedBox.shrink(),
                         SettingsSection.account => AccountSettings(
                           controller: controller,

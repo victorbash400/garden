@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:garden_client/garden_client.dart';
 
 import '../../state/files_controller.dart';
@@ -19,25 +18,8 @@ class FileActions {
   final BuildContext context;
   final FilesController controller;
 
-  Future<void> invite() async {
-    try {
-      final code = await controller.gateway.invite(controller.drive!.id);
-      await Clipboard.setData(ClipboardData(text: code));
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Invitation copied. The previous invitation no longer works.',
-            ),
-          ),
-        );
-      }
-    } catch (failure) {
-      controller.reportError(failure);
-    }
-  }
-
   Future<void> create(String kind, {int? parentId}) async {
+    if (!controller.canWrite) return;
     final name = await showDialog<String>(
       context: context,
       builder: (_) => NodeNameDialog(
@@ -55,6 +37,7 @@ class FileActions {
   }
 
   Future<void> import({int? parentId}) async {
+    if (!controller.canWrite) return;
     final driveId = controller.drive!.id;
     final destination = parentId ?? controller.parentId;
     try {
@@ -88,6 +71,7 @@ class FileActions {
   }
 
   Future<void> edit(FileNode node) async {
+    if (!controller.canWrite) return;
     if (!isTextFile(node.name)) {
       controller.reportError(StateError('This file cannot be edited as text.'));
       return;
@@ -121,6 +105,10 @@ class FileActions {
 
   Future<void> perform(FileNode node, String action) async {
     if (controller.busy) return;
+    if (!controller.canWrite &&
+        const {'edit', 'rename', 'move', 'delete'}.contains(action)) {
+      return;
+    }
     switch (action) {
       case 'open':
         await open(node);

@@ -1,38 +1,67 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-class ErrorNotice extends StatelessWidget {
+import 'error_popup.dart';
+
+// Serializes errors from independent surfaces within each app window.
+final _pendingErrors = Expando<Future<void>>();
+
+class ErrorNotice extends StatefulWidget {
   const ErrorNotice({
     super.key,
     required this.message,
-    required this.onDismiss,
+    this.onDismiss,
+    this.action,
+    this.onAction,
   });
   final String message;
-  final VoidCallback onDismiss;
+  final VoidCallback? onDismiss;
+  final String? action;
+  final VoidCallback? onAction;
+
   @override
-  Widget build(BuildContext context) => Container(
-    margin: const EdgeInsets.fromLTRB(28, 12, 28, 0),
-    padding: const EdgeInsets.fromLTRB(14, 10, 6, 10),
-    decoration: BoxDecoration(
-      color: const Color(0xFFFFF1F0),
-      borderRadius: BorderRadius.circular(10),
-    ),
-    child: Row(
-      children: [
-        const Icon(LucideIcons.circleAlert, size: 16, color: Color(0xFFAA3434)),
-        const SizedBox(width: 10),
-        Expanded(
-          child: SelectableText(
-            message,
-            style: const TextStyle(fontSize: 12, color: Color(0xFFAA3434)),
+  State<ErrorNotice> createState() => _ErrorNoticeState();
+}
+
+class _ErrorNoticeState extends State<ErrorNotice> {
+  @override
+  void initState() {
+    super.initState();
+    schedule();
+  }
+
+  @override
+  void didUpdateWidget(ErrorNotice oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.message != widget.message) schedule();
+  }
+
+  void schedule() {
+    final message = widget.message;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final navigator = Navigator.of(context, rootNavigator: true);
+      final previous = _pendingErrors[navigator] ?? Future<void>.value();
+      _pendingErrors[navigator] = previous.then((_) async {
+        if (!mounted || widget.message != message) return;
+        final retry = await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => ErrorPopup(
+            message: message,
+            action: widget.action,
+            onAction: widget.onAction,
           ),
-        ),
-        IconButton(
-          onPressed: onDismiss,
-          tooltip: 'Dismiss error',
-          icon: const Icon(LucideIcons.x, size: 16),
-        ),
-      ],
-    ),
-  );
+        );
+        if (!mounted || widget.message != message) return;
+        if (retry == true) {
+          widget.onAction?.call();
+        } else {
+          widget.onDismiss?.call();
+        }
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.shrink();
 }

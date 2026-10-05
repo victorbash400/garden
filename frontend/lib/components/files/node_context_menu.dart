@@ -22,7 +22,8 @@ class NodeContextMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) => GestureDetector(
     behavior: HitTestBehavior.opaque,
-    onSecondaryTapDown: controller.busy
+    onSecondaryTapDown:
+        controller.busy || (node == null && !controller.canWrite)
         ? null
         : (details) async {
             final actions = FileActions(context, controller);
@@ -61,7 +62,7 @@ class NodeContextMenu extends StatelessWidget {
                         child: const Text('Import files…'),
                       ),
                     ]
-                  : nodeMenuItems(node!),
+                  : nodeMenuItems(node!, canWrite: controller.canWrite),
             );
             if (action == null || !context.mounted) return;
             if (node != null) {

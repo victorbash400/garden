@@ -27,6 +27,7 @@ class DirectoryList extends StatelessWidget {
             node: node,
             child: FileRow(
               node: node,
+              canWrite: controller.canWrite,
               striped: index.isEven,
               selected: controller.selected?.id == node.id,
               onSelect: () => controller.select(node),

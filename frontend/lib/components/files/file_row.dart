@@ -19,8 +19,9 @@ class FileRow extends StatelessWidget {
     required this.onOpen,
     required this.onAction,
     this.striped = false,
+    this.canWrite = true,
   });
-  final bool striped;
+  final bool striped, canWrite;
   final FileNode node;
   final bool selected;
   final VoidCallback onSelect;
@@ -28,7 +29,7 @@ class FileRow extends StatelessWidget {
   final ValueChanged<String> onAction;
   @override
   Widget build(BuildContext context) => HoverRename(
-    onRename: () => onAction('rename'),
+    onRename: canWrite ? () => onAction('rename') : null,
     right: 48,
     child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: .5),
@@ -69,7 +70,7 @@ class FileRow extends StatelessWidget {
                   padding: EdgeInsets.zero,
                   icon: const Icon(LucideIcons.ellipsis, size: 16),
                   onSelected: onAction,
-                  itemBuilder: (_) => nodeMenuItems(node),
+                  itemBuilder: (_) => nodeMenuItems(node, canWrite: canWrite),
                 ),
               ],
             ),

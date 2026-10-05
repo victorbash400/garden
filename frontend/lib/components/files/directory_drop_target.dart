@@ -38,7 +38,7 @@ class _DirectoryDropTargetState extends State<DirectoryDropTarget> {
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: widget.controller.imports,
     builder: (_, _) => DropTarget(
-      enable: !widget.controller.imports.busy,
+      enable: !widget.controller.imports.busy && widget.controller.canWrite,
       onDragEntered: (_) => setState(() => dragging = true),
       onDragExited: (_) => setState(() => dragging = false),
       onDragDone: _drop,

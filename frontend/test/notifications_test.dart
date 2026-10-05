@@ -1,10 +1,13 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_client/garden_client.dart';
+import 'package:garden_flutter/components/sharing/notification_bell.dart';
 import 'package:garden_flutter/services/sharing/drive_sharing_service.dart';
 import 'package:garden_flutter/state/sharing/notification_controller.dart';
 import 'package:garden_flutter/state/garden_controller.dart';
+import 'package:garden_flutter/ui/garden_theme.dart';
 import 'package:garden_flutter/model/account_info.dart';
 import 'package:garden_flutter/model/garden_info.dart';
 
@@ -112,5 +115,18 @@ void main() {
     await serviceB.events.close();
   });
 
-
+  testWidgets('bell opens Notifications from the file browser', (tester) async {
+    final controller = GardenController(TestGateway(), MemoryPreferences())
+      ..page = GardenPage.files;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: GardenTheme.light,
+        home: Scaffold(body: NotificationBell(controller: controller)),
+      ),
+    );
+    await tester.tap(find.byTooltip('Notifications'));
+    expect(controller.page, GardenPage.settings);
+    expect(controller.settingsSection, SettingsSection.notifications);
+    controller.dispose();
+  });
 }

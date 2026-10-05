@@ -60,80 +60,82 @@ class DriveRowActions extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     mainAxisSize: MainAxisSize.min,
     children: [
-      SizedBox(
-        width: 24,
-        height: 28,
-        child: IconButton(
-          tooltip: 'New folder in ${drive.name}',
-          padding: EdgeInsets.zero,
-          onPressed: controller.busy ? null : () => createFolder(context),
-          icon: const Icon(
-            LucideIcons.plus,
-            size: 14,
-            color: Color(0xFF858581),
-          ),
-        ),
-      ),
-      SizedBox(
-        width: 24,
-        height: 28,
-        child: PopupMenuButton<String>(
-          tooltip: 'Actions for ${drive.name}',
-          enabled: !controller.busy,
-          padding: EdgeInsets.zero,
-          icon: const Icon(
-            LucideIcons.ellipsis,
-            size: 15,
-            color: Color(0xFF858581),
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          color: Colors.white,
-          elevation: 4,
-          onSelected: (value) async {
-            if (value == 'rename') await rename(context);
-            if (value == 'folder' && context.mounted) {
-              await createFolder(context);
-            }
-            if (value == 'delete' && context.mounted) await delete(context);
-          },
-          itemBuilder: (_) => [
-            if (drive.role == 'Owner')
-              const PopupMenuItem(
-                value: 'rename',
-                child: Row(
-                  children: [
-                    Icon(LucideIcons.squarePen, size: 16),
-                    SizedBox(width: 10),
-                    Text('Rename…'),
-                  ],
-                ),
-              ),
-            const PopupMenuItem(
-              value: 'folder',
-              child: Row(
-                children: [
-                  Icon(LucideIcons.folderPlus, size: 16),
-                  SizedBox(width: 10),
-                  Text('New folder'),
-                ],
-              ),
+      if (drive.canWrite)
+        SizedBox(
+          width: 24,
+          height: 28,
+          child: IconButton(
+            tooltip: 'New folder in ${drive.name}',
+            padding: EdgeInsets.zero,
+            onPressed: controller.busy ? null : () => createFolder(context),
+            icon: const Icon(
+              LucideIcons.plus,
+              size: 14,
+              color: Color(0xFF858581),
             ),
-            if (drive.role == 'Owner')
+          ),
+        ),
+      if (drive.canWrite)
+        SizedBox(
+          width: 24,
+          height: 28,
+          child: PopupMenuButton<String>(
+            tooltip: 'Actions for ${drive.name}',
+            enabled: !controller.busy,
+            padding: EdgeInsets.zero,
+            icon: const Icon(
+              LucideIcons.ellipsis,
+              size: 15,
+              color: Color(0xFF858581),
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            color: Colors.white,
+            elevation: 4,
+            onSelected: (value) async {
+              if (value == 'rename') await rename(context);
+              if (value == 'folder' && context.mounted) {
+                await createFolder(context);
+              }
+              if (value == 'delete' && context.mounted) await delete(context);
+            },
+            itemBuilder: (_) => [
+              if (drive.role == 'Owner')
+                const PopupMenuItem(
+                  value: 'rename',
+                  child: Row(
+                    children: [
+                      Icon(LucideIcons.squarePen, size: 16),
+                      SizedBox(width: 10),
+                      Text('Rename…'),
+                    ],
+                  ),
+                ),
               const PopupMenuItem(
-                value: 'delete',
+                value: 'folder',
                 child: Row(
                   children: [
-                    Icon(LucideIcons.trash2, size: 16, color: Colors.red),
+                    Icon(LucideIcons.folderPlus, size: 16),
                     SizedBox(width: 10),
-                    Text('Delete drive', style: TextStyle(color: Colors.red)),
+                    Text('New folder'),
                   ],
                 ),
               ),
-          ],
+              if (drive.role == 'Owner')
+                const PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(LucideIcons.trash2, size: 16, color: Colors.red),
+                      SizedBox(width: 10),
+                      Text('Delete drive', style: TextStyle(color: Colors.red)),
+                    ],
+                  ),
+                ),
+            ],
+          ),
         ),
-      ),
     ],
   );
 }

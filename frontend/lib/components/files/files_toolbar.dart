@@ -20,7 +20,7 @@ class FilesToolbar extends StatelessWidget {
   final FilesController controller;
   final ValueChanged<String> onCreate;
   final VoidCallback onImport;
-  final VoidCallback onInvite;
+  final VoidCallback? onInvite;
   final VoidCallback onBackToDrives;
   final VoidCallback? onConnections;
   @override
@@ -116,9 +116,10 @@ class FilesToolbar extends StatelessWidget {
                   onPressed: controller.busy ? null : controller.reconnect,
                   icon: LucideIcons.wifiOff,
                 ),
-              if (controller.drive!.role == 'Owner')
+              if (onInvite != null &&
+                  const {'Owner', 'Manager'}.contains(controller.drive!.role))
                 ToolbarButton(
-                  tooltip: 'Create invitation',
+                  tooltip: 'Manage drive sharing',
                   onPressed: controller.busy ? null : onInvite,
                   icon: LucideIcons.link,
                 ),
@@ -126,7 +127,9 @@ class FilesToolbar extends StatelessWidget {
                 listenable: controller.imports,
                 builder: (_, _) => ToolbarButton(
                   tooltip: 'Import files',
-                  onPressed: controller.imports.busy ? null : onImport,
+                  onPressed: controller.imports.busy || !controller.canWrite
+                      ? null
+                      : onImport,
                   icon: LucideIcons.upload,
                 ),
               ),
@@ -135,7 +138,7 @@ class FilesToolbar extends StatelessWidget {
                 height: 32,
                 child: PopupMenuButton<String>(
                   tooltip: 'Create',
-                  enabled: !controller.busy,
+                  enabled: !controller.busy && controller.canWrite,
                   padding: EdgeInsets.zero,
                   style: ToolbarButton.style,
                   icon: const Icon(

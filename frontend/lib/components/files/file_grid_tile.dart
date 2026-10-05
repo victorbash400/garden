@@ -15,7 +15,7 @@ class FileGridTile extends StatelessWidget {
   final FileNode node;
   @override
   Widget build(BuildContext context) => HoverRename(
-    onRename: controller.busy
+    onRename: controller.busy || !controller.canWrite
         ? null
         : () => FileActions(context, controller).perform(node, 'rename'),
     right: 4,

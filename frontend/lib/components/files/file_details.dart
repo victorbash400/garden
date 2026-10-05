@@ -17,12 +17,14 @@ class FileDetails extends StatefulWidget {
     required this.revision,
     required this.userId,
     required this.onExport,
+    this.canWrite = true,
   });
   final FilesGateway gateway;
   final FileNode node;
   final int revision;
   final String userId;
   final ValueChanged<FileVersion> onExport;
+  final bool canWrite;
   @override
   State<FileDetails> createState() => _FileDetailsState();
 }
@@ -133,7 +135,7 @@ class _FileDetailsState extends State<FileDetails> {
                           userId: widget.userId,
                         ),
                       ),
-                      FileCommentInput(onSubmit: post),
+                      if (widget.canWrite) FileCommentInput(onSubmit: post),
                     ],
                   ),
                 ],
