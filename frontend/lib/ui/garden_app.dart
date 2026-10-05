@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../state/garden_controller.dart';
 import '../components/error_notice.dart';
+import '../components/account_background.dart';
 import '../components/build_update_banner.dart';
 import '../components/finder_status_observer.dart';
 import '../components/files/import_status_bar.dart';
@@ -70,7 +71,9 @@ class GardenApp extends StatelessWidget {
                                 enabled: _showSidebar,
                                 child: KeyedSubtree(
                                   key: ValueKey(controller.page),
-                                  child: _content(),
+                                  child: _showAccountBackground
+                                      ? AccountBackground(child: _content())
+                                      : _content(),
                                 ),
                               ),
                             ),
@@ -98,6 +101,12 @@ class GardenApp extends StatelessWidget {
       ),
     ),
   );
+  bool get _showAccountBackground => const {
+    GardenPage.signIn,
+    GardenPage.register,
+    GardenPage.verify,
+  }.contains(controller.page);
+
   bool get _showSidebar =>
       controller.account != null &&
       const {

@@ -30,6 +30,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - assets/auth-background.webp
     - assets/garden.svg
     - assets/activity.svg
     - assets/folder-closed.svg

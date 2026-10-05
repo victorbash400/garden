@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../components/account_card.dart';
+
 import '../components/garden_field.dart';
 import '../components/passkey_sign_in_button.dart';
 import '../state/account_security_controller.dart';
@@ -74,76 +76,80 @@ class _AccountFormState extends State<AccountForm> {
     child: SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: AutofillGroup(
-        child: SizedBox(
-          width: 340,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (widget.savedEmail != null) ...[
-                SavedLoginButton(
-                  email: widget.savedEmail!,
-                  touchId: widget.security?.touchId ?? false,
-                  onContinue: widget.busy ? null : widget.onContinueSaved,
-                  onForget: widget.busy ? null : widget.onForgetSaved,
+        child: AccountCard(
+          child: SizedBox(
+            width: 340,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (widget.savedEmail != null) ...[
+                  SavedLoginButton(
+                    email: widget.savedEmail!,
+                    touchId: widget.security?.touchId ?? false,
+                    onContinue: widget.busy ? null : widget.onContinueSaved,
+                    onForget: widget.busy ? null : widget.onForgetSaved,
+                  ),
+                  const SizedBox(height: 20),
+                ],
+                GardenField(
+                  label: 'Email',
+                  autofillHints: const [
+                    AutofillHints.username,
+                    AutofillHints.email,
+                  ],
+                  controller: email,
+                  enabled: !widget.busy,
+                  autofocus: true,
+                  keyboardType: TextInputType.emailAddress,
                 ),
                 const SizedBox(height: 20),
-              ],
-              GardenField(
-                label: 'Email',
-                autofillHints: const [
-                  AutofillHints.username,
-                  AutofillHints.email,
-                ],
-                controller: email,
-                enabled: !widget.busy,
-                autofocus: true,
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 20),
-              GardenField(
-                label: 'Password',
-                autofillHints: [
-                  widget.isRegistration
-                      ? AutofillHints.newPassword
-                      : AutofillHints.password,
-                ],
-                controller: password,
-                obscure: true,
-                enabled: !widget.busy,
-                onSubmitted: (_) => submit(),
-              ),
-              if (widget.showDemo || widget.onCreateAccount != null) ...[
-                const SizedBox(height: 12),
-                AccountFormLinks(
-                  showDemo: widget.showDemo,
-                  onFillDemo: widget.busy ? null : fillDemo,
-                  onCreateAccount: widget.busy ? null : widget.onCreateAccount,
-                  showCreateAccount: widget.onCreateAccount != null,
+                GardenField(
+                  label: 'Password',
+                  autofillHints: [
+                    widget.isRegistration
+                        ? AutofillHints.newPassword
+                        : AutofillHints.password,
+                  ],
+                  controller: password,
+                  obscure: true,
+                  enabled: !widget.busy,
+                  onSubmitted: (_) => submit(),
                 ),
-              ],
-              const SizedBox(height: 24),
-              GardenButton(
-                label: widget.busy ? 'Please wait' : widget.submitLabel,
-                onPressed: canSubmit ? submit : null,
-              ),
-              if (widget.onPasskey != null) ...[
-                const SizedBox(height: 12),
-                PasskeySignInButton(
-                  security: widget.security!,
-                  busy: widget.busy,
-                  onPressed: widget.onPasskey!,
-                ),
-              ],
-              if (widget.onBack != null) ...[
-                const SizedBox(height: 12),
+                if (widget.showDemo || widget.onCreateAccount != null) ...[
+                  const SizedBox(height: 12),
+                  AccountFormLinks(
+                    showDemo: widget.showDemo,
+                    onFillDemo: widget.busy ? null : fillDemo,
+                    onCreateAccount: widget.busy
+                        ? null
+                        : widget.onCreateAccount,
+                    showCreateAccount: widget.onCreateAccount != null,
+                  ),
+                ],
+                const SizedBox(height: 24),
                 GardenButton(
-                  label: 'Back',
-                  secondary: true,
-                  onPressed: widget.busy ? null : widget.onBack,
+                  label: widget.busy ? 'Please wait' : widget.submitLabel,
+                  onPressed: canSubmit ? submit : null,
                 ),
+                if (widget.onPasskey != null) ...[
+                  const SizedBox(height: 12),
+                  PasskeySignInButton(
+                    security: widget.security!,
+                    busy: widget.busy,
+                    onPressed: widget.onPasskey!,
+                  ),
+                ],
+                if (widget.onBack != null) ...[
+                  const SizedBox(height: 12),
+                  GardenButton(
+                    label: 'Back',
+                    secondary: true,
+                    onPressed: widget.busy ? null : widget.onBack,
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),
