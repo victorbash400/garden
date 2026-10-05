@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -6,6 +8,8 @@ import 'window_menu_delegate.dart';
 import '../model/account_window_info.dart';
 
 class AccountWindow extends ChangeNotifier {
+  final _focusEvents = StreamController<void>.broadcast();
+  Stream<void> get focusEvents => _focusEvents.stream;
   List<AccountWindowInfo> windows = const [];
   Map<String, Object?>? relaunchSession;
   Map<String, Object?> Function()? exportSession;
@@ -46,6 +50,7 @@ class AccountWindow extends ChangeNotifier {
         throw MissingPluginException(call.method);
       }
       menus.setActive(call.arguments as bool);
+      if (call.arguments == true) _focusEvents.add(null);
     });
     final state = await channel.invokeMapMethod<String, Object?>('initialize');
     if (state == null || state['id'] is! String || state['active'] is! bool) {
@@ -114,5 +119,11 @@ class AccountWindow extends ChangeNotifier {
       throw StateError('macOS did not release the account window.');
     }
     return lastWindow;
+  }
+
+  @override
+  void dispose() {
+    _focusEvents.close();
+    super.dispose();
   }
 }

@@ -21,10 +21,14 @@ class FinderStatusObserver extends StatefulWidget {
 class _FinderStatusObserverState extends State<FinderStatusObserver>
     with WidgetsBindingObserver {
   StreamSubscription<void>? _wakeSubscription;
+  StreamSubscription<void>? _focusSubscription;
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _focusSubscription = widget.controller.accountWindow?.focusEvents.listen(
+      (_) => unawaited(widget.controller.notifications?.reconnectIfNeeded()),
+    );
     _wakeSubscription = widget.controller.nativeSetup?.system.wakeEvents.listen(
       (_) {
         unawaited(widget.controller.notifications?.reconnectIfNeeded());
@@ -42,6 +46,7 @@ class _FinderStatusObserverState extends State<FinderStatusObserver>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _wakeSubscription?.cancel();
+    _focusSubscription?.cancel();
     super.dispose();
   }
 
