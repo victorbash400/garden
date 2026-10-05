@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../state/garden_controller.dart';
 import 'garden_mark.dart';
-import 'sidebar_item.dart';
+import 'profile_button.dart';
 import 'sidebar_drives.dart';
 
 class GardenSidebar extends StatelessWidget {
@@ -38,14 +37,7 @@ class GardenSidebar extends StatelessWidget {
             child: SidebarDrives(controller: controller),
           ),
         ),
-        SidebarItem(
-          icon: LucideIcons.settings,
-          label: 'Settings',
-          selected: controller.page == GardenPage.settings,
-          onTap: controller.busy
-              ? null
-              : () => controller.navigate(GardenPage.settings),
-        ),
+        ProfileButton(controller: controller),
         const SizedBox(height: 18),
       ],
     ),

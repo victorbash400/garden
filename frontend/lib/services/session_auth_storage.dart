@@ -5,13 +5,17 @@ import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 class SessionAuthStorage implements ClientAuthSuccessStorage {
   SessionAuthStorage(
     String serverUrl, {
+    String windowId = 'main',
     ClientAuthSuccessStorage? persistent,
     ClientAuthSuccessStorage? protected,
-  }) : biometric = protected ?? biometricSessionStorage(serverUrl),
+  }) : biometric =
+           protected ?? biometricSessionStorage(serverUrl, windowId: windowId),
        persistent =
            persistent ??
            SecureClientAuthSuccessStorage(
-             authSuccessStorageKey: 'garden.session.$serverUrl',
+             authSuccessStorageKey: windowId == 'main'
+                 ? 'garden.session.$serverUrl'
+                 : 'garden.session.$serverUrl.$windowId',
              secureStorage: const FlutterSecureStorage(
                mOptions: MacOsOptions(
                  accountName: 'Garden',

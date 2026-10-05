@@ -10,10 +10,12 @@ import 'passkey_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ServerpodGateway implements GardenGateway {
-  ServerpodGateway(String serverUrl)
+  ServerpodGateway(String serverUrl, {String windowId = 'main'})
     : client = Client(serverUrl),
-      storage = SessionAuthStorage(serverUrl),
-      savedEmailKey = 'garden.savedEmail.$serverUrl' {
+      storage = SessionAuthStorage(serverUrl, windowId: windowId),
+      savedEmailKey = windowId == 'main'
+          ? 'garden.savedEmail.$serverUrl'
+          : 'garden.savedEmail.$serverUrl.$windowId' {
     client.authSessionManager = FlutterAuthSessionManager(storage: storage);
   }
   final Client client;

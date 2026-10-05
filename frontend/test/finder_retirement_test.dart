@@ -191,7 +191,7 @@ void main() {
       await mounts.sync(account, [
         const GardenInfo(id: 2, name: 'Kept', role: 'owner', members: 1),
       ]);
-      expect(events, ['missing', 'prepareRemoval', 'revoke', 'reconcile']);
+      expect(events, ['missing', 'rename', 'prepareRemoval', 'revoke', 'reconcile']);
       expect(mounts.mountedDriveIDs, {2});
     },
     skip: !Platform.isMacOS,

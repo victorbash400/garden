@@ -19,7 +19,11 @@ class GardenMenuBar extends StatelessWidget {
   Widget build(BuildContext context) {
     if (defaultTargetPlatform != TargetPlatform.macOS) return child;
     return ListenableBuilder(
-      listenable: Listenable.merge([controller, controller.files]),
+      listenable: Listenable.merge([
+        controller,
+        controller.files,
+        controller.accountWindow,
+      ]),
       builder: (context, _) {
         final files = controller.files;
         final available =
@@ -67,6 +71,11 @@ class GardenMenuBar extends StatelessWidget {
             PlatformMenu(
               label: 'File',
               menus: [
+                item(
+                  'New Account Window',
+                  controller.busy ? null : controller.newAccountWindow,
+                  LogicalKeyboardKey.keyN,
+                ),
                 item(
                   'New Folder…',
                   available ? () => actions!.create('folder') : null,
@@ -173,6 +182,12 @@ class GardenMenuBar extends StatelessWidget {
             PlatformMenu(
               label: 'Window',
               menus: [
+                for (final window
+                    in controller.accountWindow?.windows ?? const [])
+                  PlatformMenuItem(
+                    label: window.title,
+                    onSelected: () => controller.accountWindow!.show(window.id),
+                  ),
                 const PlatformProvidedMenuItem(
                   type: PlatformProvidedMenuItemType.minimizeWindow,
                 ),

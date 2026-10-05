@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../state/garden_controller.dart';
 import 'settings_category.dart';
+import '../profile_button.dart';
 
 class SettingsSidebar extends StatelessWidget {
   const SettingsSidebar({super.key, required this.controller});
@@ -67,6 +68,8 @@ class SettingsSidebar extends StatelessWidget {
           selected: false,
           onTap: controller.busy ? null : controller.back,
         ),
+        const SizedBox(height: 8),
+        ProfileButton(controller: controller),
         const SizedBox(height: 18),
       ],
     ),

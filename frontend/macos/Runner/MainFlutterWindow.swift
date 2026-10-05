@@ -74,21 +74,7 @@ class MainFlutterWindow: NSWindow {
     self.contentViewController = flutterViewController
     self.setFrame(windowFrame, display: true)
 
-    RegisterGeneratedPlugins(registry: flutterViewController)
-    GardenActivityBridge.install(on: flutterViewController.engine.binaryMessenger)
-    GardenBandwidthBridge.install(on: flutterViewController.engine.binaryMessenger)
-    GardenCacheBridge.install(on: flutterViewController.engine.binaryMessenger)
-    NativeSetupBridge.install(on: flutterViewController.engine.binaryMessenger)
-    FlutterMethodChannel(
-      name: "garden/native_auth", binaryMessenger: flutterViewController.engine.binaryMessenger
-    ).setMethodCallHandler { call, result in
-      if call.method == "configured" {
-        result(nativeAuthenticationConfigured())
-      } else {
-        result(FlutterMethodNotImplemented)
-      }
-    }
-    GardenFinderBridge.install(on: flutterViewController.engine.binaryMessenger)
+    GardenWindows.attach(self, controller: flutterViewController, slot: "main")
 
     appearance = NSAppearance(named: .aqua)
     super.awakeFromNib()

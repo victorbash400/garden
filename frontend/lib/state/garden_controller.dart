@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../utils/error_message.dart';
+import '../native/account_window.dart';
 import '../services/activity_log.dart';
 
 import '../model/account_info.dart';
@@ -36,6 +37,7 @@ class GardenController extends ChangeNotifier {
     this.gateway,
     this.preferences, {
     this.files,
+    this.accountWindow,
     this.security,
     this.finder,
     this.finderUpdates,
@@ -55,6 +57,7 @@ class GardenController extends ChangeNotifier {
       await finder!.openNode(current, node.gardenId, node.id!);
     };
   }
+  final AccountWindow? accountWindow;
   final AccountSecurityController? security;
   final FinderMounts? finder;
   final FinderUpdates? finderUpdates;
@@ -86,6 +89,12 @@ class GardenController extends ChangeNotifier {
   String? registrationId;
   String registrationEmail = '';
   String registrationPassword = '';
+
+  Future<void> newAccountWindow() => _request(() async {
+    final windows = accountWindow;
+    if (windows == null) throw StateError('Account windows require macOS.');
+    await windows.open();
+  });
 
   Future<void> initialize() => _request(_loadStartup);
 
@@ -220,6 +229,7 @@ class GardenController extends ChangeNotifier {
   });
 
   Future<void> _finishAuthentication(AccountInfo signedIn) async {
+    await accountWindow?.setAccount(signedIn);
     account = signedIn;
     ActivityLog.instance.account = signedIn.id;
     savedEmail = signedIn.email;
@@ -361,7 +371,9 @@ class GardenController extends ChangeNotifier {
     _changingDriveAccess = true;
     try {
       await _finderWork;
-      if (account != null) await finder?.signOut(account!);
+      final current = account;
+      final disconnect = await accountWindow?.releaseAccount() ?? true;
+      if (current != null && disconnect) await finder?.signOut(current);
       await finderUpdates?.close();
       await files?.close();
       await gateway.signOut();
@@ -377,6 +389,10 @@ class GardenController extends ChangeNotifier {
       registrationId = null;
       savedEmail = null;
       page = GardenPage.signIn;
+    } catch (_) {
+      final current = account;
+      if (current != null) await accountWindow?.setAccount(current);
+      rethrow;
     } finally {
       _changingDriveAccess = false;
     }

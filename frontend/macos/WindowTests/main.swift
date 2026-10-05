@@ -1,0 +1,18 @@
+import Foundation
+
+let accounts = WindowAccounts()
+accounts.set("alice", window: "one")
+accounts.set("bob", window: "two")
+precondition(accounts.release("one"))
+precondition(accounts.release("two"))
+accounts.set("alice", window: "one")
+accounts.set("alice", window: "two")
+precondition(!accounts.release("one"))
+precondition(accounts.release("two"))
+accounts.set("alice", window: "one")
+accounts.set("bob", window: "one")
+accounts.set("alice", window: "two")
+precondition(accounts.release("one"))
+precondition(accounts.release("two"))
+precondition(!accounts.release("missing"))
+print("Window account isolation passed.")

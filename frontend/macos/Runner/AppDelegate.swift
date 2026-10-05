@@ -6,10 +6,12 @@ class AppDelegate: FlutterAppDelegate {
   override func applicationDidFinishLaunching(_ notification: Notification) {
     super.applicationDidFinishLaunching(notification)
     updateDockIcon()
+    GardenWindows.restore()
   }
 
   override func applicationDidBecomeActive(_ notification: Notification) {
     updateDockIcon()
+    GardenWindows.restore()
   }
 
   private func updateDockIcon() {
@@ -24,7 +26,7 @@ class AppDelegate: FlutterAppDelegate {
   }
 
   override func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-    if !flag { sender.windows.first?.makeKeyAndOrderFront(self) }
+    if !flag { GardenWindows.reopen() }
     return true
   }
 

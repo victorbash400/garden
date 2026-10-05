@@ -21,6 +21,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		A30000000000000000000002 /* WindowAccounts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40000000000000000000002 /* WindowAccounts.swift */; };
+		A30000000000000000000001 /* GardenWindows.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40000000000000000000001 /* GardenWindows.swift */; };
 		0B73494BD26D4437DC235208 /* GardenAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8681944F850AE3C8FBA3090E /* GardenAPI.swift */; };
 		0B736C14FB9B44B900A472DD /* GardenProviderError.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1A3B90C9289C040C23D814 /* GardenProviderError.swift */; };
 		14F8DF57F2F53B0521DFDBF0 /* FinderCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7A65DF6BF53C6D521B7B380 /* FinderCredential.swift */; };
@@ -232,6 +234,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A40000000000000000000002 /* WindowAccounts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowAccounts.swift; sourceTree = "<group>"; };
+		A40000000000000000000001 /* GardenWindows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenWindows.swift; sourceTree = "<group>"; };
 		081BAFC548A1CD53E423E5FC /* GardenRangeCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenRangeCache.swift; path = FinderShared/GardenRangeCache.swift; sourceTree = "<group>"; };
 		173EA74C13F90026956280D2 /* GardenObjectRequests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenObjectRequests.swift; path = FinderShared/GardenObjectRequests.swift; sourceTree = "<group>"; };
 		CF8F409BC2E2A333913FB95C /* GardenBandwidth.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenBandwidth.swift; path = FinderShared/GardenBandwidth.swift; sourceTree = "<group>"; };
@@ -474,6 +478,8 @@
 			children = (
 				33CC10F02044A3C60003C045 /* AppDelegate.swift */,
 				A20000000000000000000002 /* NativeSetupBridge.swift */,
+				A40000000000000000000001 /* GardenWindows.swift */,
+				A40000000000000000000002 /* WindowAccounts.swift */,
 				33CC11122044BFA00003C045 /* MainFlutterWindow.swift */,
 				A10000000000000000000002 /* NativeAuthenticationConfiguration.swift */,
 				33E51913231747F40026EE4D /* DebugProfile.entitlements */,
@@ -864,6 +870,8 @@
 				28E0F5D8527848FE9D2F2DF5 /* GardenRangeWriter.swift in Sources */,
 				3CA90B6668C34A7085E55AC0 /* GardenReadBuffer.swift in Sources */,
 				B64B611127F344C6BEE48278 /* GardenCacheWatch.swift in Sources */,
+				A30000000000000000000001 /* GardenWindows.swift in Sources */,
+				A30000000000000000000002 /* WindowAccounts.swift in Sources */,
 				33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */,
 				A10000000000000000000001 /* NativeAuthenticationConfiguration.swift in Sources */,
 				33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */,

@@ -4,16 +4,14 @@ import ServiceManagement
 
 enum NativeSetupBridge {
   private static var backgroundActivity: NSObjectProtocol?
-  private static var wakeObserver: NSObjectProtocol?
+  private static var wakeObservers: [NSObjectProtocol] = []
 
   static func install(on messenger: FlutterBinaryMessenger) {
     let channel = FlutterMethodChannel(name: "garden/setup", binaryMessenger: messenger)
-    if let observer = wakeObserver {
-      NSWorkspace.shared.notificationCenter.removeObserver(observer)
-    }
-    wakeObserver = NSWorkspace.shared.notificationCenter.addObserver(
+    let observer = NSWorkspace.shared.notificationCenter.addObserver(
       forName: NSWorkspace.didWakeNotification, object: nil, queue: .main
     ) { _ in channel.invokeMethod("wake", arguments: nil) }
+    wakeObservers.append(observer)
     channel.setMethodCallHandler { call, result in
       do {
         switch call.method {
