@@ -43,6 +43,13 @@ final class PermissionProtocol: URLProtocol {
     let node = try GardenNode(["id": 1, "parentId": 0, "name": "Empty.txt", "kind": "file", "size": 0,
       "version": 0, "updatedAt": "2026-10-05T10:00:00.000Z", "deleted": false])
     try await engine.metadata.reset(nodes: [node], revision: 0)
+    try await engine.metadata.apply(GardenChange(revision: 1, operation: "permissions", node: nil, previousParentID: nil))
+    try require(try await engine.metadata.revision == 1, "Permission events must advance the cursor without a file node")
+    do {
+      try await engine.metadata.apply(GardenChange(revision: 2, operation: "update", node: nil, previousParentID: nil))
+      throw POSIXError(.EIO)
+    } catch GardenAPIError.invalidResponse { }
+    try require(try await engine.metadata.revision == 1, "Invalid file events must leave the cursor unchanged")
     try require(try await !engine.checkWithdrawal(), "Viewer still has read access")
     let visible = try await engine.lookup("/Empty.txt")
     try require(visible?.attributes?.permissions == 0o444, "Viewer permissions must be read-only")

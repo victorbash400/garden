@@ -97,8 +97,11 @@ final class RemoteMetadata {
       let current = try revision ?? 0
       if change.revision <= current { return }
       guard change.revision == current + 1 else { throw GardenAPIError.invalidResponse }
-      guard let node = change.node else { throw GardenAPIError.invalidResponse }
-      try store(node)
+      if let node = change.node {
+        try store(node)
+      } else if change.operation != "permissions" {
+        throw GardenAPIError.invalidResponse
+      }
       try saveRevision(change.revision)
     }
   }
