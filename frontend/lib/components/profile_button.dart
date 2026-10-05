@@ -18,7 +18,7 @@ class ProfileButton extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Material(
         color: const Color(0xFFEEEEEE),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(20),
         child: PopupMenuButton<String>(
           tooltip: 'Account menu',
           enabled: !controller.busy,
@@ -27,7 +27,7 @@ class ProfileButton extends StatelessWidget {
             0,
             -(36.0 * (controller.accountWindow == null ? 5 : 6) + 16),
           ),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(20),
           constraints: const BoxConstraints(minWidth: 216, maxWidth: 300),
           color: Colors.white,
           surfaceTintColor: Colors.transparent,
@@ -110,17 +110,17 @@ class ProfileButton extends StatelessWidget {
             button: true,
             label: 'Account menu',
             child: SizedBox(
-              height: 52,
+              height: 40,
               child: Ink(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 decoration: BoxDecoration(
                   color: const Color(0xFFEEEEEE),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
                   children: [
                     CircleAvatar(
-                      radius: 15,
+                      radius: 12,
                       backgroundColor: const Color(0xFFE0E0E0),
                       child: Text(
                         name.isEmpty
@@ -132,22 +132,17 @@ class ProfileButton extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          fontSize: 13,
+                          fontSize: 12,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ),
-                    const Icon(
-                      LucideIcons.chevronUp,
-                      size: 14,
-                      color: Color(0xFF737373),
                     ),
                   ],
                 ),
