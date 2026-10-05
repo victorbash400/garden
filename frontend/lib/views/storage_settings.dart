@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../components/cache_limit_control.dart';
+import '../components/settings/bandwidth_settings.dart';
 import '../components/settings/cache_usage_controls.dart';
 import '../components/settings/settings_group.dart';
 import '../state/garden_controller.dart';
@@ -51,6 +52,8 @@ class _StorageSettingsState extends State<StorageSettings> {
             ),
           ],
         ),
+        const SizedBox(height: 20),
+        const BandwidthSettings(),
         const SizedBox(height: 12),
         const Text(
           'Caps Garden’s fetched file blocks. Other apps’ previews and copies are separate.',

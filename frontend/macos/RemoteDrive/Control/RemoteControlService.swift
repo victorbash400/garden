@@ -92,6 +92,24 @@ final class RemoteControlService: NSObject, NSXPCListenerDelegate, GardenRemoteC
     connection.invalidationHandler = { task.cancel() }
     connection.interruptionHandler = { task.cancel() }
   }
+  func bandwidthStatus(reply: @escaping (NSDictionary?, String?) -> Void) {
+    Task {
+      do { reply(try await GardenBandwidth.shared.status().dictionary as NSDictionary, nil) }
+      catch { reply(nil, error.localizedDescription) }
+    }
+  }
+  func setBandwidth(_ upload: Int64, download: Int64, reply: @escaping (String?) -> Void) {
+    Task {
+      do { try await GardenBandwidth.shared.set(GardenBandwidthLimits(upload: upload, download: download)); reply(nil) }
+      catch { reply(error.localizedDescription) }
+    }
+  }
+  func reserveBandwidth(_ bytes: Int64, upload: Bool, reply: @escaping (Double, String?) -> Void) {
+    Task {
+      do { reply(try await GardenBandwidth.shared.reserve(bytes: bytes, upload: upload), nil) }
+      catch { reply(0, error.localizedDescription) }
+    }
+  }
   func cacheStatus(reply: @escaping (NSDictionary?, String?) -> Void) { cache.perform("status", reply: reply) }
   func clearCache(reply: @escaping (NSDictionary?, String?) -> Void) { cache.perform("clear", reply: reply) }
   func setCacheLimit(_ bytes: Int64, reply: @escaping (NSDictionary?, String?) -> Void) { cache.perform("setLimit", bytes: bytes, reply: reply) }

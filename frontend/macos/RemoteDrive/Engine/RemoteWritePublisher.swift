@@ -21,6 +21,7 @@ struct RemoteWritePublisher {
     if state.size <= RemoteWriteJournal.blockSize {
       if state.size > 0 {
         let bytes = try await RemoteWriteReader.read(state, journal: journal, ranges: ranges, offset: 0, length: state.size)
+        try await GardenBandwidth.shared.pace(bytes: Int64(bytes.count), upload: true)
         _ = try await api.call("content", "writeChunk", ["versionId": id, "index": 0,
           "data": "decode('\(bytes.base64EncodedString())', 'base64')"])
       }

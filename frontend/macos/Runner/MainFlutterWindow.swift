@@ -75,6 +75,7 @@ class MainFlutterWindow: NSWindow {
     self.setFrame(windowFrame, display: true)
 
     RegisterGeneratedPlugins(registry: flutterViewController)
+    GardenBandwidthBridge.install(on: flutterViewController.engine.binaryMessenger)
     GardenCacheBridge.install(on: flutterViewController.engine.binaryMessenger)
     NativeSetupBridge.install(on: flutterViewController.engine.binaryMessenger)
     FlutterMethodChannel(

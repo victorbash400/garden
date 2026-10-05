@@ -26,7 +26,7 @@ xcrun swiftc -O -parse-as-library -swift-version 5 -import-objc-header "$root/Re
   "$root/FinderShared/FinderCredential.swift" "$root/FinderShared/GardenNode.swift" \
   "$root/FinderShared/GardenFileAttributes.swift" \
   "$root/FinderShared/GardenAPI.swift" "$root/FinderShared/GardenMultipartUpload.swift" \
-  "$root/FinderShared/GardenObjectRequests.swift" "$root/FinderShared/GardenRangeCache.swift" \
+  "$root/FinderShared/GardenBandwidth.swift" "$root/FinderShared/GardenObjectRequests.swift" "$root/FinderShared/GardenRangeCache.swift" \
   "$root/FinderShared/GardenRangeWriter.swift" "$root/FinderShared/GardenReadBuffer.swift" "$root/FinderShared/GardenReadPermits.swift" \
   "$root/FinderShared/GardenDiskCache.swift" "$root/FinderShared/GardenCacheDatabase.swift" \
   "$root/FinderShared/GardenCachePolicy.swift" "$root/FinderShared/GardenCacheWatch.swift" \

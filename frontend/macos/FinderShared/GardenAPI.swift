@@ -148,6 +148,7 @@ actor GardenAPI {
   }
 
   func read(id: Int, version: Int, offset: Int, length: Int) async throws -> Data {
+    try await GardenBandwidth.shared.pace(bytes: Int64(length), upload: false)
     guard let encoded = try await call("content", "read", [
       "nodeId": id,
       "versionId": version,
@@ -204,6 +205,7 @@ actor GardenAPI {
         }
         data.append(part)
       }
+      try await GardenBandwidth.shared.pace(bytes: Int64(data.count), upload: true)
       let encoded = data.base64EncodedString()
       _ = try await call("content", "writeChunk", [
         "versionId": versionID,

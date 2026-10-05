@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'dart:typed_data';
+
+import 'package:flutter/services.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -16,6 +17,24 @@ import 'widget_test.dart' as auth;
 
 const drive = GardenInfo(id: 1, name: 'Shared', role: 'Owner', members: 1);
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  setUp(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(const MethodChannel('garden/bandwidth'), (
+          call,
+        ) async {
+          if (call.method == 'reserve') return {'seconds': 0.0};
+          if (call.method == 'status') return {'upload': 0, 'download': 0};
+          return <String, Object>{};
+        });
+  });
+  tearDown(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('garden/bandwidth'),
+          null,
+        );
+  });
   test('snapshot buffers live changes and failed navigation keeps the current path', () async {
     final gateway = FilesFixture()..pending = Completer<DirectoryListing>();
     final controller = FilesController(gateway);

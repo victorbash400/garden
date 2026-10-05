@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:garden_client/garden_client.dart';
 
 import 'direct_files_gateway.dart';
+import '../bandwidth_store.dart';
 
 class DirectDownload {
   const DirectDownload(this.gateway);
@@ -29,6 +30,7 @@ class DirectDownload {
         final url = Uri.parse(ticket.url!);
         if (url.scheme != 'https') throw StateError('Invalid download URL.');
         final end = min(offset + 4 * 1024 * 1024, ticket.size) - 1;
+        await BandwidthStore.pace(end - offset + 1, upload: false);
         final request = await client.getUrl(url);
         request.headers.set(HttpHeaders.rangeHeader, 'bytes=$offset-$end');
         final response = await request.close();

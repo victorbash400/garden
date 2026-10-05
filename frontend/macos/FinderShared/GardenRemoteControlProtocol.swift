@@ -8,6 +8,9 @@ enum GardenRemoteService {
 }
 
 @objc protocol GardenRemoteControlProtocol: GardenCacheServiceProtocol {
+  func bandwidthStatus(reply: @escaping (NSDictionary?, String?) -> Void)
+  func setBandwidth(_ upload: Int64, download: Int64, reply: @escaping (String?) -> Void)
+  func reserveBandwidth(_ bytes: Int64, upload: Bool, reply: @escaping (Double, String?) -> Void)
   func request(_ method: String, payload: Data, reply: @escaping (Data?, String?) -> Void)
   func subscribeDrives(_ payload: Data, reply: @escaping (String?) -> Void)
 }

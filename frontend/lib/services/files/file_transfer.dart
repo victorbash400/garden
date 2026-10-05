@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:garden_client/garden_client.dart';
 
 import 'files_gateway.dart';
+import '../bandwidth_store.dart';
 import 'direct_files_gateway.dart';
 import 'direct_download.dart';
 import 'multipart_transfer.dart';
@@ -50,6 +51,8 @@ class FileTransfer {
         if (buffer.length == chunkSize) {
           cancellation?.check();
           final data = buffer.takeBytes();
+          await BandwidthStore.pace(data.length, upload: true);
+          cancellation?.check();
           await gateway.writeChunk(
             version.id!,
             index++,
@@ -63,6 +66,8 @@ class FileTransfer {
     if (buffer.isNotEmpty) {
       cancellation?.check();
       final data = buffer.takeBytes();
+      await BandwidthStore.pace(data.length, upload: true);
+      cancellation?.check();
       await gateway.writeChunk(
         version.id!,
         index++,
@@ -94,6 +99,7 @@ class FileTransfer {
     var offset = 0;
     while (offset < size) {
       final length = (size - offset).clamp(0, chunkSize);
+      await BandwidthStore.pace(length, upload: false);
       final data = await gateway.read(node.id!, id, offset, length);
       if (data.lengthInBytes != length) {
         throw StateError('File content is incomplete.');

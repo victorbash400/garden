@@ -11,6 +11,7 @@ struct GardenObjectRequests {
   static func upload(_ request: URLRequest, data: Data) async throws {
     for attempt in 0..<3 {
       do {
+        try await GardenBandwidth.shared.pace(bytes: Int64(data.count), upload: true)
         let (body, response) = try await URLSession.shared.upload(for: request, from: data)
         guard let response = response as? HTTPURLResponse else { throw GardenAPIError.invalidResponse }
         guard response.statusCode == 200 else {
@@ -31,7 +32,17 @@ struct GardenObjectRequests {
 
   static func read(_ request: URLRequest) async throws -> (Data, URLResponse) {
     for attempt in 0..<3 {
-      do { return try await reads.data(for: request) }
+      do {
+        guard let range = request.value(forHTTPHeaderField: "Range"), range.hasPrefix("bytes=") else {
+          throw GardenAPIError.invalidResponse
+        }
+        let bounds = range.dropFirst(6).split(separator: "-", omittingEmptySubsequences: false)
+        guard bounds.count == 2, let start = Int64(bounds[0]), let end = Int64(bounds[1]), start >= 0, end >= start, end < Int64.max else {
+          throw GardenAPIError.invalidResponse
+        }
+        try await GardenBandwidth.shared.pace(bytes: end - start + 1, upload: false)
+        return try await reads.data(for: request)
+      }
       catch {
         guard attempt < 2, retryable(error) else { throw error }
         try await Task.sleep(for: .milliseconds(250 * (attempt + 1)))

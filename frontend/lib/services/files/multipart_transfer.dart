@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:garden_client/garden_client.dart';
 
 import 'direct_files_gateway.dart';
+import '../bandwidth_store.dart';
 import 'part_checksum.dart';
 import 'transfer_cancellation.dart';
 
@@ -125,6 +126,8 @@ class MultipartTransfer {
     TransferCancellation? cancellation,
   ) async {
     if (url.scheme != 'https') throw StateError('Invalid upload URL.');
+    cancellation?.check();
+    await BandwidthStore.pace(bytes.length, upload: true);
     cancellation?.check();
     final request = await client.putUrl(url);
     request.contentLength = bytes.length;
