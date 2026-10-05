@@ -9,6 +9,7 @@ class InvitationMailer {
     DriveInvitation invitation,
     String driveName,
   ) async {
+    invitation.deliveryMessageId = null;
     final sender = Platform.environment['GARDEN_EMAIL_FROM'];
     final region =
         Platform.environment['GARDEN_EMAIL_REGION'] ??

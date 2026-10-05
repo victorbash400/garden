@@ -1,7 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:garden_server/src/generated/protocol.dart';
-import 'package:serverpod/serverpod.dart';
+import 'package:garden_server/src/sharing/invitation_mailer.dart';
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as auth;
 import 'package:serverpod_auth_idp_server/providers/email.dart' as email;
@@ -11,6 +12,47 @@ import 'test_tools/serverpod_test_tools.dart';
 
 void main() {
   withServerpod('Sharing events and usage', (builder, endpoints) {
+    test(
+      'an unavailable resend clears the earlier provider acknowledgement',
+      () async {
+        expect(
+          Platform.environment['GARDEN_EMAIL_FROM'],
+          isNull,
+          reason: 'Integration tests must not send real invitation emails.',
+        );
+        final session = builder.build();
+        final owner = builder.copyWith(
+          authentication: AuthenticationOverride.authenticationInfo(
+            'mailer-owner',
+            {},
+          ),
+        );
+        final drive = await endpoints.garden.create(owner, 'Mail');
+        final now = DateTime.now().toUtc();
+        final invitation = await DriveInvitation.db.insertRow(
+          session,
+          DriveInvitation(
+            gardenId: drive.id,
+            inviterId: 'mailer-owner',
+            recipientEmail: 'mailer@example.com',
+            role: 'Viewer',
+            deliveryStatus: 'accepted',
+            deliveryMessageId: 'earlier-provider-message',
+            createdAt: now,
+            expiresAt: now.add(const Duration(days: 7)),
+          ),
+        );
+        final result = await InvitationMailer.send(session, invitation, 'Mail');
+        expect(result.deliveryStatus, 'notConfigured');
+        expect(result.deliveryMessageId, isNull);
+        final persisted = await DriveInvitation.db.findById(
+          session,
+          result.id!,
+        );
+        expect(persisted!.deliveryMessageId, isNull);
+        expect(persisted.deliveryError, isNotNull);
+      },
+    );
     test(
       'notifications replay and read changes stay recipient scoped',
       () async {
