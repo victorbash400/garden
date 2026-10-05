@@ -60,7 +60,38 @@ class DelayedNotificationFixture extends NotificationFixture {
   Future<List<AccountNotification>> notifications() => snapshot.future;
 }
 
+class ReconnectingNotificationFixture extends NotificationFixture {
+  final resumedEvents = StreamController<AccountNotification>.broadcast();
+  @override
+  Stream<AccountNotification> watch(int cursor) {
+    watches++;
+    return watches == 1 ? events.stream : resumedEvents.stream;
+  }
+}
+
 void main() {
+  test(
+    'closed streams recover on resume and replay missed notifications',
+    () async {
+      final service = ReconnectingNotificationFixture()..initial = [notice(1)];
+      final controller = NotificationController(service);
+      await controller.start();
+      await controller.reconnectIfNeeded();
+      expect(service.watches, 1);
+      await service.events.close();
+      expect(controller.error, isNotNull);
+      service.initial = [notice(1), notice(2)];
+      await controller.reconnectIfNeeded();
+      expect(service.watches, 2);
+      expect(controller.error, isNull);
+      expect(controller.items.map((item) => item.id), [2, 1]);
+      await controller.close();
+      await service.resumedEvents.close();
+      await controller.reconnectIfNeeded();
+      expect(service.watches, 2);
+      controller.dispose();
+    },
+  );
   test('late snapshots cannot overwrite streamed read status', () async {
     final service = DelayedNotificationFixture();
     final controller = NotificationController(service);

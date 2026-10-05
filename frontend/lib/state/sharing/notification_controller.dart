@@ -55,6 +55,11 @@ class NotificationController extends ChangeNotifier {
             error = errorMessage(failure);
             notifyListeners();
           },
+          onDone: () {
+            if (generation != _generation || !_active) return;
+            error ??= 'Notifications disconnected. Refresh to reconnect.';
+            notifyListeners();
+          },
         );
     try {
       final values = await service.notifications();
@@ -79,6 +84,10 @@ class NotificationController extends ChangeNotifier {
     if (generation != _generation) return;
     _items[item.id!] = item.copyWith(readAt: DateTime.now().toUtc());
     notifyListeners();
+  }
+
+  Future<void> reconnectIfNeeded() async {
+    if (_active && !loading && error != null) await start();
   }
 
   Future<void> close() async {

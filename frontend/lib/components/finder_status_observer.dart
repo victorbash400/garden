@@ -27,6 +27,7 @@ class _FinderStatusObserverState extends State<FinderStatusObserver>
     WidgetsBinding.instance.addObserver(this);
     _wakeSubscription = widget.controller.nativeSetup?.system.wakeEvents.listen(
       (_) {
+        unawaited(widget.controller.notifications?.reconnectIfNeeded());
         unawaited(
           widget.controller.handleSystemWake().catchError(
             widget.controller.finderUpdateError,
@@ -46,6 +47,9 @@ class _FinderStatusObserverState extends State<FinderStatusObserver>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(widget.controller.notifications?.reconnectIfNeeded());
+    }
     if (state == AppLifecycleState.resumed &&
         widget.controller.account != null &&
         !widget.controller.busy &&
