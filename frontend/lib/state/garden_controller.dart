@@ -1,4 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
+
+import '../services/sharing/drive_sharing_service.dart';
+import 'sharing/notification_controller.dart';
 
 import '../utils/error_message.dart';
 import '../native/account_window.dart';
@@ -47,6 +52,13 @@ class GardenController extends ChangeNotifier {
   }) : storage = preferences is CacheStore
            ? StorageController(preferences)
            : null {
+    if (gateway is SharingGateway) {
+      notifications = NotificationController(
+        (gateway as SharingGateway).sharing,
+        onAccessChanged: () => unawaited(_refreshDriveAccess()),
+      );
+      notifications!.addListener(notifyListeners);
+    }
     accountWindow?.prepareRelaunch = _prepareRelaunch;
     if (gateway is RelaunchSessionGateway) {
       accountWindow?.exportSession = () =>
@@ -89,6 +101,8 @@ class GardenController extends ChangeNotifier {
     notifyListeners();
   }
 
+  NotificationController? notifications;
+  int _accessGeneration = 0;
   final AccountWindow? accountWindow;
   final AccountSecurityController? security;
   final FinderMounts? finder;
@@ -246,6 +260,39 @@ class GardenController extends ChangeNotifier {
     registrationId = await gateway.beginRegistration(registrationEmail);
   });
 
+  Future<void> _refreshDriveAccess() async {
+    final current = account;
+    if (current == null || _changingDriveAccess) return;
+    final generation = ++_accessGeneration;
+    try {
+      final latest = await gateway.listGardens();
+      if (account?.id != current.id || generation != _accessGeneration) return;
+      gardens = latest;
+      final active = files?.drive;
+      if (active != null) {
+        final matches = latest.where((item) => item.id == active.id);
+        if (matches.isEmpty) {
+          await files?.close();
+          if (account?.id != current.id || generation != _accessGeneration) {
+            return;
+          }
+          selected = null;
+          if (page == GardenPage.files) page = GardenPage.gardens;
+        } else {
+          files?.drive = matches.single;
+          selected = matches.single;
+        }
+      }
+      _queueFinderSync();
+      notifyListeners();
+    } catch (failure) {
+      if (account?.id == current.id && generation == _accessGeneration) {
+        error = errorMessage(failure);
+        notifyListeners();
+      }
+    }
+  }
+
   Future<void> refresh() => _request(() async {
     try {
       gardens = await gateway.listGardens();
@@ -280,6 +327,7 @@ class GardenController extends ChangeNotifier {
     serviceAvailable = true;
     page = GardenPage.gardens;
     _queueFinderSync();
+    if (notifications != null) unawaited(notifications!.start());
   }
 
   Future<void> retryLoading() => _request(() async {
@@ -410,6 +458,7 @@ class GardenController extends ChangeNotifier {
     _queueFinderSync();
   });
   Future<void> signOut() => _request(() async {
+    _accessGeneration++;
     _changingDriveAccess = true;
     try {
       await _finderWork;
@@ -418,6 +467,7 @@ class GardenController extends ChangeNotifier {
       if (current != null && disconnect) await finder?.signOut(current);
       await finderUpdates?.close();
       await files?.close();
+      await notifications?.close();
       await gateway.signOut();
       account = null;
       ActivityLog.instance.account = null;
@@ -496,6 +546,9 @@ class GardenController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _accessGeneration++;
+    notifications?.removeListener(notifyListeners);
+    notifications?.dispose();
     storage?.removeListener(notifyListeners);
     storage?.dispose();
     finderUpdates?.removeListener(_finderChanged);

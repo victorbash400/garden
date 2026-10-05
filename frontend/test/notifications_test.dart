@@ -4,7 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_client/garden_client.dart';
 import 'package:garden_flutter/services/sharing/drive_sharing_service.dart';
 import 'package:garden_flutter/state/sharing/notification_controller.dart';
+import 'package:garden_flutter/state/garden_controller.dart';
+import 'package:garden_flutter/model/account_info.dart';
+import 'package:garden_flutter/model/garden_info.dart';
 
+import 'widget_test.dart' show TestGateway, MemoryPreferences;
 
 class TestConnectivity extends ConnectivityMonitor {
   void change(bool connected) => notifyListeners(connected);
@@ -39,7 +43,31 @@ AccountNotification notice(int id) => AccountNotification(
   createdAt: DateTime.now().toUtc(),
 );
 
+class DelayedSharingGateway extends TestGateway implements SharingGateway {
+  @override
+  final NotificationFixture sharing = NotificationFixture();
+  final listing = Completer<List<GardenInfo>>();
+  @override
+  Future<List<GardenInfo>> listGardens() => listing.future;
+}
+
 void main() {
+  test(
+    'an in-flight access refresh cannot update a closed account window',
+    () async {
+      final gateway = DelayedSharingGateway();
+      final controller = GardenController(gateway, MemoryPreferences())
+        ..account = const AccountInfo(id: 'owner', email: 'owner@example.com');
+      await controller.notifications!.start();
+      controller.dispose();
+      gateway.listing.complete([
+        const GardenInfo(id: 1, name: 'Shared', role: 'Owner', members: 1),
+      ]);
+      await Future<void>.delayed(Duration.zero);
+      expect(controller.gardens, isEmpty);
+      await gateway.sharing.events.close();
+    },
+  );
   test(
     'overlapping starts subscribe once and network restoration replays data',
     () async {
@@ -83,5 +111,6 @@ void main() {
     await serviceA.events.close();
     await serviceB.events.close();
   });
+
 
 }

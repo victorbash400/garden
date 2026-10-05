@@ -96,8 +96,20 @@ import Foundation
       try await recipient.close(recipientHandle)
       bytes = ownerEdit
       print("Hosted two-account conflict: both exact edits preserved, visible conflict and separate authorship passed")
+      let pendingFile = try await owner.api.create(parentID: 0, name: "Pending.txt", folder: false)
+      try await recipient.catchUp()
+      let pendingHandle = try await recipient.open("/Pending.txt", directory: false)
+      let pendingBytes = Data("Accepted before access changed".utf8)
+      try await recipient.write(pendingHandle, offset: 0, bytes: pendingBytes, append: false)
+      await recipient.scheduledPublications[pendingFile.id]?.cancel()
       _ = try await owner.api.call("driveMembers", "changeRole", ["gardenId": driveID, "userId": recipientSource.accountID, "role": "Viewer"])
       try await recipient.reconnect()
+      do { try await recipient.flush(pendingHandle); throw POSIXError(.EIO) }
+      catch let error as POSIXError { try require(error.code == .EROFS, "Downgrade must deny publication of an open edit") }
+      try require(try await owner.api.get(pendingFile.id).size == 0, "Downgrade must leave the cloud version unchanged")
+      let pendingExtents = try await recipient.writes.extents(pendingFile.id, offset: 0, length: pendingBytes.count)
+      try require(pendingExtents.count == 1 && pendingExtents[0].bytes == pendingBytes, "Downgrade must preserve every accepted local byte")
+      print("Hosted open-edit downgrade: publication denied, cloud unchanged and exact pending bytes retained")
       let mountPath = "/Volumes/GardenSharingTest-\(UUID())"
       let mount = try await RemoteMount.start(engine: recipient, path: mountPath, name: "Garden Sharing Test")
       mounted = mount
@@ -114,6 +126,8 @@ import Foundation
       try require(try await recipient.checkWithdrawal(), "Hosted removal must withdraw access")
       do { _ = try await recipient.lookup("/Shared.txt"); throw POSIXError(.EIO) }
       catch let error as POSIXError { try require(error.code == .EACCES, "Removed account cannot use cached metadata") }
+      let retainedExtents = try await recipient.writes.extents(pendingFile.id, offset: 0, length: pendingBytes.count)
+      try require(retainedExtents.count == 1 && retainedExtents[0].bytes == pendingBytes, "Removal must retain the unpublished edit privately")
       try await mount.unmount(preserveWrites: true)
       try await running.value
       mounted = nil
