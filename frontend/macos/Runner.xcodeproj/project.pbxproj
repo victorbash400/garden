@@ -21,6 +21,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		A50000000000000000000010 /* GardenRelaunchReceipt.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50000000000000000000011 /* GardenRelaunchReceipt.swift */; };
 		A50000000000000000000007 /* GardenMemory.c in Sources */ = {isa = PBXBuildFile; fileRef = A50000000000000000000008 /* GardenMemory.c */; };
 		A50000000000000000000005 /* GardenSessionHandoff.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50000000000000000000006 /* GardenSessionHandoff.swift */; };
 		A50000000000000000000003 /* GardenBuildUpdates.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50000000000000000000004 /* GardenBuildUpdates.swift */; };
@@ -238,6 +239,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A50000000000000000000011 /* GardenRelaunchReceipt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenRelaunchReceipt.swift; sourceTree = "<group>"; };
 		A50000000000000000000008 /* GardenMemory.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = GardenMemory.c; sourceTree = "<group>"; };
 		A50000000000000000000009 /* GardenMemory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GardenMemory.h; sourceTree = "<group>"; };
 		A50000000000000000000006 /* GardenSessionHandoff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenSessionHandoff.swift; sourceTree = "<group>"; };
@@ -489,6 +491,7 @@
 				A20000000000000000000002 /* NativeSetupBridge.swift */,
 				A50000000000000000000004 /* GardenBuildUpdates.swift */,
 				A50000000000000000000006 /* GardenSessionHandoff.swift */,
+				A50000000000000000000011 /* GardenRelaunchReceipt.swift */,
 				A50000000000000000000008 /* GardenMemory.c */,
 				A50000000000000000000009 /* GardenMemory.h */,
 				A50000000000000000000002 /* GardenBuildWatch.swift */,
@@ -887,6 +890,7 @@
 				B64B611127F344C6BEE48278 /* GardenCacheWatch.swift in Sources */,
 				A50000000000000000000003 /* GardenBuildUpdates.swift in Sources */,
 				A50000000000000000000005 /* GardenSessionHandoff.swift in Sources */,
+				A50000000000000000000010 /* GardenRelaunchReceipt.swift in Sources */,
 				A50000000000000000000007 /* GardenMemory.c in Sources */,
 				A50000000000000000000001 /* GardenBuildWatch.swift in Sources */,
 				A30000000000000000000001 /* GardenWindows.swift in Sources */,

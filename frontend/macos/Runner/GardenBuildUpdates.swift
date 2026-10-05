@@ -73,8 +73,12 @@ import Cocoa
     let configuration = NSWorkspace.OpenConfiguration()
     configuration.createsNewApplicationInstance = true
     configuration.arguments = [GardenSessionHandoff.argument, handoff]
+    let receipt = GardenRelaunchReceipt(name: handoff)
+    defer { receipt.close() }
     do {
-      _ = try await NSWorkspace.shared.openApplication(at: bundle, configuration: configuration)
+      let application = try await NSWorkspace.shared.openApplication(at: bundle, configuration: configuration)
+      do { try await receipt.wait() }
+      catch { application.terminate(); throw error }
       GardenSessionHandoff.remove(handoff)
       NSApplication.shared.terminate(nil)
     } catch {

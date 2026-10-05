@@ -10,8 +10,15 @@ import Cocoa
 
   private static var restored: [String: [String: Any]] = [:]
   private static var sessions: [String: Any] = {
-    do { return try GardenSessionHandoff.consume(arguments: ProcessInfo.processInfo.arguments) }
-    catch { return ["error": "Could not restore the account sessions. Sign in again."] }
+    let arguments = ProcessInfo.processInfo.arguments
+    do {
+      let payload = try GardenSessionHandoff.consume(arguments: arguments)
+      GardenRelaunchReceipt.acknowledge(arguments: arguments, accepted: true)
+      return payload
+    } catch {
+      GardenRelaunchReceipt.acknowledge(arguments: arguments, accepted: false)
+      return ["error": "Could not restore the account sessions. Sign in again."]
+    }
   }()
   private static let relaunchKey = "garden.relaunchWindows"
 
