@@ -69,6 +69,7 @@ driveInvitations:
 driveManagement:
   - get:
 driveMembers:
+  - accessRole:
   - list:
   - changeRole:
   - remove:

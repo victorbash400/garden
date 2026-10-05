@@ -167,15 +167,35 @@ actor RemoteManager {
       entry.registration.retiring = true
       do { try save() }
       catch { entry.registration = previous; throw error }
-      try await unmount(entry)
       let state = root.appendingPathComponent(entry.registration.domainID)
-      if FileManager.default.fileExists(atPath: state.appendingPathComponent("writes.sqlite").path) {
-        let engine = try RemoteEngine(domainID: entry.registration.domainID, state: state,
-          cache: cache, limit: GardenCachePolicy.read())
-        do { try await engine.flushAll() }
-        catch { await engine.stop(); throw error }
-        await engine.stop()
+      let engine: RemoteEngine
+      if let mounted = entry.mount { engine = mounted.engine }
+      else { engine = try RemoteEngine(domainID: entry.registration.domainID, state: state,
+        cache: cache, limit: GardenCachePolicy.read()) }
+      var withdrew = false
+      let hasPendingWrites = !(try await engine.writes.pending().isEmpty)
+      do {
+        if entry.mount != nil || hasPendingWrites {
+          withdrew = try await engine.checkWithdrawal()
+        }
       }
+      catch FinderCredentialError.keychain(let code) where code == errSecItemNotFound {
+        // An interrupted completed retirement may already have removed its credential.
+        let url = state.appendingPathComponent("writes.sqlite")
+        if FileManager.default.fileExists(atPath: url.path) {
+          let journal = try RemoteWriteJournal(url: url, namespace: entry.registration.domainID, limit: 256 * 1024 * 1024)
+          if !(try journal.pending().isEmpty) { await engine.stop(); throw FinderCredentialError.keychain(code) }
+        }
+      }
+      entry.registration.accessWithdrawn = withdrew
+      try save()
+      try await unmount(entry, preserveWrites: withdrew)
+      if !withdrew, hasPendingWrites {
+        do { try await engine.preparePendingWrites() }
+        catch { await engine.stop(); throw error }
+      }
+      await engine.stop()
+
     }
     await publish()
     return try tokenIDs(accountID: accountID, keeping: driveIDs)
@@ -277,7 +297,7 @@ actor RemoteManager {
     let journalURL = root.appendingPathComponent(id).appendingPathComponent("writes.sqlite")
     if FileManager.default.fileExists(atPath: journalURL.path) {
       let journal = try RemoteWriteJournal(url: journalURL, namespace: id, limit: 256 * 1024 * 1024)
-      guard try journal.pending().isEmpty else { throw POSIXError(.EBUSY) }
+      guard try entry.registration.accessWithdrawn == true || journal.pending().isEmpty else { throw POSIXError(.EBUSY) }
     }
     try FinderCredentialStore.remove(id)
     entries.removeValue(forKey: id)
@@ -286,17 +306,17 @@ actor RemoteManager {
     await publish()
   }
 
-  private func unmount(_ entry: RemoteDriveEntry) async throws {
+  private func unmount(_ entry: RemoteDriveEntry, preserveWrites: Bool = false) async throws {
     entry.starting?.cancel()
     if let pending = entry.starting {
       do {
         let mount = try await pending.value
-        try await mount.unmount()
+        try await mount.unmount(preserveWrites: preserveWrites)
         await mount.engine.stop()
       } catch is CancellationError { }
     }
     if let mount = entry.mount {
-      try await mount.unmount()
+      try await mount.unmount(preserveWrites: preserveWrites)
       await mount.engine.stop()
       entry.mount = nil
     }

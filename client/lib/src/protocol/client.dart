@@ -850,6 +850,13 @@ class EndpointDriveMembers extends _isc.EndpointRef {
   @override
   String get name => 'driveMembers';
 
+  _ida.Future<String?> accessRole(int gardenId) =>
+      caller.callServerEndpoint<String?>(
+        'driveMembers',
+        'accessRole',
+        {'gardenId': gardenId},
+      );
+
   _ida.Future<List<_izuigwd2.GardenMember>> list(int gardenId) =>
       caller.callServerEndpoint<List<_izuigwd2.GardenMember>>(
         'driveMembers',

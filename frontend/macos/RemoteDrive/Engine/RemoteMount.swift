@@ -102,8 +102,8 @@ final class RemoteMount: @unchecked Sendable {
     _ = requestStop()
   }
 
-  func unmount() async throws {
-    try await engine.flushAll()
+  func unmount(preserveWrites: Bool = false) async throws {
+    if !preserveWrites { try await engine.flushAll() }
     await flushInvalidations()
     try await requestStop().wait()
     try await run()

@@ -1523,6 +1523,26 @@ class Endpoints extends _is.EndpointDispatch {
       name: 'driveMembers',
       endpoint: endpoints['driveMembers']!,
       methodConnectors: {
+        'accessRole': _is.MethodConnector(
+          name: 'accessRole',
+          params: {
+            'gardenId': _is.ParameterDescription(
+              name: 'gardenId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['driveMembers'] as _ikohprpe.DriveMembersEndpoint)
+                      .accessRole(
+                        session,
+                        params['gardenId'],
+                      ),
+        ),
         'list': _is.MethodConnector(
           name: 'list',
           params: {

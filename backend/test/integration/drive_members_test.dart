@@ -71,12 +71,20 @@ void main() {
         endpoints.driveMembers.leave(owner, drive.id),
         throwsA(isA<GardenException>()),
       );
+      expect(
+        await endpoints.driveMembers.accessRole(manager, drive.id),
+        'Manager',
+      );
       await endpoints.driveMembers.remove(manager, drive.id, 'admin-editor');
       final revoked = builder.copyWith(
         authentication: AuthenticationOverride.authenticationInfo(
           'admin-editor',
           {},
         ),
+      );
+      expect(
+        await endpoints.driveMembers.accessRole(revoked, drive.id),
+        isNull,
       );
       await expectLater(
         endpoints.files.list(revoked, drive.id, 0),

@@ -8,6 +8,18 @@ class DriveMembersEndpoint extends Endpoint {
   @override
   bool get requireLogin => true;
 
+  Future<String?> accessRole(Session session, int gardenId) async {
+    final drive = await GardenRecord.db.findById(session, gardenId);
+    if (drive == null || drive.deleted) return null;
+    final member = await GardenMember.db.findFirstRow(
+      session,
+      where: (row) =>
+          row.gardenId.equals(gardenId) &
+          row.userId.equals(DriveAccess.user(session)),
+    );
+    return member == null ? null : DriveRole.parse(member.role).label;
+  }
+
   Future<List<GardenMember>> list(Session session, int gardenId) async {
     await DriveAccess.require(session, gardenId);
     return GardenMember.db.find(

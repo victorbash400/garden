@@ -19,6 +19,7 @@ actor RemoteEngine {
   private var nextHandle: UInt64 = 1
   private var subscription: RemoteSubscription?
   private var driveRole: RemoteDrivePermission?
+  private(set) var accessWithdrawn = false
   var issue: String? {
     get async {
       if let writeIssue { return writeIssue }
@@ -158,6 +159,17 @@ actor RemoteEngine {
   }
 
   func currentRevision() throws -> Int { try metadata.revision ?? 0 }
+
+  func preparePendingWrites() async throws {
+    try await refreshPermission()
+    try await flushAll()
+  }
+
+  func checkWithdrawal() async throws -> Bool {
+    do { try await refreshPermission() }
+    catch let error as POSIXError where error.code == .EACCES && accessWithdrawn { }
+    return accessWithdrawn
+  }
 
   func reconnect() async throws {
     try await refreshPermission()
@@ -311,11 +323,14 @@ actor RemoteEngine {
     driveRole = nil
     do {
       let credential = try await api.streamCredential()
-      guard let value = try await api.call("garden", "connect", ["gardenId": credential.driveID]) as? [String: Any],
-        let role = value["role"] as? String else {
-        throw GardenAPIError.invalidResponse
+      let value = try await api.call("driveMembers", "accessRole", ["gardenId": credential.driveID])
+      if value is NSNull {
+        accessWithdrawn = true
+        throw POSIXError(.EACCES)
       }
+      guard let role = value as? String else { throw GardenAPIError.invalidResponse }
       driveRole = try RemoteDrivePermission(role: role)
+      accessWithdrawn = false
       invalidate(["/"])
     } catch {
       driveRole = nil
