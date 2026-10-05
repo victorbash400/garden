@@ -102,8 +102,24 @@ import Foundation
       let pendingBytes = Data("Accepted before access changed".utf8)
       try await recipient.write(pendingHandle, offset: 0, bytes: pendingBytes, append: false)
       await recipient.scheduledPublications[pendingFile.id]?.cancel()
+      let downgraded = RemoteCompletion<Void>()
+      await recipient.setInvalidation({ _ in
+        Task {
+          do { try await recipient.requireWrite() }
+          catch let error as POSIXError where error.code == .EROFS { downgraded.resolve(.success(())) }
+          catch { }
+        }
+      }, settled: {})
       _ = try await owner.api.call("driveMembers", "changeRole", ["gardenId": driveID, "userId": recipientSource.accountID, "role": "Viewer"])
-      try await recipient.reconnect()
+      let deadline = Task {
+        do { try await Task.sleep(for: .seconds(20)) }
+        catch { return }
+        downgraded.resolve(.failure(POSIXError(.ETIMEDOUT)))
+      }
+      do { try await downgraded.wait() }
+      catch { deadline.cancel(); throw error }
+      deadline.cancel()
+      print("Hosted permission stream: active engine received Viewer downgrade without manual refresh")
       do { try await recipient.flush(pendingHandle); throw POSIXError(.EIO) }
       catch let error as POSIXError { try require(error.code == .EROFS, "Downgrade must deny publication of an open edit") }
       try require(try await owner.api.get(pendingFile.id).size == 0, "Downgrade must leave the cloud version unchanged")
