@@ -21,6 +21,7 @@ class ProfileButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         child: PopupMenuButton<String>(
           tooltip: 'Account menu',
+          popUpAnimationStyle: AnimationStyle.noAnimation,
           enabled: !controller.busy,
           position: PopupMenuPosition.over,
           offset: Offset(
