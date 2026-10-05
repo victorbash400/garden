@@ -63,7 +63,7 @@ class _DrivesSettingsState extends State<DrivesSettings> {
       (item) =>
           item.id! > noticeCursor &&
           item.gardenId == selected &&
-          item.kind == 'accessChanged',
+          (item.kind == 'accessChanged' || item.kind == 'invitationUpdated'),
     );
     for (final item in items) {
       if (item.id! > noticeCursor) noticeCursor = item.id!;

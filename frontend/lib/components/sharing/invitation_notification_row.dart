@@ -37,6 +37,8 @@ class _InvitationNotificationRowState extends State<InvitationNotificationRow> {
     final status = invite == null
         ? (widget.item.kind == 'accessChanged'
               ? 'Drive access updated'
+              : widget.item.kind == 'invitationUpdated'
+              ? 'Invitation updated'
               : 'Drive invitation')
         : invite.acceptedAt != null
         ? 'Accepted'

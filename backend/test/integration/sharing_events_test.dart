@@ -13,6 +13,84 @@ import 'test_tools/serverpod_test_tools.dart';
 void main() {
   withServerpod('Sharing events and usage', (builder, endpoints) {
     test(
+      'decline and revoke persist live inviter status notifications',
+      () async {
+        final session = builder.build();
+        final identities = <auth.AuthUser>[];
+        for (final address in [
+          'status-owner@example.com',
+          'status-recipient@example.com',
+        ]) {
+          final user = await auth.AuthUser.db.insertRow(
+            session,
+            auth.AuthUser(scopeNames: {}, blocked: false),
+          );
+          identities.add(user);
+          await email.EmailAccount.db.insertRow(
+            session,
+            email.EmailAccount(
+              authUserId: user.id!,
+              email: address,
+              passwordHash: 'unused',
+            ),
+          );
+        }
+        final owner = builder.copyWith(
+          authentication: AuthenticationOverride.authenticationInfo(
+            identities.first.id!.toString(),
+            {},
+          ),
+        );
+        final recipient = builder.copyWith(
+          authentication: AuthenticationOverride.authenticationInfo(
+            identities.last.id!.toString(),
+            {},
+          ),
+        );
+        final drive = await endpoints.garden.create(owner, 'Status changes');
+        final invite = await endpoints.driveInvitations.invite(
+          owner,
+          drive.id,
+          'status-recipient@example.com',
+          'Viewer',
+        );
+        final stream = StreamIterator(endpoints.notifications.watch(owner, 0));
+        try {
+          final next = stream.moveNext();
+          await endpoints.driveInvitations.decline(recipient, invite.id!);
+          expect(await next.timeout(const Duration(seconds: 5)), isTrue);
+          expect(stream.current.kind, 'invitationUpdated');
+          expect(stream.current.gardenId, drive.id);
+          expect(stream.current.title, contains('declined'));
+          expect(stream.current.recipientEmail, 'status-owner@example.com');
+          expect(
+            (await endpoints.notifications.list(owner, 0)).single.id,
+            stream.current.id,
+          );
+          final second = await endpoints.driveInvitations.invite(
+            owner,
+            drive.id,
+            'status-recipient@example.com',
+            'Viewer',
+          );
+          final revoked = stream.moveNext();
+          await endpoints.driveInvitations.revoke(owner, second.id!);
+          expect(await revoked.timeout(const Duration(seconds: 5)), isTrue);
+          expect(stream.current.title, contains('revoked'));
+          expect(await endpoints.notifications.list(owner, 0), hasLength(2));
+          expect(
+            (await endpoints.notifications.list(
+              recipient,
+              0,
+            )).every((notice) => notice.kind == 'invitation'),
+            isTrue,
+          );
+        } finally {
+          await stream.cancel();
+        }
+      },
+    );
+    test(
       'an unavailable resend clears the earlier provider acknowledgement',
       () async {
         expect(

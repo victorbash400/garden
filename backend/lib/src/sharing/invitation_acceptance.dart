@@ -90,6 +90,7 @@ class InvitationAcceptance {
 
   static Future<void> decline(Session session, int invitationId) async {
     final email = await RecipientIdentity.email(session);
+    List<AccountNotification> updates = [];
     await session.db.transaction((transaction) async {
       final invite = await DriveInvitation.db.findById(
         session,
@@ -107,8 +108,16 @@ class InvitationAcceptance {
         invite,
         transaction: transaction,
       );
+      updates = await AccountNotices.recordInvitationStatus(
+        session,
+        invite,
+        transaction,
+      );
     });
     await AccountNotices.invitationChanged(session, invitationId);
+    for (final notice in updates) {
+      await AccountNotices.publish(session, notice);
+    }
   }
 
   static void pending(DriveInvitation invite) {

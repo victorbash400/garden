@@ -181,6 +181,7 @@ class DriveInvitationsEndpoint extends Endpoint {
     if (original == null) {
       throw GardenException(message: 'This invitation is unavailable.');
     }
+    List<AccountNotification> updates = [];
     await session.db.transaction((transaction) async {
       await DriveAccess.lock(
         session,
@@ -214,7 +215,15 @@ class DriveInvitationsEndpoint extends Endpoint {
         invite,
         transaction: transaction,
       );
+      updates = await AccountNotices.recordInvitationStatus(
+        session,
+        invite,
+        transaction,
+      );
     });
     await AccountNotices.invitationChanged(session, invitationId);
+    for (final notice in updates) {
+      await AccountNotices.publish(session, notice);
+    }
   }
 }
