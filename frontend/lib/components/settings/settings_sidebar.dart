@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../state/garden_controller.dart';
 import 'settings_category.dart';
+import '../activity_icon.dart';
 import '../profile_button.dart';
 
 class SettingsSidebar extends StatelessWidget {
@@ -33,7 +34,7 @@ class SettingsSidebar extends StatelessWidget {
         ),
         SettingsCategory(
           label: 'Account',
-          icon: LucideIcons.userRound,
+          icon: const Icon(LucideIcons.userRound),
           selected: controller.settingsSection == SettingsSection.account,
           onTap: controller.busy
               ? null
@@ -41,7 +42,7 @@ class SettingsSidebar extends StatelessWidget {
         ),
         SettingsCategory(
           label: 'Storage',
-          icon: LucideIcons.hardDrive,
+          icon: const Icon(LucideIcons.hardDrive),
           selected: controller.settingsSection == SettingsSection.storage,
           onTap: controller.busy
               ? null
@@ -49,7 +50,7 @@ class SettingsSidebar extends StatelessWidget {
         ),
         SettingsCategory(
           label: 'Connections',
-          icon: LucideIcons.plug,
+          icon: const Icon(LucideIcons.plug),
           selected: controller.settingsSection == SettingsSection.connections,
           onTap: controller.busy
               ? null
@@ -57,14 +58,14 @@ class SettingsSidebar extends StatelessWidget {
         ),
         SettingsCategory(
           label: 'Activity',
-          icon: LucideIcons.activity,
+          icon: const ActivityIcon(),
           selected: controller.settingsSection == SettingsSection.activity,
           onTap: () => controller.selectSettings(SettingsSection.activity),
         ),
         const Spacer(),
         SettingsCategory(
           label: 'Back to drives',
-          icon: LucideIcons.arrowLeft,
+          icon: const Icon(LucideIcons.arrowLeft),
           selected: false,
           onTap: controller.busy ? null : controller.back,
         ),

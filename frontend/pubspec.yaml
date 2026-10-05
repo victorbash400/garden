@@ -31,6 +31,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/garden.svg
+    - assets/activity.svg
     - assets/folder-closed.svg
     - assets/folder-open.svg
   fonts:

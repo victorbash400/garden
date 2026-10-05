@@ -9,7 +9,7 @@ class SettingsCategory extends StatelessWidget {
     required this.onTap,
   });
   final String label;
-  final IconData icon;
+  final Widget icon;
   final bool selected;
   final VoidCallback? onTap;
   @override
@@ -27,7 +27,10 @@ class SettingsCategory extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Row(
               children: [
-                Icon(icon, size: 17, color: const Color(0xFF555550)),
+                IconTheme(
+                  data: const IconThemeData(size: 17, color: Color(0xFF555550)),
+                  child: icon,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
