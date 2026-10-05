@@ -1,0 +1,19 @@
+class: DriveInvitation
+table: drive_invitation
+fields:
+  gardenId: int, relation(parent=garden_record)
+  inviterId: String
+  recipientEmail: String
+  role: String
+  expiresAt: DateTime
+  createdAt: DateTime
+  acceptedBy: String?
+  acceptedAt: DateTime?
+  declinedAt: DateTime?
+  revokedAt: DateTime?
+  deliveryStatus: String, default='notConfigured'
+  deliveryMessageId: String?
+  deliveryError: String?
+indexes:
+  invitation_recipient:
+    fields: recipientEmail, gardenId

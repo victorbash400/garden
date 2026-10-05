@@ -1,5 +1,6 @@
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
+import '../gardens/drive_permissions.dart';
 import 'drive_access.dart';
 import 'drive_journal.dart';
 
@@ -54,6 +55,7 @@ class FilesEndpoint extends Endpoint {
       gardenId,
       transaction,
       mode: LockMode.forShare,
+      capability: DriveCapability.read,
     )).revision,
   );
 
@@ -71,6 +73,7 @@ class FilesEndpoint extends Endpoint {
       gardenId,
       transaction,
       mode: LockMode.forShare,
+      capability: DriveCapability.read,
     );
     await DriveAccess.parent(session, gardenId, parentId, transaction);
     return FileNode.db.find(
@@ -93,6 +96,7 @@ class FilesEndpoint extends Endpoint {
           gardenId,
           transaction,
           mode: LockMode.forShare,
+          capability: DriveCapability.read,
         );
         await DriveAccess.parent(session, gardenId, parentId, transaction);
         final nodes = await FileNode.db.find(

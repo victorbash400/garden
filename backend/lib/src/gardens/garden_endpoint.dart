@@ -4,6 +4,7 @@ import 'package:crypto/crypto.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_idp_server/core.dart';
 import '../generated/protocol.dart';
+import '../sharing/member_change.dart';
 
 class GardenEndpoint extends Endpoint {
   @override
@@ -135,7 +136,6 @@ class GardenEndpoint extends Endpoint {
         name: record.name,
         role: 'Owner',
         members: 1,
-        invitationCode: code,
       );
     });
   }
@@ -148,7 +148,7 @@ class GardenEndpoint extends Endpoint {
       );
     }
     final user = _user(session);
-    await session.db.transaction((transaction) async {
+    final change = await session.db.transaction((transaction) async {
       final record = await GardenRecord.db.findById(
         session,
         gardenId,
@@ -159,82 +159,26 @@ class GardenEndpoint extends Endpoint {
         throw GardenException(message: 'Only the drive owner can rename it.');
       }
       record.name = trimmed;
-      await GardenRecord.db.updateRow(
+      final members = await GardenMember.db.find(
         session,
-        record,
+        where: (row) => row.gardenId.equals(gardenId),
         transaction: transaction,
       );
+      return MemberChange.record(session, record, transaction, {
+        for (final member in members) member.userId: 'Drive renamed',
+      });
     });
+    await change.publish(session);
   }
 
   Future<String> invite(Session session, int gardenId) async {
-    final random = Random.secure();
-    final code = base64Url.encode(
-      List.generate(24, (_) => random.nextInt(256)),
-    );
-    await session.db.transaction((transaction) async {
-      final record = await GardenRecord.db.findById(
-        session,
-        gardenId,
-        transaction: transaction,
-        lockMode: LockMode.forUpdate,
-      );
-      if (record == null ||
-          record.deleted ||
-          record.ownerId != _user(session)) {
-        throw GardenException(
-          message: 'Only the drive owner can create invitations.',
-        );
-      }
-      record.invitationHash = _hash(code);
-      await GardenRecord.db.updateRow(
-        session,
-        record,
-        transaction: transaction,
-      );
-    });
-    return code;
+    throw GardenException(message: 'Use email invitations in drive settings.');
   }
 
   Future<GardenSummary> join(Session session, String invitationCode) async {
-    final record = await GardenRecord.db.findFirstRow(
-      session,
-      where: (row) => row.invitationHash.equals(_hash(invitationCode.trim())),
+    throw GardenException(
+      message: 'Accept your email invitation in Notifications.',
     );
-    if (record == null || record.deleted) {
-      throw GardenException(message: 'The invitation code is invalid.');
-    }
-    await session.db.transaction((transaction) async {
-      final locked = await GardenRecord.db.findById(
-        session,
-        record.id!,
-        transaction: transaction,
-        lockMode: LockMode.forUpdate,
-      );
-      if (locked == null ||
-          locked.deleted ||
-          locked.invitationHash != _hash(invitationCode.trim())) {
-        throw GardenException(message: 'The invitation code is invalid.');
-      }
-      final existing = await GardenMember.db.findFirstRow(
-        session,
-        where: (row) =>
-            row.gardenId.equals(record.id!) & row.userId.equals(_user(session)),
-        transaction: transaction,
-      );
-      if (existing == null) {
-        await GardenMember.db.insertRow(
-          session,
-          GardenMember(
-            gardenId: record.id!,
-            userId: _user(session),
-            role: 'Member',
-          ),
-          transaction: transaction,
-        );
-      }
-    });
-    return connect(session, record.id!);
   }
 
   Future<GardenSummary> connect(Session session, int gardenId) async {
@@ -254,7 +198,7 @@ class GardenEndpoint extends Endpoint {
   }
 
   Future<void> delete(Session session, int gardenId) async {
-    await session.db.transaction((transaction) async {
+    final change = await session.db.transaction((transaction) async {
       final record = await GardenRecord.db.findById(
         session,
         gardenId,
@@ -269,12 +213,16 @@ class GardenEndpoint extends Endpoint {
         );
       }
       record.deleted = true;
-      await GardenRecord.db.updateRow(
+      final members = await GardenMember.db.find(
         session,
-        record,
+        where: (row) => row.gardenId.equals(gardenId),
         transaction: transaction,
       );
+      return MemberChange.record(session, record, transaction, {
+        for (final member in members) member.userId: 'Drive deleted',
+      });
     });
+    await change.publish(session);
   }
 
   Future<GardenSummary> _summary(

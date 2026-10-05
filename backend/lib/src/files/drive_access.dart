@@ -1,11 +1,33 @@
 import 'dart:convert';
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
+import '../gardens/drive_permissions.dart';
 
 class DriveAccess {
   static String user(Session session) => session.authenticated!.userIdentifier;
 
   static Future<void> require(
+    Session session,
+    int gardenId, {
+    Transaction? transaction,
+    DriveCapability capability = DriveCapability.read,
+  }) async {
+    final drive = await GardenRecord.db.findById(
+      session,
+      gardenId,
+      transaction: transaction,
+    );
+    if (drive == null || drive.deleted) {
+      throw GardenException(message: 'You do not have access to this drive.');
+    }
+    (await role(
+      session,
+      gardenId,
+      transaction: transaction,
+    )).require(capability);
+  }
+
+  static Future<DriveRole> role(
     Session session,
     int gardenId, {
     Transaction? transaction,
@@ -16,20 +38,17 @@ class DriveAccess {
           row.gardenId.equals(gardenId) & row.userId.equals(user(session)),
       transaction: transaction,
     );
-    final drive = await GardenRecord.db.findById(
-      session,
-      gardenId,
-      transaction: transaction,
-    );
-    if (member == null || drive == null || drive.deleted) {
+    if (member == null) {
       throw GardenException(message: 'You do not have access to this drive.');
     }
+    return DriveRole.parse(member.role);
   }
 
   static Future<FileNode> node(
     Session session,
     int id, {
     Transaction? transaction,
+    DriveCapability capability = DriveCapability.read,
   }) async {
     final node = await FileNode.db.findById(
       session,
@@ -39,7 +58,12 @@ class DriveAccess {
     if (node == null || node.deleted) {
       throw GardenException(message: 'This file or folder no longer exists.');
     }
-    await require(session, node.gardenId, transaction: transaction);
+    await require(
+      session,
+      node.gardenId,
+      transaction: transaction,
+      capability: capability,
+    );
     return node;
   }
 
@@ -57,16 +81,8 @@ class DriveAccess {
     int gardenId,
     Transaction transaction, {
     LockMode mode = LockMode.forUpdate,
+    DriveCapability capability = DriveCapability.write,
   }) async {
-    final member = await GardenMember.db.findFirstRow(
-      session,
-      where: (row) =>
-          row.gardenId.equals(gardenId) & row.userId.equals(user(session)),
-      transaction: transaction,
-    );
-    if (member == null) {
-      throw GardenException(message: 'You do not have access to this drive.');
-    }
     final drive = await GardenRecord.db.findById(
       session,
       gardenId,
@@ -76,6 +92,11 @@ class DriveAccess {
     if (drive == null || drive.deleted) {
       throw GardenException(message: 'This drive no longer exists.');
     }
+    (await role(
+      session,
+      gardenId,
+      transaction: transaction,
+    )).require(capability);
     return drive;
   }
 

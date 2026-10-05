@@ -21,8 +21,14 @@ import 'package:garden_server/src/generated/files/file_version.dart'
     as _iwzwya1z;
 import 'package:garden_server/src/generated/files/uploaded_part.dart'
     as _izqf04mm;
+import 'package:garden_server/src/generated/gardens/garden_member.dart'
+    as _ii55jf3s;
 import 'package:garden_server/src/generated/gardens/garden_summary.dart'
     as _itk3qnhp;
+import 'package:garden_server/src/generated/sharing/account_notification.dart'
+    as _im5nx011;
+import 'package:garden_server/src/generated/sharing/drive_invitation.dart'
+    as _i0k70kb6;
 import 'package:serverpod/protocol.dart' as _isp;
 import 'package:serverpod/serverpod.dart' as _is;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
@@ -54,6 +60,10 @@ import 'gardens/garden_member.dart' as _icenu3t8;
 import 'gardens/garden_record.dart' as _iwqk3oef;
 import 'gardens/garden_summary.dart' as _i5zbrq86;
 import 'greetings/greeting.dart' as _izw8z7ou;
+import 'sharing/account_notification.dart' as _i8nfb11w;
+import 'sharing/drive_invitation.dart' as _iks3nfjn;
+import 'sharing/drive_management.dart' as _ihkyi9jp;
+import 'sharing/drive_member_details.dart' as _iwfm68rt;
 export 'files/content_download.dart';
 export 'files/directory_listing.dart';
 export 'files/drive_event.dart';
@@ -77,6 +87,10 @@ export 'gardens/garden_member.dart';
 export 'gardens/garden_record.dart';
 export 'gardens/garden_summary.dart';
 export 'greetings/greeting.dart';
+export 'sharing/account_notification.dart';
+export 'sharing/drive_invitation.dart';
+export 'sharing/drive_management.dart';
+export 'sharing/drive_member_details.dart';
 
 class Protocol extends _is.DatabaseSerializationManager {
   Protocol._();
@@ -86,6 +100,84 @@ class Protocol extends _is.DatabaseSerializationManager {
   static final Protocol _instance = Protocol._().._registerHostProtocols();
 
   static List<_isp.TableDefinition> get targetTableDefinitions => [
+    _isp.TableDefinition(
+      name: 'account_notification',
+      dartName: 'AccountNotification',
+      schema: 'public',
+      module: 'garden',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'recipientEmail',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'gardenId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'invitationId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'kind',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'title',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _isp.ColumnDefinition(
+          name: 'readAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'notification_recipient_cursor',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'recipientEmail',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
     _isp.TableDefinition(
       name: 'drive_event',
       dartName: 'DriveEvent',
@@ -170,6 +262,132 @@ class Protocol extends _is.DatabaseSerializationManager {
           ],
           type: 'btree',
           isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'drive_invitation',
+      dartName: 'DriveInvitation',
+      schema: 'public',
+      module: 'garden',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'gardenId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'inviterId',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'recipientEmail',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'role',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'expiresAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _isp.ColumnDefinition(
+          name: 'acceptedBy',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'acceptedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'declinedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'revokedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'deliveryStatus',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+          columnDefault: '\'notConfigured\'',
+        ),
+        _isp.ColumnDefinition(
+          name: 'deliveryMessageId',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'deliveryError',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'drive_invitation_fk_0',
+          columns: ['gardenId'],
+          referenceTable: 'garden_record',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'invitation_recipient',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'recipientEmail',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'gardenId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
           isPrimary: false,
         ),
       ],
@@ -988,6 +1206,18 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _izw8z7ou.Greeting) {
       return _izw8z7ou.Greeting.fromJson(data) as T;
     }
+    if (t == _i8nfb11w.AccountNotification) {
+      return _i8nfb11w.AccountNotification.fromJson(data) as T;
+    }
+    if (t == _iks3nfjn.DriveInvitation) {
+      return _iks3nfjn.DriveInvitation.fromJson(data) as T;
+    }
+    if (t == _ihkyi9jp.DriveManagement) {
+      return _ihkyi9jp.DriveManagement.fromJson(data) as T;
+    }
+    if (t == _iwfm68rt.DriveMemberDetails) {
+      return _iwfm68rt.DriveMemberDetails.fromJson(data) as T;
+    }
     if (t == _is.getType<_id6mrfn8.ContentDownload?>()) {
       return (data != null ? _id6mrfn8.ContentDownload.fromJson(data) : null)
           as T;
@@ -1079,6 +1309,24 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _is.getType<_izw8z7ou.Greeting?>()) {
       return (data != null ? _izw8z7ou.Greeting.fromJson(data) : null) as T;
     }
+    if (t == _is.getType<_i8nfb11w.AccountNotification?>()) {
+      return (data != null
+              ? _i8nfb11w.AccountNotification.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_iks3nfjn.DriveInvitation?>()) {
+      return (data != null ? _iks3nfjn.DriveInvitation.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ihkyi9jp.DriveManagement?>()) {
+      return (data != null ? _ihkyi9jp.DriveManagement.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_iwfm68rt.DriveMemberDetails?>()) {
+      return (data != null ? _iwfm68rt.DriveMemberDetails.fromJson(data) : null)
+          as T;
+    }
     if (t == List<_iqxechne.FileNode>) {
       return (data as List)
               .map((e) => deserialize<_iqxechne.FileNode>(e))
@@ -1103,6 +1351,18 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == List<_i4wn0cbe.DriveEvent>) {
       return (data as List)
               .map((e) => deserialize<_i4wn0cbe.DriveEvent>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_iwfm68rt.DriveMemberDetails>) {
+      return (data as List)
+              .map((e) => deserialize<_iwfm68rt.DriveMemberDetails>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_iks3nfjn.DriveInvitation>) {
+      return (data as List)
+              .map((e) => deserialize<_iks3nfjn.DriveInvitation>(e))
               .toList()
           as T;
     }
@@ -1198,6 +1458,24 @@ class Protocol extends _is.DatabaseSerializationManager {
               .toList()
           as T;
     }
+    if (t == List<_i0k70kb6.DriveInvitation>) {
+      return (data as List)
+              .map((e) => deserialize<_i0k70kb6.DriveInvitation>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ii55jf3s.GardenMember>) {
+      return (data as List)
+              .map((e) => deserialize<_ii55jf3s.GardenMember>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_im5nx011.AccountNotification>) {
+      return (data as List)
+              .map((e) => deserialize<_im5nx011.AccountNotification>(e))
+              .toList()
+          as T;
+    }
     try {
       return _iais.Protocol().deserialize<T>(data, t);
     } on _is.DeserializationTypeNotFoundException catch (_) {}
@@ -1237,6 +1515,10 @@ class Protocol extends _is.DatabaseSerializationManager {
       _iwqk3oef.GardenRecord => 'GardenRecord',
       _i5zbrq86.GardenSummary => 'GardenSummary',
       _izw8z7ou.Greeting => 'Greeting',
+      _i8nfb11w.AccountNotification => 'AccountNotification',
+      _iks3nfjn.DriveInvitation => 'DriveInvitation',
+      _ihkyi9jp.DriveManagement => 'DriveManagement',
+      _iwfm68rt.DriveMemberDetails => 'DriveMemberDetails',
       _ => null,
     };
   }
@@ -1299,6 +1581,14 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'GardenSummary';
       case _izw8z7ou.Greeting():
         return 'Greeting';
+      case _i8nfb11w.AccountNotification():
+        return 'AccountNotification';
+      case _iks3nfjn.DriveInvitation():
+        return 'DriveInvitation';
+      case _ihkyi9jp.DriveManagement():
+        return 'DriveManagement';
+      case _iwfm68rt.DriveMemberDetails():
+        return 'DriveMemberDetails';
     }
     className = _iais.Protocol().getClassNameForObject(data);
     if (className != null) {
@@ -1399,6 +1689,18 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (dataClassName == 'Greeting') {
       return deserialize<_izw8z7ou.Greeting>(data['data']);
     }
+    if (dataClassName == 'AccountNotification') {
+      return deserialize<_i8nfb11w.AccountNotification>(data['data']);
+    }
+    if (dataClassName == 'DriveInvitation') {
+      return deserialize<_iks3nfjn.DriveInvitation>(data['data']);
+    }
+    if (dataClassName == 'DriveManagement') {
+      return deserialize<_ihkyi9jp.DriveManagement>(data['data']);
+    }
+    if (dataClassName == 'DriveMemberDetails') {
+      return deserialize<_iwfm68rt.DriveMemberDetails>(data['data']);
+    }
     if (dataClassName.startsWith('serverpod_auth_idp.')) {
       data['className'] = dataClassName.substring(19);
       return _iais.Protocol().deserializeByClassName(data);
@@ -1458,6 +1760,10 @@ class Protocol extends _is.DatabaseSerializationManager {
         return _icenu3t8.GardenMember.t;
       case _iwqk3oef.GardenRecord:
         return _iwqk3oef.GardenRecord.t;
+      case _i8nfb11w.AccountNotification:
+        return _i8nfb11w.AccountNotification.t;
+      case _iks3nfjn.DriveInvitation:
+        return _iks3nfjn.DriveInvitation.t;
     }
     return null;
   }

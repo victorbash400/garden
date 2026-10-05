@@ -177,11 +177,11 @@ class MultipartObjectStore {
         .buildPresignedUri(
           key: version.objectPath!,
           method: 'GET',
-          expiration: const Duration(minutes: 15),
+          expiration: const Duration(minutes: 2),
         )
         .toString(),
     size: version.size,
-    expiresAt: DateTime.now().toUtc().add(const Duration(minutes: 15)),
+    expiresAt: DateTime.now().toUtc().add(const Duration(minutes: 2)),
   );
 
   Future<Uint8List> read(String path, int offset, int length) async {

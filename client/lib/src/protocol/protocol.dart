@@ -20,8 +20,14 @@ import 'package:garden_client/src/protocol/files/file_version.dart'
     as _ibt6e7l6;
 import 'package:garden_client/src/protocol/files/uploaded_part.dart'
     as _ieod4w9g;
+import 'package:garden_client/src/protocol/gardens/garden_member.dart'
+    as _izuigwd2;
 import 'package:garden_client/src/protocol/gardens/garden_summary.dart'
     as _iwcj6pye;
+import 'package:garden_client/src/protocol/sharing/account_notification.dart'
+    as _ijqj61ga;
+import 'package:garden_client/src/protocol/sharing/drive_invitation.dart'
+    as _i9n4hrh3;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _iacc;
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
@@ -50,6 +56,10 @@ import 'gardens/garden_member.dart' as _icenu3t8;
 import 'gardens/garden_record.dart' as _iwqk3oef;
 import 'gardens/garden_summary.dart' as _i5zbrq86;
 import 'greetings/greeting.dart' as _izw8z7ou;
+import 'sharing/account_notification.dart' as _i8nfb11w;
+import 'sharing/drive_invitation.dart' as _iks3nfjn;
+import 'sharing/drive_management.dart' as _ihkyi9jp;
+import 'sharing/drive_member_details.dart' as _iwfm68rt;
 export 'files/content_download.dart';
 export 'files/directory_listing.dart';
 export 'files/drive_event.dart';
@@ -73,6 +83,10 @@ export 'gardens/garden_member.dart';
 export 'gardens/garden_record.dart';
 export 'gardens/garden_summary.dart';
 export 'greetings/greeting.dart';
+export 'sharing/account_notification.dart';
+export 'sharing/drive_invitation.dart';
+export 'sharing/drive_management.dart';
+export 'sharing/drive_member_details.dart';
 export 'client.dart';
 
 class Protocol extends _isc.SerializationManager {
@@ -178,6 +192,18 @@ class Protocol extends _isc.SerializationManager {
     if (t == _izw8z7ou.Greeting) {
       return _izw8z7ou.Greeting.fromJson(data) as T;
     }
+    if (t == _i8nfb11w.AccountNotification) {
+      return _i8nfb11w.AccountNotification.fromJson(data) as T;
+    }
+    if (t == _iks3nfjn.DriveInvitation) {
+      return _iks3nfjn.DriveInvitation.fromJson(data) as T;
+    }
+    if (t == _ihkyi9jp.DriveManagement) {
+      return _ihkyi9jp.DriveManagement.fromJson(data) as T;
+    }
+    if (t == _iwfm68rt.DriveMemberDetails) {
+      return _iwfm68rt.DriveMemberDetails.fromJson(data) as T;
+    }
     if (t == _isc.getType<_id6mrfn8.ContentDownload?>()) {
       return (data != null ? _id6mrfn8.ContentDownload.fromJson(data) : null)
           as T;
@@ -263,6 +289,24 @@ class Protocol extends _isc.SerializationManager {
     if (t == _isc.getType<_izw8z7ou.Greeting?>()) {
       return (data != null ? _izw8z7ou.Greeting.fromJson(data) : null) as T;
     }
+    if (t == _isc.getType<_i8nfb11w.AccountNotification?>()) {
+      return (data != null
+              ? _i8nfb11w.AccountNotification.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _isc.getType<_iks3nfjn.DriveInvitation?>()) {
+      return (data != null ? _iks3nfjn.DriveInvitation.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_ihkyi9jp.DriveManagement?>()) {
+      return (data != null ? _ihkyi9jp.DriveManagement.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_iwfm68rt.DriveMemberDetails?>()) {
+      return (data != null ? _iwfm68rt.DriveMemberDetails.fromJson(data) : null)
+          as T;
+    }
     if (t == List<_iqxechne.FileNode>) {
       return (data as List)
               .map((e) => deserialize<_iqxechne.FileNode>(e))
@@ -287,6 +331,18 @@ class Protocol extends _isc.SerializationManager {
     if (t == List<_i4wn0cbe.DriveEvent>) {
       return (data as List)
               .map((e) => deserialize<_i4wn0cbe.DriveEvent>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_iwfm68rt.DriveMemberDetails>) {
+      return (data as List)
+              .map((e) => deserialize<_iwfm68rt.DriveMemberDetails>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_iks3nfjn.DriveInvitation>) {
+      return (data as List)
+              .map((e) => deserialize<_iks3nfjn.DriveInvitation>(e))
               .toList()
           as T;
     }
@@ -382,6 +438,24 @@ class Protocol extends _isc.SerializationManager {
               .toList()
           as T;
     }
+    if (t == List<_i9n4hrh3.DriveInvitation>) {
+      return (data as List)
+              .map((e) => deserialize<_i9n4hrh3.DriveInvitation>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_izuigwd2.GardenMember>) {
+      return (data as List)
+              .map((e) => deserialize<_izuigwd2.GardenMember>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ijqj61ga.AccountNotification>) {
+      return (data as List)
+              .map((e) => deserialize<_ijqj61ga.AccountNotification>(e))
+              .toList()
+          as T;
+    }
     try {
       return _iaic.Protocol().deserialize<T>(data, t);
     } on _isc.DeserializationTypeNotFoundException catch (_) {}
@@ -416,6 +490,10 @@ class Protocol extends _isc.SerializationManager {
       _iwqk3oef.GardenRecord => 'GardenRecord',
       _i5zbrq86.GardenSummary => 'GardenSummary',
       _izw8z7ou.Greeting => 'Greeting',
+      _i8nfb11w.AccountNotification => 'AccountNotification',
+      _iks3nfjn.DriveInvitation => 'DriveInvitation',
+      _ihkyi9jp.DriveManagement => 'DriveManagement',
+      _iwfm68rt.DriveMemberDetails => 'DriveMemberDetails',
       _ => null,
     };
   }
@@ -476,6 +554,14 @@ class Protocol extends _isc.SerializationManager {
         return 'GardenSummary';
       case _izw8z7ou.Greeting():
         return 'Greeting';
+      case _i8nfb11w.AccountNotification():
+        return 'AccountNotification';
+      case _iks3nfjn.DriveInvitation():
+        return 'DriveInvitation';
+      case _ihkyi9jp.DriveManagement():
+        return 'DriveManagement';
+      case _iwfm68rt.DriveMemberDetails():
+        return 'DriveMemberDetails';
     }
     className = _iaic.Protocol().getClassNameForObject(data);
     if (className != null) {
@@ -566,6 +652,18 @@ class Protocol extends _isc.SerializationManager {
     }
     if (dataClassName == 'Greeting') {
       return deserialize<_izw8z7ou.Greeting>(data['data']);
+    }
+    if (dataClassName == 'AccountNotification') {
+      return deserialize<_i8nfb11w.AccountNotification>(data['data']);
+    }
+    if (dataClassName == 'DriveInvitation') {
+      return deserialize<_iks3nfjn.DriveInvitation>(data['data']);
+    }
+    if (dataClassName == 'DriveManagement') {
+      return deserialize<_ihkyi9jp.DriveManagement>(data['data']);
+    }
+    if (dataClassName == 'DriveMemberDetails') {
+      return deserialize<_iwfm68rt.DriveMemberDetails>(data['data']);
     }
     if (dataClassName.startsWith('serverpod_auth_idp.')) {
       data['className'] = dataClassName.substring(19);

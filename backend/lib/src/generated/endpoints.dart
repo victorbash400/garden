@@ -30,6 +30,10 @@ import '../files/files_endpoint.dart' as _idx8vriz;
 import '../files/filesystem_endpoint.dart' as _im12bomv;
 import '../gardens/garden_endpoint.dart' as _isd11de7;
 import '../greetings/greeting_endpoint.dart' as _il624ik7;
+import '../sharing/drive_invitations_endpoint.dart' as _ixmifqa6;
+import '../sharing/drive_management_endpoint.dart' as _ibbydm1q;
+import '../sharing/drive_members_endpoint.dart' as _ikohprpe;
+import '../sharing/notifications_endpoint.dart' as _ifqfc08z;
 export 'future_calls.dart' show ServerpodFutureCallsGetter;
 
 class Endpoints extends _is.EndpointDispatch {
@@ -88,6 +92,30 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'greeting',
+          null,
+        ),
+      'driveInvitations': _ixmifqa6.DriveInvitationsEndpoint()
+        ..initialize(
+          server,
+          'driveInvitations',
+          null,
+        ),
+      'driveManagement': _ibbydm1q.DriveManagementEndpoint()
+        ..initialize(
+          server,
+          'driveManagement',
+          null,
+        ),
+      'driveMembers': _ikohprpe.DriveMembersEndpoint()
+        ..initialize(
+          server,
+          'driveMembers',
+          null,
+        ),
+      'notifications': _ifqfc08z.NotificationsEndpoint()
+        ..initialize(
+          server,
+          'notifications',
           null,
         ),
     };
@@ -1326,6 +1354,370 @@ class Endpoints extends _is.EndpointDispatch {
                     session,
                     params['name'],
                   ),
+        ),
+      },
+    );
+    connectors['driveInvitations'] = _is.EndpointConnector(
+      name: 'driveInvitations',
+      endpoint: endpoints['driveInvitations']!,
+      methodConnectors: {
+        'invite': _is.MethodConnector(
+          name: 'invite',
+          params: {
+            'gardenId': _is.ParameterDescription(
+              name: 'gardenId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'email': _is.ParameterDescription(
+              name: 'email',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'role': _is.ParameterDescription(
+              name: 'role',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['driveInvitations']
+                          as _ixmifqa6.DriveInvitationsEndpoint)
+                      .invite(
+                        session,
+                        params['gardenId'],
+                        params['email'],
+                        params['role'],
+                      ),
+        ),
+        'received': _is.MethodConnector(
+          name: 'received',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['driveInvitations']
+                          as _ixmifqa6.DriveInvitationsEndpoint)
+                      .received(session),
+        ),
+        'accept': _is.MethodConnector(
+          name: 'accept',
+          params: {
+            'invitationId': _is.ParameterDescription(
+              name: 'invitationId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['driveInvitations']
+                          as _ixmifqa6.DriveInvitationsEndpoint)
+                      .accept(
+                        session,
+                        params['invitationId'],
+                      ),
+        ),
+        'decline': _is.MethodConnector(
+          name: 'decline',
+          params: {
+            'invitationId': _is.ParameterDescription(
+              name: 'invitationId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['driveInvitations']
+                          as _ixmifqa6.DriveInvitationsEndpoint)
+                      .decline(
+                        session,
+                        params['invitationId'],
+                      ),
+        ),
+        'resend': _is.MethodConnector(
+          name: 'resend',
+          params: {
+            'invitationId': _is.ParameterDescription(
+              name: 'invitationId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['driveInvitations']
+                          as _ixmifqa6.DriveInvitationsEndpoint)
+                      .resend(
+                        session,
+                        params['invitationId'],
+                      ),
+        ),
+        'revoke': _is.MethodConnector(
+          name: 'revoke',
+          params: {
+            'invitationId': _is.ParameterDescription(
+              name: 'invitationId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['driveInvitations']
+                          as _ixmifqa6.DriveInvitationsEndpoint)
+                      .revoke(
+                        session,
+                        params['invitationId'],
+                      ),
+        ),
+      },
+    );
+    connectors['driveManagement'] = _is.EndpointConnector(
+      name: 'driveManagement',
+      endpoint: endpoints['driveManagement']!,
+      methodConnectors: {
+        'get': _is.MethodConnector(
+          name: 'get',
+          params: {
+            'gardenId': _is.ParameterDescription(
+              name: 'gardenId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['driveManagement']
+                          as _ibbydm1q.DriveManagementEndpoint)
+                      .get(
+                        session,
+                        params['gardenId'],
+                      ),
+        ),
+      },
+    );
+    connectors['driveMembers'] = _is.EndpointConnector(
+      name: 'driveMembers',
+      endpoint: endpoints['driveMembers']!,
+      methodConnectors: {
+        'list': _is.MethodConnector(
+          name: 'list',
+          params: {
+            'gardenId': _is.ParameterDescription(
+              name: 'gardenId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['driveMembers'] as _ikohprpe.DriveMembersEndpoint)
+                      .list(
+                        session,
+                        params['gardenId'],
+                      ),
+        ),
+        'changeRole': _is.MethodConnector(
+          name: 'changeRole',
+          params: {
+            'gardenId': _is.ParameterDescription(
+              name: 'gardenId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'userId': _is.ParameterDescription(
+              name: 'userId',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'role': _is.ParameterDescription(
+              name: 'role',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['driveMembers'] as _ikohprpe.DriveMembersEndpoint)
+                      .changeRole(
+                        session,
+                        params['gardenId'],
+                        params['userId'],
+                        params['role'],
+                      ),
+        ),
+        'remove': _is.MethodConnector(
+          name: 'remove',
+          params: {
+            'gardenId': _is.ParameterDescription(
+              name: 'gardenId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'userId': _is.ParameterDescription(
+              name: 'userId',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['driveMembers'] as _ikohprpe.DriveMembersEndpoint)
+                      .remove(
+                        session,
+                        params['gardenId'],
+                        params['userId'],
+                      ),
+        ),
+        'transferOwnership': _is.MethodConnector(
+          name: 'transferOwnership',
+          params: {
+            'gardenId': _is.ParameterDescription(
+              name: 'gardenId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'userId': _is.ParameterDescription(
+              name: 'userId',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['driveMembers'] as _ikohprpe.DriveMembersEndpoint)
+                      .transferOwnership(
+                        session,
+                        params['gardenId'],
+                        params['userId'],
+                      ),
+        ),
+        'leave': _is.MethodConnector(
+          name: 'leave',
+          params: {
+            'gardenId': _is.ParameterDescription(
+              name: 'gardenId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['driveMembers'] as _ikohprpe.DriveMembersEndpoint)
+                      .leave(
+                        session,
+                        params['gardenId'],
+                      ),
+        ),
+      },
+    );
+    connectors['notifications'] = _is.EndpointConnector(
+      name: 'notifications',
+      endpoint: endpoints['notifications']!,
+      methodConnectors: {
+        'list': _is.MethodConnector(
+          name: 'list',
+          params: {
+            'afterId': _is.ParameterDescription(
+              name: 'afterId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['notifications']
+                          as _ifqfc08z.NotificationsEndpoint)
+                      .list(
+                        session,
+                        params['afterId'],
+                      ),
+        ),
+        'markRead': _is.MethodConnector(
+          name: 'markRead',
+          params: {
+            'notificationId': _is.ParameterDescription(
+              name: 'notificationId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['notifications']
+                          as _ifqfc08z.NotificationsEndpoint)
+                      .markRead(
+                        session,
+                        params['notificationId'],
+                      ),
+        ),
+        'watch': _is.MethodStreamConnector(
+          name: 'watch',
+          params: {
+            'afterId': _is.ParameterDescription(
+              name: 'afterId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          streamParams: {},
+          returnType: _is.MethodStreamReturnType.streamType,
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+                Map<String, Stream> streamParams,
+              ) =>
+                  (endpoints['notifications']
+                          as _ifqfc08z.NotificationsEndpoint)
+                      .watch(
+                        session,
+                        params['afterId'],
+                      ),
         ),
       },
     );

@@ -5,6 +5,7 @@ import 'package:crypto/crypto.dart';
 import 'package:serverpod/serverpod.dart';
 
 import '../generated/protocol.dart';
+import '../gardens/drive_permissions.dart';
 import 'drive_access.dart';
 import 'drive_journal.dart';
 import 'edit_uploads.dart';
@@ -40,29 +41,42 @@ class ContentEndpoint extends Endpoint {
     int baseVersion,
     int size,
   ) async {
-    final node = await DriveAccess.node(session, nodeId);
-    if (node.kind != NodeKind.file || size < 0 || size > 1 << 40) {
-      throw GardenException(message: 'Invalid file size or type.');
-    }
-    if (baseVersion != 0 && baseVersion != node.version) {
-      final base = await FileVersion.db.findById(session, baseVersion);
-      if (base == null || base.nodeId != nodeId || !base.committed) {
-        throw GardenException(
-          message: 'This base file version is unavailable.',
-        );
+    final original = await DriveAccess.node(session, nodeId);
+    final upload = await session.db.transaction((transaction) async {
+      await DriveAccess.lock(session, original.gardenId, transaction);
+      final node = await DriveAccess.node(
+        session,
+        nodeId,
+        transaction: transaction,
+      );
+      if (node.kind != NodeKind.file || size < 0 || size > 1 << 40) {
+        throw GardenException(message: 'Invalid file size or type.');
       }
-    }
-    final upload = await FileVersion.db.insertRow(
-      session,
-      FileVersion(
-        nodeId: nodeId,
-        authorId: DriveAccess.user(session),
-        baseVersion: baseVersion,
-        size: size,
-        chunkCount: (size + chunkSize - 1) ~/ chunkSize,
-        createdAt: DateTime.now().toUtc(),
-      ),
-    );
+      if (baseVersion != 0 && baseVersion != node.version) {
+        final base = await FileVersion.db.findById(
+          session,
+          baseVersion,
+          transaction: transaction,
+        );
+        if (base == null || base.nodeId != nodeId || !base.committed) {
+          throw GardenException(
+            message: 'This base file version is unavailable.',
+          );
+        }
+      }
+      return FileVersion.db.insertRow(
+        session,
+        FileVersion(
+          nodeId: nodeId,
+          authorId: DriveAccess.user(session),
+          baseVersion: baseVersion,
+          size: size,
+          chunkCount: (size + chunkSize - 1) ~/ chunkSize,
+          createdAt: DateTime.now().toUtc(),
+        ),
+        transaction: transaction,
+      );
+    });
     await UploadCleanupTasks.schedule(session, upload.id!);
     return upload;
   }
@@ -78,7 +92,11 @@ class ContentEndpoint extends Endpoint {
     }
     final store = MultipartObjectStore(session);
     try {
-      await DriveAccess.node(session, nodeId);
+      await DriveAccess.node(
+        session,
+        nodeId,
+        capability: DriveCapability.write,
+      );
       final pending = await FileVersion.db.findFirstRow(
         session,
         where: (row) =>
@@ -213,6 +231,20 @@ class ContentEndpoint extends Endpoint {
     Transaction transaction, {
     bool allowCommitted = false,
   }) async {
+    final original = await FileVersion.db.findById(
+      session,
+      id,
+      transaction: transaction,
+    );
+    if (original == null) {
+      throw GardenException(message: 'This upload is unavailable.');
+    }
+    final node = await DriveAccess.node(
+      session,
+      original.nodeId,
+      transaction: transaction,
+    );
+    await DriveAccess.lock(session, node.gardenId, transaction);
     final version = await FileVersion.db.findById(
       session,
       id,

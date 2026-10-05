@@ -32,10 +32,18 @@ import 'package:garden_client/src/protocol/gardens/account_details.dart'
     as _i7n7hin1;
 import 'package:garden_client/src/protocol/gardens/finder_session.dart'
     as _ihw30tky;
+import 'package:garden_client/src/protocol/gardens/garden_member.dart'
+    as _izuigwd2;
 import 'package:garden_client/src/protocol/gardens/garden_summary.dart'
     as _iwcj6pye;
 import 'package:garden_client/src/protocol/greetings/greeting.dart'
     as _iz66whiu;
+import 'package:garden_client/src/protocol/sharing/account_notification.dart'
+    as _ijqj61ga;
+import 'package:garden_client/src/protocol/sharing/drive_invitation.dart'
+    as _i9n4hrh3;
+import 'package:garden_client/src/protocol/sharing/drive_management.dart'
+    as _im35ejox;
 import 'package:http/http.dart' as _i85jenna;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _iacc;
@@ -765,6 +773,168 @@ class EndpointGreeting extends _isc.EndpointRef {
       );
 }
 
+/// {@category Endpoint}
+class EndpointDriveInvitations extends _isc.EndpointRef {
+  EndpointDriveInvitations(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'driveInvitations';
+
+  _ida.Future<_i9n4hrh3.DriveInvitation> invite(
+    int gardenId,
+    String email,
+    String role,
+  ) => caller.callServerEndpoint<_i9n4hrh3.DriveInvitation>(
+    'driveInvitations',
+    'invite',
+    {
+      'gardenId': gardenId,
+      'email': email,
+      'role': role,
+    },
+  );
+
+  _ida.Future<List<_i9n4hrh3.DriveInvitation>> received() =>
+      caller.callServerEndpoint<List<_i9n4hrh3.DriveInvitation>>(
+        'driveInvitations',
+        'received',
+        {},
+      );
+
+  _ida.Future<void> accept(int invitationId) => caller.callServerEndpoint<void>(
+    'driveInvitations',
+    'accept',
+    {'invitationId': invitationId},
+  );
+
+  _ida.Future<void> decline(int invitationId) =>
+      caller.callServerEndpoint<void>(
+        'driveInvitations',
+        'decline',
+        {'invitationId': invitationId},
+      );
+
+  _ida.Future<_i9n4hrh3.DriveInvitation> resend(int invitationId) =>
+      caller.callServerEndpoint<_i9n4hrh3.DriveInvitation>(
+        'driveInvitations',
+        'resend',
+        {'invitationId': invitationId},
+      );
+
+  _ida.Future<void> revoke(int invitationId) => caller.callServerEndpoint<void>(
+    'driveInvitations',
+    'revoke',
+    {'invitationId': invitationId},
+  );
+}
+
+/// {@category Endpoint}
+class EndpointDriveManagement extends _isc.EndpointRef {
+  EndpointDriveManagement(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'driveManagement';
+
+  _ida.Future<_im35ejox.DriveManagement> get(int gardenId) =>
+      caller.callServerEndpoint<_im35ejox.DriveManagement>(
+        'driveManagement',
+        'get',
+        {'gardenId': gardenId},
+      );
+}
+
+/// {@category Endpoint}
+class EndpointDriveMembers extends _isc.EndpointRef {
+  EndpointDriveMembers(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'driveMembers';
+
+  _ida.Future<List<_izuigwd2.GardenMember>> list(int gardenId) =>
+      caller.callServerEndpoint<List<_izuigwd2.GardenMember>>(
+        'driveMembers',
+        'list',
+        {'gardenId': gardenId},
+      );
+
+  _ida.Future<void> changeRole(
+    int gardenId,
+    String userId,
+    String role,
+  ) => caller.callServerEndpoint<void>(
+    'driveMembers',
+    'changeRole',
+    {
+      'gardenId': gardenId,
+      'userId': userId,
+      'role': role,
+    },
+  );
+
+  _ida.Future<void> remove(
+    int gardenId,
+    String userId,
+  ) => caller.callServerEndpoint<void>(
+    'driveMembers',
+    'remove',
+    {
+      'gardenId': gardenId,
+      'userId': userId,
+    },
+  );
+
+  _ida.Future<void> transferOwnership(
+    int gardenId,
+    String userId,
+  ) => caller.callServerEndpoint<void>(
+    'driveMembers',
+    'transferOwnership',
+    {
+      'gardenId': gardenId,
+      'userId': userId,
+    },
+  );
+
+  _ida.Future<void> leave(int gardenId) => caller.callServerEndpoint<void>(
+    'driveMembers',
+    'leave',
+    {'gardenId': gardenId},
+  );
+}
+
+/// {@category Endpoint}
+class EndpointNotifications extends _isc.EndpointRef {
+  EndpointNotifications(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'notifications';
+
+  _ida.Future<List<_ijqj61ga.AccountNotification>> list(int afterId) =>
+      caller.callServerEndpoint<List<_ijqj61ga.AccountNotification>>(
+        'notifications',
+        'list',
+        {'afterId': afterId},
+      );
+
+  _ida.Future<void> markRead(int notificationId) =>
+      caller.callServerEndpoint<void>(
+        'notifications',
+        'markRead',
+        {'notificationId': notificationId},
+      );
+
+  _ida.Stream<_ijqj61ga.AccountNotification> watch(int afterId) =>
+      caller.callStreamingServerEndpoint<
+        _ida.Stream<_ijqj61ga.AccountNotification>,
+        _ijqj61ga.AccountNotification
+      >(
+        'notifications',
+        'watch',
+        {'afterId': afterId},
+        {},
+      );
+}
+
 class Modules {
   Modules(Client client) {
     serverpod_auth_idp = _iaic.Caller(client);
@@ -812,6 +982,10 @@ class Client extends _isc.ServerpodClientShared {
     filesystem = EndpointFilesystem(this);
     garden = EndpointGarden(this);
     greeting = EndpointGreeting(this);
+    driveInvitations = EndpointDriveInvitations(this);
+    driveManagement = EndpointDriveManagement(this);
+    driveMembers = EndpointDriveMembers(this);
+    notifications = EndpointNotifications(this);
     modules = Modules(this);
   }
 
@@ -833,6 +1007,14 @@ class Client extends _isc.ServerpodClientShared {
 
   late final EndpointGreeting greeting;
 
+  late final EndpointDriveInvitations driveInvitations;
+
+  late final EndpointDriveManagement driveManagement;
+
+  late final EndpointDriveMembers driveMembers;
+
+  late final EndpointNotifications notifications;
+
   late final Modules modules;
 
   @override
@@ -846,6 +1028,10 @@ class Client extends _isc.ServerpodClientShared {
     'filesystem': filesystem,
     'garden': garden,
     'greeting': greeting,
+    'driveInvitations': driveInvitations,
+    'driveManagement': driveManagement,
+    'driveMembers': driveMembers,
+    'notifications': notifications,
   };
 
   @override

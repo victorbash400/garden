@@ -59,3 +59,22 @@ garden:
   - delete:
 greeting:
   - hello:
+driveInvitations:
+  - invite:
+  - received:
+  - accept:
+  - decline:
+  - resend:
+  - revoke:
+driveManagement:
+  - get:
+driveMembers:
+  - list:
+  - changeRole:
+  - remove:
+  - transferOwnership:
+  - leave:
+notifications:
+  - list:
+  - markRead:
+  - watch:

@@ -1,0 +1,6 @@
+class: DriveMemberDetails
+fields:
+  userId: String
+  role: String
+  displayName: String
+  email: String?

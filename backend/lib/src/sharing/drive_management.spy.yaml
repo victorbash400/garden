@@ -1,0 +1,8 @@
+class: DriveManagement
+fields:
+  drive: GardenSummary
+  logicalBytes: int
+  fileCount: int
+  folderCount: int
+  members: List<DriveMemberDetails>
+  invitations: List<DriveInvitation>

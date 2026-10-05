@@ -22,7 +22,10 @@ void main() {
 
     test('rename preserves files and is owner-only', () async {
       final drive = await endpoints.garden.create(owner, 'Original');
-      await endpoints.garden.join(guest, drive.invitationCode!);
+      await GardenMember.db.insertRow(
+        owner.build(),
+        GardenMember(gardenId: drive.id, userId: 'guest', role: 'Editor'),
+      );
       final node = await endpoints.files.create(
         owner,
         drive.id,
@@ -51,7 +54,10 @@ void main() {
       'drive deletion is owner-only, hides membership and blocks files',
       () async {
         final drive = await endpoints.garden.create(owner, 'Disposable');
-        await endpoints.garden.join(guest, drive.invitationCode!);
+        await GardenMember.db.insertRow(
+          owner.build(),
+          GardenMember(gardenId: drive.id, userId: 'guest', role: 'Editor'),
+        );
         final node = await endpoints.files.create(
           owner,
           drive.id,
@@ -64,8 +70,18 @@ void main() {
           throwsA(isA<GardenException>()),
         );
         await endpoints.garden.delete(owner, drive.id);
-        expect(await endpoints.garden.list(owner), isEmpty);
-        expect(await endpoints.garden.list(guest), isEmpty);
+        expect(
+          (await endpoints.garden.list(
+            owner,
+          )).any((item) => item.id == drive.id),
+          isFalse,
+        );
+        expect(
+          (await endpoints.garden.list(
+            guest,
+          )).any((item) => item.id == drive.id),
+          isFalse,
+        );
         await expectLater(
           endpoints.files.list(owner, drive.id, 0),
           throwsA(isA<GardenException>()),
@@ -276,7 +292,10 @@ void main() {
       'lease prevents another member saving and comments are persisted',
       () async {
         final drive = await endpoints.garden.create(owner, 'Shared');
-        await endpoints.garden.join(guest, drive.invitationCode!);
+        await GardenMember.db.insertRow(
+          owner.build(),
+          GardenMember(gardenId: drive.id, userId: 'guest', role: 'Editor'),
+        );
         final node = await endpoints.files.create(
           owner,
           drive.id,
@@ -304,23 +323,18 @@ void main() {
       },
     );
 
-    test(
-      'invitations are owner-only and rotation invalidates the old code',
-      () async {
-        final drive = await endpoints.garden.create(owner, 'Invitations');
-        await endpoints.garden.join(guest, drive.invitationCode!);
-        await expectLater(
-          endpoints.garden.invite(guest, drive.id),
-          throwsA(isA<GardenException>()),
-        );
-        final code = await endpoints.garden.invite(owner, drive.id);
-        await expectLater(
-          endpoints.garden.join(guest, drive.invitationCode!),
-          throwsA(isA<GardenException>()),
-        );
-        expect((await endpoints.garden.join(guest, code)).id, drive.id);
-      },
-    );
+    test('legacy unbound invitation codes cannot grant access', () async {
+      final drive = await endpoints.garden.create(owner, 'Invitations');
+      expect(drive.invitationCode, isNull);
+      await expectLater(
+        endpoints.garden.invite(owner, drive.id),
+        throwsA(isA<GardenException>()),
+      );
+      await expectLater(
+        endpoints.garden.join(guest, 'legacy-code'),
+        throwsA(isA<GardenException>()),
+      );
+    });
     test(
       'upload cleanup is idempotent and preserves committed versions',
       () async {
