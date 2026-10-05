@@ -11,6 +11,8 @@ String errorMessage(Object error) => switch (error) {
   ExcludeCredentialsCanNotBeRegisteredException() =>
     'This passkey is already registered.',
   PlatformException(code: '-128') => 'Authentication canceled.',
+  MissingPluginException() => 'Restart Garden to load the native controls.',
+  PlatformException() => error.message ?? 'Native request failed.',
   StateError() => error.message,
   GardenException() => error.message,
   _ => error.toString(),

@@ -6,6 +6,8 @@ import '../state/garden_controller.dart';
 import '../components/settings/finder_setup_row.dart';
 import '../components/settings/login_item_row.dart';
 import '../components/settings/background_updates_row.dart';
+import '../components/settings/settings_inline_button.dart';
+import '../components/settings/settings_issue.dart';
 
 class ConnectionsSettings extends StatelessWidget {
   const ConnectionsSettings({super.key, required this.controller});
@@ -14,43 +16,40 @@ class ConnectionsSettings extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    final issues = [
+      controller.finderIssue,
+      controller.finderUpdates?.error,
+      controller.nativeSetup?.error,
+    ].whereType<String>().toSet();
+    return SettingsGroup(
       children: [
-        SettingsGroup(
-          children: [
-            SettingsRow(
-              label: 'Garden service',
-              value: Text(
-                controller.serviceAvailable
-                    ? 'Available at last check'
-                    : 'Unavailable',
-              ),
-            ),
-            FinderSetupRow(controller: controller),
-            if (controller.finderUpdates != null)
-              BackgroundUpdatesRow(updates: controller.finderUpdates!),
-            if (controller.nativeSetup != null)
-              LoginItemRow(controller: controller.nativeSetup!),
-          ],
-        ),
-        for (final issue in [
-          controller.finderIssue,
-          controller.finderUpdates?.error,
-          controller.nativeSetup?.error,
-        ].whereType<String>().toSet()) ...[
-          const SizedBox(height: 12),
-          SelectableText(
-            issue,
-            style: const TextStyle(fontSize: 12, color: Color(0xFFB23D3D)),
+        SettingsRow(
+          label: 'Garden service',
+          value: Text(
+            controller.serviceAvailable ? 'Available' : 'Unavailable',
           ),
-        ],
-        const SizedBox(height: 12),
-        TextButton(
-          onPressed: controller.busy || controller.finderSyncing
-              ? null
-              : controller.checkConnections,
-          child: const Text('Check connections'),
+        ),
+        FinderSetupRow(controller: controller),
+        if (controller.finderUpdates != null)
+          BackgroundUpdatesRow(updates: controller.finderUpdates!),
+        if (controller.nativeSetup != null)
+          LoginItemRow(controller: controller.nativeSetup!),
+        if (issues.isNotEmpty)
+          SettingsIssue(
+            message: 'Connection check failed',
+            details: issues.join('\n'),
+          ),
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: SettingsInlineButton(
+              onPressed: controller.busy || controller.finderSyncing
+                  ? null
+                  : controller.checkConnections,
+              label: 'Check connections',
+            ),
+          ),
         ),
       ],
     );

@@ -4,6 +4,7 @@ import '../../state/storage_controller.dart';
 import 'cache_usage_bar.dart';
 import 'cache_history_graph.dart';
 import 'settings_inline_button.dart';
+import 'settings_issue.dart';
 
 class CacheUsageControls extends StatelessWidget {
   const CacheUsageControls({super.key, required this.controller});
@@ -55,9 +56,9 @@ class CacheUsageControls extends StatelessWidget {
             ),
           if (controller.error != null) ...[
             const SizedBox(height: 12),
-            Text(
-              controller.error!,
-              style: const TextStyle(color: Color(0xFFB33D38), fontSize: 13),
+            SettingsIssue(
+              message: 'Cache request failed',
+              details: controller.error!,
             ),
           ],
         ],
