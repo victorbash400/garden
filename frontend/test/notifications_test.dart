@@ -54,7 +54,30 @@ class DelayedSharingGateway extends TestGateway implements SharingGateway {
   Future<List<GardenInfo>> listGardens() => listing.future;
 }
 
+class DelayedNotificationFixture extends NotificationFixture {
+  final snapshot = Completer<List<AccountNotification>>();
+  @override
+  Future<List<AccountNotification>> notifications() => snapshot.future;
+}
+
 void main() {
+  test('late snapshots cannot overwrite streamed read status', () async {
+    final service = DelayedNotificationFixture();
+    final controller = NotificationController(service);
+    final starting = controller.start();
+    await Future<void>.delayed(Duration.zero);
+    final original = notice(1);
+    final updated = original.copyWith(readAt: DateTime.now().toUtc());
+    service.events.add(updated);
+    await Future<void>.delayed(Duration.zero);
+    service.snapshot.complete([original]);
+    await starting;
+    expect(controller.items.single.readAt, updated.readAt);
+    expect(controller.unread, 0);
+    await controller.close();
+    controller.dispose();
+    await service.events.close();
+  });
   test(
     'an in-flight access refresh cannot update a closed account window',
     () async {

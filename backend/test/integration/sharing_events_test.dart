@@ -48,14 +48,43 @@ void main() {
         final stream = StreamIterator(
           endpoints.notifications.watch(recipient, 0),
         );
+        int cursor = 0;
         try {
           expect(
             await stream.moveNext().timeout(const Duration(seconds: 5)),
             isTrue,
           );
           final notification = stream.current;
+          cursor = notification.id!;
           expect(notification.invitationId, invitation.id);
           expect(notification.readAt, isNull);
+          final outsiderUser = await auth.AuthUser.db.insertRow(
+            owner.build(),
+            auth.AuthUser(scopeNames: {}, blocked: false),
+          );
+          await email.EmailAccount.db.insertRow(
+            owner.build(),
+            email.EmailAccount(
+              authUserId: outsiderUser.id!,
+              email: 'unrelated-events@example.com',
+              passwordHash: 'unused',
+            ),
+          );
+          final outsider = builder.copyWith(
+            authentication: AuthenticationOverride.authenticationInfo(
+              outsiderUser.id!.toString(),
+              {},
+            ),
+          );
+          expect(await endpoints.notifications.list(outsider, 0), isEmpty);
+          await expectLater(
+            endpoints.notifications.markRead(outsider, notification.id!),
+            throwsA(isA<GardenException>()),
+          );
+          expect(
+            (await endpoints.notifications.list(recipient, 0)).single.readAt,
+            isNull,
+          );
           final next = stream.moveNext();
           await endpoints.notifications.markRead(recipient, notification.id!);
           expect(await next.timeout(const Duration(seconds: 5)), isTrue);
@@ -63,6 +92,26 @@ void main() {
           expect(stream.current.readAt, isNotNull);
         } finally {
           await stream.cancel();
+        }
+        final otherDrive = await endpoints.garden.create(owner, 'Missed event');
+        final missed = await endpoints.driveInvitations.invite(
+          owner,
+          otherDrive.id,
+          'events@example.com',
+          'Viewer',
+        );
+        final replay = StreamIterator(
+          endpoints.notifications.watch(recipient, cursor),
+        );
+        try {
+          expect(
+            await replay.moveNext().timeout(const Duration(seconds: 5)),
+            isTrue,
+          );
+          expect(replay.current.id, greaterThan(cursor));
+          expect(replay.current.invitationId, missed.id);
+        } finally {
+          await replay.cancel();
         }
       },
     );
