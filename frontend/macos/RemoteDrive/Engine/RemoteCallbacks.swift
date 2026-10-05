@@ -98,12 +98,15 @@ func remoteMutate(_ context: UnsafeMutableRawPointer?, _ operation: Int32, _ pat
 }
 
 @_cdecl("garden_remote_open")
-func remoteOpen(_ context: UnsafeMutableRawPointer?, _ path: UnsafePointer<CChar>?, _ directory: Int32, _ handle: UnsafeMutablePointer<UInt64>?) -> Int32 {
+func remoteOpen(_ context: UnsafeMutableRawPointer?, _ path: UnsafePointer<CChar>?, _ directory: Int32, _ writing: Int32, _ handle: UnsafeMutablePointer<UInt64>?) -> Int32 {
   status {
     let remoteEngine = try engine(context)
     guard let path, let handle else { throw POSIXError(.EINVAL) }
     let name = String(cString: path)
-    handle.pointee = try wait { try await remoteEngine.open(name, directory: directory != 0) }
+    handle.pointee = try wait {
+      if writing != 0 { try await remoteEngine.requireWrite() }
+      return try await remoteEngine.open(name, directory: directory != 0)
+    }
     return 0
   }
 }

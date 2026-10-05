@@ -18,6 +18,7 @@ actor RemoteEngine {
   private var directories: [UInt64: [GardenNode]] = [:]
   private var nextHandle: UInt64 = 1
   private var subscription: RemoteSubscription?
+  private var driveRole: RemoteDrivePermission?
   var issue: String? {
     get async {
       if let writeIssue { return writeIssue }
@@ -39,6 +40,7 @@ actor RemoteEngine {
 
   func prepare(changed: @escaping @Sendable () async -> Void = {}) async throws {
     self.changed = changed
+    try await refreshPermission()
     if try metadata.revision == nil {
       let revision = try await api.revision()
       try metadata.beginSnapshot()
@@ -59,10 +61,13 @@ actor RemoteEngine {
       }
     }
     try await catchUp()
-    try await recoverMutations()
-    try await flushAll()
-    let stream = RemoteSubscription(api: api, revision: { try await self.currentRevision() }, changed: changed,
+    if driveRole != .viewer {
+      try await recoverMutations()
+      try await flushAll()
+    }
+    let stream = RemoteSubscription(api: api, revision: { try await self.currentRevision() }, changed: { await self.subscriptionChanged() },
       connected: { await self.connectionRestored() }) { change in
+      if change.operation == "permissions" { try await self.refreshPermission() }
       try await self.receive(change)
     }
     subscription = stream
@@ -72,12 +77,16 @@ actor RemoteEngine {
   func catchUp() async throws {
     while true {
       let changes = try await api.changes(after: metadata.revision ?? 0)
-      for change in changes { try receive(change) }
+      for change in changes {
+        if change.operation == "permissions" { try await refreshPermission() }
+        try receive(change)
+      }
       if changes.count < 256 { break }
     }
   }
 
   func mutate(_ mutation: RemoteMutation) async throws {
+    try requireWrite()
     if mutation.operation == .unlink || mutation.operation == .rename {
       if let node = try metadata.lookup(mutation.path), !node.folder { try await publish(node.id) }
       if let destination = mutation.destination {
@@ -151,14 +160,20 @@ actor RemoteEngine {
   func currentRevision() throws -> Int { try metadata.revision ?? 0 }
 
   func reconnect() async throws {
-    try await serializeMutation(nil)
-    try await flushAll()
+    try await refreshPermission()
+    if driveRole != .viewer {
+      try await serializeMutation(nil)
+      try await flushAll()
+    }
     try await subscription?.reconnect()
     await settled()
   }
 
   func connectionRestored() async {
-    do { try await flushAll() }
+    do {
+      try await refreshPermission()
+      if driveRole != .viewer { try await flushAll() }
+    }
     catch { RemoteLog.error(error) }
   }
 
@@ -210,8 +225,9 @@ actor RemoteEngine {
   }
 
   func lookup(_ path: String, handle: UInt64 = 0) throws -> GardenNode? {
+    try requireRead()
     if handle != 0 {
-      if directories[handle] != nil { return handles[handle] }
+      if directories[handle] != nil { return try visible(handles[handle]) }
       guard let node = handles[handle] else { throw POSIXError(.EBADF) }
       return try visible(node)
     }
@@ -219,6 +235,7 @@ actor RemoteEngine {
   }
 
   func open(_ path: String, directory: Bool) throws -> UInt64 {
+    try requireRead()
     let node = try metadata.lookup(path)
     if directory {
       guard node == nil || node!.folder else { throw POSIXError(.ENOTDIR) }
@@ -242,16 +259,22 @@ actor RemoteEngine {
   }
 
   func list(_ handle: UInt64) throws -> [GardenNode] {
+    try requireRead()
     guard let nodes = directories[handle] else { throw POSIXError(.EBADF) }
     return try nodes.map { try visible($0)! }
   }
 
   func read(_ handle: UInt64, offset: Int, length: Int) async throws -> Data {
+    try requireRead()
     guard let node = handles[handle] else { throw POSIXError(.EBADF) }
     if let draft = try writes.state(node.id) {
-      return try await RemoteWriteReader.read(draft, journal: writes, ranges: ranges, offset: offset, length: length)
+      let bytes = try await RemoteWriteReader.read(draft, journal: writes, ranges: ranges, offset: offset, length: length)
+      try requireRead()
+      return bytes
     }
-    return try await ranges.read(node: node, offset: offset, length: length, path: try path(node.id))
+    let bytes = try await ranges.read(node: node, offset: offset, length: length, path: try path(node.id))
+    try requireRead()
+    return bytes
   }
 
   func stop() async {
@@ -267,7 +290,48 @@ actor RemoteEngine {
       node.size = draft.size
       node.modifiedDate = draft.modified
     }
+    if driveRole == .viewer {
+      var attributes = node.attributes ?? GardenFileAttributes()
+      attributes.permissions = (attributes.permissions ?? (node.folder ? 0o755 : 0o644)) & 0o555
+      node.attributes = attributes
+    }
     return node
+  }
+
+  func requireRead() throws {
+    guard driveRole != nil else { throw POSIXError(.EACCES) }
+  }
+
+  func requireWrite() throws {
+    try requireRead()
+    guard driveRole != .viewer else { throw POSIXError(.EROFS) }
+  }
+
+  private func refreshPermission() async throws {
+    driveRole = nil
+    do {
+      let credential = try await api.streamCredential()
+      guard let value = try await api.call("garden", "connect", ["gardenId": credential.driveID]) as? [String: Any],
+        let role = value["role"] as? String else {
+        throw GardenAPIError.invalidResponse
+      }
+      driveRole = try RemoteDrivePermission(role: role)
+      invalidate(["/"])
+    } catch {
+      driveRole = nil
+      await ranges.invalidate()
+      invalidate(["/"])
+      throw error
+    }
+  }
+
+  private func subscriptionChanged() async {
+    if await subscription?.issue != nil {
+      driveRole = nil
+      await ranges.invalidate()
+      invalidate(["/"])
+    }
+    await changed()
   }
 
   func writeStatus(_ issue: String?, paths: [String] = []) async {
@@ -280,5 +344,20 @@ actor RemoteEngine {
 enum RemoteLog {
   static func error(_ error: Error) {
     try? FileHandle.standardError.write(contentsOf: Data(("Garden remote drive: \(error.localizedDescription)\n").utf8))
+  }
+}
+
+
+enum RemoteDrivePermission: Sendable {
+  case owner, manager, editor, viewer
+
+  init(role: String) throws {
+    switch role {
+    case "Owner": self = .owner
+    case "Manager": self = .manager
+    case "Editor", "Member": self = .editor
+    case "Viewer": self = .viewer
+    default: throw GardenAPIError.invalidResponse
+    }
   }
 }

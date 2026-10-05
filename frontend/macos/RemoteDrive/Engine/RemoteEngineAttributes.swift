@@ -6,6 +6,7 @@ extension RemoteEngine {
   }
 
   func setAttributes(_ name: String?, handle: UInt64, created: Date?, modified: Date?, attributes: GardenFileAttributes?) async throws {
+    try requireWrite()
     guard name != nil || handle != 0 else { throw POSIXError(.EINVAL) }
     try attributes?.validate()
     var node = try attributeNode(name ?? "/", handle: handle)
@@ -51,6 +52,7 @@ extension RemoteEngine {
   }
 
   func setExtendedAttribute(_ name: String, key: String, bytes: Data?, options: Int) async throws {
+    try requireWrite()
     let node = try attributeNode(name)
     let original = node.attributes ?? GardenFileAttributes()
     let updated = try original.setting(key, bytes: bytes, options: options)

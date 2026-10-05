@@ -8,7 +8,7 @@ void garden_remote_stop(void *mount);
 void garden_remote_destroy(void *mount);
 int garden_remote_invalidate(void *mount, const char *path);
 int garden_remote_attributes(void *engine, const char *path, uint64_t handle, struct stat *attributes);
-int garden_remote_open(void *engine, const char *path, int directory, uint64_t *handle);
+int garden_remote_open(void *engine, const char *path, int directory, int writing, uint64_t *handle);
 int garden_remote_close(void *engine, uint64_t handle);
 int garden_remote_read(void *engine, uint64_t handle, void *buffer, int64_t offset, int64_t length);
 int garden_remote_create(void *engine, const char *path, uint32_t permissions, int folder, uint64_t *handle);

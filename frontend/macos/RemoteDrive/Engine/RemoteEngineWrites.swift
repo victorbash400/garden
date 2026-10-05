@@ -6,11 +6,13 @@ extension RemoteEngine {
   }
 
   func write(_ handle: UInt64, offset: Int, bytes: Data, append: Bool) async throws {
+    try requireWrite()
     guard let original = try lookup("/", handle: handle), !original.folder else { throw POSIXError(.EISDIR) }
     if let pending = publications[original.id] { try await pending.value }
     if try writes.state(original.id)?.sealed == true { try await publish(original.id) }
     guard let node = try lookup("/", handle: handle) else { throw POSIXError(.EBADF) }
     guard try metadata.node(node.id) != nil else { throw POSIXError(.ENOENT) }
+    try requireWrite()
     let position = append ? node.size : offset
     do { try writes.write(node, offset: position, bytes: bytes) }
     catch let error as POSIXError where error.code == .ENOSPC {
@@ -22,12 +24,14 @@ extension RemoteEngine {
   }
 
   func truncate(_ path: String, handle: UInt64, size: Int) async throws {
+    try requireWrite()
     guard let original = try lookup(path, handle: handle), !original.folder else { throw POSIXError(.EISDIR) }
     if original.size == size { return }
     if let pending = publications[original.id] { try await pending.value }
     if try writes.state(original.id)?.sealed == true { try await publish(original.id) }
     guard let current = try lookup(path, handle: handle) else { throw POSIXError(.ENOENT) }
     guard try metadata.node(current.id) != nil else { throw POSIXError(.ENOENT) }
+    try requireWrite()
     try writes.truncate(current, size: size)
     schedulePublication(current.id)
   }
@@ -45,6 +49,7 @@ extension RemoteEngine {
     scheduledPublications.removeValue(forKey: node)?.cancel()
     if let pending = publications[node] { try await pending.value; return }
     guard try writes.state(node) != nil else { return }
+    try requireWrite()
     let pending = Task { try await self.publishDraft(node) }
     publications[node] = pending
     defer { publications.removeValue(forKey: node) }

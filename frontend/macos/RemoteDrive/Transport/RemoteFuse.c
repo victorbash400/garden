@@ -52,7 +52,7 @@ static int access_item(const char *path, int mask) {
 
 static int open_file(const char *path, struct fuse_file_info *file) {
   file->keep_cache = 0;
-  int result = garden_remote_open(fuse_get_context()->private_data, path, 0, &file->fh);
+  int result = garden_remote_open(fuse_get_context()->private_data, path, 0, (file->flags & O_ACCMODE) != O_RDONLY || (file->flags & O_TRUNC), &file->fh);
   if (result == 0 && (file->flags & O_TRUNC)) {
     result = garden_remote_truncate(fuse_get_context()->private_data, path, file->fh, 0);
     if (result != 0) garden_remote_close(fuse_get_context()->private_data, file->fh);
@@ -67,7 +67,7 @@ static int create_file(const char *path, mode_t mode, struct fuse_file_info *fil
 }
 
 static int open_directory(const char *path, struct fuse_file_info *file) {
-  return garden_remote_open(fuse_get_context()->private_data, path, 1, &file->fh);
+  return garden_remote_open(fuse_get_context()->private_data, path, 1, 0, &file->fh);
 }
 
 static int release(const char *path, struct fuse_file_info *file) {
