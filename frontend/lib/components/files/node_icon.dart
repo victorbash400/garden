@@ -18,5 +18,5 @@ class NodeIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) => node.kind == NodeKind.folder
       ? FolderIcon(size: size, open: open)
-      : FileIcon(size: size);
+      : FileIcon(size: size, name: node.name);
 }

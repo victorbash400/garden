@@ -23,7 +23,7 @@ class ChatReferenceRow extends StatelessWidget {
         children: [
           node.kind == NodeKind.folder
               ? const FolderIcon(size: 20)
-              : const FileIcon(size: 20),
+              : FileIcon(size: 20, name: node.name),
           const SizedBox(width: 8),
           Expanded(
             child: Text(

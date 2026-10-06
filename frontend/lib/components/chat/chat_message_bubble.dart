@@ -50,7 +50,7 @@ class ChatMessageBubble extends StatelessWidget {
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-              icon: const FileIcon(size: 18),
+              icon: FileIcon(size: 18, name: message.nodeName),
               label: Text(
                 message.nodeName!,
                 overflow: TextOverflow.ellipsis,

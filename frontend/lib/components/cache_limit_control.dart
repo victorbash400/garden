@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../ui/garden_colors.dart';
+import 'settings/cache_presets.dart';
 
 class CacheLimitControl extends StatefulWidget {
   const CacheLimitControl({
@@ -36,12 +37,14 @@ class _CacheLimitControlState extends State<CacheLimitControl> {
             style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
           ),
           Spacer(),
-          Text(
-            value.round() == 0 ? 'No disk cache' : '${value.round()} GiB',
-            style: TextStyle(
-              fontSize: 13,
-              color: GardenColors.of(context).secondary,
-            ),
+          CachePresets(
+            limit: value.round(),
+            onChanged: widget.busy
+                ? null
+                : (next) {
+                    setState(() => value = next.toDouble());
+                    widget.onSave(next);
+                  },
           ),
         ],
       ),

@@ -93,6 +93,7 @@ class TreeRow extends StatelessWidget {
                               width: 24,
                               child: icon == SystemIcons.file
                                   ? FileIcon(
+                                      name: label,
                                       size: 24,
                                       color: GardenColors.of(context).ink,
                                     )

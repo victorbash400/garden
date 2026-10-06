@@ -4,6 +4,8 @@ import '../components/cache_limit_control.dart';
 import '../components/settings/bandwidth_settings.dart';
 import '../components/settings/cache_usage_controls.dart';
 import '../components/settings/settings_group.dart';
+import '../components/settings/drive_storage_usage.dart';
+import '../services/sharing/drive_sharing_service.dart';
 import '../state/garden_controller.dart';
 
 class StorageSettings extends StatefulWidget {
@@ -36,9 +38,17 @@ class _StorageSettingsState extends State<StorageSettings> {
   Widget build(BuildContext context) {
     final controller = widget.controller;
     final storage = controller.storage;
+    final gateway = controller.gateway;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (gateway is SharingGateway) ...[
+          DriveStorageUsageControls(
+            service: (gateway as SharingGateway).sharing,
+            driveIds: controller.gardens.map((drive) => drive.id).toList(),
+          ),
+          const SizedBox(height: 20),
+        ],
         SettingsGroup(
           children: [
             if (storage != null) CacheUsageControls(controller: storage),

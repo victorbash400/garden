@@ -30,7 +30,7 @@ class ChatReferenceChip extends StatelessWidget {
         children: [
           node.kind == NodeKind.folder
               ? const FolderIcon(size: 18)
-              : const FileIcon(size: 18),
+              : FileIcon(size: 18, name: node.name),
           const SizedBox(width: 6),
           Flexible(
             child: Text(
