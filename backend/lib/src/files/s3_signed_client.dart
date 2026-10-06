@@ -3,17 +3,24 @@ import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:http/http.dart' as http;
 
 class S3SignedClient extends http.BaseClient {
-  S3SignedClient(String access, String secret, String region)
-    : signer = AWSSigV4Signer(
-        credentialsProvider: AWSCredentialsProvider(
-          AWSCredentials(access, secret),
-        ),
-      ),
-      scope = AWSCredentialScope(region: region, service: AWSService.s3);
+  S3SignedClient(
+    String access,
+    String secret,
+    String region, {
+    http.Client? transport,
+  }) : transport = transport ?? http.Client(),
+       _ownsTransport = transport == null,
+       signer = AWSSigV4Signer(
+         credentialsProvider: AWSCredentialsProvider(
+           AWSCredentials(access, secret),
+         ),
+       ),
+       scope = AWSCredentialScope(region: region, service: AWSService.s3);
 
   final AWSSigV4Signer signer;
   final AWSCredentialScope scope;
-  final http.Client transport = http.Client();
+  final http.Client transport;
+  final bool _ownsTransport;
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
@@ -45,5 +52,7 @@ class S3SignedClient extends http.BaseClient {
   }
 
   @override
-  void close() => transport.close();
+  void close() {
+    if (_ownsTransport) transport.close();
+  }
 }

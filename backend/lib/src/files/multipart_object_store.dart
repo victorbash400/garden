@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:aws_client/s3.dart' as aws;
+import 'package:http/http.dart' as http;
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_cloud_storage_s3/serverpod_cloud_storage_s3.dart';
 import 'package:serverpod_cloud_storage_s3_compat/serverpod_cloud_storage_s3_compat.dart';
@@ -23,7 +24,12 @@ class MultipartObjectStore {
     }
     client = aws.S3(
       region: region,
-      client: transport = S3SignedClient(access, secret, region),
+      client: transport = S3SignedClient(
+        access,
+        secret,
+        region,
+        transport: _sharedTransport(session.serverpod),
+      ),
       credentials: aws.AwsClientCredentials(
         accessKey: access,
         secretKey: secret,
@@ -42,6 +48,21 @@ class MultipartObjectStore {
   late final aws.S3 client;
   late final S3SignedClient transport;
   late final S3Client signer;
+
+  static final _transports = Expando<http.Client>();
+
+  static http.Client _sharedTransport(Serverpod pod) {
+    final current = _transports[pod];
+    if (current != null) return current;
+    final client = http.Client();
+    pod.experimental.shutdownTasks.addTask(client, () async {
+      client.close();
+      _transports[pod] = null;
+      pod.experimental.shutdownTasks.removeTask(client);
+    });
+    _transports[pod] = client;
+    return client;
+  }
 
   static int partSizeFor(int size) {
     const unit = 1024 * 1024;
