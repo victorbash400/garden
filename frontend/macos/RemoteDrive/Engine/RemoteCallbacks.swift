@@ -47,7 +47,10 @@ func fileStat(_ node: GardenNode?) throws -> stat {
   attributes.st_uid = getuid()
   attributes.st_gid = getgid()
   attributes.st_size = off_t(node?.size ?? 0)
-  attributes.st_blocks = 0
+  let size = node?.size ?? 0
+  guard size >= 0 else { throw POSIXError(.EINVAL) }
+  // Report cloud file allocation. Zero blocks makes Resolve treat populated files as offline.
+  attributes.st_blocks = blkcnt_t(size / 512 + (size % 512 == 0 ? 0 : 1))
   attributes.st_blksize = 1024 * 1024
   attributes.st_mtimespec = fileTimespec(node?.modifiedDate ?? Date(timeIntervalSince1970: 0))
   attributes.st_ctimespec = attributes.st_mtimespec
