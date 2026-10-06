@@ -8,15 +8,16 @@ final class RemoteMount: @unchecked Sendable {
   private let invalidations = DispatchQueue(label: "garden.remote.invalidation", qos: .utility)
   private var stopRequested = false
   private let handle: UnsafeMutableRawPointer
-  private let ready = RemoteCompletion<Void>()
+  private let ready: RemoteCompletion<Void>
   private let finished = RemoteCompletion<Int32>()
   private var stopped = RemoteCompletion<Void>()
   private let unmounted = RemoteCompletion<Void>()
   private var observers: [NSObjectProtocol] = []
 
-  private init(engine: RemoteEngine, path: String, name: String) throws {
+  private init(engine: RemoteEngine, path: String, name: String, ready: RemoteCompletion<Void>) throws {
     self.engine = engine
     self.path = path
+    self.ready = ready
     guard let handle = path.withCString({ path in
       name.withCString { name in garden_remote_start(Unmanaged.passUnretained(engine).toOpaque(), path, name) }
     }) else { throw POSIXError(.EIO) }
@@ -24,9 +25,17 @@ final class RemoteMount: @unchecked Sendable {
   }
 
   static func start(engine: RemoteEngine, path: String, name: String) async throws -> RemoteMount {
+    let ready = RemoteCompletion<Void>()
+    let observer = NSWorkspace.shared.notificationCenter.addObserver(
+      forName: NSWorkspace.didMountNotification, object: nil, queue: nil
+    ) { notice in
+      guard let url = notice.userInfo?[NSWorkspace.volumeURLUserInfoKey] as? URL, url.path == path else { return }
+      ready.resolve(.success(()))
+    }
+    defer { NSWorkspace.shared.notificationCenter.removeObserver(observer) }
     let mount: RemoteMount = try await withCheckedThrowingContinuation { continuation in
       DispatchQueue.global(qos: .userInitiated).async {
-        do { continuation.resume(returning: try RemoteMount(engine: engine, path: path, name: name)) }
+        do { continuation.resume(returning: try RemoteMount(engine: engine, path: path, name: name, ready: ready)) }
         catch { continuation.resume(throwing: error) }
       }
     }
@@ -58,12 +67,6 @@ final class RemoteMount: @unchecked Sendable {
   }
 
   private func begin(path: String) {
-    observers.append(NSWorkspace.shared.notificationCenter.addObserver(
-      forName: NSWorkspace.didMountNotification, object: nil, queue: nil
-    ) { [weak self] notice in
-      guard let url = notice.userInfo?[NSWorkspace.volumeURLUserInfoKey] as? URL, url.path == path else { return }
-      self?.ready.resolve(.success(()))
-    })
     observers.append(NSWorkspace.shared.notificationCenter.addObserver(
       forName: NSWorkspace.didUnmountNotification, object: nil, queue: nil
     ) { [weak self] notice in

@@ -126,6 +126,7 @@ func remoteRead(_ context: UnsafeMutableRawPointer?, _ handle: UInt64, _ buffer:
     let remoteEngine = try engine(context)
     guard let buffer, offset >= 0, length >= 0, length <= 16 * 1024 * 1024 else { throw POSIXError(.EINVAL) }
     let data = try wait { try await remoteEngine.read(handle, offset: Int(offset), length: Int(length)) }
+    guard data.count <= Int(length) else { throw POSIXError(.EIO) }
     data.copyBytes(to: buffer.assumingMemoryBound(to: UInt8.self), count: data.count)
     return Int32(data.count)
   }
