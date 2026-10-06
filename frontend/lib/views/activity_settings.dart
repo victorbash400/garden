@@ -91,21 +91,17 @@ class _ActivitySettingsState extends State<ActivitySettings> {
                         ),
                       ),
                     )
-                  : Scrollbar(
+                  : ListView.builder(
                       controller: scroll,
-                      thumbVisibility: true,
-                      child: ListView.builder(
-                        controller: scroll,
-                        padding: EdgeInsets.fromLTRB(12, 0, 12, 12),
-                        itemCount: entries.length,
-                        itemBuilder: (context, index) => ActivityRow(
-                          key: ValueKey(entries[index].id),
-                          entry: entries[index],
-                          striped: index.isOdd,
-                          drive:
-                              drives[entries[index].drive] ??
-                              'Drive ${entries[index].drive}',
-                        ),
+                      padding: EdgeInsets.fromLTRB(12, 0, 12, 12),
+                      itemCount: entries.length,
+                      itemBuilder: (context, index) => ActivityRow(
+                        key: ValueKey(entries[index].id),
+                        entry: entries[index],
+                        striped: index.isOdd,
+                        drive:
+                            drives[entries[index].drive] ??
+                            'Drive ${entries[index].drive}',
                       ),
                     ),
             ),

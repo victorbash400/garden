@@ -24,6 +24,7 @@ class _SidebarDrivesState extends State<SidebarDrives> {
     final controller = widget.controller;
     final files = controller.files;
     Widget content() => ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       children: [
         SidebarItem(
           label: 'Home',

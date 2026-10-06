@@ -31,12 +31,7 @@ class GardenSidebar extends StatelessWidget {
             ),
           ),
         ),
-        Expanded(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12),
-            child: SidebarDrives(controller: controller),
-          ),
-        ),
+        Expanded(child: SidebarDrives(controller: controller)),
         SidebarAccountFooter(controller: controller),
       ],
     ),

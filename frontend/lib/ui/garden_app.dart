@@ -25,6 +25,7 @@ import '../views/value_form.dart';
 import '../views/verification_view.dart';
 import '../views/welcome_view.dart';
 import 'garden_theme.dart';
+import 'garden_scroll_behavior.dart';
 import '../model/appearance/theme_presets.dart';
 
 class GardenApp extends StatelessWidget {
@@ -35,6 +36,7 @@ class GardenApp extends StatelessWidget {
     listenable: controller,
     builder: (context, _) => MaterialApp(
       title: 'Garden',
+      scrollBehavior: const GardenScrollBehavior(),
       debugShowCheckedModeBanner: false,
       theme: _showSidebar
           ? GardenTheme.profile(

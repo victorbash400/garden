@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../model/appearance/theme_profile.dart';
 import 'garden_colors.dart';
+import 'garden_scrollbar_theme.dart';
 
 abstract final class GardenTheme {
   static const ink = Color(0xFF222226);
@@ -44,6 +45,7 @@ abstract final class GardenTheme {
     );
     final theme = base.copyWith(
       extensions: [colors],
+      scrollbarTheme: gardenScrollbarTheme(colors.ink),
       scaffoldBackgroundColor: colors.surface,
       textTheme: base.textTheme.apply(
         bodyColor: colors.ink,
@@ -102,6 +104,7 @@ abstract final class GardenTheme {
       ),
     ],
     brightness: Brightness.light,
+    scrollbarTheme: gardenScrollbarTheme(ink),
     scaffoldBackgroundColor: canvas,
     fontFamily: 'GoogleSans',
     colorScheme: ColorScheme.fromSeed(
