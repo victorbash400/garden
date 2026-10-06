@@ -11,7 +11,9 @@ class SidebarItem extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    this.badge = 0,
   });
+  final int badge;
   final SystemIcons icon;
   final String label;
   final bool selected;
@@ -39,6 +41,12 @@ class SidebarItem extends StatelessWidget {
                   style: TextStyle(fontSize: 12),
                 ),
               ),
+              if (badge > 0)
+                Badge(
+                  backgroundColor: GardenColors.of(context).accent,
+                  textColor: GardenColors.of(context).onAccent,
+                  label: Text('$badge'),
+                ),
             ],
           ),
         ),

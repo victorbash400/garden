@@ -4,6 +4,7 @@ import 'package:garden_client/garden_client.dart';
 import '../../ui/garden_colors.dart';
 import '../file_icon.dart';
 import 'chat_sender.dart';
+import '../inbox/conversation_avatar.dart';
 
 class ChatMessageRow extends StatelessWidget {
   const ChatMessageRow({
@@ -53,23 +54,7 @@ class ChatMessageRow extends StatelessWidget {
             if (!own) ...[
               SizedBox(
                 width: 30,
-                child: showSender
-                    ? Container(
-                        height: 30,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: colors.hover,
-                          borderRadius: BorderRadius.circular(7),
-                        ),
-                        child: Text(
-                          name.characters.first,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      )
-                    : null,
+                child: showSender ? const ConversationAvatar(size: 30) : null,
               ),
               const SizedBox(width: 10),
             ],
@@ -82,7 +67,7 @@ class ChatMessageRow extends StatelessWidget {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: own ? colors.hover : colors.surface,
+                    color: own ? colors.selection : colors.surface,
                     border: Border.all(color: colors.border),
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -94,7 +79,7 @@ class ChatMessageRow extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.only(bottom: 3),
                           child: ChatSender(
-                            username: name,
+                            username: own ? 'You' : name,
                             time: message.createdAt.toLocal(),
                           ),
                         ),
@@ -132,29 +117,6 @@ class ChatMessageRow extends StatelessWidget {
                 ),
               ),
             ),
-            if (own) ...[
-              SizedBox(
-                width: 30,
-                child: showSender
-                    ? Container(
-                        height: 30,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: colors.hover,
-                          borderRadius: BorderRadius.circular(7),
-                        ),
-                        child: Text(
-                          name.characters.first,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      )
-                    : null,
-              ),
-              const SizedBox(width: 10),
-            ],
           ],
         ),
       ),

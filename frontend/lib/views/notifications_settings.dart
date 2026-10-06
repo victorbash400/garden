@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:garden_client/garden_client.dart';
 
 import '../components/sharing/invitation_notification_row.dart';
@@ -10,8 +11,13 @@ import '../utils/error_message.dart';
 import '../model/notification_filter.dart';
 
 class NotificationsSettings extends StatefulWidget {
-  const NotificationsSettings({super.key, required this.controller});
+  const NotificationsSettings({
+    super.key,
+    required this.controller,
+    this.invitationsOnly = false,
+  });
   final GardenController controller;
+  final bool invitationsOnly;
   @override
   State<NotificationsSettings> createState() => _NotificationsSettingsState();
 }
@@ -24,16 +30,32 @@ class _NotificationsSettingsState extends State<NotificationsSettings> {
   NotificationSort sort = NotificationSort.newest;
   bool loadingInvitations = false;
   bool reloadInvitations = false;
+  Map<int, String> inviteStates = {};
+  void noticesChanged() {
+    final states = {
+      for (final item in widget.controller.notifications!.items.where(
+        (item) => item.invitationId != null || item.kind == 'invitationUpdated',
+      ))
+        item.id!: '${item.kind}:${item.readAt}:${item.trashedAt}',
+    };
+    if (!mapEquals(states, inviteStates)) {
+      inviteStates = states;
+      load();
+    } else if (mounted) {
+      setState(() {});
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    widget.controller.notifications?.addListener(load);
+    widget.controller.notifications?.addListener(noticesChanged);
     load();
   }
 
   @override
   void dispose() {
-    widget.controller.notifications?.removeListener(load);
+    widget.controller.notifications?.removeListener(noticesChanged);
     super.dispose();
   }
 
@@ -107,6 +129,12 @@ class _NotificationsSettingsState extends State<NotificationsSettings> {
     final items =
         notifications.items
             .where(
+              (item) =>
+                  !widget.invitationsOnly ||
+                  item.invitationId != null ||
+                  item.kind == 'invitationUpdated',
+            )
+            .where(
               (item) => switch (filter) {
                 NotificationFilter.all => item.trashedAt == null,
                 NotificationFilter.unread =>
@@ -167,6 +195,12 @@ class _NotificationsSettingsState extends State<NotificationsSettings> {
               InvitationNotificationRow(
                 key: ValueKey(item.id),
                 item: item,
+                onOpen: item.kind == 'chatAdded' || item.kind == 'chatMessage'
+                    ? () => widget.controller.openInboxNotification(
+                        item.gardenId!,
+                        item.conversationId,
+                      )
+                    : null,
                 invitation: invitations[item.invitationId],
                 busy: busy,
                 onAccept: () => act(item, accept: true),

@@ -13,7 +13,9 @@ class NotificationActions extends StatelessWidget {
     required this.onRead,
     required this.onTrash,
     required this.trashed,
+    this.onOpen,
   });
+  final VoidCallback? onOpen;
   final bool pending, unread, busy, trashed;
   final VoidCallback onAccept, onDecline, onRead, onTrash;
 
@@ -22,6 +24,11 @@ class NotificationActions extends StatelessWidget {
     spacing: 8,
     runSpacing: 8,
     children: [
+      if (!trashed && onOpen != null)
+        SettingsInlineButton(
+          label: 'Open Inbox',
+          onPressed: busy ? null : onOpen,
+        ),
       if (!trashed && pending) ...[
         SettingsInlineButton(
           label: 'Accept',

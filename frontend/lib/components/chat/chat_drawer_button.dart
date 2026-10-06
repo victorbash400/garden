@@ -14,7 +14,7 @@ class ChatDrawerButton extends StatelessWidget {
   final VoidCallback onPressed;
   @override
   Widget build(BuildContext context) => IconButton(
-    tooltip: open ? 'Close chats' : 'Chats',
+    tooltip: open ? 'Close conversations' : 'Conversations',
     onPressed: onPressed,
     style: ToolbarButton.style(context),
     icon: SvgPicture.asset(

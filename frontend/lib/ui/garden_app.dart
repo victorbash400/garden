@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../views/inbox_view.dart';
+
 import '../services/chat_gateway.dart';
 import '../services/sharing/drive_sharing_service.dart';
 import '../components/sharing/invite_member_dialog.dart';
@@ -142,6 +144,7 @@ class GardenApp extends StatelessWidget {
         GardenPage.join,
         GardenPage.files,
         GardenPage.settings,
+        GardenPage.inbox,
       }.contains(controller.page);
 
   Widget _content(BuildContext context) => switch (controller.page) {
@@ -212,6 +215,8 @@ class GardenApp extends StatelessWidget {
       focusEvents: controller.accountWindow?.focusEvents,
       userId: controller.account!.id,
       onBackToDrives: controller.back,
+      onInbox: controller.openInbox,
+      inboxUnread: controller.inbox?.unread,
       onManageDrive: controller.gateway is SharingGateway
           ? () {
               showDialog<void>(
@@ -229,5 +234,6 @@ class GardenApp extends StatelessWidget {
           : null,
     ),
     GardenPage.settings => SettingsView(controller: controller),
+    GardenPage.inbox => InboxView(controller: controller),
   };
 }

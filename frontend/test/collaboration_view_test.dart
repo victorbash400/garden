@@ -68,7 +68,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Hello'), findsOneWidget);
       await files.openFolder(folder);
-      await tester.tap(find.byTooltip('Close chat'));
+      await tester.tap(find.byTooltip('Close conversation'));
       await tester.pumpAndSettle();
       expect(find.byTooltip('Invite to drive'), findsNothing);
       expect(find.bySemanticsLabel('This folder is empty'), findsOneWidget);

@@ -32,6 +32,9 @@ abstract interface class ChatService {
     int? node, {
     int? conversation,
   });
+  Future<void> renameConversation(int id, String title);
+  Future<void> deleteConversation(int id);
+  Future<void> leaveConversation(int id);
   Future<int> readCursor(int drive);
   Future<void> markRead(int drive, int message, {int? conversation});
 }
@@ -88,6 +91,12 @@ class ServerpodChatService implements ChatService {
   }) => conversation == null
       ? client.chat.send(drive, text, reply, node)
       : client.conversationMessages.send(conversation, text, reply, node);
+  @override
+  Future<void> renameConversation(int id, String title) => client.conversations.rename(id, title);
+  @override
+  Future<void> deleteConversation(int id) => client.conversations.delete(id);
+  @override
+  Future<void> leaveConversation(int id) => client.conversations.leave(id);
   @override
   Future<int> readCursor(int drive) => client.chat.readCursor(drive);
   @override

@@ -42,7 +42,13 @@ class ChatHistory extends StatelessWidget {
                 children: [
                   SystemIcon(SystemIcons.squarePen, size: 16),
                   SizedBox(width: 8),
-                  Text('New chat', style: TextStyle(fontSize: 12)),
+                  Expanded(
+                    child: Text(
+                      'New conversation',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ),
                 ],
               ),
             ),

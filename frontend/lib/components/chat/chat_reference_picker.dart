@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:garden_client/garden_client.dart';
 
 import '../../state/files_controller.dart';
+import '../../services/files/files_gateway.dart';
 import '../../utils/error_message.dart';
 import '../error_notice.dart';
 import '../files/toolbar_button.dart';
@@ -10,8 +11,17 @@ import '../system_icon.dart';
 import 'chat_reference_row.dart';
 
 class ChatReferencePicker extends StatefulWidget {
-  const ChatReferencePicker({super.key, required this.files});
-  final FilesController files;
+  const ChatReferencePicker({
+    super.key,
+    this.files,
+    this.gateway,
+    this.driveId,
+    this.driveName,
+  });
+  final FilesController? files;
+  final FilesGateway? gateway;
+  final int? driveId;
+  final String? driveName;
   @override
   State<ChatReferencePicker> createState() => _ChatReferencePickerState();
 }
@@ -36,13 +46,13 @@ class _ChatReferencePickerState extends State<ChatReferencePicker> {
     });
     try {
       final id = parent;
-      final index = widget.files.folders;
+      final index = widget.files?.folders;
       final values =
           cache[id] ??
-          (index.isLoaded(id)
+          (index != null && index.isLoaded(id)
               ? index.directory(id)
-              : (await widget.files.gateway.list(
-                  widget.files.drive!.id,
+              : (await (widget.files?.gateway ?? widget.gateway!).list(
+                  widget.files?.drive?.id ?? widget.driveId!,
                   id,
                 )).nodes);
       if (!mounted) return;
@@ -57,7 +67,7 @@ class _ChatReferencePickerState extends State<ChatReferencePicker> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: const Text('Mention file'),
+    title: const Text('Mention file or folder'),
     content: SizedBox(
       width: 420,
       height: 340,
@@ -78,7 +88,9 @@ class _ChatReferencePickerState extends State<ChatReferencePicker> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  path.isEmpty ? widget.files.drive!.name : path.last.name,
+                  path.isEmpty
+                      ? (widget.files?.drive?.name ?? widget.driveName!)
+                      : path.last.name,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 13),
                 ),
@@ -109,6 +121,11 @@ class _ChatReferencePickerState extends State<ChatReferencePicker> {
       ),
     ),
     actions: [
+      if (path.isNotEmpty)
+        SettingsInlineButton(
+          label: 'Mention this folder',
+          onPressed: () => Navigator.pop(context, path.last),
+        ),
       SettingsInlineButton(
         label: 'Cancel',
         onPressed: () => Navigator.pop(context),

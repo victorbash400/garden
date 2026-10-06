@@ -1,5 +1,9 @@
 import 'dart:async';
 
+import '../services/chat_gateway.dart';
+import '../services/inbox_service.dart';
+import 'inbox_controller.dart';
+
 import 'package:flutter/foundation.dart';
 
 import '../services/sharing/drive_sharing_service.dart';
@@ -46,6 +50,7 @@ enum GardenPage {
   join,
   settings,
   files,
+  inbox,
 }
 
 class GardenController extends ChangeNotifier {
@@ -132,6 +137,23 @@ class GardenController extends ChangeNotifier {
   }
 
   NotificationController? notifications;
+  InboxController? inbox;
+  void openInbox() => navigate(GardenPage.inbox);
+  Future<void> openInboxNotification(int drive, int? conversation) async {
+    openInbox();
+    await inbox!.refresh();
+    final matches = inbox!.entries.where(
+      (entry) =>
+          entry.gardenId == drive && entry.conversationId == conversation,
+    );
+    if (matches.isEmpty) {
+      inbox!.error = 'This conversation is no longer available.';
+      notifyListeners();
+      return;
+    }
+    await inbox!.select(matches.first);
+  }
+
   int _accessGeneration = 0;
   final AppearanceController? appearance;
   final AccountWindow? accountWindow;
@@ -352,6 +374,16 @@ class GardenController extends ChangeNotifier {
 
   Future<void> _finishAuthentication(AccountInfo signedIn) async {
     await accountWindow?.setAccount(signedIn);
+    inbox?.removeListener(notifyListeners);
+    inbox?.dispose();
+    inbox = gateway is ChatGateway
+        ? InboxController(
+            ServerpodInboxService((gateway as ChatGateway).client),
+            ServerpodChatService((gateway as ChatGateway).client),
+            signedIn.id,
+          )
+        : null;
+    inbox?.addListener(notifyListeners);
     account = signedIn;
     ActivityLog.instance.account = signedIn.id;
     savedEmail = signedIn.email;
@@ -361,6 +393,7 @@ class GardenController extends ChangeNotifier {
     page = GardenPage.gardens;
     _queueFinderSync();
     if (notifications != null) unawaited(notifications!.start());
+    if (inbox != null) unawaited(inbox!.start());
   }
 
   Future<void> retryLoading() => _request(() async {
@@ -500,6 +533,7 @@ class GardenController extends ChangeNotifier {
       if (current != null && disconnect) await finder?.signOut(current);
       await finderUpdates?.close();
       await files?.close();
+      await inbox?.close();
       await notifications?.close();
       await gateway.signOut();
       account = null;
@@ -582,6 +616,8 @@ class GardenController extends ChangeNotifier {
     _accessGeneration++;
     notifications?.removeListener(notifyListeners);
     notifications?.dispose();
+    inbox?.removeListener(notifyListeners);
+    inbox?.dispose();
     appearance?.removeListener(notifyListeners);
     appearance?.dispose();
     storage?.removeListener(notifyListeners);

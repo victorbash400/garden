@@ -43,20 +43,20 @@ void main() {
       final inputRect = tester.getRect(find.byType(TextField));
       expect(inputRect.center.dx, closeTo(550, 4));
       expect(inputRect.width, lessThan(760));
-      await tester.tap(find.byTooltip('Chats'));
+      await tester.tap(find.byTooltip('Conversations'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('New chat'));
+      await tester.tap(find.text('New conversation'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('member').last);
       await tester.pump();
       await tester.runAsync(() async {
-        await tester.tap(find.text('Open chat'));
+        await tester.tap(find.text('Open conversation'));
         await Future<void>.delayed(Duration.zero);
       });
       await tester.pumpAndSettle();
       expect(chat.conversation, isNotNull);
       expect(find.text('member'), findsWidgets);
-      await tester.tap(find.byTooltip('Mention file'));
+      await tester.tap(find.byTooltip('Mention file or folder'));
       await tester.pumpAndSettle();
       expect(find.text('Reference.txt'), findsOneWidget);
       await tester.enterText(find.byType(TextField), 'Review this file');
@@ -78,7 +78,7 @@ void main() {
         service.sent.last.conversationId,
         chat.conversation!.conversation.id,
       );
-      await tester.tap(find.byTooltip('Chats'));
+      await tester.tap(find.byTooltip('Conversations'));
       await tester.pumpAndSettle();
       expect(find.byType(ChatHistory), findsOneWidget);
       await tester.runAsync(() async {
@@ -125,7 +125,7 @@ void main() {
         ),
       );
       await tester.pumpWidget(app());
-      await tester.tap(find.byTooltip('Mention file'));
+      await tester.tap(find.byTooltip('Mention file or folder'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), 'Keep this draft');
       await tester.pump();

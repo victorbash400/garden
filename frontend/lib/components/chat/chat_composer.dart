@@ -46,7 +46,12 @@ class _ChatComposerState extends State<ChatComposer> {
     try {
       final node = await widget.onMention();
       if (!mounted) return;
-      if (node != null) setState(() => reference = node);
+      if (node != null) {
+        if (input.text.endsWith('@')) {
+          input.text = input.text.substring(0, input.text.length - 1);
+        }
+        setState(() => reference = node);
+      }
       focus.requestFocus();
     } finally {
       picking = false;
@@ -94,6 +99,13 @@ class _ChatComposerState extends State<ChatComposer> {
                 const SingleActivator(LogicalKeyboardKey.enter): () => send(),
               },
               child: TextField(
+                onChanged: (text) {
+                  if (text.endsWith('@') &&
+                      (text.length == 1 ||
+                          text[text.length - 2].trim().isEmpty)) {
+                    mention();
+                  }
+                },
                 autofocus: true,
                 controller: input,
                 focusNode: focus,
@@ -119,7 +131,7 @@ class _ChatComposerState extends State<ChatComposer> {
             Row(
               children: [
                 ToolbarButton(
-                  tooltip: 'Mention file',
+                  tooltip: 'Mention file or folder',
                   icon: SystemIcons.link,
                   onPressed: enabled ? mention : null,
                 ),

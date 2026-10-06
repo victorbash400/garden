@@ -102,10 +102,10 @@ class FilesToolbar extends StatelessWidget {
                   isLabelVisible: chatUnread > 0,
                   label: Text('$chatUnread'),
                   child: ToolbarButton(
-                    tooltip: 'Chat',
+                    tooltip: 'Inbox',
                     selected: chatVisible,
                     onPressed: onChat,
-                    icon: SystemIcons.messageSquare,
+                    icon: SystemIcons.inbox,
                   ),
                 ),
             ],

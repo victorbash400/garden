@@ -17,7 +17,9 @@ class ChatPanel extends StatelessWidget {
     required this.driveName,
     required this.onFile,
     required this.onMention,
+    this.showHistory = true,
   });
+  final bool showHistory;
   final ChatController controller;
   final String driveName;
   final ValueChanged<int> onFile;
@@ -34,7 +36,11 @@ class ChatPanel extends StatelessWidget {
     ),
     child: Column(
       children: [
-        ChatHeader(controller: controller, driveName: driveName),
+        ChatHeader(
+          controller: controller,
+          driveName: driveName,
+          showHistory: showHistory,
+        ),
         if (controller.error != null)
           ErrorNotice(
             message: controller.error!,

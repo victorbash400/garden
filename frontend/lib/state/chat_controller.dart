@@ -92,7 +92,7 @@ class ChatController extends ChangeNotifier {
             onDone: () {
               if (generation != _generation) return;
               connected = false;
-              error ??= 'Chat disconnected. Reconnect to continue.';
+              error ??= 'Conversation disconnected. Reconnect to continue.';
               notifyListeners();
             },
           );
@@ -243,6 +243,8 @@ class ChatController extends ChangeNotifier {
     _conversations[selected.conversation.id!] = selected;
     await selectConversation(selected);
   }
+
+  void notifyAudienceChanged() => notifyListeners();
 
   String audience(String driveName) {
     final selected = conversation;

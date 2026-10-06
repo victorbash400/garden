@@ -17,6 +17,12 @@ DriveMessage message(int id, {String author = 'other', int? reply}) =>
     );
 
 class FakeChat implements ChatService {
+  @override
+  Future<void> renameConversation(int id, String title) async {}
+  @override
+  Future<void> deleteConversation(int id) async {}
+  @override
+  Future<void> leaveConversation(int id) async {}
   final sent = <DriveMessage>[];
   bool failSend = false;
   final events = StreamController<DriveMessage>.broadcast();

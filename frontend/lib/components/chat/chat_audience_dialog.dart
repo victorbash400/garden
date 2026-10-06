@@ -17,8 +17,8 @@ class ChatAudienceDialog extends StatelessWidget {
       controller.conversation == null
           ? 'Everyone in $driveName'
           : controller.conversation!.members.length == 2
-          ? 'Direct chat'
-          : 'Group chat',
+          ? 'Direct conversation'
+          : 'Group conversation',
     ),
     content: SizedBox(
       width: 300,

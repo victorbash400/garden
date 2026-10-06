@@ -73,19 +73,18 @@ class _NewChatDialogState extends State<NewChatDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: const Text('New chat'),
+    title: const Text('New conversation'),
     content: SizedBox(
       width: 380,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (selected.length > 1)
-            GardenField(
-              label: 'Group name (optional)',
-              controller: title,
-              enabled: !saving,
-            ),
+          GardenField(
+            label: 'Name (optional)',
+            controller: title,
+            enabled: !saving,
+          ),
           if (loading) const LinearProgressIndicator(minHeight: 2),
           if (error != null)
             ErrorNotice(
@@ -95,7 +94,7 @@ class _NewChatDialogState extends State<NewChatDialog> {
             ),
           if (!loading && error == null && members.isEmpty)
             const Text(
-              'Invite someone to this drive to start a chat.',
+              'Invite someone to this drive to start a conversation.',
               style: TextStyle(fontSize: 13),
             ),
           ConstrainedBox(
@@ -127,7 +126,7 @@ class _NewChatDialogState extends State<NewChatDialog> {
         onPressed: saving ? null : () => Navigator.pop(context),
       ),
       SettingsInlineButton(
-        label: saving ? 'Opening…' : 'Open chat',
+        label: saving ? 'Opening…' : 'Open conversation',
         primary: true,
         onPressed: saving || loading || selected.isEmpty ? null : create,
       ),

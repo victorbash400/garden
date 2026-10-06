@@ -36,6 +36,7 @@ enum SystemIcons {
   settings('settings'),
   share2('share'),
   external('external'),
+  inbox('inbox'),
   squareActivity('heart_rate'),
   squarePen('write'),
   trash2('trash'),

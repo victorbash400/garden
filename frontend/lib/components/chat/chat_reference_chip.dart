@@ -3,6 +3,7 @@ import 'package:garden_client/garden_client.dart';
 
 import '../../ui/garden_colors.dart';
 import '../file_icon.dart';
+import '../folder_icon.dart';
 import '../files/toolbar_button.dart';
 import '../system_icon.dart';
 
@@ -27,7 +28,9 @@ class ChatReferenceChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const FileIcon(size: 18),
+          node.kind == NodeKind.folder
+              ? const FolderIcon(size: 18)
+              : const FileIcon(size: 18),
           const SizedBox(width: 6),
           Flexible(
             child: Text(
@@ -37,7 +40,7 @@ class ChatReferenceChip extends StatelessWidget {
             ),
           ),
           ToolbarButton(
-            tooltip: 'Remove file mention',
+            tooltip: 'Remove mention',
             icon: SystemIcons.x,
             onPressed: onRemove,
           ),

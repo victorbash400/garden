@@ -26,11 +26,15 @@ class FilesView extends StatefulWidget {
     required this.controller,
     required this.userId,
     required this.onBackToDrives,
+    this.inboxUnread,
+    this.onInbox,
     this.onConnections,
     this.onManageDrive,
     this.chatService,
     this.focusEvents,
   });
+  final int? inboxUnread;
+  final VoidCallback? onInbox;
   final ChatService? chatService;
   final Stream<void>? focusEvents;
   final FilesController controller;
@@ -58,7 +62,9 @@ class _FilesViewState extends State<FilesView> with WidgetsBindingObserver {
       chat = ChatController(service, controller.drive!.id, userId)
         ..addListener(changed);
       controller.shareNode = shareNode;
-      unawaited(chat!.start());
+      if (widget.onInbox == null) {
+        unawaited(chat!.start());
+      }
       focus = widget.focusEvents?.listen((_) => reconnect());
       if (service is ServerpodChatService) {
         service.client.connectivityMonitor?.addListener(connectivityChanged);
@@ -75,7 +81,10 @@ class _FilesViewState extends State<FilesView> with WidgetsBindingObserver {
   }
 
   void reconnect() {
-    if (chat != null && !chat!.connected && !chat!.loading) {
+    if ((widget.onInbox == null || chat?.visible == true) &&
+        chat != null &&
+        !chat!.connected &&
+        !chat!.loading) {
       unawaited(chat!.start());
     }
   }
@@ -106,6 +115,10 @@ class _FilesViewState extends State<FilesView> with WidgetsBindingObserver {
   Future<void> share() async {
     final node = controller.selected;
     if (node == null || chat == null) return;
+    if (!chat!.connected && !chat!.loading) {
+      await chat!.start();
+    }
+    if (!mounted) return;
     final sent = await showDialog<bool>(
       context: context,
       builder: (_) => ShareReferenceDialog(
@@ -114,7 +127,13 @@ class _FilesViewState extends State<FilesView> with WidgetsBindingObserver {
         driveName: controller.drive!.name,
       ),
     );
-    if (sent == true && mounted && !chat!.visible) chat!.toggle();
+    if (sent == true && mounted) {
+      if (widget.onInbox != null) {
+        widget.onInbox!();
+      } else if (!chat!.visible) {
+        chat!.toggle();
+      }
+    }
   }
 
   Future<void> openReference(int id) async {
@@ -170,9 +189,9 @@ class _FilesViewState extends State<FilesView> with WidgetsBindingObserver {
                 onInvite: onManageDrive,
                 onBackToDrives: onBackToDrives,
                 onConnections: onConnections,
-                onChat: chat?.toggle,
+                onChat: widget.onInbox ?? chat?.toggle,
                 onShare: chat == null ? null : share,
-                chatUnread: chat?.unread ?? 0,
+                chatUnread: widget.inboxUnread ?? chat?.unread ?? 0,
                 chatVisible: chat?.visible ?? false,
               ),
               SizedBox(

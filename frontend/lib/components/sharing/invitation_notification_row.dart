@@ -9,6 +9,7 @@ class InvitationNotificationRow extends StatelessWidget {
   const InvitationNotificationRow({
     super.key,
     required this.item,
+    this.onOpen,
     this.invitation,
     required this.busy,
     required this.onAccept,
@@ -16,6 +17,7 @@ class InvitationNotificationRow extends StatelessWidget {
     required this.onRead,
     required this.onTrash,
   });
+  final VoidCallback? onOpen;
   final AccountNotification item;
   final DriveInvitation? invitation;
   final bool busy;
@@ -35,7 +37,11 @@ class InvitationNotificationRow extends StatelessWidget {
         invite.revokedAt == null &&
         invite.expiresAt.isAfter(DateTime.now().toUtc());
     final status = invite == null
-        ? (item.kind == 'accessChanged'
+        ? (item.kind == 'chatAdded'
+              ? 'Added to conversation'
+              : item.kind == 'chatMessage'
+              ? 'New message'
+              : item.kind == 'accessChanged'
               ? 'Drive access updated'
               : item.kind == 'invitationUpdated'
               ? 'Invitation updated'
@@ -85,6 +91,7 @@ class InvitationNotificationRow extends StatelessWidget {
                 ...[
                   const SizedBox(height: 12),
                   NotificationActions(
+                    onOpen: onOpen,
                     pending: pending && item.trashedAt == null,
                     trashed: item.trashedAt != null,
                     onTrash: onTrash,

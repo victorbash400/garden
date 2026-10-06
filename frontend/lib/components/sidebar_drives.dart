@@ -31,6 +31,14 @@ class _SidebarDrivesState extends State<SidebarDrives> {
           selected: controller.page == GardenPage.gardens,
           onTap: () => controller.navigate(GardenPage.gardens),
         ),
+        if (controller.inbox != null)
+          SidebarItem(
+            label: 'Inbox',
+            icon: SystemIcons.inbox,
+            badge: controller.inbox!.unread,
+            selected: controller.page == GardenPage.inbox,
+            onTap: controller.openInbox,
+          ),
         DriveSectionHeader(
           label: 'Drives',
           onOpen: controller.busy
