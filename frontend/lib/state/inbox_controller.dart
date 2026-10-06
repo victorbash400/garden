@@ -67,9 +67,10 @@ class InboxController extends ChangeNotifier {
     error = null;
     notifyListeners();
     try {
+      final selection = selectedKey;
       final value = await service.snapshot();
       if (generation != _generation) return;
-      _replace(value.entries);
+      _replace(value.entries, selection: selection);
       _subscription = service
           .watch(value.cursor)
           .listen(
@@ -93,6 +94,9 @@ class InboxController extends ChangeNotifier {
       if (generation == _generation) {
         loading = false;
         notifyListeners();
+        if (_queued) {
+          unawaited(refresh());
+        }
       }
     }
   }
@@ -128,14 +132,14 @@ class InboxController extends ChangeNotifier {
   void _replace(List<InboxEntry> values, {String? selection}) {
     entries = values
       ..sort(
-        (a, b) => (b.latestAt ?? DateTime.utc(1970)).compareTo(
-          a.latestAt ?? DateTime.utc(1970),
+        (a, b) => (b.latestAt ?? b.createdAt ?? DateTime.utc(1970)).compareTo(
+          a.latestAt ?? a.createdAt ?? DateTime.utc(1970),
         ),
       );
     if (chat != null) {
       final current = entries.where((entry) => key(entry) == selectedKey);
       if (current.isEmpty) {
-        if (selection == null || selection == selectedKey) {
+        if (selection == selectedKey) {
           clearSelection();
         } else {
           _queued = true;

@@ -36,6 +36,23 @@ InboxEntry entry(int id, {int unread = 0, bool added = false}) => InboxEntry(
 );
 void main() {
   test(
+    'A newly created empty conversation appears ahead of older messages',
+    () async {
+      final service = FakeInbox()
+        ..entries = [
+          entry(1)..latestAt = DateTime.utc(2026, 9),
+          entry(2, added: true)..createdAt = DateTime.utc(2026, 10),
+        ];
+      final messages = FakeChat();
+      final inbox = InboxController(service, messages, 'me');
+      await inbox.start();
+      expect(inbox.entries.map((entry) => entry.conversationId), [2, 1]);
+      inbox.dispose();
+      await service.events.close();
+      await messages.events.close();
+    },
+  );
+  test(
     'Incoming conversation appears without opening a conversation',
     () async {
       final service = FakeInbox(), messages = FakeChat();
