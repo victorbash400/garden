@@ -341,7 +341,7 @@ actor RemoteEngine {
   }
 
   private func subscriptionChanged() async {
-    if await subscription?.issue != nil {
+    if await subscription?.accessDenied == true {
       driveRole = nil
       await ranges.invalidate()
       invalidate(["/"])

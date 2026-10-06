@@ -13,6 +13,7 @@ actor RemoteSubscription {
   private let changed: @Sendable () async -> Void
   private let connected: @Sendable () async -> Void
   private(set) var issue: String?
+  private(set) var accessDenied = false
 
   init(api: GardenAPI, revision: @escaping @Sendable () async throws -> Int,
     changed: @escaping @Sendable () async -> Void = {},
@@ -60,6 +61,7 @@ actor RemoteSubscription {
       guard !stopped else { stream.close(); throw CancellationError() }
       connection = stream
       issue = nil
+      accessDenied = false
       await changed()
       connecting = nil
       reader = Task {
@@ -69,18 +71,26 @@ actor RemoteSubscription {
         }
       }
       await connected()
-    } catch { issue = error.localizedDescription; await changed(); throw error }
+    } catch { recordFailure(error); await changed(); throw error }
   }
 
   private func failed(_ error: Error, stream: RemoteChanges, retry: Bool) async {
     guard !stopped, connection === stream else { return }
-    issue = error.localizedDescription
+    recordFailure(error)
     await changed()
     RemoteLog.error(error)
     // Retry once after a broken connection; further retries require a network or user event.
     if retry, error is URLError {
       do { try await connect(retryConnectionFailure: false) }
       catch { RemoteLog.error(error) }
+    }
+  }
+
+  func recordFailure(_ error: Error) {
+    issue = error.localizedDescription
+    switch error {
+    case GardenAPIError.unauthorized, GardenAPIError.http(403, _): accessDenied = true
+    default: accessDenied = false
     }
   }
 
