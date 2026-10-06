@@ -17,6 +17,7 @@ import '../services/files/files_gateway.dart';
 enum FileViewMode { grid, list, columns }
 
 class FilesController extends ChangeNotifier {
+  Future<void> Function(FileNode)? shareNode;
   FilesController(this.gateway) {
     imports = FileImportController(gateway, _acceptImported);
   }
@@ -43,6 +44,7 @@ class FilesController extends ChangeNotifier {
   bool live = false;
   String? error;
   int revision = 0;
+  int detailsRevision = 0;
   double? progress;
   StreamSubscription<DriveEvent>? _subscription;
   List<DriveEvent>? _buffer;
@@ -131,6 +133,8 @@ class FilesController extends ChangeNotifier {
     }
     if (event.revision <= revision) return;
     revision = event.revision;
+    if (event.operation == 'chat') return;
+    detailsRevision = event.revision;
     final node = event.node;
     if (node != null && event.operation != 'comment') {
       _upsert(node);
@@ -411,6 +415,7 @@ class FilesController extends ChangeNotifier {
     selected = null;
     _buffer = null;
     revision = 0;
+    detailsRevision = 0;
     live = false;
     error = null;
   }

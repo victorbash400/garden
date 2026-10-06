@@ -16,7 +16,7 @@ class ProfileButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final account = controller.account;
     if (account == null) return SizedBox.shrink();
-    final name = account.email.split('@').first;
+    final name = account.username;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 12),
       child: Material(
@@ -64,7 +64,7 @@ class ProfileButton extends StatelessWidget {
               enabled: false,
               height: 36,
               child: Text(
-                account.email,
+                account.username,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(

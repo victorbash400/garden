@@ -21,6 +21,7 @@ class FileDetails extends StatefulWidget {
     required this.node,
     required this.revision,
     required this.userId,
+    this.identities = const {},
     required this.onExport,
     this.canWrite = true,
   });
@@ -28,6 +29,7 @@ class FileDetails extends StatefulWidget {
   final FileNode node;
   final int revision;
   final String userId;
+  final Map<String, String> identities;
   final ValueChanged<FileVersion> onExport;
   final bool canWrite;
   @override
@@ -125,6 +127,7 @@ class _FileDetailsState extends State<FileDetails> {
                   FileVersionsList(
                     versions: versions,
                     userId: widget.userId,
+                    identities: widget.identities,
                     onExport: widget.onExport,
                   ),
                   Column(
@@ -133,7 +136,8 @@ class _FileDetailsState extends State<FileDetails> {
                         child: FileCommentsList(
                           comments: comments,
                           userId: widget.userId,
-                              ),
+                          identities: widget.identities,
+                        ),
                       ),
                       if (widget.canWrite) FileCommentInput(onSubmit: post),
                     ],

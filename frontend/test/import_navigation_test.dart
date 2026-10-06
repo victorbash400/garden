@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/services.dart';
 import 'package:garden_client/garden_client.dart';
 import 'package:garden_flutter/model/garden_info.dart';
 import 'package:garden_flutter/services/files/import_entry.dart';
@@ -24,6 +24,16 @@ class PendingUpload extends FilesFixture {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  setUp(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('garden/bandwidth'),
+          (call) async => call.method == 'reserve'
+              ? {'seconds': 0.0}
+              : {'upload': 0, 'download': 0},
+        );
+  });
   test('folder imports preserve nested and empty directories', () async {
     final source = await Directory.systemTemp.createTemp('garden-import-');
     final root = await Directory('${source.path}/Project').create();

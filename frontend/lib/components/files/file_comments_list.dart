@@ -9,9 +9,11 @@ class FileCommentsList extends StatelessWidget {
     super.key,
     required this.comments,
     required this.userId,
+    this.identities = const {},
   });
   final List<FileComment> comments;
   final String userId;
+  final Map<String, String> identities;
   @override
   Widget build(BuildContext context) => ListView(
     children: [
@@ -24,7 +26,7 @@ class FileCommentsList extends StatelessWidget {
               Text(
                 comment.authorId == userId
                     ? 'You'
-                    : comment.authorId,
+                    : identities[comment.authorId] ?? 'Username unavailable',
                 style: TextStyle(
                   fontSize: 11,
                   color: GardenColors.of(context).secondary,

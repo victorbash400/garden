@@ -10,10 +10,12 @@ class FileVersionsList extends StatelessWidget {
     super.key,
     required this.versions,
     required this.userId,
+    this.identities = const {},
     required this.onExport,
   });
   final List<FileVersion> versions;
   final String userId;
+  final Map<String, String> identities;
   final ValueChanged<FileVersion> onExport;
   @override
   Widget build(BuildContext context) => ListView(
@@ -26,7 +28,7 @@ class FileVersionsList extends StatelessWidget {
             style: const TextStyle(fontSize: 12),
           ),
           subtitle: Text(
-            '${version.authorId == userId ? 'You' : version.authorId} · ${fileSize(version.size)}',
+            '${version.authorId == userId ? 'You' : identities[version.authorId] ?? 'Username unavailable'} · ${fileSize(version.size)}',
             style: const TextStyle(fontSize: 11),
           ),
           trailing: IconButton(

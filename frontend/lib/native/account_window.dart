@@ -110,7 +110,7 @@ class AccountWindow extends ChangeNotifier {
   Future<void> open() => channel.invokeMethod<void>('new');
   Future<void> setAccount(AccountInfo account) => channel.invokeMethod<void>(
     'account',
-    {'id': account.id, 'email': account.email},
+    {'id': account.id, 'username': account.username},
   );
 
   Future<bool> releaseAccount() async {

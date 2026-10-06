@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../services/chat_gateway.dart';
+import '../services/sharing/drive_sharing_service.dart';
+import '../components/sharing/invite_member_dialog.dart';
 
 import '../state/garden_controller.dart';
 import '../components/error_notice.dart';
@@ -201,13 +204,26 @@ class GardenApp extends StatelessWidget {
       ),
     ),
     GardenPage.files => FilesView(
+      key: ValueKey('${controller.account!.id}:${controller.files!.drive!.id}'),
       controller: controller.files!,
+      chatService: controller.gateway is ChatGateway
+          ? ServerpodChatService((controller.gateway as ChatGateway).client)
+          : null,
+      focusEvents: controller.accountWindow?.focusEvents,
       userId: controller.account!.id,
       onBackToDrives: controller.back,
-      onManageDrive: () {
-        controller.selectSettings(SettingsSection.drives);
-        controller.navigate(GardenPage.settings);
-      },
+      onManageDrive: controller.gateway is SharingGateway
+          ? () {
+              showDialog<void>(
+                context: context,
+                builder: (_) => InviteMemberDialog(
+                  service: (controller.gateway as SharingGateway).sharing,
+                  driveId: controller.files!.drive!.id,
+                  owner: controller.files!.drive!.role == 'Owner',
+                ),
+              );
+            }
+          : null,
       onConnections: controller.needsFinderAttention
           ? controller.openConnections
           : null,

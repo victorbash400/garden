@@ -13,6 +13,7 @@ import '../services/relaunch_session_gateway.dart';
 import '../model/account_info.dart';
 import '../model/garden_info.dart';
 import '../services/garden_gateway.dart';
+import '../services/username_gateway.dart';
 import '../services/preferences_store.dart';
 import '../native/finder_mounts.dart';
 import '../native/finder_updates.dart';
@@ -87,6 +88,24 @@ class GardenController extends ChangeNotifier {
       await finder!.openNode(current, node.gardenId, node.id!);
     };
   }
+  Future<void> setUsername(String username) async {
+    final service = gateway;
+    if (service is! UsernameGateway) {
+      throw StateError('Username editing is unavailable.');
+    }
+    final previous = account;
+    final updated = await (service as UsernameGateway).setUsername(username);
+    if (account?.id != previous?.id) return;
+    account = updated;
+    await accountWindow?.setAccount(updated);
+    notifyListeners();
+  }
+
+  void reportError(Object failure) {
+    error = errorMessage(failure);
+    notifyListeners();
+  }
+
   bool _relaunching = false;
   bool get relaunching => _relaunching;
 

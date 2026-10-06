@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -246,7 +247,10 @@ void main() {
     await controller.openDrive(drive);
     await tester.pumpAndSettle();
     expect(controller.page, GardenPage.files);
-    await tester.tap(find.byTooltip('Create'));
+    await tester.tapAt(
+      tester.getCenter(find.bySemanticsLabel('This folder is empty')),
+      buttons: kSecondaryMouseButton,
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text('New text file…'));
     await tester.pumpAndSettle();

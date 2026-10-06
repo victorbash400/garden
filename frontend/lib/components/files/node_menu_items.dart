@@ -6,6 +6,7 @@ import '../../services/files/text_file_type.dart';
 List<PopupMenuEntry<String>> nodeMenuItems(
   FileNode node, {
   bool canWrite = true,
+  bool canShare = false,
 }) => [
   const PopupMenuItem(height: 32, value: 'open', child: Text('Open')),
   if (node.kind == NodeKind.file) ...[
@@ -13,6 +14,8 @@ List<PopupMenuEntry<String>> nodeMenuItems(
       const PopupMenuItem(height: 32, value: 'edit', child: Text('Edit text')),
     const PopupMenuItem(height: 32, value: 'export', child: Text('Export…')),
   ],
+  if (canShare)
+    const PopupMenuItem(height: 32, value: 'share', child: Text('Share…')),
   if (canWrite) ...[
     const PopupMenuItem(height: 32, value: 'rename', child: Text('Rename…')),
     const PopupMenuItem(height: 32, value: 'move', child: Text('Move…')),

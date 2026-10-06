@@ -60,7 +60,7 @@ class AccountSecurityController extends ChangeNotifier {
       biometricOnly: true,
     );
     if (!confirmed) throw StateError('Touch ID was canceled.');
-    await gateway.setTouchId(enabled, account.email);
+    await gateway.setTouchId(enabled, account.username);
     touchId = enabled;
     status = enabled ? 'Touch ID enabled on this Mac' : 'Touch ID disabled';
   });

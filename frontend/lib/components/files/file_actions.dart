@@ -110,6 +110,8 @@ class FileActions {
       return;
     }
     switch (action) {
+      case 'share':
+        await controller.shareNode?.call(node);
       case 'open':
         await open(node);
       case 'edit':

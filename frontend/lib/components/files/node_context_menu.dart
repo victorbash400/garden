@@ -67,7 +67,12 @@ class NodeContextMenu extends StatelessWidget {
                         child: Text('Import files…'),
                       ),
                     ]
-                  : nodeMenuItems(node!, canWrite: controller.canWrite),
+                  : nodeMenuItems(
+                      node!,
+                      canWrite: controller.canWrite,
+                      canShare:
+                          controller.canWrite && controller.shareNode != null,
+                    ),
             );
             if (action == null || !context.mounted) return;
             if (node != null) {

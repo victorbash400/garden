@@ -381,7 +381,7 @@ void main() {
       await tester.pump();
       await tester.tap(find.text('Verify'));
       await tester.pumpAndSettle();
-      expect(find.text('Join drive'), findsOneWidget);
+      expect(find.text('Invitations'), findsOneWidget);
       expect(controller.registrationPassword, isEmpty);
     },
   );
@@ -407,12 +407,10 @@ void main() {
       expect(find.text('Projects'), findsWidgets);
       expect(find.text('Connected to drive'), findsNothing);
       expect(find.text('Finder mounting is not available yet.'), findsNothing);
-      expect(find.byTooltip('Create invitation'), findsOneWidget);
+      expect(find.byTooltip('Import files'), findsOneWidget);
     },
   );
-  testWidgets('Join Garden submits the invitation and shows its membership', (
-    tester,
-  ) async {
+  testWidgets('Invitations opens notifications from Home', (tester) async {
     final controller = GardenController(
       TestGateway(),
       MemoryPreferences(),
@@ -420,15 +418,12 @@ void main() {
     );
     await controller.signIn('garden@example.com', 'password');
     await tester.pumpWidget(GardenApp(controller: controller));
-    await tester.tap(find.text('Join drive').last);
+    await tester.tap(find.text('Invitations'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), 'invite');
-    await tester.pump();
-    await tester.tap(find.text('Join drive').last);
-    await tester.pumpAndSettle();
-    expect(controller.selected!.role, 'Member');
-    expect(find.text('Shared'), findsWidgets);
-    expect(find.text('Connected to drive'), findsNothing);
+    expect(controller.page, GardenPage.settings);
+    expect(controller.settingsSection, SettingsSection.notifications);
+    await tester.pumpWidget(const SizedBox());
+    controller.dispose();
   });
 
   test('Drive creation opens files without a redundant list request', () async {
@@ -469,7 +464,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(gateway.calls, 1);
     expect(find.text('Create drive'), findsOneWidget);
-    expect(find.text('Join drive'), findsOneWidget);
+    expect(find.text('Invitations'), findsOneWidget);
   });
   testWidgets('Connection failure remains visible without advancing', (
     tester,

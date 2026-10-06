@@ -71,11 +71,11 @@ import Cocoa
         target.makeKeyAndOrderFront(nil); result(nil)
       case "account":
         guard let value = call.arguments as? [String: String],
-              let id = value["id"], let email = value["email"] else {
+              let id = value["id"], let username = value["username"] else {
           result(FlutterError(code: "window", message: "Missing account.", details: nil)); return
         }
         accounts.set(id, window: slot)
-        window.title = "Garden — \(email)"
+        window.title = "Garden — \(username)"
         var saved = UserDefaults.standard.stringArray(forKey: savedKey) ?? []
         if !saved.contains(slot) { saved.append(slot); UserDefaults.standard.set(saved, forKey: savedKey) }
         publish(); result(nil)

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../components/settings/settings_group.dart';
+import '../components/settings/username_control.dart';
 import '../components/settings/account_security_controls.dart';
 import '../components/settings/settings_row.dart';
 import '../components/settings/settings_action_row.dart';
@@ -21,6 +22,7 @@ class AccountSettings extends StatelessWidget {
       ],
       SettingsGroup(
         children: [
+          UsernameControl(controller: controller),
           SettingsRow(
             label: 'Email',
             value: SelectableText(controller.account!.email),

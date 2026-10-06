@@ -2,6 +2,8 @@ import '../system_icon.dart';
 
 import 'package:flutter/material.dart';
 
+import 'home_breadcrumb.dart';
+
 import '../../state/files_controller.dart';
 import 'toolbar_button.dart';
 import 'toolbar_group.dart';
@@ -12,23 +14,27 @@ class FilesToolbar extends StatelessWidget {
   const FilesToolbar({
     super.key,
     required this.controller,
-    required this.onCreate,
     required this.onImport,
     required this.onInvite,
     required this.onBackToDrives,
     this.onConnections,
+    this.onChat,
+    this.onShare,
+    this.chatUnread = 0,
+    this.chatVisible = false,
   });
   final FilesController controller;
-  final ValueChanged<String> onCreate;
   final VoidCallback onImport;
   final VoidCallback? onInvite;
   final VoidCallback onBackToDrives;
-  final VoidCallback? onConnections;
+  final VoidCallback? onConnections, onChat, onShare;
+  final int chatUnread;
+  final bool chatVisible;
   @override
   Widget build(BuildContext context) => SizedBox(
     height: 56,
     child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14),
+      padding: EdgeInsets.symmetric(horizontal: 14),
       child: Row(
         children: [
           ToolbarGroup(
@@ -46,67 +52,15 @@ class FilesToolbar extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  TextButton(
-                    onPressed: controller.busy
-                        ? null
-                        : () => controller.goTo(0),
-                    style: TextButton.styleFrom(
-                      foregroundColor: const Color(0xFF333330),
-                      minimumSize: Size.zero,
-                      padding: const EdgeInsets.symmetric(horizontal: 5),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      textStyle: Theme.of(context).textTheme.labelLarge!
-                          .copyWith(fontSize: 12, fontWeight: FontWeight.w500),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      overlayColor: const Color(0xFFF9F9F9),
-                    ),
-                    child: Text(
-                      controller.drive!.name,
-                      style: const TextStyle(fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                  for (var i = 0; i < controller.path.length; i++) ...[
-                    const SystemIcon(
-                      SystemIcons.chevronRight,
-                      size: 12,
-                      color: Colors.grey,
-                    ),
-                    TextButton(
-                      onPressed: controller.busy
-                          ? null
-                          : () => controller.goTo(i + 1),
-                      style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFF333330),
-                        minimumSize: Size.zero,
-                        padding: const EdgeInsets.symmetric(horizontal: 5),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        textStyle: Theme.of(context).textTheme.labelLarge!
-                            .copyWith(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                            ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        overlayColor: const Color(0xFFF9F9F9),
-                      ),
-                      child: Text(controller.path[i].name),
-                    ),
-                  ],
-                ],
-              ),
+            child: HomeBreadcrumb(
+              controller: controller,
+              onHome: onBackToDrives,
             ),
           ),
           FileViewSelector(controller: controller),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           ToolbarGroup(
             children: [
               if (onConnections != null)
@@ -117,12 +71,13 @@ class FilesToolbar extends StatelessWidget {
                   onPressed: controller.busy ? null : controller.reconnect,
                   icon: SystemIcons.wifiOff,
                 ),
-              if (onInvite != null &&
+              if (controller.path.isEmpty &&
+                  onInvite != null &&
                   const {'Owner', 'Manager'}.contains(controller.drive!.role))
                 ToolbarButton(
-                  tooltip: 'Manage drive sharing',
+                  tooltip: 'Invite to drive',
                   onPressed: controller.busy ? null : onInvite,
-                  icon: SystemIcons.link,
+                  icon: SystemIcons.userPlus,
                 ),
               ListenableBuilder(
                 listenable: controller.imports,
@@ -131,33 +86,28 @@ class FilesToolbar extends StatelessWidget {
                   onPressed: controller.imports.busy || !controller.canWrite
                       ? null
                       : onImport,
-                  icon: SystemIcons.upload,
+                  icon: SystemIcons.importFiles,
                 ),
               ),
-              SizedBox(
-                width: 32,
-                height: 32,
-                child: PopupMenuButton<String>(
-                  tooltip: 'Create',
-                  enabled: !controller.busy && controller.canWrite,
-                  padding: EdgeInsets.zero,
-                  style: ToolbarButton.style(context),
-                  icon: const SystemIcon(
-                    SystemIcons.plus,
-                    size: 15,
-                    color: Color(0xFF4E4E4A),
-                  ),
-                  onSelected: onCreate,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  color: const Color(0xFFF5F5F3),
-                  itemBuilder: (_) => const [
-                    PopupMenuItem(value: 'folder', child: Text('New folder…')),
-                    PopupMenuItem(value: 'file', child: Text('New text file…')),
-                  ],
+              if (onShare != null)
+                ToolbarButton(
+                  tooltip: 'Share',
+                  onPressed: controller.selected == null || !controller.canWrite
+                      ? null
+                      : onShare,
+                  icon: SystemIcons.external,
                 ),
-              ),
+              if (onChat != null)
+                Badge(
+                  isLabelVisible: chatUnread > 0,
+                  label: Text('$chatUnread'),
+                  child: ToolbarButton(
+                    tooltip: 'Chat',
+                    selected: chatVisible,
+                    onPressed: onChat,
+                    icon: SystemIcons.messageSquare,
+                  ),
+                ),
             ],
           ),
         ],

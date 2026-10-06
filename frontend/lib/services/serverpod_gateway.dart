@@ -3,6 +3,8 @@ import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
 
 import '../model/account_info.dart';
+import 'username_gateway.dart';
+import 'chat_gateway.dart';
 import '../model/garden_info.dart';
 import 'garden_gateway.dart';
 import 'sharing/drive_sharing_service.dart';
@@ -13,7 +15,12 @@ import 'passkey_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ServerpodGateway
-    implements GardenGateway, RelaunchSessionGateway, SharingGateway {
+    implements
+        GardenGateway,
+        RelaunchSessionGateway,
+        SharingGateway,
+        UsernameGateway,
+        ChatGateway {
   ServerpodGateway(
     this.serverUrl, {
     String windowId = 'main',
@@ -64,6 +71,7 @@ class ServerpodGateway
     return await _account();
   }
 
+  @override
   final Client client;
   final SessionAuthStorage storage;
   final String savedEmailKey;
@@ -96,7 +104,7 @@ class ServerpodGateway
     final result = await PasskeyService(client).signIn();
     await _storeSignIn(result, remember);
     final account = await _account();
-    if (remember) await preferences.setString(savedEmailKey, account.email);
+    if (remember) await preferences.setString(savedEmailKey, account.username);
     return account;
   }
 
@@ -107,15 +115,26 @@ class ServerpodGateway
     await client.auth.updateSignedInUser(result);
   }
 
-  Future<void> setTouchId(bool enabled, String email) async {
+  Future<void> setTouchId(bool enabled, String username) async {
     await storage.setTouchId(enabled);
-    await preferences.setString(savedEmailKey, email);
+    await preferences.setString(savedEmailKey, username);
     await preferences.setBool(touchIdKey, enabled);
   }
 
   Future<AccountInfo> _account() async {
-    final account = await client.garden.account();
-    return AccountInfo(id: account.id, email: account.email);
+    final AccountDetails account;
+    try {
+      account = await client.garden.account();
+    } on TypeError {
+      throw StateError(
+        'Garden’s account service needs an update. Retry after the service update finishes.',
+      );
+    }
+    return AccountInfo(
+      id: account.id,
+      email: account.email,
+      username: account.username,
+    );
   }
 
   @override
@@ -128,14 +147,25 @@ class ServerpodGateway
     try {
       result = await client.emailIdp.login(email: email, password: password);
     } on ServerpodClientUnauthorized {
-      throw StateError('Invalid email or password.');
+      throw StateError('Incorrect username, email or password.');
     }
     await _storeSignIn(result, remember);
+    final account = await _account();
+    if (remember) await preferences.setString(savedEmailKey, account.username);
+    return account;
+  }
+
+  @override
+  Future<AccountInfo> setUsername(String username) async {
+    final value = await client.garden.setUsername(username);
     final account = AccountInfo(
-      id: result.authUserId.toString(),
-      email: email.trim(),
+      id: value.id,
+      email: value.email,
+      username: value.username,
     );
-    if (remember) await preferences.setString(savedEmailKey, email);
+    if (storage.remember) {
+      await preferences.setString(savedEmailKey, account.username);
+    }
     return account;
   }
 
@@ -158,7 +188,7 @@ class ServerpodGateway
     );
     await _storeSignIn(result, true);
     final account = await _account();
-    await preferences.setString(savedEmailKey, account.email);
+    await preferences.setString(savedEmailKey, account.username);
     return account;
   }
 

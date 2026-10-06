@@ -93,7 +93,7 @@ class _AccountFormState extends State<AccountForm> {
                   const SizedBox(height: 20),
                 ],
                 GardenField(
-                  label: 'Email',
+                  label: widget.isRegistration ? 'Email' : 'Email or username',
                   autofillHints: const [
                     AutofillHints.username,
                     AutofillHints.email,
@@ -101,7 +101,9 @@ class _AccountFormState extends State<AccountForm> {
                   controller: email,
                   enabled: !widget.busy,
                   autofocus: true,
-                  keyboardType: TextInputType.emailAddress,
+                  keyboardType: widget.isRegistration
+                      ? TextInputType.emailAddress
+                      : TextInputType.text,
                 ),
                 const SizedBox(height: 20),
                 GardenField(

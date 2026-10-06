@@ -1,10 +1,12 @@
 import 'system_icon.dart';
+
 import 'package:flutter/material.dart';
 import 'package:garden_client/garden_client.dart';
 
 import '../state/garden_controller.dart';
 import 'drive_folder_branch.dart';
 import 'tree_row.dart';
+import 'sidebar_item.dart';
 import 'drive_section_header.dart';
 import 'drive_row_actions.dart';
 import 'files/node_drag_surface.dart';
@@ -23,6 +25,12 @@ class _SidebarDrivesState extends State<SidebarDrives> {
     final files = controller.files;
     Widget content() => ListView(
       children: [
+        SidebarItem(
+          label: 'Home',
+          icon: SystemIcons.house,
+          selected: controller.page == GardenPage.gardens,
+          onTap: () => controller.navigate(GardenPage.gardens),
+        ),
         DriveSectionHeader(
           label: 'Drives',
           onOpen: controller.busy
