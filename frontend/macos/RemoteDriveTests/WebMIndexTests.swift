@@ -33,6 +33,18 @@ import Foundation
     try require(chain.offsets == [0, 6], "Cluster discovery must not add a position at EOF")
     chain.discoverClusters(in: Data([0x1f, 0x43, 0xb6, 0x75, 0xff]), offset: 6, fileSize: 12)
     try require(chain.offsets == [0, 6], "Invalid or unknown cluster sizes must not invent positions")
+    var sparse = GardenWebMIndex(offsets: [0, 64 * 1024, 128 * 1024])
+    sparse.discoverClusters(in: Data([0x1f, 0x43, 0xb6, 0x75, 0x81, 0]), offset: 64 * 1024,
+      fileSize: 256 * 1024)
+    try require(sparse.offsets == [0, 65536, 65542, 131072], "Indexed range lookup must include a header at the page start")
+    for _ in 0..<100 {
+      sparse.discoverClusters(in: Data([0x1f, 0x43, 0xb6, 0x75, 0x81, 0]), offset: 64 * 1024,
+        fileSize: 256 * 1024)
+    }
+    try require(sparse.offsets == [0, 65536, 65542, 131072], "Repeated cached headers must not duplicate offsets")
+    sparse.discoverClusters(in: Data([0x1f, 0x43, 0xb6, 0x75, 0x81, 0]), offset: 100,
+      fileSize: 256 * 1024)
+    try require(sparse.offsets == [0, 65536, 65542, 131072], "Bytes outside indexed headers must not invent clusters")
     for argument in CommandLine.arguments.dropFirst() {
       let file = URL(fileURLWithPath: argument)
       let handle = try FileHandle(forReadingFrom: file)

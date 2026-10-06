@@ -4,18 +4,32 @@ struct GardenWebMIndex {
   private(set) var offsets: [Int]
 
   mutating func discoverClusters(in data: Data, offset: Int, fileSize: Int) {
+    guard offset >= 0, offset <= fileSize, data.count <= fileSize - offset else { return }
+    let first = lowerBound(offset)
+    let end = lowerBound(offset + data.count)
+    guard first < end else { return }
     let bytes = Array(data)
     var discovered: [Int] = []
-    for start in offsets where start >= offset && start < offset + bytes.count {
+    for start in offsets[first..<end] {
       var cursor = start - offset
       guard let cluster = Self.element(bytes, cursor: &cursor), cluster.id == 0x1f43b675,
         !cluster.unknownSize, cluster.end > cursor, cluster.end <= fileSize - offset else { continue }
       let next = offset + cluster.end
-      if next < fileSize { discovered.append(next) }
+      let position = lowerBound(next)
+      if next < fileSize, position == offsets.count || offsets[position] != next { discovered.append(next) }
     }
     guard !discovered.isEmpty else { return }
     let combined = Array(Set(offsets + discovered)).sorted()
     if combined.count <= 16384 { offsets = combined }
+  }
+
+  private func lowerBound(_ offset: Int) -> Int {
+    var low = 0, high = offsets.count
+    while low < high {
+      let middle = (low + high) / 2
+      if offsets[middle] < offset { low = middle + 1 } else { high = middle }
+    }
+    return low
   }
 
   func nextPages(after offset: Int, count: Int, excluding: Set<Int> = [], distance: Int = 64 * 1024 * 1024) -> [Int] {
