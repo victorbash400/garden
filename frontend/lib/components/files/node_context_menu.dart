@@ -70,6 +70,7 @@ class NodeContextMenu extends StatelessWidget {
                   : nodeMenuItems(
                       node!,
                       canWrite: controller.canWrite,
+                      canPreview: controller.previewFile != null,
                       canShare:
                           controller.canWrite && controller.shareNode != null,
                     ),

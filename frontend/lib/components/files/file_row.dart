@@ -19,8 +19,9 @@ class FileRow extends StatelessWidget {
     required this.onAction,
     this.striped = false,
     this.canWrite = true,
+    this.canPreview = false,
   });
-  final bool striped, canWrite;
+  final bool striped, canWrite, canPreview;
   final FileNode node;
   final bool selected;
   final VoidCallback onSelect;
@@ -59,7 +60,11 @@ class FileRow extends StatelessWidget {
                   padding: EdgeInsets.zero,
                   icon: SystemIcon(SystemIcons.ellipsis, size: 16),
                   onSelected: onAction,
-                  itemBuilder: (_) => nodeMenuItems(node, canWrite: canWrite),
+                  itemBuilder: (_) => nodeMenuItems(
+                    node,
+                    canWrite: canWrite,
+                    canPreview: canPreview,
+                  ),
                 ),
               ],
             ),

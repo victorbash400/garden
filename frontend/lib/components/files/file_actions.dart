@@ -114,6 +114,17 @@ class FileActions {
         await controller.shareNode?.call(node);
       case 'open':
         await open(node);
+      case 'preview':
+        if (node.kind != NodeKind.file) return;
+        try {
+          final preview = controller.previewFile;
+          if (preview == null) {
+            throw StateError('Native file previews are unavailable.');
+          }
+          await preview(node);
+        } catch (failure) {
+          controller.reportError(failure);
+        }
       case 'edit':
         await edit(node);
       case 'export':

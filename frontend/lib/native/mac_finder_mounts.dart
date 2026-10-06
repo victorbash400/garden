@@ -6,9 +6,10 @@ import '../model/account_info.dart';
 import '../model/garden_info.dart';
 import '../services/serverpod_gateway.dart';
 import 'finder_mounts.dart';
+import 'finder_previews.dart';
 import 'finder_status.dart';
 
-class MacFinderMounts implements FinderMounts {
+class MacFinderMounts implements FinderMounts, FinderPreviews {
   MacFinderMounts(this.gateway, this.serverURL);
 
   final ServerpodGateway gateway;
@@ -117,6 +118,18 @@ class MacFinderMounts implements FinderMounts {
     if (application == null || application.isEmpty) {
       throw StateError('macOS did not confirm that the file was opened.');
     }
+  }
+
+  @override
+  Future<void> previewNode(AccountInfo account, int driveID, int nodeID) async {
+    if (!Platform.isMacOS) {
+      throw UnsupportedError('Native file previews require macOS.');
+    }
+    await _channel.invokeMethod<void>('preview', {
+      'accountID': account.id,
+      'driveID': driveID,
+      'nodeID': nodeID,
+    });
   }
 
   @override

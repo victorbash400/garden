@@ -20,6 +20,7 @@ import '../services/garden_gateway.dart';
 import '../services/username_gateway.dart';
 import '../services/preferences_store.dart';
 import '../native/finder_mounts.dart';
+import '../native/finder_previews.dart';
 import '../native/finder_updates.dart';
 import '../native/finder_status.dart';
 import 'native_setup_controller.dart';
@@ -92,6 +93,18 @@ class GardenController extends ChangeNotifier {
       }
       await finder!.openNode(current, node.gardenId, node.id!);
     };
+    final previews = finder;
+    if (previews is FinderPreviews) {
+      files?.previewFile = (node) async {
+        final current = account;
+        if (current == null) throw StateError('Sign in to preview files.');
+        await (previews as FinderPreviews).previewNode(
+          current,
+          node.gardenId,
+          node.id!,
+        );
+      };
+    }
   }
   Future<void> setUsername(String username) async {
     final service = gateway;

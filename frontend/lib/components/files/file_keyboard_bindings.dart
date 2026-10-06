@@ -22,6 +22,9 @@ class FileKeyboardBindings extends StatelessWidget {
 
     return CallbackShortcuts(
       bindings: {
+        if (controller.previewFile != null)
+          const SingleActivator(LogicalKeyboardKey.space): () =>
+              selected('preview'),
         const SingleActivator(LogicalKeyboardKey.digit1, meta: true): () =>
             controller.setViewMode(FileViewMode.grid),
         const SingleActivator(LogicalKeyboardKey.digit2, meta: true): () =>

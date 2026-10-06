@@ -34,6 +34,7 @@ class FilesController extends ChangeNotifier {
   FileNode? selected;
   FileViewMode viewMode = FileViewMode.list;
   Future<void> Function(FileNode)? openFile;
+  Future<void> Function(FileNode)? previewFile;
   void setViewMode(FileViewMode mode) {
     if (mode == viewMode) return;
     viewMode = mode;

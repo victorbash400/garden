@@ -7,9 +7,16 @@ List<PopupMenuEntry<String>> nodeMenuItems(
   FileNode node, {
   bool canWrite = true,
   bool canShare = false,
+  bool canPreview = false,
 }) => [
   const PopupMenuItem(height: 32, value: 'open', child: Text('Open')),
   if (node.kind == NodeKind.file) ...[
+    if (canPreview)
+      const PopupMenuItem(
+        height: 32,
+        value: 'preview',
+        child: Text('Quick Look'),
+      ),
     if (canWrite && isTextFile(node.name))
       const PopupMenuItem(height: 32, value: 'edit', child: Text('Edit text')),
     const PopupMenuItem(height: 32, value: 'export', child: Text('Export…')),

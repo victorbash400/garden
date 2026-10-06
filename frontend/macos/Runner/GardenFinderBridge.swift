@@ -20,6 +20,16 @@ enum GardenFinderBridge {
               driveIDs: arguments["driveIDs"] as? [Int], driveID: arguments["driveID"] as? Int,
               name: arguments["name"] as? String, nodeID: arguments["nodeID"] as? Int)
             try GardenRemoteBridge.registerService()
+            if call.method == "signOut" { GardenFilePreview.dismiss() }
+            if call.method == "preview" {
+              guard request.nodeID != nil,
+                let path = try await GardenRemoteBridge.request("location", request) as? String else {
+                throw FinderBridgeError.invalidArguments
+              }
+              try await GardenFilePreview.show(URL(fileURLWithPath: path))
+              result(nil)
+              return
+            }
             if call.method == "open" {
               result(try await GardenRemoteBridge.open(request))
               return
