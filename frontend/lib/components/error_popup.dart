@@ -1,4 +1,4 @@
-import 'system_icon.dart';
+import 'warning_icon.dart';
 
 import 'package:flutter/material.dart';
 
@@ -30,11 +30,7 @@ class ErrorPopup extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SystemIcon(
-                SystemIcons.triangleAlert,
-                size: 40,
-                color: colors.error,
-              ),
+              const Center(child: WarningIcon()),
               const SizedBox(height: 20),
               Semantics(
                 liveRegion: true,

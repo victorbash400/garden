@@ -7,7 +7,7 @@ import '../components/settings/finder_setup_row.dart';
 import '../components/settings/login_item_row.dart';
 import '../components/settings/background_updates_row.dart';
 import '../components/settings/settings_inline_button.dart';
-import '../components/settings/settings_issue.dart';
+import '../components/settings/connection_issue_row.dart';
 
 class ConnectionsSettings extends StatelessWidget {
   const ConnectionsSettings({super.key, required this.controller});
@@ -34,11 +34,7 @@ class ConnectionsSettings extends StatelessWidget {
           BackgroundUpdatesRow(updates: controller.finderUpdates!),
         if (controller.nativeSetup != null)
           LoginItemRow(controller: controller.nativeSetup!),
-        if (issues.isNotEmpty)
-          SettingsIssue(
-            message: 'Connection check failed',
-            details: issues.join('\n'),
-          ),
+        if (issues.isNotEmpty) ConnectionIssueRow(details: issues.join('\n')),
         Padding(
           padding: const EdgeInsets.all(16),
           child: Align(
