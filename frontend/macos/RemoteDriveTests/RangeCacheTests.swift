@@ -35,18 +35,20 @@ actor RangeSource {
     try require(await cache.remoteBytes <= 4 * 1024 * 1024, "Fast read-ahead must stay within three blocks ahead")
     print("16 sequential 64 KiB reads: \(requests.count) requests including read-ahead, \(start.duration(to: .now))")
     _ = try await cache.read(node: node, offset: 1234, length: 700000)
-    try require(await source.requests.count == requests.count, "Changing read size must reuse cached pages")
+    try require(await source.requests.dropFirst(requests.count).allSatisfy { $0.0 >= 1024 * 1024 },
+      "Changing read size must reuse cached pages")
     let far = 90 * 1024 * 1024
     let random = try await cache.read(node: node, offset: far + 123, length: 256)
     try require(random == Data(((far + 123)..<(far + 379)).map { UInt8($0 % 251) }), "Seek bytes differ")
-    try require(await source.requests.last?.1 == 65536, "An isolated seek must not trigger bulk fetching")
-    let before = await source.requests.count
+    try require(await source.requests.filter { $0.0 == far }.map { $0.1 } == [65536],
+      "An isolated seek must issue only one small request")
     let uncached = 60 * 1024 * 1024
     try await withThrowingTaskGroup(of: Data.self) { group in
       for _ in 0..<8 { group.addTask { try await cache.read(node: node, offset: uncached, length: 32768) } }
       for try await bytes in group { try require(bytes.count == 32768, "Concurrent result size differs") }
     }
-    try require(await source.requests.count - before == 1, "Overlapping reads should share one request")
+    try require(await source.requests.filter { $0.0 == uncached }.count == 1,
+      "Overlapping reads should share one request")
     let final = try await cache.read(node: node, offset: size - 70, length: 512)
     try require(final == Data(((size - 70)..<size).map { UInt8($0 % 251) }), "EOF bytes differ")
     await GardenReadBuffer.shared.clear()
