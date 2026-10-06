@@ -12,6 +12,12 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:typed_data' as _idt;
+import 'package:garden_client/src/protocol/accounts/public_identity.dart'
+    as _ish1qmwt;
+import 'package:garden_client/src/protocol/chat/drive_message.dart'
+    as _i7cpab2u;
+import 'package:garden_client/src/protocol/conversations/conversation_summary.dart'
+    as _ivtfh1ba;
 import 'package:garden_client/src/protocol/files/drive_event.dart' as _ib0wfils;
 import 'package:garden_client/src/protocol/files/file_comment.dart'
     as _i6rexlqc;
@@ -33,6 +39,14 @@ import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
     as _iaic;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
+import 'accounts/account_username.dart' as _iltvw8yc;
+import 'accounts/public_identity.dart' as _i70ifst1;
+import 'chat/chat_read.dart' as _i3atmsok;
+import 'chat/chat_snapshot.dart' as _idocpjhp;
+import 'chat/drive_message.dart' as _i2rvmy1x;
+import 'conversations/conversation.dart' as _i5m0ut6e;
+import 'conversations/conversation_member.dart' as _i1li1n6g;
+import 'conversations/conversation_summary.dart' as _igvs8us8;
 import 'files/content_download.dart' as _id6mrfn8;
 import 'files/directory_listing.dart' as _i8kiawn9;
 import 'files/drive_event.dart' as _i4wn0cbe;
@@ -60,6 +74,14 @@ import 'sharing/account_notification.dart' as _i8nfb11w;
 import 'sharing/drive_invitation.dart' as _iks3nfjn;
 import 'sharing/drive_management.dart' as _ihkyi9jp;
 import 'sharing/drive_member_details.dart' as _iwfm68rt;
+export 'accounts/account_username.dart';
+export 'accounts/public_identity.dart';
+export 'chat/chat_read.dart';
+export 'chat/chat_snapshot.dart';
+export 'chat/drive_message.dart';
+export 'conversations/conversation.dart';
+export 'conversations/conversation_member.dart';
+export 'conversations/conversation_summary.dart';
 export 'files/content_download.dart';
 export 'files/directory_listing.dart';
 export 'files/drive_event.dart';
@@ -123,6 +145,30 @@ class Protocol extends _isc.SerializationManager {
       }
     }
 
+    if (t == _iltvw8yc.AccountUsername) {
+      return _iltvw8yc.AccountUsername.fromJson(data) as T;
+    }
+    if (t == _i70ifst1.PublicIdentity) {
+      return _i70ifst1.PublicIdentity.fromJson(data) as T;
+    }
+    if (t == _i3atmsok.ChatRead) {
+      return _i3atmsok.ChatRead.fromJson(data) as T;
+    }
+    if (t == _idocpjhp.ChatSnapshot) {
+      return _idocpjhp.ChatSnapshot.fromJson(data) as T;
+    }
+    if (t == _i2rvmy1x.DriveMessage) {
+      return _i2rvmy1x.DriveMessage.fromJson(data) as T;
+    }
+    if (t == _i5m0ut6e.Conversation) {
+      return _i5m0ut6e.Conversation.fromJson(data) as T;
+    }
+    if (t == _i1li1n6g.ConversationMember) {
+      return _i1li1n6g.ConversationMember.fromJson(data) as T;
+    }
+    if (t == _igvs8us8.ConversationSummary) {
+      return _igvs8us8.ConversationSummary.fromJson(data) as T;
+    }
     if (t == _id6mrfn8.ContentDownload) {
       return _id6mrfn8.ContentDownload.fromJson(data) as T;
     }
@@ -203,6 +249,36 @@ class Protocol extends _isc.SerializationManager {
     }
     if (t == _iwfm68rt.DriveMemberDetails) {
       return _iwfm68rt.DriveMemberDetails.fromJson(data) as T;
+    }
+    if (t == _isc.getType<_iltvw8yc.AccountUsername?>()) {
+      return (data != null ? _iltvw8yc.AccountUsername.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_i70ifst1.PublicIdentity?>()) {
+      return (data != null ? _i70ifst1.PublicIdentity.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_i3atmsok.ChatRead?>()) {
+      return (data != null ? _i3atmsok.ChatRead.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_idocpjhp.ChatSnapshot?>()) {
+      return (data != null ? _idocpjhp.ChatSnapshot.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_i2rvmy1x.DriveMessage?>()) {
+      return (data != null ? _i2rvmy1x.DriveMessage.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_i5m0ut6e.Conversation?>()) {
+      return (data != null ? _i5m0ut6e.Conversation.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_i1li1n6g.ConversationMember?>()) {
+      return (data != null ? _i1li1n6g.ConversationMember.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_igvs8us8.ConversationSummary?>()) {
+      return (data != null
+              ? _igvs8us8.ConversationSummary.fromJson(data)
+              : null)
+          as T;
     }
     if (t == _isc.getType<_id6mrfn8.ContentDownload?>()) {
       return (data != null ? _id6mrfn8.ContentDownload.fromJson(data) : null)
@@ -307,6 +383,18 @@ class Protocol extends _isc.SerializationManager {
       return (data != null ? _iwfm68rt.DriveMemberDetails.fromJson(data) : null)
           as T;
     }
+    if (t == List<_i2rvmy1x.DriveMessage>) {
+      return (data as List)
+              .map((e) => deserialize<_i2rvmy1x.DriveMessage>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i70ifst1.PublicIdentity>) {
+      return (data as List)
+              .map((e) => deserialize<_i70ifst1.PublicIdentity>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_iqxechne.FileNode>) {
       return (data as List)
               .map((e) => deserialize<_iqxechne.FileNode>(e))
@@ -343,6 +431,12 @@ class Protocol extends _isc.SerializationManager {
     if (t == List<_iks3nfjn.DriveInvitation>) {
       return (data as List)
               .map((e) => deserialize<_iks3nfjn.DriveInvitation>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ish1qmwt.PublicIdentity>) {
+      return (data as List)
+              .map((e) => deserialize<_ish1qmwt.PublicIdentity>(e))
               .toList()
           as T;
     }
@@ -399,14 +493,26 @@ class Protocol extends _isc.SerializationManager {
           )
           as T;
     }
-    if (t == List<_i6rexlqc.FileComment>) {
+    if (t == List<_i7cpab2u.DriveMessage>) {
       return (data as List)
-              .map((e) => deserialize<_i6rexlqc.FileComment>(e))
+              .map((e) => deserialize<_i7cpab2u.DriveMessage>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ivtfh1ba.ConversationSummary>) {
+      return (data as List)
+              .map((e) => deserialize<_ivtfh1ba.ConversationSummary>(e))
               .toList()
           as T;
     }
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    }
+    if (t == List<_i6rexlqc.FileComment>) {
+      return (data as List)
+              .map((e) => deserialize<_i6rexlqc.FileComment>(e))
+              .toList()
+          as T;
     }
     if (t == List<_ieod4w9g.UploadedPart>) {
       return (data as List)
@@ -467,6 +573,14 @@ class Protocol extends _isc.SerializationManager {
 
   static String? getClassNameForType(Type type) {
     return switch (type) {
+      _iltvw8yc.AccountUsername => 'AccountUsername',
+      _i70ifst1.PublicIdentity => 'PublicIdentity',
+      _i3atmsok.ChatRead => 'ChatRead',
+      _idocpjhp.ChatSnapshot => 'ChatSnapshot',
+      _i2rvmy1x.DriveMessage => 'DriveMessage',
+      _i5m0ut6e.Conversation => 'Conversation',
+      _i1li1n6g.ConversationMember => 'ConversationMember',
+      _igvs8us8.ConversationSummary => 'ConversationSummary',
       _id6mrfn8.ContentDownload => 'ContentDownload',
       _i8kiawn9.DirectoryListing => 'DirectoryListing',
       _i4wn0cbe.DriveEvent => 'DriveEvent',
@@ -508,6 +622,22 @@ class Protocol extends _isc.SerializationManager {
     }
 
     switch (data) {
+      case _iltvw8yc.AccountUsername():
+        return 'AccountUsername';
+      case _i70ifst1.PublicIdentity():
+        return 'PublicIdentity';
+      case _i3atmsok.ChatRead():
+        return 'ChatRead';
+      case _idocpjhp.ChatSnapshot():
+        return 'ChatSnapshot';
+      case _i2rvmy1x.DriveMessage():
+        return 'DriveMessage';
+      case _i5m0ut6e.Conversation():
+        return 'Conversation';
+      case _i1li1n6g.ConversationMember():
+        return 'ConversationMember';
+      case _igvs8us8.ConversationSummary():
+        return 'ConversationSummary';
       case _id6mrfn8.ContentDownload():
         return 'ContentDownload';
       case _i8kiawn9.DirectoryListing():
@@ -583,6 +713,30 @@ class Protocol extends _isc.SerializationManager {
     var dataClassName = data['className'];
     if (dataClassName is! String) {
       return super.deserializeByClassName(data);
+    }
+    if (dataClassName == 'AccountUsername') {
+      return deserialize<_iltvw8yc.AccountUsername>(data['data']);
+    }
+    if (dataClassName == 'PublicIdentity') {
+      return deserialize<_i70ifst1.PublicIdentity>(data['data']);
+    }
+    if (dataClassName == 'ChatRead') {
+      return deserialize<_i3atmsok.ChatRead>(data['data']);
+    }
+    if (dataClassName == 'ChatSnapshot') {
+      return deserialize<_idocpjhp.ChatSnapshot>(data['data']);
+    }
+    if (dataClassName == 'DriveMessage') {
+      return deserialize<_i2rvmy1x.DriveMessage>(data['data']);
+    }
+    if (dataClassName == 'Conversation') {
+      return deserialize<_i5m0ut6e.Conversation>(data['data']);
+    }
+    if (dataClassName == 'ConversationMember') {
+      return deserialize<_i1li1n6g.ConversationMember>(data['data']);
+    }
+    if (dataClassName == 'ConversationSummary') {
+      return deserialize<_igvs8us8.ConversationSummary>(data['data']);
     }
     if (dataClassName == 'ContentDownload') {
       return deserialize<_id6mrfn8.ContentDownload>(data['data']);

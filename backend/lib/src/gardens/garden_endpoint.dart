@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../accounts/usernames.dart';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:serverpod/serverpod.dart';
@@ -21,7 +22,13 @@ class GardenEndpoint extends Endpoint {
     if (email == null) {
       throw GardenException(message: 'The account has no email address.');
     }
-    return AccountDetails(id: id, email: email);
+    final identity = await Usernames.ensure(session, id);
+    return AccountDetails(id: id, email: email, username: identity.username);
+  }
+
+  Future<AccountDetails> setUsername(Session session, String username) async {
+    await Usernames.rename(session, _user(session), username);
+    return account(session);
   }
 
   Future<FinderSession> finderSession(Session session, int gardenId) async {

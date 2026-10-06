@@ -1,0 +1,4 @@
+class: ConversationSummary
+fields:
+  conversation: Conversation
+  members: List<PublicIdentity>

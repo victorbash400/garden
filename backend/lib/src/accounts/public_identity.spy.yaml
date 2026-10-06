@@ -1,0 +1,4 @@
+class: PublicIdentity
+fields:
+  userId: String
+  username: String

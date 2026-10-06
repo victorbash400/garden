@@ -12,48 +12,41 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
-abstract class AccountDetails
+abstract class PublicIdentity
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
-  AccountDetails._({
-    required this.id,
-    required this.email,
+  PublicIdentity._({
+    required this.userId,
     required this.username,
   });
 
-  factory AccountDetails({
-    required String id,
-    required String email,
+  factory PublicIdentity({
+    required String userId,
     required String username,
-  }) = _AccountDetailsImpl;
+  }) = _PublicIdentityImpl;
 
-  factory AccountDetails.fromJson(Map<String, dynamic> jsonSerialization) {
-    return AccountDetails(
-      id: jsonSerialization['id'] as String,
-      email: jsonSerialization['email'] as String,
+  factory PublicIdentity.fromJson(Map<String, dynamic> jsonSerialization) {
+    return PublicIdentity(
+      userId: jsonSerialization['userId'] as String,
       username: jsonSerialization['username'] as String,
     );
   }
 
-  String id;
-
-  String email;
+  String userId;
 
   String username;
 
-  /// Returns a shallow copy of this [AccountDetails]
+  /// Returns a shallow copy of this [PublicIdentity]
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
-  AccountDetails copyWith({
-    String? id,
-    String? email,
+  PublicIdentity copyWith({
+    String? userId,
     String? username,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
-      '__className__': 'AccountDetails',
-      'id': id,
-      'email': email,
+      '__className__': 'PublicIdentity',
+      'userId': userId,
       'username': username,
     };
   }
@@ -61,9 +54,8 @@ abstract class AccountDetails
   @override
   Map<String, dynamic> toJsonForProtocol() {
     return {
-      '__className__': 'AccountDetails',
-      'id': id,
-      'email': email,
+      '__className__': 'PublicIdentity',
+      'userId': userId,
       'username': username,
     };
   }
@@ -74,29 +66,25 @@ abstract class AccountDetails
   }
 }
 
-class _AccountDetailsImpl extends AccountDetails {
-  _AccountDetailsImpl({
-    required String id,
-    required String email,
+class _PublicIdentityImpl extends PublicIdentity {
+  _PublicIdentityImpl({
+    required String userId,
     required String username,
   }) : super._(
-         id: id,
-         email: email,
+         userId: userId,
          username: username,
        );
 
-  /// Returns a shallow copy of this [AccountDetails]
+  /// Returns a shallow copy of this [PublicIdentity]
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
   @override
-  AccountDetails copyWith({
-    String? id,
-    String? email,
+  PublicIdentity copyWith({
+    String? userId,
     String? username,
   }) {
-    return AccountDetails(
-      id: id ?? this.id,
-      email: email ?? this.email,
+    return PublicIdentity(
+      userId: userId ?? this.userId,
       username: username ?? this.username,
     );
   }

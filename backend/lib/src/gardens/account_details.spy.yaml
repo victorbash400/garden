@@ -2,3 +2,4 @@ class: AccountDetails
 fields:
   id: String
   email: String
+  username: String

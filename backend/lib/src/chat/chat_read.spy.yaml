@@ -1,0 +1,10 @@
+class: ChatRead
+table: chat_read
+fields:
+  gardenId: int
+  userId: String
+  messageId: int
+indexes:
+  chat_read_user:
+    fields: gardenId, userId
+    unique: true

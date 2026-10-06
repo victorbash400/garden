@@ -21,9 +21,13 @@ import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _iacs;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _iais;
+import '../accounts/identities_endpoint.dart' as _i3objh06;
 import '../auth/email_idp_endpoint.dart' as _iuc1hd5t;
 import '../auth/jwt_refresh_endpoint.dart' as _inwq3ztq;
 import '../auth/passkey_idp_endpoint.dart' as _ia8doutj;
+import '../chat/chat_endpoint.dart' as _i3w57des;
+import '../conversations/conversation_messages_endpoint.dart' as _igrz8jk3;
+import '../conversations/conversations_endpoint.dart' as _ilt2yzl9;
 import '../files/collaboration_endpoint.dart' as _iiks30z9;
 import '../files/content_endpoint.dart' as _iqqtuyco;
 import '../files/files_endpoint.dart' as _idx8vriz;
@@ -40,6 +44,12 @@ class Endpoints extends _is.EndpointDispatch {
   @override
   void initializeEndpoints(_is.Server server) {
     var endpoints = <String, _is.Endpoint>{
+      'identities': _i3objh06.IdentitiesEndpoint()
+        ..initialize(
+          server,
+          'identities',
+          null,
+        ),
       'emailIdp': _iuc1hd5t.EmailIdpEndpoint()
         ..initialize(
           server,
@@ -56,6 +66,24 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'passkeyIdp',
+          null,
+        ),
+      'chat': _i3w57des.ChatEndpoint()
+        ..initialize(
+          server,
+          'chat',
+          null,
+        ),
+      'conversationMessages': _igrz8jk3.ConversationMessagesEndpoint()
+        ..initialize(
+          server,
+          'conversationMessages',
+          null,
+        ),
+      'conversations': _ilt2yzl9.ConversationsEndpoint()
+        ..initialize(
+          server,
+          'conversations',
           null,
         ),
       'collaboration': _iiks30z9.CollaborationEndpoint()
@@ -119,6 +147,32 @@ class Endpoints extends _is.EndpointDispatch {
           null,
         ),
     };
+    connectors['identities'] = _is.EndpointConnector(
+      name: 'identities',
+      endpoint: endpoints['identities']!,
+      methodConnectors: {
+        'members': _is.MethodConnector(
+          name: 'members',
+          params: {
+            'driveId': _is.ParameterDescription(
+              name: 'driveId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['identities'] as _i3objh06.IdentitiesEndpoint)
+                      .members(
+                        session,
+                        params['driveId'],
+                      ),
+        ),
+      },
+    );
     connectors['emailIdp'] = _is.EndpointConnector(
       name: 'emailIdp',
       endpoint: endpoints['emailIdp']!,
@@ -429,6 +483,503 @@ class Endpoints extends _is.EndpointDispatch {
               ) async =>
                   (endpoints['passkeyIdp'] as _ia8doutj.PasskeyIdpEndpoint)
                       .hasAccount(session),
+        ),
+      },
+    );
+    connectors['chat'] = _is.EndpointConnector(
+      name: 'chat',
+      endpoint: endpoints['chat']!,
+      methodConnectors: {
+        'snapshot': _is.MethodConnector(
+          name: 'snapshot',
+          params: {
+            'driveId': _is.ParameterDescription(
+              name: 'driveId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['chat'] as _i3w57des.ChatEndpoint).snapshot(
+                session,
+                params['driveId'],
+              ),
+        ),
+        'thread': _is.MethodConnector(
+          name: 'thread',
+          params: {
+            'driveId': _is.ParameterDescription(
+              name: 'driveId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'messageId': _is.ParameterDescription(
+              name: 'messageId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'beforeId': _is.ParameterDescription(
+              name: 'beforeId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['chat'] as _i3w57des.ChatEndpoint).thread(
+                session,
+                params['driveId'],
+                params['messageId'],
+                params['beforeId'],
+              ),
+        ),
+        'history': _is.MethodConnector(
+          name: 'history',
+          params: {
+            'driveId': _is.ParameterDescription(
+              name: 'driveId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'beforeId': _is.ParameterDescription(
+              name: 'beforeId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['chat'] as _i3w57des.ChatEndpoint).history(
+                session,
+                params['driveId'],
+                params['beforeId'],
+              ),
+        ),
+        'conversations': _is.MethodConnector(
+          name: 'conversations',
+          params: {
+            'driveId': _is.ParameterDescription(
+              name: 'driveId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'beforeId': _is.ParameterDescription(
+              name: 'beforeId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['chat'] as _i3w57des.ChatEndpoint).conversations(
+                    session,
+                    params['driveId'],
+                    params['beforeId'],
+                  ),
+        ),
+        'send': _is.MethodConnector(
+          name: 'send',
+          params: {
+            'driveId': _is.ParameterDescription(
+              name: 'driveId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'text': _is.ParameterDescription(
+              name: 'text',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'replyToId': _is.ParameterDescription(
+              name: 'replyToId',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+            'nodeId': _is.ParameterDescription(
+              name: 'nodeId',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['chat'] as _i3w57des.ChatEndpoint).send(
+                session,
+                params['driveId'],
+                params['text'],
+                params['replyToId'],
+                params['nodeId'],
+              ),
+        ),
+        'unread': _is.MethodConnector(
+          name: 'unread',
+          params: {
+            'driveId': _is.ParameterDescription(
+              name: 'driveId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['chat'] as _i3w57des.ChatEndpoint).unread(
+                session,
+                params['driveId'],
+              ),
+        ),
+        'readCursor': _is.MethodConnector(
+          name: 'readCursor',
+          params: {
+            'driveId': _is.ParameterDescription(
+              name: 'driveId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['chat'] as _i3w57des.ChatEndpoint).readCursor(
+                    session,
+                    params['driveId'],
+                  ),
+        ),
+        'markRead': _is.MethodConnector(
+          name: 'markRead',
+          params: {
+            'driveId': _is.ParameterDescription(
+              name: 'driveId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'messageId': _is.ParameterDescription(
+              name: 'messageId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['chat'] as _i3w57des.ChatEndpoint).markRead(
+                session,
+                params['driveId'],
+                params['messageId'],
+              ),
+        ),
+        'watch': _is.MethodStreamConnector(
+          name: 'watch',
+          params: {
+            'driveId': _is.ParameterDescription(
+              name: 'driveId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'afterId': _is.ParameterDescription(
+              name: 'afterId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          streamParams: {},
+          returnType: _is.MethodStreamReturnType.streamType,
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+                Map<String, Stream> streamParams,
+              ) => (endpoints['chat'] as _i3w57des.ChatEndpoint).watch(
+                session,
+                params['driveId'],
+                params['afterId'],
+              ),
+        ),
+      },
+    );
+    connectors['conversationMessages'] = _is.EndpointConnector(
+      name: 'conversationMessages',
+      endpoint: endpoints['conversationMessages']!,
+      methodConnectors: {
+        'snapshot': _is.MethodConnector(
+          name: 'snapshot',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['conversationMessages']
+                          as _igrz8jk3.ConversationMessagesEndpoint)
+                      .snapshot(
+                        session,
+                        params['id'],
+                      ),
+        ),
+        'history': _is.MethodConnector(
+          name: 'history',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'beforeId': _is.ParameterDescription(
+              name: 'beforeId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['conversationMessages']
+                          as _igrz8jk3.ConversationMessagesEndpoint)
+                      .history(
+                        session,
+                        params['id'],
+                        params['beforeId'],
+                      ),
+        ),
+        'thread': _is.MethodConnector(
+          name: 'thread',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'messageId': _is.ParameterDescription(
+              name: 'messageId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'beforeId': _is.ParameterDescription(
+              name: 'beforeId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['conversationMessages']
+                          as _igrz8jk3.ConversationMessagesEndpoint)
+                      .thread(
+                        session,
+                        params['id'],
+                        params['messageId'],
+                        params['beforeId'],
+                      ),
+        ),
+        'send': _is.MethodConnector(
+          name: 'send',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'text': _is.ParameterDescription(
+              name: 'text',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'replyToId': _is.ParameterDescription(
+              name: 'replyToId',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+            'nodeId': _is.ParameterDescription(
+              name: 'nodeId',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['conversationMessages']
+                          as _igrz8jk3.ConversationMessagesEndpoint)
+                      .send(
+                        session,
+                        params['id'],
+                        params['text'],
+                        params['replyToId'],
+                        params['nodeId'],
+                      ),
+        ),
+        'markRead': _is.MethodConnector(
+          name: 'markRead',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'messageId': _is.ParameterDescription(
+              name: 'messageId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['conversationMessages']
+                          as _igrz8jk3.ConversationMessagesEndpoint)
+                      .markRead(
+                        session,
+                        params['id'],
+                        params['messageId'],
+                      ),
+        ),
+        'watch': _is.MethodStreamConnector(
+          name: 'watch',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'afterId': _is.ParameterDescription(
+              name: 'afterId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          streamParams: {},
+          returnType: _is.MethodStreamReturnType.streamType,
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+                Map<String, Stream> streamParams,
+              ) =>
+                  (endpoints['conversationMessages']
+                          as _igrz8jk3.ConversationMessagesEndpoint)
+                      .watch(
+                        session,
+                        params['id'],
+                        params['afterId'],
+                      ),
+        ),
+      },
+    );
+    connectors['conversations'] = _is.EndpointConnector(
+      name: 'conversations',
+      endpoint: endpoints['conversations']!,
+      methodConnectors: {
+        'list': _is.MethodConnector(
+          name: 'list',
+          params: {
+            'driveId': _is.ParameterDescription(
+              name: 'driveId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'beforeId': _is.ParameterDescription(
+              name: 'beforeId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['conversations']
+                          as _ilt2yzl9.ConversationsEndpoint)
+                      .list(
+                        session,
+                        params['driveId'],
+                        params['beforeId'],
+                      ),
+        ),
+        'get': _is.MethodConnector(
+          name: 'get',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['conversations']
+                          as _ilt2yzl9.ConversationsEndpoint)
+                      .get(
+                        session,
+                        params['id'],
+                      ),
+        ),
+        'create': _is.MethodConnector(
+          name: 'create',
+          params: {
+            'driveId': _is.ParameterDescription(
+              name: 'driveId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'recipients': _is.ParameterDescription(
+              name: 'recipients',
+              type: _is.getType<List<String>>(),
+              nullable: false,
+            ),
+            'title': _is.ParameterDescription(
+              name: 'title',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['conversations']
+                          as _ilt2yzl9.ConversationsEndpoint)
+                      .create(
+                        session,
+                        params['driveId'],
+                        params['recipients'],
+                        params['title'],
+                      ),
         ),
       },
     );
@@ -1161,6 +1712,25 @@ class Endpoints extends _is.EndpointDispatch {
                 Map<String, dynamic> params,
               ) async => (endpoints['garden'] as _isd11de7.GardenEndpoint)
                   .account(session),
+        ),
+        'setUsername': _is.MethodConnector(
+          name: 'setUsername',
+          params: {
+            'username': _is.ParameterDescription(
+              name: 'username',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['garden'] as _isd11de7.GardenEndpoint).setUsername(
+                    session,
+                    params['username'],
+                  ),
         ),
         'finderSession': _is.MethodConnector(
           name: 'finderSession',

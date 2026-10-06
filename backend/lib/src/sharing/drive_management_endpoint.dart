@@ -1,6 +1,4 @@
 import 'package:serverpod/serverpod.dart';
-import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
-    as auth;
 import '../files/drive_access.dart';
 import '../gardens/drive_permissions.dart';
 import '../generated/protocol.dart';
@@ -47,27 +45,20 @@ class DriveManagementEndpoint extends Endpoint {
             transaction: transaction,
           )
         : <DriveInvitation>[];
-    final profiles = await auth.UserProfile.db.find(
+    final identities = await AccountUsername.db.find(
       session,
-      where: (row) => row.authUserId.inSet(
-        members.map((member) => UuidValue.fromString(member.userId)).toSet(),
-      ),
+      where: (row) =>
+          row.userId.inSet(members.map((member) => member.userId).toSet()),
       transaction: transaction,
     );
-    final identities = {
-      for (final profile in profiles) profile.authUserId.toString(): profile,
+    final names = {
+      for (final identity in identities) identity.userId: identity.username,
     };
     final details = members.map((member) {
-      final profile = identities[member.userId];
       return DriveMemberDetails(
         userId: member.userId,
         role: member.role,
-        displayName:
-            profile?.userName ??
-            profile?.fullName ??
-            profile?.email ??
-            member.userId,
-        email: profile?.email,
+        displayName: names[member.userId] ?? 'Username unavailable',
       );
     }).toList();
     return DriveManagement(

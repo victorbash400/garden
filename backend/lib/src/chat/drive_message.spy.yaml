@@ -1,0 +1,20 @@
+class: DriveMessage
+table: drive_message
+fields:
+  gardenId: int, relation(parent=garden_record)
+  conversationId: int?, relation(parent=conversation, onDelete=Cascade)
+  authorId: String
+  username: String
+  text: String
+  replyToId: int?
+  nodeId: int?
+  nodeName: String?
+  hasReplies: bool, default=false, !persist
+  createdAt: DateTime
+indexes:
+  message_drive_id:
+    fields: gardenId, id
+  message_conversation_id:
+    fields: conversationId, id
+  message_reply_parent:
+    fields: replyToId

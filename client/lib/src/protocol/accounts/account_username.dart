@@ -12,48 +12,51 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
-abstract class AccountDetails
+abstract class AccountUsername
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
-  AccountDetails._({
-    required this.id,
-    required this.email,
+  AccountUsername._({
+    this.id,
+    required this.userId,
     required this.username,
   });
 
-  factory AccountDetails({
-    required String id,
-    required String email,
+  factory AccountUsername({
+    int? id,
+    required String userId,
     required String username,
-  }) = _AccountDetailsImpl;
+  }) = _AccountUsernameImpl;
 
-  factory AccountDetails.fromJson(Map<String, dynamic> jsonSerialization) {
-    return AccountDetails(
-      id: jsonSerialization['id'] as String,
-      email: jsonSerialization['email'] as String,
+  factory AccountUsername.fromJson(Map<String, dynamic> jsonSerialization) {
+    return AccountUsername(
+      id: jsonSerialization['id'] as int?,
+      userId: jsonSerialization['userId'] as String,
       username: jsonSerialization['username'] as String,
     );
   }
 
-  String id;
+  /// The database id, set if the object has been inserted into the
+  /// database or if it has been fetched from the database. Otherwise,
+  /// the id will be null.
+  int? id;
 
-  String email;
+  String userId;
 
   String username;
 
-  /// Returns a shallow copy of this [AccountDetails]
+  /// Returns a shallow copy of this [AccountUsername]
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
-  AccountDetails copyWith({
-    String? id,
-    String? email,
+  AccountUsername copyWith({
+    int? id,
+    String? userId,
     String? username,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
-      '__className__': 'AccountDetails',
-      'id': id,
-      'email': email,
+      '__className__': 'AccountUsername',
+      if (id != null) 'id': id,
+      'userId': userId,
       'username': username,
     };
   }
@@ -61,9 +64,9 @@ abstract class AccountDetails
   @override
   Map<String, dynamic> toJsonForProtocol() {
     return {
-      '__className__': 'AccountDetails',
-      'id': id,
-      'email': email,
+      '__className__': 'AccountUsername',
+      if (id != null) 'id': id,
+      'userId': userId,
       'username': username,
     };
   }
@@ -74,29 +77,31 @@ abstract class AccountDetails
   }
 }
 
-class _AccountDetailsImpl extends AccountDetails {
-  _AccountDetailsImpl({
-    required String id,
-    required String email,
+class _Undefined {}
+
+class _AccountUsernameImpl extends AccountUsername {
+  _AccountUsernameImpl({
+    int? id,
+    required String userId,
     required String username,
   }) : super._(
          id: id,
-         email: email,
+         userId: userId,
          username: username,
        );
 
-  /// Returns a shallow copy of this [AccountDetails]
+  /// Returns a shallow copy of this [AccountUsername]
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
   @override
-  AccountDetails copyWith({
-    String? id,
-    String? email,
+  AccountUsername copyWith({
+    Object? id = _Undefined,
+    String? userId,
     String? username,
   }) {
-    return AccountDetails(
-      id: id ?? this.id,
-      email: email ?? this.email,
+    return AccountUsername(
+      id: id is int? ? id : this.id,
+      userId: userId ?? this.userId,
       username: username ?? this.username,
     );
   }

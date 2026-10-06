@@ -12,6 +12,14 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _ida;
 import 'dart:typed_data' as _idt;
+import 'package:garden_client/src/protocol/accounts/public_identity.dart'
+    as _ish1qmwt;
+import 'package:garden_client/src/protocol/chat/chat_snapshot.dart'
+    as _i69yydj4;
+import 'package:garden_client/src/protocol/chat/drive_message.dart'
+    as _i7cpab2u;
+import 'package:garden_client/src/protocol/conversations/conversation_summary.dart'
+    as _ivtfh1ba;
 import 'package:garden_client/src/protocol/files/content_download.dart'
     as _ic1eq1qp;
 import 'package:garden_client/src/protocol/files/directory_listing.dart'
@@ -52,9 +60,21 @@ import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 import 'protocol.dart' as _il2as5qe;
 
-/// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
-/// are made available on the server and enable the corresponding sign-in widget
-/// on the client.
+/// {@category Endpoint}
+class EndpointIdentities extends _isc.EndpointRef {
+  EndpointIdentities(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'identities';
+
+  _ida.Future<List<_ish1qmwt.PublicIdentity>> members(int driveId) =>
+      caller.callServerEndpoint<List<_ish1qmwt.PublicIdentity>>(
+        'identities',
+        'members',
+        {'driveId': driveId},
+      );
+}
+
 /// {@category Endpoint}
 class EndpointEmailIdp extends _iaic.EndpointEmailIdpBase {
   EndpointEmailIdp(_isc.EndpointCaller caller) : super(caller);
@@ -62,15 +82,6 @@ class EndpointEmailIdp extends _iaic.EndpointEmailIdpBase {
   @override
   String get name => 'emailIdp';
 
-  /// Logs in the user and returns a new session.
-  ///
-  /// Throws an [EmailAccountLoginException] in case of errors, with reason:
-  /// - [EmailAccountLoginExceptionReason.invalidCredentials] if the email or
-  ///   password is incorrect.
-  /// - [EmailAccountLoginExceptionReason.tooManyAttempts] if there have been
-  ///   too many failed login attempts.
-  ///
-  /// Throws an [AuthUserBlockedException] if the auth user is blocked.
   @override
   _ida.Future<_iacc.AuthSuccess> login({
     required String email,
@@ -336,6 +347,243 @@ class EndpointPasskeyIdp extends _iaic.EndpointPasskeyIdpBase {
     'passkeyIdp',
     'hasAccount',
     {},
+  );
+}
+
+/// {@category Endpoint}
+class EndpointChat extends _isc.EndpointRef {
+  EndpointChat(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'chat';
+
+  _ida.Future<_i69yydj4.ChatSnapshot> snapshot(int driveId) =>
+      caller.callServerEndpoint<_i69yydj4.ChatSnapshot>(
+        'chat',
+        'snapshot',
+        {'driveId': driveId},
+      );
+
+  _ida.Future<List<_i7cpab2u.DriveMessage>> thread(
+    int driveId,
+    int messageId,
+    int beforeId,
+  ) => caller.callServerEndpoint<List<_i7cpab2u.DriveMessage>>(
+    'chat',
+    'thread',
+    {
+      'driveId': driveId,
+      'messageId': messageId,
+      'beforeId': beforeId,
+    },
+  );
+
+  _ida.Future<List<_i7cpab2u.DriveMessage>> history(
+    int driveId,
+    int beforeId,
+  ) => caller.callServerEndpoint<List<_i7cpab2u.DriveMessage>>(
+    'chat',
+    'history',
+    {
+      'driveId': driveId,
+      'beforeId': beforeId,
+    },
+  );
+
+  _ida.Future<List<_i7cpab2u.DriveMessage>> conversations(
+    int driveId,
+    int beforeId,
+  ) => caller.callServerEndpoint<List<_i7cpab2u.DriveMessage>>(
+    'chat',
+    'conversations',
+    {
+      'driveId': driveId,
+      'beforeId': beforeId,
+    },
+  );
+
+  _ida.Future<_i7cpab2u.DriveMessage> send(
+    int driveId,
+    String text,
+    int? replyToId,
+    int? nodeId,
+  ) => caller.callServerEndpoint<_i7cpab2u.DriveMessage>(
+    'chat',
+    'send',
+    {
+      'driveId': driveId,
+      'text': text,
+      'replyToId': replyToId,
+      'nodeId': nodeId,
+    },
+  );
+
+  _ida.Future<int> unread(int driveId) => caller.callServerEndpoint<int>(
+    'chat',
+    'unread',
+    {'driveId': driveId},
+  );
+
+  _ida.Future<int> readCursor(int driveId) => caller.callServerEndpoint<int>(
+    'chat',
+    'readCursor',
+    {'driveId': driveId},
+  );
+
+  _ida.Future<void> markRead(
+    int driveId,
+    int messageId,
+  ) => caller.callServerEndpoint<void>(
+    'chat',
+    'markRead',
+    {
+      'driveId': driveId,
+      'messageId': messageId,
+    },
+  );
+
+  _ida.Stream<_i7cpab2u.DriveMessage> watch(
+    int driveId,
+    int afterId,
+  ) =>
+      caller.callStreamingServerEndpoint<
+        _ida.Stream<_i7cpab2u.DriveMessage>,
+        _i7cpab2u.DriveMessage
+      >(
+        'chat',
+        'watch',
+        {
+          'driveId': driveId,
+          'afterId': afterId,
+        },
+        {},
+      );
+}
+
+/// {@category Endpoint}
+class EndpointConversationMessages extends _isc.EndpointRef {
+  EndpointConversationMessages(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'conversationMessages';
+
+  _ida.Future<_i69yydj4.ChatSnapshot> snapshot(int id) =>
+      caller.callServerEndpoint<_i69yydj4.ChatSnapshot>(
+        'conversationMessages',
+        'snapshot',
+        {'id': id},
+      );
+
+  _ida.Future<List<_i7cpab2u.DriveMessage>> history(
+    int id,
+    int beforeId,
+  ) => caller.callServerEndpoint<List<_i7cpab2u.DriveMessage>>(
+    'conversationMessages',
+    'history',
+    {
+      'id': id,
+      'beforeId': beforeId,
+    },
+  );
+
+  _ida.Future<List<_i7cpab2u.DriveMessage>> thread(
+    int id,
+    int messageId,
+    int beforeId,
+  ) => caller.callServerEndpoint<List<_i7cpab2u.DriveMessage>>(
+    'conversationMessages',
+    'thread',
+    {
+      'id': id,
+      'messageId': messageId,
+      'beforeId': beforeId,
+    },
+  );
+
+  _ida.Future<_i7cpab2u.DriveMessage> send(
+    int id,
+    String text,
+    int? replyToId,
+    int? nodeId,
+  ) => caller.callServerEndpoint<_i7cpab2u.DriveMessage>(
+    'conversationMessages',
+    'send',
+    {
+      'id': id,
+      'text': text,
+      'replyToId': replyToId,
+      'nodeId': nodeId,
+    },
+  );
+
+  _ida.Future<void> markRead(
+    int id,
+    int messageId,
+  ) => caller.callServerEndpoint<void>(
+    'conversationMessages',
+    'markRead',
+    {
+      'id': id,
+      'messageId': messageId,
+    },
+  );
+
+  _ida.Stream<_i7cpab2u.DriveMessage> watch(
+    int id,
+    int afterId,
+  ) =>
+      caller.callStreamingServerEndpoint<
+        _ida.Stream<_i7cpab2u.DriveMessage>,
+        _i7cpab2u.DriveMessage
+      >(
+        'conversationMessages',
+        'watch',
+        {
+          'id': id,
+          'afterId': afterId,
+        },
+        {},
+      );
+}
+
+/// {@category Endpoint}
+class EndpointConversations extends _isc.EndpointRef {
+  EndpointConversations(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'conversations';
+
+  _ida.Future<List<_ivtfh1ba.ConversationSummary>> list(
+    int driveId,
+    int beforeId,
+  ) => caller.callServerEndpoint<List<_ivtfh1ba.ConversationSummary>>(
+    'conversations',
+    'list',
+    {
+      'driveId': driveId,
+      'beforeId': beforeId,
+    },
+  );
+
+  _ida.Future<_ivtfh1ba.ConversationSummary> get(int id) =>
+      caller.callServerEndpoint<_ivtfh1ba.ConversationSummary>(
+        'conversations',
+        'get',
+        {'id': id},
+      );
+
+  _ida.Future<_ivtfh1ba.ConversationSummary> create(
+    int driveId,
+    List<String> recipients,
+    String title,
+  ) => caller.callServerEndpoint<_ivtfh1ba.ConversationSummary>(
+    'conversations',
+    'create',
+    {
+      'driveId': driveId,
+      'recipients': recipients,
+      'title': title,
+    },
   );
 }
 
@@ -688,6 +936,13 @@ class EndpointGarden extends _isc.EndpointRef {
         {},
       );
 
+  _ida.Future<_i7n7hin1.AccountDetails> setUsername(String username) =>
+      caller.callServerEndpoint<_i7n7hin1.AccountDetails>(
+        'garden',
+        'setUsername',
+        {'username': username},
+      );
+
   _ida.Future<_ihw30tky.FinderSession> finderSession(int gardenId) =>
       caller.callServerEndpoint<_ihw30tky.FinderSession>(
         'garden',
@@ -992,9 +1247,13 @@ class Client extends _isc.ServerpodClientShared {
              disconnectStreamsOnLostInternetConnection,
          httpClientOverride: httpClientOverride,
        ) {
+    identities = EndpointIdentities(this);
     emailIdp = EndpointEmailIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
     passkeyIdp = EndpointPasskeyIdp(this);
+    chat = EndpointChat(this);
+    conversationMessages = EndpointConversationMessages(this);
+    conversations = EndpointConversations(this);
     collaboration = EndpointCollaboration(this);
     content = EndpointContent(this);
     files = EndpointFiles(this);
@@ -1008,11 +1267,19 @@ class Client extends _isc.ServerpodClientShared {
     modules = Modules(this);
   }
 
+  late final EndpointIdentities identities;
+
   late final EndpointEmailIdp emailIdp;
 
   late final EndpointJwtRefresh jwtRefresh;
 
   late final EndpointPasskeyIdp passkeyIdp;
+
+  late final EndpointChat chat;
+
+  late final EndpointConversationMessages conversationMessages;
+
+  late final EndpointConversations conversations;
 
   late final EndpointCollaboration collaboration;
 
@@ -1038,9 +1305,13 @@ class Client extends _isc.ServerpodClientShared {
 
   @override
   Map<String, _isc.EndpointRef> get endpointRefLookup => {
+    'identities': identities,
     'emailIdp': emailIdp,
     'jwtRefresh': jwtRefresh,
     'passkeyIdp': passkeyIdp,
+    'chat': chat,
+    'conversationMessages': conversationMessages,
+    'conversations': conversations,
     'collaboration': collaboration,
     'content': content,
     'files': files,

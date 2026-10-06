@@ -1,3 +1,5 @@
+identities:
+  - members:
 emailIdp:
   - login:
   - startRegistration:
@@ -16,6 +18,27 @@ passkeyIdp:
   - removeKey:
   - createChallenge:
   - hasAccount:
+chat:
+  - snapshot:
+  - thread:
+  - history:
+  - conversations:
+  - send:
+  - unread:
+  - readCursor:
+  - markRead:
+  - watch:
+conversationMessages:
+  - snapshot:
+  - history:
+  - thread:
+  - send:
+  - markRead:
+  - watch:
+conversations:
+  - list:
+  - get:
+  - create:
 collaboration:
   - comments:
   - comment:
@@ -48,6 +71,7 @@ filesystem:
   - mutate:
 garden:
   - account:
+  - setUsername:
   - finderSession:
   - revokeFinderSessions:
   - list:

@@ -1,0 +1,7 @@
+class: ChatSnapshot
+fields:
+  messages: List<DriveMessage>
+  identities: List<PublicIdentity>
+  readCursor: int
+  unreadCount: int
+  latestMessageId: int, default=0

@@ -1,0 +1,12 @@
+class: ConversationMember
+table: conversation_member
+fields:
+  conversationId: int, relation(parent=conversation, onDelete=Cascade)
+  userId: String
+  readCursor: int, default=0
+indexes:
+  conversation_member_user:
+    fields: conversationId, userId
+    unique: true
+  conversation_user:
+    fields: userId, conversationId

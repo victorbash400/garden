@@ -1,0 +1,14 @@
+class: Conversation
+table: conversation
+fields:
+  gardenId: int, relation(parent=garden_record)
+  creatorId: String
+  title: String
+  directKey: String?
+  createdAt: DateTime
+indexes:
+  conversation_drive:
+    fields: gardenId, id
+  conversation_direct:
+    fields: gardenId, directKey
+    unique: true

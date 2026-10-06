@@ -12,6 +12,12 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:typed_data' as _idt;
+import 'package:garden_server/src/generated/accounts/public_identity.dart'
+    as _ibikijea;
+import 'package:garden_server/src/generated/chat/drive_message.dart'
+    as _i92woz0i;
+import 'package:garden_server/src/generated/conversations/conversation_summary.dart'
+    as _ilpy78oq;
 import 'package:garden_server/src/generated/files/drive_event.dart'
     as _ipqwe4ae;
 import 'package:garden_server/src/generated/files/file_comment.dart'
@@ -35,6 +41,14 @@ import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _iacs;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _iais;
+import 'accounts/account_username.dart' as _iltvw8yc;
+import 'accounts/public_identity.dart' as _i70ifst1;
+import 'chat/chat_read.dart' as _i3atmsok;
+import 'chat/chat_snapshot.dart' as _idocpjhp;
+import 'chat/drive_message.dart' as _i2rvmy1x;
+import 'conversations/conversation.dart' as _i5m0ut6e;
+import 'conversations/conversation_member.dart' as _i1li1n6g;
+import 'conversations/conversation_summary.dart' as _igvs8us8;
 import 'files/content_download.dart' as _id6mrfn8;
 import 'files/directory_listing.dart' as _i8kiawn9;
 import 'files/drive_event.dart' as _i4wn0cbe;
@@ -64,6 +78,14 @@ import 'sharing/account_notification.dart' as _i8nfb11w;
 import 'sharing/drive_invitation.dart' as _iks3nfjn;
 import 'sharing/drive_management.dart' as _ihkyi9jp;
 import 'sharing/drive_member_details.dart' as _iwfm68rt;
+export 'accounts/account_username.dart';
+export 'accounts/public_identity.dart';
+export 'chat/chat_read.dart';
+export 'chat/chat_snapshot.dart';
+export 'chat/drive_message.dart';
+export 'conversations/conversation.dart';
+export 'conversations/conversation_member.dart';
+export 'conversations/conversation_summary.dart';
 export 'files/content_download.dart';
 export 'files/directory_listing.dart';
 export 'files/drive_event.dart';
@@ -175,6 +197,294 @@ class Protocol extends _is.DatabaseSerializationManager {
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
               definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'account_username',
+      dartName: 'AccountUsername',
+      schema: 'public',
+      module: 'garden',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'userId',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'username',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'username_user_unique',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'userId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'username_unique',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'username',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'chat_read',
+      dartName: 'ChatRead',
+      schema: 'public',
+      module: 'garden',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'gardenId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'userId',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'messageId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'chat_read_user',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'gardenId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'userId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'conversation',
+      dartName: 'Conversation',
+      schema: 'public',
+      module: 'garden',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'gardenId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'creatorId',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'title',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'directKey',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'conversation_fk_0',
+          columns: ['gardenId'],
+          referenceTable: 'garden_record',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'conversation_drive',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'gardenId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'conversation_direct',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'gardenId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'directKey',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'conversation_member',
+      dartName: 'ConversationMember',
+      schema: 'public',
+      module: 'garden',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'conversationId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'userId',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'readCursor',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '0',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'conversation_member_fk_0',
+          columns: ['conversationId'],
+          referenceTable: 'conversation',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'conversation_member_user',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'conversationId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'userId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'conversation_user',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'userId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'conversationId',
             ),
           ],
           type: 'btree',
@@ -390,6 +700,147 @@ class Protocol extends _is.DatabaseSerializationManager {
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
               definition: 'gardenId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'drive_message',
+      dartName: 'DriveMessage',
+      schema: 'public',
+      module: 'garden',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'gardenId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'conversationId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'authorId',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'username',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'text',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'replyToId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'nodeId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'nodeName',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'drive_message_fk_0',
+          columns: ['gardenId'],
+          referenceTable: 'garden_record',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'drive_message_fk_1',
+          columns: ['conversationId'],
+          referenceTable: 'conversation',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'message_drive_id',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'gardenId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'message_conversation_id',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'conversationId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'message_reply_parent',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'replyToId',
             ),
           ],
           type: 'btree',
@@ -1140,6 +1591,30 @@ class Protocol extends _is.DatabaseSerializationManager {
       }
     }
 
+    if (t == _iltvw8yc.AccountUsername) {
+      return _iltvw8yc.AccountUsername.fromJson(data) as T;
+    }
+    if (t == _i70ifst1.PublicIdentity) {
+      return _i70ifst1.PublicIdentity.fromJson(data) as T;
+    }
+    if (t == _i3atmsok.ChatRead) {
+      return _i3atmsok.ChatRead.fromJson(data) as T;
+    }
+    if (t == _idocpjhp.ChatSnapshot) {
+      return _idocpjhp.ChatSnapshot.fromJson(data) as T;
+    }
+    if (t == _i2rvmy1x.DriveMessage) {
+      return _i2rvmy1x.DriveMessage.fromJson(data) as T;
+    }
+    if (t == _i5m0ut6e.Conversation) {
+      return _i5m0ut6e.Conversation.fromJson(data) as T;
+    }
+    if (t == _i1li1n6g.ConversationMember) {
+      return _i1li1n6g.ConversationMember.fromJson(data) as T;
+    }
+    if (t == _igvs8us8.ConversationSummary) {
+      return _igvs8us8.ConversationSummary.fromJson(data) as T;
+    }
     if (t == _id6mrfn8.ContentDownload) {
       return _id6mrfn8.ContentDownload.fromJson(data) as T;
     }
@@ -1223,6 +1698,36 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (t == _iwfm68rt.DriveMemberDetails) {
       return _iwfm68rt.DriveMemberDetails.fromJson(data) as T;
+    }
+    if (t == _is.getType<_iltvw8yc.AccountUsername?>()) {
+      return (data != null ? _iltvw8yc.AccountUsername.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_i70ifst1.PublicIdentity?>()) {
+      return (data != null ? _i70ifst1.PublicIdentity.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_i3atmsok.ChatRead?>()) {
+      return (data != null ? _i3atmsok.ChatRead.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_idocpjhp.ChatSnapshot?>()) {
+      return (data != null ? _idocpjhp.ChatSnapshot.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i2rvmy1x.DriveMessage?>()) {
+      return (data != null ? _i2rvmy1x.DriveMessage.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i5m0ut6e.Conversation?>()) {
+      return (data != null ? _i5m0ut6e.Conversation.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i1li1n6g.ConversationMember?>()) {
+      return (data != null ? _i1li1n6g.ConversationMember.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_igvs8us8.ConversationSummary?>()) {
+      return (data != null
+              ? _igvs8us8.ConversationSummary.fromJson(data)
+              : null)
+          as T;
     }
     if (t == _is.getType<_id6mrfn8.ContentDownload?>()) {
       return (data != null ? _id6mrfn8.ContentDownload.fromJson(data) : null)
@@ -1333,6 +1838,18 @@ class Protocol extends _is.DatabaseSerializationManager {
       return (data != null ? _iwfm68rt.DriveMemberDetails.fromJson(data) : null)
           as T;
     }
+    if (t == List<_i2rvmy1x.DriveMessage>) {
+      return (data as List)
+              .map((e) => deserialize<_i2rvmy1x.DriveMessage>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i70ifst1.PublicIdentity>) {
+      return (data as List)
+              .map((e) => deserialize<_i70ifst1.PublicIdentity>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_iqxechne.FileNode>) {
       return (data as List)
               .map((e) => deserialize<_iqxechne.FileNode>(e))
@@ -1369,6 +1886,12 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == List<_iks3nfjn.DriveInvitation>) {
       return (data as List)
               .map((e) => deserialize<_iks3nfjn.DriveInvitation>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ibikijea.PublicIdentity>) {
+      return (data as List)
+              .map((e) => deserialize<_ibikijea.PublicIdentity>(e))
               .toList()
           as T;
     }
@@ -1425,14 +1948,26 @@ class Protocol extends _is.DatabaseSerializationManager {
           )
           as T;
     }
-    if (t == List<_ih79ezm0.FileComment>) {
+    if (t == List<_i92woz0i.DriveMessage>) {
       return (data as List)
-              .map((e) => deserialize<_ih79ezm0.FileComment>(e))
+              .map((e) => deserialize<_i92woz0i.DriveMessage>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ilpy78oq.ConversationSummary>) {
+      return (data as List)
+              .map((e) => deserialize<_ilpy78oq.ConversationSummary>(e))
               .toList()
           as T;
     }
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    }
+    if (t == List<_ih79ezm0.FileComment>) {
+      return (data as List)
+              .map((e) => deserialize<_ih79ezm0.FileComment>(e))
+              .toList()
+          as T;
     }
     if (t == List<_izqf04mm.UploadedPart>) {
       return (data as List)
@@ -1496,6 +2031,14 @@ class Protocol extends _is.DatabaseSerializationManager {
 
   static String? getClassNameForType(Type type) {
     return switch (type) {
+      _iltvw8yc.AccountUsername => 'AccountUsername',
+      _i70ifst1.PublicIdentity => 'PublicIdentity',
+      _i3atmsok.ChatRead => 'ChatRead',
+      _idocpjhp.ChatSnapshot => 'ChatSnapshot',
+      _i2rvmy1x.DriveMessage => 'DriveMessage',
+      _i5m0ut6e.Conversation => 'Conversation',
+      _i1li1n6g.ConversationMember => 'ConversationMember',
+      _igvs8us8.ConversationSummary => 'ConversationSummary',
       _id6mrfn8.ContentDownload => 'ContentDownload',
       _i8kiawn9.DirectoryListing => 'DirectoryListing',
       _i4wn0cbe.DriveEvent => 'DriveEvent',
@@ -1539,6 +2082,22 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
 
     switch (data) {
+      case _iltvw8yc.AccountUsername():
+        return 'AccountUsername';
+      case _i70ifst1.PublicIdentity():
+        return 'PublicIdentity';
+      case _i3atmsok.ChatRead():
+        return 'ChatRead';
+      case _idocpjhp.ChatSnapshot():
+        return 'ChatSnapshot';
+      case _i2rvmy1x.DriveMessage():
+        return 'DriveMessage';
+      case _i5m0ut6e.Conversation():
+        return 'Conversation';
+      case _i1li1n6g.ConversationMember():
+        return 'ConversationMember';
+      case _igvs8us8.ConversationSummary():
+        return 'ConversationSummary';
       case _id6mrfn8.ContentDownload():
         return 'ContentDownload';
       case _i8kiawn9.DirectoryListing():
@@ -1620,6 +2179,30 @@ class Protocol extends _is.DatabaseSerializationManager {
     var dataClassName = data['className'];
     if (dataClassName is! String) {
       return super.deserializeByClassName(data);
+    }
+    if (dataClassName == 'AccountUsername') {
+      return deserialize<_iltvw8yc.AccountUsername>(data['data']);
+    }
+    if (dataClassName == 'PublicIdentity') {
+      return deserialize<_i70ifst1.PublicIdentity>(data['data']);
+    }
+    if (dataClassName == 'ChatRead') {
+      return deserialize<_i3atmsok.ChatRead>(data['data']);
+    }
+    if (dataClassName == 'ChatSnapshot') {
+      return deserialize<_idocpjhp.ChatSnapshot>(data['data']);
+    }
+    if (dataClassName == 'DriveMessage') {
+      return deserialize<_i2rvmy1x.DriveMessage>(data['data']);
+    }
+    if (dataClassName == 'Conversation') {
+      return deserialize<_i5m0ut6e.Conversation>(data['data']);
+    }
+    if (dataClassName == 'ConversationMember') {
+      return deserialize<_i1li1n6g.ConversationMember>(data['data']);
+    }
+    if (dataClassName == 'ConversationSummary') {
+      return deserialize<_igvs8us8.ConversationSummary>(data['data']);
     }
     if (dataClassName == 'ContentDownload') {
       return deserialize<_id6mrfn8.ContentDownload>(data['data']);
@@ -1748,6 +2331,16 @@ class Protocol extends _is.DatabaseSerializationManager {
       }
     }
     switch (t) {
+      case _iltvw8yc.AccountUsername:
+        return _iltvw8yc.AccountUsername.t;
+      case _i3atmsok.ChatRead:
+        return _i3atmsok.ChatRead.t;
+      case _i2rvmy1x.DriveMessage:
+        return _i2rvmy1x.DriveMessage.t;
+      case _i5m0ut6e.Conversation:
+        return _i5m0ut6e.Conversation.t;
+      case _i1li1n6g.ConversationMember:
+        return _i1li1n6g.ConversationMember.t;
       case _i4wn0cbe.DriveEvent:
         return _i4wn0cbe.DriveEvent.t;
       case _imjz65yx.FileChunk:

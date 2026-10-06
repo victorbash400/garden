@@ -1,0 +1,12 @@
+class: AccountUsername
+table: account_username
+fields:
+  userId: String
+  username: String
+indexes:
+  username_user_unique:
+    fields: userId
+    unique: true
+  username_unique:
+    fields: username
+    unique: true
