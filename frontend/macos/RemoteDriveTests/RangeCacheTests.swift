@@ -72,5 +72,18 @@ actor RangeSource {
     }
     try require(streams.observe(offset: 90 * 1024 * 1024, length: 16384) == GardenReadWindow.pageSize,
       "A distant metadata seek must retain a small window")
+    let audio = try GardenNode(["id": 2, "parentId": 0, "name": "audio.wav", "kind": "file", "size": size,
+      "version": 1, "updatedAt": "2026-10-06T00:00:00.000Z", "deleted": false])
+    let audioBefore = await source.requests.count
+    let bytesBefore = await cache.remoteBytes
+    for offset in stride(from: 0, to: 2 * 1024 * 1024, by: 4096) {
+      let data = try await cache.read(node: audio, offset: offset, length: 4096)
+      try require(data == Data((offset..<(offset + 4096)).map { UInt8($0 % 251) }), "Small audio reads differ")
+    }
+    await cache.invalidate()
+    try require(await source.requests.count - audioBefore <= 5, "Small sequential audio reads must reuse read-ahead")
+    try require(await cache.remoteBytes - bytesBefore <= 3 * 1024 * 1024 + 65536,
+      "Small-read prefetch must stay within one bulk window ahead")
+    print("512 small audio reads: byte correctness, shared requests and bounded read-ahead passed")
   }
 }

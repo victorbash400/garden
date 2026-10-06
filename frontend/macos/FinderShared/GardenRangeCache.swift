@@ -110,7 +110,7 @@ actor GardenRangeCache {
     }
     guard result.count == end - offset else { throw GardenAPIError.invalidResponse }
     if persist {
-      if length >= Self.smallBlockSize, fetchSize == GardenReadWindow.maximumSize {
+      if (length >= Self.smallBlockSize || length <= 8192), fetchSize == GardenReadWindow.maximumSize {
         schedulePayload(node: node, after: end, path: path)
       }
       scheduleReadAhead(node: node, offset: offset, path: path)
