@@ -44,7 +44,8 @@ enum SystemIcons {
   upload('upload'),
   importFiles('import'),
   userPlus('user_add'),
-  userRound('user'),
+  userRound('user_male_circle'),
+  users('users'),
   wifiOff('wifi_error'),
   x('cross'),
   folderOpen('folder_open');

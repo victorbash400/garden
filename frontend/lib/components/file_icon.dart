@@ -9,9 +9,12 @@ class FileIcon extends StatelessWidget {
   final Color? color;
 
   @override
-  Widget build(BuildContext context) => SystemIcon(
-    SystemIcons.file,
-    size: size,
-    color: color ?? GardenColors.of(context).ink,
-  );
+  Widget build(BuildContext context) {
+    final colors = GardenColors.of(context);
+    return SystemIcon(
+      SystemIcons.file,
+      size: size,
+      color: color == null || color == colors.ink ? colors.mix(.68) : color,
+    );
+  }
 }

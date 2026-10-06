@@ -53,7 +53,7 @@ class ChatHeader extends StatelessWidget {
         ConversationMenu(chat: controller),
         ToolbarButton(
           tooltip: 'Who can see this conversation',
-          icon: SystemIcons.userRound,
+          icon: SystemIcons.users,
           onPressed: () => showDialog(
             context: context,
             builder: (_) => ChatAudienceDialog(
