@@ -85,5 +85,24 @@ actor RangeSource {
     try require(await cache.remoteBytes - bytesBefore <= 3 * 1024 * 1024 + 65536,
       "Small-read prefetch must stay within one bulk window ahead")
     print("512 small audio reads: byte correctness, shared requests and bounded read-ahead passed")
+    for length in [16384, 32768] {
+      let media = try GardenNode(["id": length, "parentId": 0, "name": "media.webm", "kind": "file", "size": size,
+        "version": 1, "updatedAt": "2026-10-06T00:00:00.000Z", "deleted": false])
+      let before = await source.requests.count
+      let bytesBefore = await cache.remoteBytes
+      for offset in stride(from: 0, to: 2 * 1024 * 1024, by: length) {
+        let bytes = try await cache.read(node: media, offset: offset, length: length)
+        try require(bytes == Data((offset..<(offset + length)).map { UInt8($0 % 251) }), "Media stream bytes differ")
+        if offset == 1024 * 1024 - 2 * length {
+          let started = await source.requests.dropFirst(before).contains { $0.0 == 1024 * 1024 }
+          try require(started, "The next media window must start before the current one is exhausted")
+        }
+      }
+      await cache.invalidate()
+      try require(await source.requests.count - before <= 5, "Sequential media reads must reuse bounded windows")
+      try require(await cache.remoteBytes - bytesBefore <= 3 * 1024 * 1024 + 65536,
+        "Media read-ahead must stay one block ahead")
+    }
+    print("16 and 32 KiB media streams: byte correctness and bounded read-ahead passed")
   }
 }
