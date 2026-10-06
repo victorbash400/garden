@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:garden_client/garden_client.dart';
 
-import '../settings/settings_inline_button.dart';
+import '../../ui/garden_colors.dart';
+import 'notification_actions.dart';
+import 'notification_icon.dart';
 
-class InvitationNotificationRow extends StatefulWidget {
+class InvitationNotificationRow extends StatelessWidget {
   const InvitationNotificationRow({
     super.key,
     required this.item,
@@ -13,21 +14,20 @@ class InvitationNotificationRow extends StatefulWidget {
     required this.onAccept,
     required this.onDecline,
     required this.onRead,
+    required this.onTrash,
   });
   final AccountNotification item;
   final DriveInvitation? invitation;
   final bool busy;
-  final VoidCallback onAccept, onDecline, onRead;
-  @override
-  State<InvitationNotificationRow> createState() =>
-      _InvitationNotificationRowState();
-}
-
-class _InvitationNotificationRowState extends State<InvitationNotificationRow> {
-  bool expanded = false;
+  final VoidCallback onAccept, onDecline, onRead, onTrash;
   @override
   Widget build(BuildContext context) {
-    final invite = widget.invitation;
+    final colors = GardenColors.of(context);
+    final localDate = item.createdAt.toLocal();
+    final locale = MaterialLocalizations.of(context);
+    final date =
+        '${locale.formatMediumDate(localDate)} · ${locale.formatTimeOfDay(TimeOfDay.fromDateTime(localDate))}';
+    final invite = invitation;
     final pending =
         invite != null &&
         invite.acceptedAt == null &&
@@ -35,9 +35,9 @@ class _InvitationNotificationRowState extends State<InvitationNotificationRow> {
         invite.revokedAt == null &&
         invite.expiresAt.isAfter(DateTime.now().toUtc());
     final status = invite == null
-        ? (widget.item.kind == 'accessChanged'
+        ? (item.kind == 'accessChanged'
               ? 'Drive access updated'
-              : widget.item.kind == 'invitationUpdated'
+              : item.kind == 'invitationUpdated'
               ? 'Invitation updated'
               : 'Drive invitation')
         : invite.acceptedAt != null
@@ -49,83 +49,57 @@ class _InvitationNotificationRowState extends State<InvitationNotificationRow> {
         : !pending
         ? 'Expired'
         : 'Drive invitation · ${invite.role}';
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        InkWell(
-          borderRadius: BorderRadius.circular(10),
-          onTap: () => setState(() => expanded = !expanded),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: NotificationIcon(
+              unread: item.readAt == null && item.trashedAt == null,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.item.title,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: widget.item.readAt == null
-                              ? FontWeight.w600
-                              : FontWeight.w400,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        status,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
+                Text(
+                  item.title,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                if (pending) ...[
-                  SettingsInlineButton(
-                    label: 'Decline',
-                    onPressed: widget.busy ? null : widget.onDecline,
-                  ),
-                  const SizedBox(width: 8),
-                  SettingsInlineButton(
-                    label: 'Accept',
-                    onPressed: widget.busy ? null : widget.onAccept,
+                const SizedBox(height: 4),
+                Text(
+                  status,
+                  style: TextStyle(fontSize: 12, color: colors.secondary),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  date,
+                  style: TextStyle(fontSize: 11, color: colors.secondary),
+                ),
+                ...[
+                  const SizedBox(height: 12),
+                  NotificationActions(
+                    pending: pending && item.trashedAt == null,
+                    trashed: item.trashedAt != null,
+                    onTrash: onTrash,
+                    unread: item.readAt == null,
+                    busy: busy,
+                    onAccept: onAccept,
+                    onDecline: onDecline,
+                    onRead: onRead,
                   ),
                 ],
-                const SizedBox(width: 12),
-                Icon(
-                  expanded ? LucideIcons.chevronUp : LucideIcons.chevronDown,
-                  size: 16,
-                ),
               ],
             ),
           ),
-        ),
-        if (expanded)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    widget.item.createdAt.toLocal().toString(),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                if (widget.item.readAt == null)
-                  SettingsInlineButton(
-                    label: 'Mark read',
-                    onPressed: widget.busy ? null : widget.onRead,
-                  ),
-              ],
-            ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 }

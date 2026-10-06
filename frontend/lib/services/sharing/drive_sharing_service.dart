@@ -27,6 +27,8 @@ class DriveSharingService {
       client.notifications.list(0);
   Stream<AccountNotification> watch(int cursor) =>
       client.notifications.watch(cursor);
+  Future<void> setTrashed(int id, bool trashed) =>
+      client.notifications.setTrashed(id, trashed);
   Future<void> markRead(int id) => client.notifications.markRead(id);
   Future<List<DriveInvitation>> received() =>
       client.driveInvitations.received();

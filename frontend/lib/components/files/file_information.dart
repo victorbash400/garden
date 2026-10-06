@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../ui/garden_colors.dart';
+
 import 'package:garden_client/garden_client.dart';
 
 import 'file_size.dart';
@@ -11,36 +14,42 @@ class FileInformation extends StatelessWidget {
   Widget build(BuildContext context) {
     final date = node.updatedAt.toLocal();
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Center(
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20),
+              padding: EdgeInsets.symmetric(vertical: 20),
               child: NodeIcon(node: node, size: 72),
             ),
           ),
           SelectableText(
             node.name,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           Text(
             fileSize(node.size),
-            style: const TextStyle(fontSize: 12, color: Color(0xFF777773)),
+            style: TextStyle(
+              fontSize: 12,
+              color: GardenColors.of(context).secondary,
+            ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           Row(
             children: [
-              const Text(
+              Text(
                 'Modified',
-                style: TextStyle(fontSize: 11, color: Color(0xFF777773)),
+                style: TextStyle(
+                  fontSize: 11,
+                  color: GardenColors.of(context).secondary,
+                ),
               ),
-              const Spacer(),
+              Spacer(),
               Text(
                 '${date.day}/${date.month}/${date.year}',
-                style: const TextStyle(fontSize: 11),
+                style: TextStyle(fontSize: 11),
               ),
             ],
           ),

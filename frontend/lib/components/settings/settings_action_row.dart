@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../ui/garden_colors.dart';
+
 class SettingsActionRow extends StatelessWidget {
   const SettingsActionRow({
     super.key,
@@ -15,7 +17,7 @@ class SettingsActionRow extends StatelessWidget {
     onTap: onTap,
     title: Text(
       label,
-      style: const TextStyle(fontSize: 13, color: Color(0xFFB23D3D)),
+      style: TextStyle(fontSize: 13, color: GardenColors.of(context).danger),
     ),
   );
 }

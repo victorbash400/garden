@@ -1,8 +1,9 @@
+import 'system_icon.dart';
+
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../model/garden_info.dart';
-import '../ui/garden_theme.dart';
+import '../ui/garden_colors.dart';
 import 'garden_button.dart';
 
 class GardenRow extends StatelessWidget {
@@ -11,32 +12,31 @@ class GardenRow extends StatelessWidget {
   final VoidCallback? onConnect;
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(vertical: 16),
-    decoration: const BoxDecoration(
-      border: Border(bottom: BorderSide(color: Color(0xFFE9E9EC))),
+    padding: EdgeInsets.symmetric(vertical: 16),
+    decoration: BoxDecoration(
+      border: Border(
+        bottom: BorderSide(color: GardenColors.of(context).divider),
+      ),
     ),
     child: Row(
       children: [
-        const Icon(
-          LucideIcons.hardDrive,
+        SystemIcon(
+          SystemIcons.hardDrive,
           size: 30,
-          color: GardenTheme.secondary,
+          color: GardenColors.of(context).ink,
         ),
-        const SizedBox(width: 14),
+        SizedBox(width: 14),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                garden.name,
-                style: const TextStyle(fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 4),
+              Text(garden.name, style: TextStyle(fontWeight: FontWeight.w500)),
+              SizedBox(height: 4),
               Text(
                 '${garden.members} members · ${garden.role}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: GardenTheme.secondary,
+                  color: GardenColors.of(context).secondary,
                 ),
               ),
             ],

@@ -1,4 +1,9 @@
+import '../error_notice.dart';
+
 import 'package:flutter/material.dart';
+
+import '../../ui/garden_colors.dart';
+
 import 'package:garden_client/garden_client.dart';
 
 import '../../utils/error_message.dart';
@@ -95,30 +100,25 @@ class _FileDetailsState extends State<FileDetails> {
   Widget build(BuildContext context) => SizedBox(
     width: 280,
     child: DecoratedBox(
-      decoration: const BoxDecoration(
-        border: Border(left: BorderSide(color: Color(0xFFE8E8EB))),
+      decoration: BoxDecoration(
+        border: Border(
+          left: BorderSide(color: GardenColors.of(context).border),
+        ),
       ),
       child: DefaultTabController(
         length: 2,
         child: Column(
           children: [
             FileInformation(node: widget.node),
-            const TabBar(
+            TabBar(
               tabs: [
                 Tab(text: 'Versions'),
                 Tab(text: 'Comments'),
               ],
               labelStyle: TextStyle(fontSize: 12),
             ),
-            if (loading) const LinearProgressIndicator(minHeight: 2),
-            if (error != null)
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: SelectableText(
-                  error!,
-                  style: const TextStyle(fontSize: 12, color: Colors.red),
-                ),
-              ),
+            if (loading) LinearProgressIndicator(minHeight: 2),
+            if (error != null) ErrorNotice(message: error!),
             Expanded(
               child: TabBarView(
                 children: [
@@ -133,7 +133,7 @@ class _FileDetailsState extends State<FileDetails> {
                         child: FileCommentsList(
                           comments: comments,
                           userId: widget.userId,
-                        ),
+                              ),
                       ),
                       if (widget.canWrite) FileCommentInput(onSubmit: post),
                     ],

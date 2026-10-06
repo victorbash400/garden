@@ -1,6 +1,8 @@
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 
+import '../../ui/garden_colors.dart';
+
 import '../../services/files/drop_import.dart';
 import '../../state/files_controller.dart';
 
@@ -50,8 +52,11 @@ class _DirectoryDropTargetState extends State<DirectoryDropTarget> {
             IgnorePointer(
               child: Container(
                 decoration: BoxDecoration(
-                  color: const Color(0x180078FF),
-                  border: Border.all(color: const Color(0xFF0078FF), width: 2),
+                  color: GardenColors.of(context).accentSurface,
+                  border: Border.all(
+                    color: GardenColors.of(context).accent,
+                    width: 2,
+                  ),
                 ),
               ),
             ),

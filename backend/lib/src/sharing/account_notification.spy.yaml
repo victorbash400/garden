@@ -8,6 +8,7 @@ fields:
   title: String
   createdAt: DateTime
   readAt: DateTime?
+  trashedAt: DateTime?
 indexes:
   notification_recipient_cursor:
     fields: recipientEmail, id

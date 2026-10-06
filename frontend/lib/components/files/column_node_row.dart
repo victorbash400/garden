@@ -1,8 +1,11 @@
+import '../system_icon.dart';
 import 'hover_rename.dart';
 
 import 'package:flutter/material.dart';
+
+import '../../ui/garden_colors.dart';
+
 import 'package:garden_client/garden_client.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../state/files_controller.dart';
 import '../list_row.dart';
@@ -50,24 +53,24 @@ class ColumnNodeRow extends StatelessWidget {
             height: 29,
             child: Row(
               children: [
-                const SizedBox(width: 6),
+                SizedBox(width: 6),
                 NodeIcon(node: node, size: 20, open: active),
-                const SizedBox(width: 6),
+                SizedBox(width: 6),
                 Expanded(
                   child: Text(
                     node.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 12),
+                    style: TextStyle(fontSize: 12),
                   ),
                 ),
                 if (node.kind == NodeKind.folder)
-                  const Icon(
-                    LucideIcons.chevronRight,
+                  SystemIcon(
+                    SystemIcons.chevronRight,
                     size: 12,
-                    color: Color(0xFF888884),
+                    color: GardenColors.of(context).ink,
                   ),
-                const SizedBox(width: 6),
+                SizedBox(width: 6),
               ],
             ),
           ),

@@ -4,10 +4,10 @@ import 'package:garden_client/garden_client.dart';
 import '../components/sharing/invitation_notification_row.dart';
 import '../components/settings/settings_group.dart';
 import '../components/settings/settings_issue.dart';
-import '../components/settings/settings_row.dart';
-import '../components/settings/settings_inline_button.dart';
+import '../components/sharing/notifications_toolbar.dart';
 import '../state/garden_controller.dart';
 import '../utils/error_message.dart';
+import '../model/notification_filter.dart';
 
 class NotificationsSettings extends StatefulWidget {
   const NotificationsSettings({super.key, required this.controller});
@@ -20,6 +20,8 @@ class _NotificationsSettingsState extends State<NotificationsSettings> {
   Map<int, DriveInvitation> invitations = {};
   String? error;
   bool busy = false;
+  NotificationFilter filter = NotificationFilter.all;
+  NotificationSort sort = NotificationSort.newest;
   bool loadingInvitations = false;
   bool reloadInvitations = false;
   @override
@@ -60,7 +62,11 @@ class _NotificationsSettingsState extends State<NotificationsSettings> {
     }
   }
 
-  Future<void> act(AccountNotification item, {bool? accept}) async {
+  Future<void> act(
+    AccountNotification item, {
+    bool? accept,
+    bool? trashed,
+  }) async {
     setState(() {
       busy = true;
       error = null;
@@ -73,7 +79,11 @@ class _NotificationsSettingsState extends State<NotificationsSettings> {
       if (accept == false) {
         await notifications.service.decline(item.invitationId!);
       }
-      await notifications.markRead(item);
+      if (trashed != null) {
+        await notifications.setTrashed(item, trashed);
+      } else {
+        await notifications.markRead(item);
+      }
       await load();
       if (accept == true) {
         await widget.controller.refresh();
@@ -94,48 +104,77 @@ class _NotificationsSettingsState extends State<NotificationsSettings> {
     if (notifications == null) {
       return const Text('Notifications are unavailable.');
     }
-    return SettingsGroup(
+    final items =
+        notifications.items
+            .where(
+              (item) => switch (filter) {
+                NotificationFilter.all => item.trashedAt == null,
+                NotificationFilter.unread =>
+                  item.trashedAt == null && item.readAt == null,
+                NotificationFilter.trash => item.trashedAt != null,
+              },
+            )
+            .toList()
+          ..sort((a, b) {
+            final order = a.createdAt.compareTo(b.createdAt);
+            final compared = order == 0 ? a.id!.compareTo(b.id!) : order;
+            return sort == NotificationSort.newest ? -compared : compared;
+          });
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (error ?? notifications.error case final String message)
-          SettingsIssue(
-            message: message,
-            action: 'Retry',
-            onAction: () {
-              notifications.start();
-              load();
-            },
-          ),
-        if (notifications.loading)
-          const Padding(
-            padding: EdgeInsets.all(20),
-            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-          ),
-        if (!notifications.loading && notifications.items.isEmpty)
-          const SettingsRow(
-            label: 'No notifications',
-            value: SizedBox.shrink(),
-          ),
-        for (final item in notifications.items)
-          InvitationNotificationRow(
-            key: ValueKey(item.id),
-            item: item,
-            invitation: invitations[item.invitationId],
-            busy: busy,
-            onAccept: () => act(item, accept: true),
-            onDecline: () => act(item, accept: false),
-            onRead: () => act(item),
-          ),
-        SettingsRow(
-          label: 'Notifications',
-          value: SettingsInlineButton(
-            label: 'Refresh',
-            onPressed: busy
-                ? null
-                : () {
-                    notifications.start();
-                    load();
-                  },
-          ),
+        NotificationsToolbar(
+          unread: notifications.unread,
+          filter: filter,
+          sort: sort,
+          onFilter: (value) => setState(() => filter = value),
+          onSort: (value) => setState(() => sort = value),
+          busy: busy || notifications.loading || loadingInvitations,
+          onRefresh: () {
+            notifications.start();
+            load();
+          },
+        ),
+        const SizedBox(height: 12),
+        SettingsGroup(
+          children: [
+            if (error ?? notifications.error case final String message)
+              SettingsIssue(
+                message: message,
+                action: 'Retry',
+                onAction: () {
+                  notifications.start();
+                  load();
+                },
+              ),
+            if (notifications.loading)
+              Padding(
+                padding: EdgeInsets.all(20),
+                child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+              ),
+            if (!notifications.loading && items.isEmpty)
+              Padding(
+                padding: EdgeInsets.all(24),
+                child: Center(
+                  child: Text(switch (filter) {
+                    NotificationFilter.all => 'No notifications',
+                    NotificationFilter.unread => 'No unread notifications',
+                    NotificationFilter.trash => 'Trash is empty',
+                  }, style: TextStyle(fontSize: 13)),
+                ),
+              ),
+            for (final item in items)
+              InvitationNotificationRow(
+                key: ValueKey(item.id),
+                item: item,
+                invitation: invitations[item.invitationId],
+                busy: busy,
+                onAccept: () => act(item, accept: true),
+                onDecline: () => act(item, accept: false),
+                onRead: () => act(item),
+                onTrash: () => act(item, trashed: item.trashedAt == null),
+              ),
+          ],
         ),
       ],
     );

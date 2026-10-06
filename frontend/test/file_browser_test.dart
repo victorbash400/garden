@@ -1,3 +1,5 @@
+import 'package:garden_flutter/ui/garden_theme.dart';
+
 import 'dart:async';
 
 import 'package:flutter/gestures.dart';
@@ -61,6 +63,7 @@ void main() {
     final file = files.selected!;
     await tester.pumpWidget(
       MaterialApp(
+        theme: GardenTheme.light,
         home: Scaffold(
           body: FilesView(
             controller: files,
@@ -131,6 +134,7 @@ void main() {
     final folder = files.selected!;
     await tester.pumpWidget(
       MaterialApp(
+        theme: GardenTheme.light,
         home: Scaffold(
           body: SizedBox(
             width: 1000,

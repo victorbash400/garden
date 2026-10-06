@@ -1,5 +1,6 @@
+import '../system_icon.dart';
+
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class SettingsPickerOption extends StatelessWidget {
   const SettingsPickerOption({
@@ -18,7 +19,7 @@ class SettingsPickerOption extends StatelessWidget {
     trailingIcon: SizedBox(
       width: 14,
       height: 14,
-      child: selected ? const Icon(LucideIcons.check, size: 14) : null,
+      child: selected ? const SystemIcon(SystemIcons.check, size: 14) : null,
     ),
     style:
         MenuItemButton.styleFrom(

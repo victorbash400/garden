@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../ui/garden_colors.dart';
+
 import '../state/activity_controller.dart';
 import '../state/garden_controller.dart';
 import '../components/settings/activity_row.dart';
@@ -33,11 +35,11 @@ class _ActivitySettingsState extends State<ActivitySettings> {
         for (final drive in widget.controller.gardens) drive.id: drive.name,
       };
       return Material(
-        color: Colors.white,
+        color: GardenColors.of(context).panel,
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: Color(0xFFD8D8D5)),
+          side: BorderSide(color: GardenColors.of(context).border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -45,17 +47,17 @@ class _ActivitySettingsState extends State<ActivitySettings> {
             Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(14),
+                  padding: EdgeInsets.all(14),
                   child: Row(
                     children: [
                       Text(
                         '${entries.length} events',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: Color(0xFF777777),
+                          color: GardenColors.of(context).secondary,
                         ),
                       ),
-                      const Spacer(),
+                      Spacer(),
                       SettingsInlineButton(
                         label: 'Clear',
                         onPressed: activity.connected && entries.isNotEmpty
@@ -74,7 +76,7 @@ class _ActivitySettingsState extends State<ActivitySettings> {
                   ),
               ],
             ),
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(horizontal: 12),
               child: ActivityHeader(),
             ),
@@ -83,9 +85,9 @@ class _ActivitySettingsState extends State<ActivitySettings> {
                   ? Center(
                       child: Text(
                         activity.connected ? 'No activity yet' : 'Connecting…',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
-                          color: Color(0xFF777777),
+                          color: GardenColors.of(context).secondary,
                         ),
                       ),
                     )
@@ -94,7 +96,7 @@ class _ActivitySettingsState extends State<ActivitySettings> {
                       thumbVisibility: true,
                       child: ListView.builder(
                         controller: scroll,
-                        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                        padding: EdgeInsets.fromLTRB(12, 0, 12, 12),
                         itemCount: entries.length,
                         itemBuilder: (context, index) => ActivityRow(
                           key: ValueKey(entries[index].id),

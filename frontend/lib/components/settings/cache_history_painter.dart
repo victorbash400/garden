@@ -3,14 +3,21 @@ import 'package:flutter/material.dart';
 import '../../model/cache_sample.dart';
 
 class CacheHistoryPainter extends CustomPainter {
-  const CacheHistoryPainter({required this.samples, required this.maximum});
+  const CacheHistoryPainter({
+    required this.samples,
+    required this.maximum,
+    required this.accent,
+    required this.gridColor,
+  });
   final List<CacheSample> samples;
   final int maximum;
+  final Color accent;
+  final Color gridColor;
 
   @override
   void paint(Canvas canvas, Size size) {
     final grid = Paint()
-      ..color = const Color(0xFFE6ECE8)
+      ..color = gridColor
       ..strokeWidth = 1;
     for (var row = 0; row <= 4; row++) {
       final y = size.height * row / 4;
@@ -40,20 +47,23 @@ class CacheHistoryPainter extends CustomPainter {
         ..lineTo(last.dx, size.height)
         ..lineTo(first.dx, size.height)
         ..close();
-      canvas.drawPath(fill, Paint()..color = const Color(0x18506F5C));
+      canvas.drawPath(fill, Paint()..color = accent.withValues(alpha: .09));
       canvas.drawPath(
         line,
         Paint()
-          ..color = const Color(0xFF506F5C)
+          ..color = accent
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.5
           ..strokeJoin = StrokeJoin.round,
       );
     }
-    canvas.drawCircle(last, 3, Paint()..color = const Color(0xFF506F5C));
+    canvas.drawCircle(last, 3, Paint()..color = accent);
   }
 
   @override
   bool shouldRepaint(CacheHistoryPainter oldDelegate) =>
-      oldDelegate.samples != samples || oldDelegate.maximum != maximum;
+      oldDelegate.samples != samples ||
+      oldDelegate.maximum != maximum ||
+      oldDelegate.accent != accent ||
+      oldDelegate.gridColor != gridColor;
 }

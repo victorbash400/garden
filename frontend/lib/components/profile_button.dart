@@ -1,5 +1,8 @@
+import 'system_icon.dart';
+
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+
+import '../ui/garden_colors.dart';
 
 import '../state/garden_controller.dart';
 import 'profile_menu_item.dart';
@@ -12,12 +15,12 @@ class ProfileButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final account = controller.account;
-    if (account == null) return const SizedBox.shrink();
+    if (account == null) return SizedBox.shrink();
     final name = account.email.split('@').first;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: EdgeInsets.symmetric(horizontal: 12),
       child: Material(
-        color: const Color(0xFFEEEEEE),
+        color: GardenColors.of(context).hover,
         borderRadius: BorderRadius.circular(20),
         child: PopupMenuButton<String>(
           tooltip: 'Account menu',
@@ -29,13 +32,15 @@ class ProfileButton extends StatelessWidget {
             -(36.0 * (controller.accountWindow == null ? 5 : 6) + 16),
           ),
           borderRadius: BorderRadius.circular(20),
-          constraints: const BoxConstraints(minWidth: 216, maxWidth: 300),
-          color: Colors.white,
+          constraints: BoxConstraints(minWidth: 216, maxWidth: 300),
+          color: GardenColors.of(context).panel,
           surfaceTintColor: Colors.transparent,
-          elevation: 6,
+          elevation: 1,
+          shadowColor: GardenColors.of(context).ink.withValues(alpha: .14),
+          menuPadding: const EdgeInsets.symmetric(vertical: 8),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: const BorderSide(color: Color(0xFFE2E2E2)),
+            borderRadius: BorderRadius.circular(14),
+            side: BorderSide(color: GardenColors.of(context).border),
           ),
           onSelected: (action) {
             switch (action) {
@@ -48,7 +53,7 @@ class ProfileButton extends StatelessWidget {
               case 'help':
                 showDialog<void>(
                   context: context,
-                  builder: (_) => const ProfileHelpDialog(),
+                  builder: (_) => ProfileHelpDialog(),
                 );
               case 'signOut':
                 controller.signOut();
@@ -62,47 +67,50 @@ class ProfileButton extends StatelessWidget {
                 account.email,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 12, color: Color(0xFF737373)),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: GardenColors.of(context).secondary,
+                ),
               ),
             ),
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'settings',
               height: 36,
               child: ProfileMenuItem(
-                icon: LucideIcons.settings,
+                icon: SystemIcons.settings,
                 label: 'Settings',
               ),
             ),
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'connections',
               height: 36,
               child: ProfileMenuItem(
-                icon: LucideIcons.plug,
+                icon: SystemIcons.plug,
                 label: 'Connections',
               ),
             ),
             if (controller.accountWindow != null)
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'new',
                 height: 36,
                 child: ProfileMenuItem(
-                  icon: LucideIcons.appWindow,
+                  icon: SystemIcons.appWindow,
                   label: 'New account window',
                 ),
               ),
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'help',
               height: 36,
               child: ProfileMenuItem(
-                icon: LucideIcons.circleHelp,
+                icon: SystemIcons.circleHelp,
                 label: 'Help',
               ),
             ),
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'signOut',
               height: 36,
               child: ProfileMenuItem(
-                icon: LucideIcons.logOut,
+                icon: SystemIcons.logOut,
                 label: 'Sign out',
               ),
             ),
@@ -113,33 +121,33 @@ class ProfileButton extends StatelessWidget {
             child: SizedBox(
               height: 40,
               child: Ink(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
+                padding: EdgeInsets.symmetric(horizontal: 10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEEEEEE),
+                  color: GardenColors.of(context).hover,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
                   children: [
                     CircleAvatar(
                       radius: 12,
-                      backgroundColor: const Color(0xFFE0E0E0),
+                      backgroundColor: GardenColors.of(context).hover,
                       child: Text(
                         name.isEmpty
                             ? '?'
                             : name.characters.first.toUpperCase(),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: Color(0xFF333333),
+                          color: GardenColors.of(context).ink,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                         ),

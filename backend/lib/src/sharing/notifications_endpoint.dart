@@ -17,6 +17,23 @@ class NotificationsEndpoint extends Endpoint {
   }
 
   Future<void> markRead(Session session, int notificationId) async {
+    await _update(session, notificationId, read: true);
+  }
+
+  Future<void> setTrashed(
+    Session session,
+    int notificationId,
+    bool trashed,
+  ) async {
+    await _update(session, notificationId, trashed: trashed);
+  }
+
+  Future<void> _update(
+    Session session,
+    int notificationId, {
+    bool read = false,
+    bool? trashed,
+  }) async {
     final email = await RecipientIdentity.email(session);
     final updated = await session.db.transaction((transaction) async {
       final notification = await AccountNotification.db.findById(
@@ -28,7 +45,10 @@ class NotificationsEndpoint extends Endpoint {
       if (notification == null || notification.recipientEmail != email) {
         throw GardenException(message: 'This notification is unavailable.');
       }
-      notification.readAt ??= DateTime.now().toUtc();
+      if (read) notification.readAt ??= DateTime.now().toUtc();
+      if (trashed != null) {
+        notification.trashedAt = trashed ? DateTime.now().toUtc() : null;
+      }
       return AccountNotification.db.updateRow(
         session,
         notification,

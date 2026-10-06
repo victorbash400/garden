@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../ui/garden_colors.dart';
 import 'package:garden_client/garden_client.dart';
 
 import '../components/error_notice.dart';
@@ -31,7 +32,7 @@ class FilesView extends StatelessWidget {
       return FileKeyboardBindings(
         controller: controller,
         child: ColoredBox(
-          color: Colors.white,
+          color: GardenColors.of(context).panel,
           child: Column(
             children: [
               FilesToolbar(
@@ -74,7 +75,7 @@ class FilesView extends StatelessWidget {
                   ],
                 ),
               ),
-              const Divider(height: 1, color: Color(0xFFE8E8EB)),
+              Divider(height: 1, color: GardenColors.of(context).border),
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -84,7 +85,7 @@ class FilesView extends StatelessWidget {
                   children: [
                     Text(
                       '${controller.nodes.length} ${controller.nodes.length == 1 ? 'item' : 'items'}',
-                      style: const TextStyle(fontSize: 11, color: Colors.grey),
+                      style: TextStyle(fontSize: 11, color: GardenColors.of(context).secondary),
                     ),
                     const Spacer(),
                   ],

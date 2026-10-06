@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../ui/garden_colors.dart';
+
 import '../../state/files_controller.dart';
 import 'directory_columns.dart';
 import 'directory_drop_target.dart';
@@ -17,8 +19,11 @@ class DirectoryBrowser extends StatelessWidget {
     children: [
       if (controller.viewMode == FileViewMode.list)
         DefaultTextStyle.merge(
-          style: const TextStyle(fontSize: 11, color: Colors.grey),
-          child: const DirectoryHeader(),
+          style: TextStyle(
+            fontSize: 11,
+            color: GardenColors.of(context).secondary,
+          ),
+          child: DirectoryHeader(),
         ),
       Expanded(
         child: controller.viewMode == FileViewMode.columns

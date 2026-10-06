@@ -1,9 +1,11 @@
+import 'package:garden_flutter/ui/garden_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:garden_flutter/components/settings/settings_picker.dart';
 import 'package:garden_flutter/components/settings/bandwidth_settings.dart';
 import 'package:garden_flutter/services/bandwidth_store.dart';
-import 'package:garden_flutter/components/settings/settings_group.dart';
+import 'package:garden_flutter/components/error_popup.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -28,11 +30,14 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(body: BandwidthSettings())),
+      MaterialApp(
+        theme: GardenTheme.light,
+        home: Scaffold(body: BandwidthSettings()),
+      ),
     );
     await tester.pumpAndSettle();
     expect(find.text('Unlimited'), findsNWidgets(2));
-    await tester.tap(find.byType(DropdownButton<int>).first);
+    await tester.tap(find.byType(SettingsPicker<int>).first);
     await tester.pumpAndSettle();
     await tester.tap(find.text('5 MiB/s').last);
     await tester.pumpAndSettle();
@@ -60,7 +65,10 @@ void main() {
           (_) async => throw MissingPluginException('native bridge missing'),
         );
     await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(body: BandwidthSettings())),
+      MaterialApp(
+        theme: GardenTheme.light,
+        home: Scaffold(body: BandwidthSettings()),
+      ),
     );
     await tester.pumpAndSettle();
     final instruction = find.text(
@@ -68,7 +76,7 @@ void main() {
     );
     expect(instruction, findsOneWidget);
     expect(
-      find.ancestor(of: instruction, matching: find.byType(SettingsGroup)),
+      find.ancestor(of: instruction, matching: find.byType(ErrorPopup)),
       findsOneWidget,
     );
     expect(find.textContaining('MissingPluginException'), findsNothing);
@@ -76,7 +84,7 @@ void main() {
   });
 
   testWidgets(
-    'native failure details stay collapsed and retry recovers controls',
+    'native failure popup shows details and retry recovers controls',
     (tester) async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(
@@ -87,14 +95,17 @@ void main() {
             ),
           );
       await tester.pumpWidget(
-        const MaterialApp(home: Scaffold(body: BandwidthSettings())),
+        MaterialApp(
+          theme: GardenTheme.light,
+          home: Scaffold(body: BandwidthSettings()),
+        ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Bandwidth unavailable'), findsOneWidget);
-      expect(find.text('Background service unavailable.'), findsNothing);
-      await tester.tap(find.text('Details'));
-      await tester.pumpAndSettle();
-      expect(find.text('Background service unavailable.'), findsOneWidget);
+      expect(find.textContaining('Bandwidth unavailable'), findsOneWidget);
+      expect(
+        find.textContaining('Background service unavailable.'),
+        findsOneWidget,
+      );
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(
             channel,

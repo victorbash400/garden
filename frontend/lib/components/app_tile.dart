@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../ui/garden_colors.dart';
+
 import 'garden_mark.dart';
 
 class AppTile extends StatelessWidget {
@@ -9,14 +11,17 @@ class AppTile extends StatelessWidget {
     width: 106,
     height: 106,
     decoration: BoxDecoration(
-      gradient: const LinearGradient(
+      gradient: LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [Colors.white, Color(0xFFF4F4F6)],
+        colors: [
+          GardenColors.of(context).panel,
+          GardenColors.of(context).panel,
+        ],
       ),
       borderRadius: BorderRadius.circular(27),
-      border: Border.all(color: const Color(0xFFE5E5E7)),
-      boxShadow: const [
+      border: Border.all(color: GardenColors.of(context).border),
+      boxShadow: [
         BoxShadow(
           color: Color(0x14000000),
           blurRadius: 30,
@@ -24,6 +29,6 @@ class AppTile extends StatelessWidget {
         ),
       ],
     ),
-    child: const Center(child: GardenMark(size: 44)),
+    child: Center(child: GardenMark(size: 44)),
   );
 }

@@ -15,7 +15,7 @@ import 'widget_test.dart' show TestGateway, MemoryPreferences;
 class InvitationService extends DriveSharingService {
   InvitationService() : super(Client('http://localhost:8080/'));
   final events = StreamController<AccountNotification>.broadcast();
-  final item = AccountNotification(
+  AccountNotification item = AccountNotification(
     id: 1,
     recipientEmail: 'reader@example.com',
     kind: 'invitation',
@@ -53,6 +53,10 @@ class InvitationService extends DriveSharingService {
 
   @override
   Future<void> markRead(int id) async {}
+  @override
+  Future<void> setTrashed(int id, bool trashed) async {
+    item = item.copyWith(trashedAt: trashed ? DateTime.now().toUtc() : null);
+  }
 }
 
 class InvitationGateway extends TestGateway implements SharingGateway {
@@ -65,12 +69,65 @@ class InvitationGateway extends TestGateway implements SharingGateway {
 }
 
 void main() {
+  testWidgets(
+    'trash persists through refresh and restores an unread invitation',
+    (tester) async {
+      final gateway = InvitationGateway();
+      final controller = GardenController(gateway, MemoryPreferences())
+        ..account = const AccountInfo(id: 'reader', email: 'reader@example.com')
+        ..page = GardenPage.settings
+        ..settingsSection = SettingsSection.notifications;
+      await controller.notifications!.start();
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: GardenTheme.light,
+          home: Scaffold(
+            body: AnimatedBuilder(
+              animation: controller,
+              builder: (_, _) => NotificationsSettings(controller: controller),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Move to trash'));
+      await tester.pumpAndSettle();
+      expect(find.text('Shared drive'), findsNothing);
+      expect(controller.notifications!.unread, 0);
+      expect(gateway.sharing.accepted, isFalse);
+      await tester.tap(find.text('Trash'));
+      await tester.pumpAndSettle();
+      expect(find.text('Shared drive'), findsOneWidget);
+      expect(find.text('Accept'), findsNothing);
+      await tester.runAsync(() async {
+        await tester.tap(find.text('Refresh'));
+        await Future<void>.delayed(Duration.zero);
+      });
+      await tester.pumpAndSettle();
+      expect(find.text('Shared drive'), findsOneWidget);
+      await tester.tap(find.text('Restore'));
+      await tester.pumpAndSettle();
+      expect(find.text('Trash is empty'), findsOneWidget);
+      await tester.tap(find.text('Unread (1)'));
+      await tester.pumpAndSettle();
+      expect(find.text('Accept'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      controller.dispose();
+      await gateway.sharing.events.close();
+    },
+  );
   for (final fail in [false, true]) {
     testWidgets(
       fail
           ? 'acceptance errors keep invitation actions available'
           : 'accepting refreshes drives and stays in Notifications',
       (tester) async {
+        tester.view.physicalSize = const Size(320, 640);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
         final gateway = InvitationGateway();
         gateway.sharing.failAccept = fail;
         final controller = GardenController(gateway, MemoryPreferences())
@@ -94,6 +151,9 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
+        expect(find.text('Unread (1)'), findsOneWidget);
+        expect(find.textContaining('· Viewer'), findsOneWidget);
+        expect(tester.takeException(), isNull);
         await tester.tap(find.text('Accept'));
         await tester.pumpAndSettle();
         expect(controller.page, GardenPage.settings);
@@ -110,6 +170,7 @@ void main() {
         }
         expect(tester.takeException(), isNull);
         await tester.pumpWidget(const SizedBox.shrink());
+        await tester.runAsync(() => Future<void>.delayed(Duration.zero));
         controller.dispose();
         await gateway.sharing.events.close();
       },

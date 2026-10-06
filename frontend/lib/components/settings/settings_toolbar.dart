@@ -1,5 +1,8 @@
+import '../system_icon.dart';
+
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+
+import '../../ui/garden_colors.dart';
 
 class SettingsToolbar extends StatelessWidget {
   const SettingsToolbar({super.key, required this.label, required this.onBack});
@@ -13,18 +16,18 @@ class SettingsToolbar extends StatelessWidget {
         IconButton(
           tooltip: 'Back to drives',
           style: IconButton.styleFrom(
-            backgroundColor: const Color(0xFFF5F5F7),
-            minimumSize: const Size(44, 32),
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            shape: const StadiumBorder(),
+            backgroundColor: GardenColors.of(context).panel,
+            minimumSize: Size(44, 32),
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            shape: StadiumBorder(),
           ),
           onPressed: onBack,
-          icon: const Icon(LucideIcons.chevronLeft, size: 21),
+          icon: SystemIcon(SystemIcons.chevronLeft, size: 21),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: 12),
         Text(
           label,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ],
     ),

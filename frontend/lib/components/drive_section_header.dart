@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../ui/garden_colors.dart';
+
 class DriveSectionHeader extends StatelessWidget {
   const DriveSectionHeader({
     super.key,
@@ -10,7 +12,7 @@ class DriveSectionHeader extends StatelessWidget {
   final VoidCallback? onOpen;
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+    padding: EdgeInsets.fromLTRB(8, 8, 8, 0),
     child: SizedBox(
       height: 31,
       child: Row(
@@ -29,10 +31,10 @@ class DriveSectionHeader extends StatelessWidget {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF858581),
+                  color: GardenColors.of(context).secondary,
                 ),
               ),
             ),

@@ -1,12 +1,11 @@
+import '../system_icon.dart';
 import 'hover_rename.dart';
 
 import 'package:flutter/material.dart';
 import 'package:garden_client/garden_client.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../ui/garden_theme.dart';
 import '../list_row.dart';
-import '../folder_icon.dart';
+import 'node_icon.dart';
 import 'file_row_values.dart';
 import 'node_menu_items.dart';
 
@@ -32,7 +31,7 @@ class FileRow extends StatelessWidget {
     onRename: canWrite ? () => onAction('rename') : null,
     right: 48,
     child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: .5),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: .5),
       child: ListRow(
         selected: selected,
         striped: striped,
@@ -43,32 +42,22 @@ class FileRow extends StatelessWidget {
           child: LayoutBuilder(
             builder: (context, constraints) => Row(
               children: [
-                const SizedBox(width: 9),
-                if (node.kind == NodeKind.folder)
-                  FolderIcon(size: 24, open: selected)
-                else
-                  const Icon(
-                    LucideIcons.file,
-                    size: 17,
-                    color: GardenTheme.secondary,
-                  ),
-                const SizedBox(width: 7),
+                SizedBox(width: 9),
+                NodeIcon(node: node, size: 24, open: selected),
+                SizedBox(width: 7),
                 Expanded(
                   child: Text(
                     node.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
                   ),
                 ),
                 FileRowValues(node: node, width: constraints.maxWidth - 57),
                 PopupMenuButton<String>(
                   tooltip: 'File actions',
                   padding: EdgeInsets.zero,
-                  icon: const Icon(LucideIcons.ellipsis, size: 16),
+                  icon: SystemIcon(SystemIcons.ellipsis, size: 16),
                   onSelected: onAction,
                   itemBuilder: (_) => nodeMenuItems(node, canWrite: canWrite),
                 ),

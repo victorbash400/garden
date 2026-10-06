@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../ui/garden_colors.dart';
+
 import '../components/settings/settings_transition.dart';
 import '../components/connection_notice_button.dart';
 import '../state/garden_controller.dart';
@@ -7,6 +9,7 @@ import 'account_settings.dart';
 import 'connections_settings.dart';
 import 'storage_settings.dart';
 import 'activity_settings.dart';
+import 'appearance_settings.dart';
 import 'drives_settings.dart';
 import 'notifications_settings.dart';
 
@@ -17,21 +20,21 @@ class SettingsView extends StatelessWidget {
   Widget build(BuildContext context) {
     if (controller.settingsSection == SettingsSection.activity) {
       return ColoredBox(
-        color: Colors.white,
+        color: GardenColors.of(context).panel,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 44),
+          padding: EdgeInsets.symmetric(horizontal: 40, vertical: 44),
           child: Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 980),
+              constraints: BoxConstraints(maxWidth: 980),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
+                  Text(
                     'Activity',
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
                   ),
-                  const SizedBox(height: 32),
+                  SizedBox(height: 32),
                   Expanded(
                     child: ActivitySettings(
                       key: ValueKey(controller.account!.id),
@@ -47,13 +50,13 @@ class SettingsView extends StatelessWidget {
     }
     return SizedBox.expand(
       child: ColoredBox(
-        color: Colors.white,
+        color: GardenColors.of(context).panel,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 44),
+          padding: EdgeInsets.symmetric(horizontal: 40, vertical: 44),
           child: Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 760),
+              constraints: BoxConstraints(maxWidth: 760),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -64,23 +67,24 @@ class SettingsView extends StatelessWidget {
                           SettingsSection.drives => 'Drives',
                           SettingsSection.notifications => 'Notifications',
                           SettingsSection.activity => 'Activity',
+                          SettingsSection.appearance => 'Appearance',
                           SettingsSection.account => 'Account',
                           SettingsSection.storage => 'Storage',
                           SettingsSection.connections => 'Connections',
                         },
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const Spacer(),
+                      Spacer(),
                       if (controller.needsFinderAttention)
                         ConnectionNoticeButton(
                           onPressed: controller.openConnections,
                         ),
                     ],
                   ),
-                  const SizedBox(height: 32),
+                  SizedBox(height: 32),
                   SettingsTransition(
                     child: KeyedSubtree(
                       key: ValueKey(controller.settingsSection),
@@ -93,7 +97,13 @@ class SettingsView extends StatelessWidget {
                           key: ValueKey(controller.account!.id),
                           controller: controller,
                         ),
-                        SettingsSection.activity => const SizedBox.shrink(),
+                        SettingsSection.activity => SizedBox.shrink(),
+                        SettingsSection.appearance =>
+                          controller.appearance == null
+                              ? Text('Appearance settings are unavailable.')
+                              : AppearanceSettings(
+                                  controller: controller.appearance!,
+                                ),
                         SettingsSection.account => AccountSettings(
                           controller: controller,
                         ),

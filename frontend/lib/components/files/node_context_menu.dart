@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../ui/garden_colors.dart';
+
 import 'package:garden_client/garden_client.dart';
 
 import '../../state/files_controller.dart';
@@ -32,7 +35,8 @@ class NodeContextMenu extends StatelessWidget {
                 Overlay.of(context).context.findRenderObject()! as RenderBox;
             final action = await showMenu<String>(
               context: context,
-              color: const Color(0xFFF5F5F3),
+              elevation: 1,
+              color: GardenColors.of(context).panel,
               surfaceTintColor: Colors.transparent,
               position: RelativeRect.fromRect(
                 Rect.fromLTWH(
@@ -44,22 +48,23 @@ class NodeContextMenu extends StatelessWidget {
                 Offset.zero & overlay.size,
               ),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: GardenColors.of(context).border),
               ),
               items: node == null
                   ? [
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'folder',
                         child: Text('New folder…'),
                       ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'file',
                         child: Text('New text file…'),
                       ),
                       PopupMenuItem(
                         value: 'import',
                         enabled: !controller.imports.busy,
-                        child: const Text('Import files…'),
+                        child: Text('Import files…'),
                       ),
                     ]
                   : nodeMenuItems(node!, canWrite: controller.canWrite),

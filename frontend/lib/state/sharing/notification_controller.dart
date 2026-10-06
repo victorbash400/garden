@@ -21,7 +21,9 @@ class NotificationController extends ChangeNotifier {
   bool loading = false;
   List<AccountNotification> get items =>
       _items.values.toList()..sort((a, b) => b.id!.compareTo(a.id!));
-  int get unread => _items.values.where((item) => item.readAt == null).length;
+  int get unread => _items.values
+      .where((item) => item.readAt == null && item.trashedAt == null)
+      .length;
 
   Future<void> start() async {
     _active = true;
@@ -83,6 +85,16 @@ class NotificationController extends ChangeNotifier {
     await service.markRead(item.id!);
     if (generation != _generation) return;
     _items[item.id!] = item.copyWith(readAt: DateTime.now().toUtc());
+    notifyListeners();
+  }
+
+  Future<void> setTrashed(AccountNotification item, bool trashed) async {
+    final generation = _generation;
+    await service.setTrashed(item.id!, trashed);
+    if (generation != _generation) return;
+    _items[item.id!] = item.copyWith(
+      trashedAt: trashed ? DateTime.now().toUtc() : null,
+    );
     notifyListeners();
   }
 

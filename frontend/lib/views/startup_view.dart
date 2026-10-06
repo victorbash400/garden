@@ -25,7 +25,10 @@ class StartupView extends StatelessWidget {
         if (error == null)
           const SizedBox.square(
             dimension: 18,
-            child: CircularProgressIndicator(strokeWidth: 2),
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Colors.black,
+            ),
           )
         else ...[
           GardenButton(label: 'Retry', onPressed: onRetry),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../ui/garden_colors.dart';
+
 class ListRow extends StatefulWidget {
   const ListRow({
     super.key,
@@ -30,13 +32,13 @@ class _ListRowState extends State<ListRow> {
       onTap: widget.onDoubleTap == null ? null : widget.onTap,
       child: Material(
         color: widget.selected
-            ? const Color(0xFFE8E8E8)
+            ? GardenColors.of(context).selection
             : hovered
-            ? const Color(0xFFEDEDEB)
+            ? GardenColors.of(context).hover
             : widget.striped
-            ? const Color(0xFFF7F7F6)
+            ? GardenColors.of(context).stripe
             : Colors.transparent,
-        borderRadius: BorderRadius.circular(7),
+        borderRadius: BorderRadius.circular(8),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: widget.onDoubleTap == null ? widget.onTap : null,

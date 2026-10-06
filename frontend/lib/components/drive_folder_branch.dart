@@ -1,9 +1,9 @@
+import 'system_icon.dart';
 import 'files/hover_rename.dart';
 import 'files/file_actions.dart';
 
 import 'package:flutter/material.dart';
 import 'package:garden_client/garden_client.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../model/garden_info.dart';
 import '../state/files_controller.dart';
@@ -57,8 +57,8 @@ class _DriveFolderBranchState extends State<DriveFolderBranch> {
               child: TreeRow(
                 label: node.name,
                 icon: node.kind == NodeKind.folder
-                    ? LucideIcons.folder
-                    : LucideIcons.file,
+                    ? SystemIcons.folder
+                    : SystemIcons.file,
                 depth: widget.depth,
                 selected:
                     active &&

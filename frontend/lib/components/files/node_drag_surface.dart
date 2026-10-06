@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+
+import '../../ui/garden_colors.dart';
+
 import 'package:garden_client/garden_client.dart';
 
 import '../../state/files_controller.dart';
 
 class NodeDrag {
-  const NodeDrag(this.driveId, this.node);
+  NodeDrag(this.driveId, this.node);
   final int driveId;
   final FileNode node;
 }
@@ -37,10 +40,7 @@ class NodeDragSurface extends StatelessWidget {
         feedback: Material(
           elevation: 3,
           borderRadius: BorderRadius.circular(7),
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Text(node!.name),
-          ),
+          child: Padding(padding: EdgeInsets.all(10), child: Text(node!.name)),
         ),
         childWhenDragging: Opacity(opacity: 0.4, child: child),
         child: child,
@@ -65,7 +65,7 @@ class NodeDragSurface extends StatelessWidget {
         decoration: BoxDecoration(
           color: candidates.isEmpty
               ? Colors.transparent
-              : const Color(0x220078FF),
+              : GardenColors.of(context).accentSurface,
           borderRadius: BorderRadius.circular(7),
         ),
         child: content,

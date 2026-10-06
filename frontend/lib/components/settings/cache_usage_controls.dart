@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../ui/garden_colors.dart';
+
 import '../../state/storage_controller.dart';
 import 'cache_usage_bar.dart';
 import 'cache_history_graph.dart';
-import 'settings_inline_button.dart';
+import 'cache_usage_actions.dart';
 import 'settings_issue.dart';
 
 class CacheUsageControls extends StatelessWidget {
@@ -14,36 +16,29 @@ class CacheUsageControls extends StatelessWidget {
   Widget build(BuildContext context) {
     final usage = controller.usage;
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
+          OverflowBar(
+            alignment: MainAxisAlignment.spaceBetween,
+            overflowAlignment: OverflowBarAlignment.start,
+            spacing: 12,
+            overflowSpacing: 12,
             children: [
-              const Text('Streaming cache'),
-              const Spacer(),
-              SettingsInlineButton(
-                label: 'Refresh',
-                onPressed: controller.busy ? null : controller.refresh,
+              const Text(
+                'Streaming cache',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
               ),
-              const SizedBox(width: 8),
-              SettingsInlineButton(
-                label: 'Clear cache',
-                onPressed:
-                    controller.busy ||
-                        usage?.available != true ||
-                        usage?.usedBytes == 0
-                    ? null
-                    : controller.clear,
-              ),
+              CacheUsageActions(controller: controller),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           if (usage?.available == true)
             Column(
               children: [
                 CacheUsageBar(usage: usage!),
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
                 CacheHistoryGraph(samples: controller.history),
               ],
             )
@@ -52,10 +47,13 @@ class CacheUsageControls extends StatelessWidget {
               controller.busy
                   ? 'Reading cache usage…'
                   : 'Connect a Finder drive to measure cache usage.',
-              style: const TextStyle(fontSize: 13, color: Color(0xFF77777A)),
+              style: TextStyle(
+                fontSize: 13,
+                color: GardenColors.of(context).secondary,
+              ),
             ),
           if (controller.error != null) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             SettingsIssue(
               message: 'Cache request failed',
               details: controller.error!,

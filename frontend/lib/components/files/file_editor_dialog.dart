@@ -1,4 +1,9 @@
+import '../error_notice.dart';
+
 import 'package:flutter/material.dart';
+
+import '../../ui/garden_colors.dart';
+
 import 'package:garden_client/garden_client.dart';
 
 import '../../state/file_editor_controller.dart';
@@ -39,25 +44,15 @@ class _FileEditorDialogState extends State<FileEditorDialog> {
       return PopScope(
         canPop: !controller.busy,
         child: AlertDialog(
-          title: Text(
-            controller.node.name,
-            style: const TextStyle(fontSize: 14),
-          ),
+          title: Text(controller.node.name, style: TextStyle(fontSize: 14)),
           content: SizedBox(
             width: 620,
             height: 380,
             child: Column(
               children: [
-                if (controller.busy)
-                  const LinearProgressIndicator(minHeight: 2),
+                if (controller.busy) LinearProgressIndicator(minHeight: 2),
                 if (controller.error != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: SelectableText(
-                      controller.error!,
-                      style: const TextStyle(fontSize: 12, color: Colors.red),
-                    ),
-                  ),
+                  ErrorNotice(message: controller.error!),
                 Expanded(
                   child: TextField(
                     controller: input,
@@ -65,13 +60,11 @@ class _FileEditorDialogState extends State<FileEditorDialog> {
                     expands: true,
                     maxLines: null,
                     minLines: null,
-                    style: const TextStyle(
-                      fontFamily: 'monospace',
+                    style: TextStyle(
+                      fontFamily: GardenColors.of(context).codeFont,
                       fontSize: 13,
                     ),
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                    ),
+                    decoration: InputDecoration(border: OutlineInputBorder()),
                   ),
                 ),
               ],
@@ -82,7 +75,7 @@ class _FileEditorDialogState extends State<FileEditorDialog> {
               onPressed: controller.busy
                   ? null
                   : () => Navigator.pop(context, saved),
-              child: const Text('Close'),
+              child: Text('Close'),
             ),
             TextButton(
               onPressed: controller.busy || !controller.loaded
@@ -94,7 +87,7 @@ class _FileEditorDialogState extends State<FileEditorDialog> {
                         Navigator.pop(context, saved);
                       }
                     },
-              child: const Text('Save'),
+              child: Text('Save'),
             ),
           ],
         ),

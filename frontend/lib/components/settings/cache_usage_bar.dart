@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../ui/garden_colors.dart';
+
 import '../../model/cache_usage.dart';
 
 class CacheUsageBar extends StatelessWidget {
@@ -21,27 +23,39 @@ class CacheUsageBar extends StatelessWidget {
     children: [
       Row(
         children: [
-          Text('${bytes(usage.usedBytes!)} used'),
-          const Spacer(),
-          Text('${bytes(usage.limitBytes)} limit'),
+          Text(
+            '${bytes(usage.usedBytes!)} used',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+          ),
+          Spacer(),
+          Text(
+            '${bytes(usage.limitBytes)} limit',
+            style: TextStyle(
+              fontSize: 12,
+              color: GardenColors.of(context).secondary,
+            ),
+          ),
         ],
       ),
-      const SizedBox(height: 12),
+      SizedBox(height: 12),
       ClipRRect(
         borderRadius: BorderRadius.circular(4),
         child: LinearProgressIndicator(
           value: usage.fraction,
           minHeight: 8,
-          color: const Color(0xFF313133),
-          backgroundColor: const Color(0xFFE8E8EA),
+          color: GardenColors.of(context).ink,
+          backgroundColor: GardenColors.of(context).border,
           semanticsLabel: 'Streaming cache usage',
           semanticsValue: '${(usage.fraction * 100).round()}%',
         ),
       ),
-      const SizedBox(height: 10),
+      SizedBox(height: 10),
       Text(
         '${usage.blocks} cached blocks · Shared across drives',
-        style: const TextStyle(fontSize: 12, color: Color(0xFF77777A)),
+        style: TextStyle(
+          fontSize: 12,
+          color: GardenColors.of(context).secondary,
+        ),
       ),
     ],
   );

@@ -78,4 +78,5 @@ driveMembers:
 notifications:
   - list:
   - markRead:
+  - setTrashed:
   - watch:

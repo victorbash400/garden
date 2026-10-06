@@ -1,4 +1,7 @@
+import '../error_notice.dart';
+
 import 'package:flutter/material.dart';
+
 import 'package:garden_client/garden_client.dart';
 
 import '../../model/account_info.dart';
@@ -32,15 +35,15 @@ class _AccountSecurityControlsState extends State<AccountSecurityControls> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Remove passkey?'),
+        title: Text('Remove passkey?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text('Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Remove'),
+            child: Text('Remove'),
           ),
         ],
       ),
@@ -64,7 +67,7 @@ class _AccountSecurityControlsState extends State<AccountSecurityControls> {
                   onPressed: !security.configured || security.busy
                       ? null
                       : () => security.addPasskey(widget.account),
-                  child: const Text('Add passkey'),
+                  child: Text('Add passkey'),
                 ),
               ),
               for (final key in security.keys)
@@ -83,7 +86,7 @@ class _AccountSecurityControlsState extends State<AccountSecurityControls> {
             ],
           ),
           if (!security.configured && !security.busy)
-            const Padding(
+            Padding(
               padding: EdgeInsets.all(12),
               child: Text(
                 'Passkeys and Touch ID require Apple signing setup.',
@@ -91,21 +94,17 @@ class _AccountSecurityControlsState extends State<AccountSecurityControls> {
               ),
             ),
           if (security.busy)
-            const Padding(
+            Padding(
               padding: EdgeInsets.all(12),
               child: Text('Please wait', style: TextStyle(fontSize: 12)),
             ),
-          if (security.error != null || security.status != null)
+          if (security.error != null) ErrorNotice(message: security.error!),
+          if (security.status != null)
             Padding(
               padding: const EdgeInsets.all(12),
               child: Text(
-                security.error ?? security.status!,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: security.error == null
-                      ? null
-                      : const Color(0xFFB23D3D),
-                ),
+                security.status!,
+                style: const TextStyle(fontSize: 12),
               ),
             ),
         ],

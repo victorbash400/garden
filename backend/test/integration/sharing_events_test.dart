@@ -210,6 +210,44 @@ void main() {
           expect(await next.timeout(const Duration(seconds: 5)), isTrue);
           expect(stream.current.id, notification.id);
           expect(stream.current.readAt, isNotNull);
+          await expectLater(
+            endpoints.notifications.setTrashed(
+              outsider,
+              notification.id!,
+              true,
+            ),
+            throwsA(isA<GardenException>()),
+          );
+          final trashedEvent = stream.moveNext();
+          await endpoints.notifications.setTrashed(
+            recipient,
+            notification.id!,
+            true,
+          );
+          expect(
+            await trashedEvent.timeout(const Duration(seconds: 5)),
+            isTrue,
+          );
+          expect(stream.current.trashedAt, isNotNull);
+          expect(
+            (await endpoints.notifications.list(recipient, 0)).single.trashedAt,
+            isNotNull,
+          );
+          final restoredEvent = stream.moveNext();
+          await endpoints.notifications.setTrashed(
+            recipient,
+            notification.id!,
+            false,
+          );
+          expect(
+            await restoredEvent.timeout(const Duration(seconds: 5)),
+            isTrue,
+          );
+          expect(stream.current.trashedAt, isNull);
+          expect(
+            (await endpoints.notifications.list(recipient, 0)).single.trashedAt,
+            isNull,
+          );
         } finally {
           await stream.cancel();
         }

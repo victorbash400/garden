@@ -1,5 +1,6 @@
+import '../system_icon.dart';
+
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../state/garden_controller.dart';
 
@@ -23,7 +24,7 @@ class NotificationBell extends StatelessWidget {
         isLabelVisible: unread > 0,
         smallSize: 5,
         backgroundColor: Theme.of(context).colorScheme.error,
-        child: const Icon(LucideIcons.bell, size: 17),
+        child: const SystemIcon(SystemIcons.bell, size: 17),
       ),
     );
   }

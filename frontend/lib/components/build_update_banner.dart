@@ -1,5 +1,5 @@
+import 'system_icon.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../native/account_window.dart';
 
@@ -29,7 +29,7 @@ class BuildUpdateBanner extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(LucideIcons.refreshCw, size: 15),
+                const SystemIcon(SystemIcons.refreshCw, size: 15),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -42,7 +42,7 @@ class BuildUpdateBanner extends StatelessWidget {
                 IconButton(
                   tooltip: 'Dismiss update',
                   onPressed: window.restarting ? null : window.dismissUpdate,
-                  icon: const Icon(LucideIcons.x, size: 13),
+                  icon: const SystemIcon(SystemIcons.x, size: 13),
                   constraints: const BoxConstraints.tightFor(
                     width: 24,
                     height: 24,

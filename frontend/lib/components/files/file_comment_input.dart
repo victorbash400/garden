@@ -1,5 +1,6 @@
+import '../system_icon.dart';
+
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class FileCommentInput extends StatefulWidget {
   const FileCommentInput({super.key, required this.onSubmit});
@@ -46,7 +47,7 @@ class _FileCommentInputState extends State<FileCommentInput> {
         IconButton(
           tooltip: 'Post comment',
           onPressed: busy ? null : submit,
-          icon: const Icon(LucideIcons.arrowUp, size: 16),
+          icon: const SystemIcon(SystemIcons.arrowUp, size: 16),
         ),
       ],
     ),

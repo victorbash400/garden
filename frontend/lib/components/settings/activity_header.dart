@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../ui/garden_colors.dart';
+
 class ActivityHeader extends StatelessWidget {
   const ActivityHeader({super.key});
   @override
@@ -12,24 +14,27 @@ class ActivityHeader extends StatelessWidget {
           width: width,
           child: Text(
             text,
-            style: const TextStyle(fontSize: 11, color: Color(0xFF777773)),
+            style: TextStyle(
+              fontSize: 11,
+              color: GardenColors.of(context).secondary,
+            ),
           ),
         );
         return Row(
           children: [
-            const SizedBox(width: 31),
-            const Expanded(
+            SizedBox(width: 31),
+            Expanded(
               child: Text(
                 'File',
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             cell('Action', 92),
             if (wide) cell('Drive', 90),
             if (wide) cell('Source', 112),
             cell('Time', 66),
-            const SizedBox(width: 9),
+            SizedBox(width: 9),
           ],
         );
       },

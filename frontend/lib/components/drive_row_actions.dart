@@ -1,5 +1,8 @@
+import 'system_icon.dart';
+
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+
+import '../ui/garden_colors.dart';
 
 import '../model/garden_info.dart';
 import '../state/garden_controller.dart';
@@ -35,19 +38,19 @@ class DriveRowActions extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Delete ${drive.name}?'),
-        content: const Text(
+        content: Text(
           'This removes the drive for everyone. Its files are retained in storage.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text('Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text(
+            child: Text(
               'Delete drive',
-              style: TextStyle(color: Colors.red),
+              style: TextStyle(color: GardenColors.of(context).danger),
             ),
           ),
         ],
@@ -68,10 +71,10 @@ class DriveRowActions extends StatelessWidget {
             tooltip: 'New folder in ${drive.name}',
             padding: EdgeInsets.zero,
             onPressed: controller.busy ? null : () => createFolder(context),
-            icon: const Icon(
-              LucideIcons.plus,
+            icon: SystemIcon(
+              SystemIcons.plus,
               size: 14,
-              color: Color(0xFF858581),
+              color: GardenColors.of(context).ink,
             ),
           ),
         ),
@@ -83,16 +86,17 @@ class DriveRowActions extends StatelessWidget {
             tooltip: 'Actions for ${drive.name}',
             enabled: !controller.busy,
             padding: EdgeInsets.zero,
-            icon: const Icon(
-              LucideIcons.ellipsis,
+            icon: SystemIcon(
+              SystemIcons.ellipsis,
               size: 15,
-              color: Color(0xFF858581),
+              color: GardenColors.of(context).ink,
             ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: GardenColors.of(context).border),
             ),
-            color: Colors.white,
-            elevation: 4,
+            color: GardenColors.of(context).panel,
+            elevation: 1,
             onSelected: (value) async {
               if (value == 'rename') await rename(context);
               if (value == 'folder' && context.mounted) {
@@ -102,34 +106,43 @@ class DriveRowActions extends StatelessWidget {
             },
             itemBuilder: (_) => [
               if (drive.role == 'Owner')
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'rename',
                   child: Row(
                     children: [
-                      Icon(LucideIcons.squarePen, size: 16),
+                      SystemIcon(SystemIcons.squarePen, size: 16),
                       SizedBox(width: 10),
                       Text('Rename…'),
                     ],
                   ),
                 ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'folder',
                 child: Row(
                   children: [
-                    Icon(LucideIcons.folderPlus, size: 16),
+                    SystemIcon(SystemIcons.folderPlus, size: 16),
                     SizedBox(width: 10),
                     Text('New folder'),
                   ],
                 ),
               ),
               if (drive.role == 'Owner')
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'delete',
                   child: Row(
                     children: [
-                      Icon(LucideIcons.trash2, size: 16, color: Colors.red),
+                      SystemIcon(
+                        SystemIcons.trash2,
+                        size: 16,
+                        color: GardenColors.of(context).danger,
+                      ),
                       SizedBox(width: 10),
-                      Text('Delete drive', style: TextStyle(color: Colors.red)),
+                      Text(
+                        'Delete drive',
+                        style: TextStyle(
+                          color: GardenColors.of(context).danger,
+                        ),
+                      ),
                     ],
                   ),
                 ),

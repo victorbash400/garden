@@ -1,6 +1,9 @@
+import '../system_icon.dart';
+import '../error_notice.dart';
+
 import 'package:flutter/material.dart';
+
 import 'package:garden_client/garden_client.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../utils/error_message.dart';
 
@@ -67,29 +70,25 @@ class _FileMoveDialogState extends State<FileMoveDialog> {
                         path.removeLast();
                         load();
                       },
-                icon: const Icon(LucideIcons.chevronLeft, size: 18),
+                icon: SystemIcon(SystemIcons.chevronLeft, size: 18),
               ),
               Expanded(
                 child: Text(
                   path.isEmpty ? 'Drive' : path.last.name,
-                  style: const TextStyle(fontSize: 13),
+                  style: TextStyle(fontSize: 13),
                 ),
               ),
             ],
           ),
-          if (busy) const LinearProgressIndicator(minHeight: 2),
-          if (error != null)
-            SelectableText(
-              error!,
-              style: const TextStyle(fontSize: 12, color: Colors.red),
-            ),
+          if (busy) LinearProgressIndicator(minHeight: 2),
+          if (error != null) ErrorNotice(message: error!),
           Expanded(
             child: ListView(
               children: [
                 for (final folder in folders)
                   ListTile(
                     dense: true,
-                    leading: const Icon(LucideIcons.folder, size: 18),
+                    leading: SystemIcon(SystemIcons.folder, size: 18),
                     title: Text(folder.name),
                     onTap: busy
                         ? null
@@ -107,13 +106,13 @@ class _FileMoveDialogState extends State<FileMoveDialog> {
     actions: [
       TextButton(
         onPressed: () => Navigator.pop(context),
-        child: const Text('Cancel'),
+        child: Text('Cancel'),
       ),
       TextButton(
         onPressed: busy || error != null
             ? null
             : () => Navigator.pop(context, parent),
-        child: const Text('Move here'),
+        child: Text('Move here'),
       ),
     ],
   );

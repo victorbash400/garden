@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../ui/garden_colors.dart';
+
 import '../../state/files_controller.dart';
 import 'column_node_row.dart';
 import 'directory_drop_target.dart';
@@ -26,7 +28,9 @@ class DirectoryColumn extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           border: depth < controller.path.length
-              ? const Border(right: BorderSide(color: Color(0xFFE8E8EB)))
+              ? Border(
+                  right: BorderSide(color: GardenColors.of(context).border),
+                )
               : null,
         ),
         child: DirectoryDropTarget(
@@ -36,7 +40,7 @@ class DirectoryColumn extends StatelessWidget {
             controller: controller,
             parentId: parent,
             child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               itemCount: nodes.length,
               itemBuilder: (_, index) => ColumnNodeRow(
                 controller: controller,

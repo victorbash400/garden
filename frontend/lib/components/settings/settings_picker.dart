@@ -1,5 +1,6 @@
+import '../system_icon.dart';
+
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'settings_picker_option.dart';
 
@@ -90,7 +91,7 @@ class SettingsPicker<T> extends StatelessWidget {
             children: [
               Expanded(child: selected?.child ?? const SizedBox.shrink()),
               const SizedBox(width: 8),
-              const Icon(LucideIcons.chevronDown, size: 14),
+              const SystemIcon(SystemIcons.chevronDown, size: 14),
             ],
           ),
         ),

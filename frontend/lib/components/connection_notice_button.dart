@@ -1,5 +1,8 @@
+import 'system_icon.dart';
+
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+
+import '../ui/garden_colors.dart';
 
 class ConnectionNoticeButton extends StatelessWidget {
   const ConnectionNoticeButton({super.key, required this.onPressed});
@@ -13,9 +16,9 @@ class ConnectionNoticeButton extends StatelessWidget {
       tooltip: 'Connection needs attention',
       padding: EdgeInsets.zero,
       onPressed: onPressed,
-      icon: const Badge(
-        backgroundColor: Color(0xFFB96032),
-        child: Icon(LucideIcons.bell, size: 17),
+      icon: Badge(
+        backgroundColor: GardenColors.of(context).accent,
+        child: SystemIcon(SystemIcons.bell, size: 17),
       ),
     ),
   );

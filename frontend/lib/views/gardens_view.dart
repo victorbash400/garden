@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../components/garden_button.dart';
-import '../components/drive_dialog.dart';
 import '../components/garden_row.dart';
-import '../components/connection_notice_button.dart';
+import '../components/drives_toolbar.dart';
 import '../state/garden_controller.dart';
 
 class GardensView extends StatelessWidget {
@@ -16,33 +13,7 @@ class GardensView extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            GardenButton(
-              label: 'Create drive',
-              icon: LucideIcons.plus,
-              onPressed: controller.busy
-                  ? null
-                  : () => showDriveDialog(context, controller),
-            ),
-            const SizedBox(width: 10),
-            GardenButton(
-              label: 'Join drive',
-              secondary: true,
-              onPressed: controller.busy
-                  ? null
-                  : () => showDriveDialog(context, controller, join: true),
-            ),
-            const Spacer(),
-            if (controller.needsFinderAttention)
-              ConnectionNoticeButton(onPressed: controller.openConnections),
-            IconButton(
-              tooltip: 'Refresh drives',
-              onPressed: controller.busy ? null : controller.refresh,
-              icon: const Icon(LucideIcons.refreshCw, size: 17),
-            ),
-          ],
-        ),
+        DrivesToolbar(controller: controller),
         const SizedBox(height: 24),
         Expanded(
           child: controller.gardens.isEmpty

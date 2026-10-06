@@ -1,3 +1,4 @@
+import 'package:garden_flutter/ui/garden_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_flutter/components/garden_field.dart';
@@ -10,6 +11,7 @@ void main() {
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
+        theme: GardenTheme.light,
         home: Scaffold(
           body: GardenField(
             label: 'Password',

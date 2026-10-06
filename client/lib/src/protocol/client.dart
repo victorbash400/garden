@@ -930,6 +930,18 @@ class EndpointNotifications extends _isc.EndpointRef {
         {'notificationId': notificationId},
       );
 
+  _ida.Future<void> setTrashed(
+    int notificationId,
+    bool trashed,
+  ) => caller.callServerEndpoint<void>(
+    'notifications',
+    'setTrashed',
+    {
+      'notificationId': notificationId,
+      'trashed': trashed,
+    },
+  );
+
   _ida.Stream<_ijqj61ga.AccountNotification> watch(int afterId) =>
       caller.callStreamingServerEndpoint<
         _ida.Stream<_ijqj61ga.AccountNotification>,

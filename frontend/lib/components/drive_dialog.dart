@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../ui/garden_colors.dart';
+
 import '../state/garden_controller.dart';
 import 'error_notice.dart';
 import 'garden_button.dart';
@@ -51,12 +53,12 @@ class _DriveDialogState extends State<DriveDialog> {
     builder: (context, _) => PopScope(
       canPop: !widget.controller.busy,
       child: Dialog(
-        backgroundColor: Colors.white,
+        backgroundColor: GardenColors.of(context).panel,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: SizedBox(
           width: 380,
           child: Padding(
-            padding: const EdgeInsets.all(28),
+            padding: EdgeInsets.all(28),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -69,14 +71,14 @@ class _DriveDialogState extends State<DriveDialog> {
                   onSubmitted: (_) => submit(),
                 ),
                 if (widget.controller.error != null) ...[
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   ErrorNotice(
                     message: widget.controller.error!,
                     onDismiss: () =>
                         widget.controller.navigate(widget.controller.page),
                   ),
                 ],
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 Wrap(
                   alignment: WrapAlignment.end,
                   spacing: 10,

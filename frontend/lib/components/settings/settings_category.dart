@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../ui/garden_colors.dart';
+
 class SettingsCategory extends StatelessWidget {
   const SettingsCategory({
     super.key,
@@ -14,9 +16,9 @@ class SettingsCategory extends StatelessWidget {
   final VoidCallback? onTap;
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 1),
+    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 1),
     child: Material(
-      color: selected ? const Color(0xFFE8E8E8) : Colors.transparent,
+      color: selected ? GardenColors.of(context).selection : Colors.transparent,
       borderRadius: BorderRadius.circular(8),
       child: InkWell(
         onTap: onTap,
@@ -24,20 +26,23 @@ class SettingsCategory extends StatelessWidget {
         child: SizedBox(
           height: 34,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+            padding: EdgeInsets.symmetric(horizontal: 8),
             child: Row(
               children: [
                 IconTheme(
-                  data: const IconThemeData(size: 17, color: Color(0xFF555550)),
+                  data: IconThemeData(
+                    size: 17,
+                    color: GardenColors.of(context).secondary,
+                  ),
                   child: icon,
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 13),
+                    style: TextStyle(fontSize: 13),
                   ),
                 ),
               ],

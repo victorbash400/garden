@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../ui/garden_colors.dart';
+
 import 'package:garden_client/garden_client.dart';
 
 class FileCommentsList extends StatelessWidget {
@@ -14,19 +17,21 @@ class FileCommentsList extends StatelessWidget {
     children: [
       for (final comment in comments)
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+          padding: EdgeInsets.fromLTRB(16, 12, 16, 4),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                comment.authorId == userId ? 'You' : comment.authorId,
-                style: const TextStyle(fontSize: 11, color: Colors.grey),
+                comment.authorId == userId
+                    ? 'You'
+                    : comment.authorId,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: GardenColors.of(context).secondary,
+                ),
               ),
-              const SizedBox(height: 4),
-              SelectableText(
-                comment.text,
-                style: const TextStyle(fontSize: 12),
-              ),
+              SizedBox(height: 4),
+              SelectableText(comment.text, style: TextStyle(fontSize: 12)),
             ],
           ),
         ),

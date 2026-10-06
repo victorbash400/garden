@@ -13,7 +13,6 @@ dependencies:
   serverpod_flutter: ^4.0.3
   serverpod_auth_idp_flutter: ^4.0.3
   flutter_svg: ^2.3.0
-  lucide_icons_flutter: ^3.1.21
   window_manager: ^0.5.2
   shared_preferences: ^2.5.5
   file_selector: ^1.1.0
@@ -30,6 +29,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - assets/icons/
     - assets/auth-background.webp
     - assets/garden.svg
     - assets/activity.svg
@@ -39,3 +39,17 @@ flutter:
     - family: GoogleSans
       fonts:
         - asset: assets/fonts/GoogleSans.ttf
+    - family: Geist
+      fonts:
+        - asset: assets/fonts/Geist-Regular.ttf
+        - asset: assets/fonts/Geist-Medium.ttf
+          weight: 500
+    - family: GeistMono
+      fonts:
+        - asset: assets/fonts/GeistMono-Regular.ttf
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+    - family: JetBrainsMono
+      fonts:
+        - asset: assets/fonts/JetBrainsMono-Regular.ttf

@@ -1,5 +1,10 @@
+import '../system_icon.dart';
+
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+
+import '../error_notice.dart';
+
+import '../../ui/garden_colors.dart';
 
 import '../../state/file_import_controller.dart';
 
@@ -14,7 +19,13 @@ class ImportStatusBar extends StatelessWidget {
       if (!controller.busy &&
           controller.error == null &&
           controller.result == null) {
-        return const SizedBox.shrink();
+        return SizedBox.shrink();
+      }
+      if (controller.error != null) {
+        return ErrorNotice(
+          message: controller.error!,
+          onDismiss: controller.dismiss,
+        );
       }
       return Column(
         mainAxisSize: MainAxisSize.min,
@@ -22,7 +33,7 @@ class ImportStatusBar extends StatelessWidget {
           if (controller.busy)
             LinearProgressIndicator(value: controller.progress, minHeight: 2),
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 4, 10, 4),
+            padding: EdgeInsets.fromLTRB(20, 4, 10, 4),
             child: Row(
               children: [
                 Expanded(
@@ -39,21 +50,21 @@ class ImportStatusBar extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       color: controller.error == null
-                          ? const Color(0xFF686868)
-                          : const Color(0xFFAA3434),
+                          ? GardenColors.of(context).secondary
+                          : GardenColors.of(context).danger,
                     ),
                   ),
                 ),
                 if (controller.busy)
                   TextButton(
                     onPressed: controller.canCancel ? controller.cancel : null,
-                    child: const Text('Cancel'),
+                    child: Text('Cancel'),
                   )
                 else
                   IconButton(
                     tooltip: 'Dismiss import status',
                     onPressed: controller.dismiss,
-                    icon: const Icon(LucideIcons.x, size: 16),
+                    icon: SystemIcon(SystemIcons.x, size: 16),
                   ),
               ],
             ),

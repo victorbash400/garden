@@ -1,5 +1,8 @@
+import '../system_icon.dart';
+
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+
+import '../../ui/garden_colors.dart';
 
 class HoverRename extends StatefulWidget {
   const HoverRename({
@@ -36,15 +39,15 @@ class _HoverRenameState extends State<HoverRename> {
                 onPressed: widget.onRename,
                 padding: EdgeInsets.zero,
                 style: IconButton.styleFrom(
-                  backgroundColor: const Color(0xFFEDEDEB),
+                  backgroundColor: GardenColors.of(context).hover,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5),
                   ),
                 ),
-                icon: const Icon(
-                  LucideIcons.squarePen,
+                icon: SystemIcon(
+                  SystemIcons.squarePen,
                   size: 14,
-                  color: Color(0xFF777777),
+                  color: GardenColors.of(context).ink,
                 ),
               ),
             ),

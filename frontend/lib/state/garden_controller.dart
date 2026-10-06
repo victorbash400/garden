@@ -21,6 +21,7 @@ import 'native_setup_controller.dart';
 import 'files_controller.dart';
 import 'account_security_controller.dart';
 import 'storage_controller.dart';
+import 'appearance_controller.dart';
 import '../services/cache_store.dart';
 
 enum SettingsSection {
@@ -28,6 +29,7 @@ enum SettingsSection {
   storage,
   connections,
   activity,
+  appearance,
   drives,
   notifications,
 }
@@ -50,6 +52,7 @@ class GardenController extends ChangeNotifier {
     this.gateway,
     this.preferences, {
     this.files,
+    this.appearance,
     this.accountWindow,
     this.security,
     this.finder,
@@ -73,6 +76,7 @@ class GardenController extends ChangeNotifier {
     }
     accountWindow?.cancelRelaunch = _cancelRelaunch;
     storage?.addListener(notifyListeners);
+    appearance?.addListener(notifyListeners);
     finderUpdates?.addListener(_finderChanged);
     nativeSetup?.addListener(notifyListeners);
     files?.openFile = (node) async {
@@ -110,6 +114,7 @@ class GardenController extends ChangeNotifier {
 
   NotificationController? notifications;
   int _accessGeneration = 0;
+  final AppearanceController? appearance;
   final AccountWindow? accountWindow;
   final AccountSecurityController? security;
   final FinderMounts? finder;
@@ -152,6 +157,8 @@ class GardenController extends ChangeNotifier {
   Future<void> initialize() => _request(_loadStartup);
 
   Future<void> _loadStartup() async {
+    await appearance?.load();
+    if (appearance?.error != null) throw StateError(appearance!.error!);
     await nativeSetup?.refresh();
     cacheLimit = await preferences.readCacheLimit();
     final sessionError = accountWindow?.sessionError;
@@ -556,6 +563,8 @@ class GardenController extends ChangeNotifier {
     _accessGeneration++;
     notifications?.removeListener(notifyListeners);
     notifications?.dispose();
+    appearance?.removeListener(notifyListeners);
+    appearance?.dispose();
     storage?.removeListener(notifyListeners);
     storage?.dispose();
     finderUpdates?.removeListener(_finderChanged);

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../ui/garden_colors.dart';
+
 import '../../model/activity_entry.dart';
 
 class ActivityDetails extends StatelessWidget {
@@ -9,7 +11,7 @@ class ActivityDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     final time = entry.time.toLocal();
     return Padding(
-      padding: const EdgeInsets.fromLTRB(32, 6, 16, 16),
+      padding: EdgeInsets.fromLTRB(32, 6, 16, 16),
       child: Align(
         alignment: Alignment.centerLeft,
         child: SelectableText(
@@ -22,10 +24,10 @@ class ActivityDetails extends StatelessWidget {
               '${entry.milliseconds.toStringAsFixed(1)} ms${entry.count > 1 ? ' total' : ''}',
             if (entry.error != null) entry.error!,
           ].join('\n'),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
             height: 1.6,
-            color: Color(0xFF666666),
+            color: GardenColors.of(context).secondary,
           ),
         ),
       ),

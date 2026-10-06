@@ -1,5 +1,5 @@
+import 'system_icon.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'garden_button.dart';
 
@@ -28,7 +28,7 @@ class SavedLoginButton extends StatelessWidget {
       IconButton(
         tooltip: 'Forget saved login',
         onPressed: onForget,
-        icon: const Icon(LucideIcons.x, size: 16),
+        icon: const SystemIcon(SystemIcons.x, size: 16),
       ),
     ],
   );

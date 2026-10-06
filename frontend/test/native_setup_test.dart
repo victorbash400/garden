@@ -1,3 +1,5 @@
+import 'package:garden_flutter/ui/garden_theme.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -147,6 +149,7 @@ void main() {
     );
     await tester.pumpWidget(
       MaterialApp(
+        theme: GardenTheme.light,
         home: Scaffold(body: FinderSetupRow(controller: controller)),
       ),
     );

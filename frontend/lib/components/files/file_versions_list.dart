@@ -1,6 +1,7 @@
+import '../system_icon.dart';
+
 import 'package:flutter/material.dart';
 import 'package:garden_client/garden_client.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'file_size.dart';
 
@@ -30,7 +31,7 @@ class FileVersionsList extends StatelessWidget {
           ),
           trailing: IconButton(
             tooltip: 'Export this version',
-            icon: const Icon(LucideIcons.download, size: 17),
+            icon: const SystemIcon(SystemIcons.download, size: 17),
             onPressed: () => onExport(version),
           ),
         ),

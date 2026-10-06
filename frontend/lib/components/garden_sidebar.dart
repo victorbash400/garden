@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'sidebar_surface.dart';
+
 import '../state/garden_controller.dart';
 import 'garden_mark.dart';
 import 'sidebar_account_footer.dart';
@@ -9,13 +11,11 @@ class GardenSidebar extends StatelessWidget {
   const GardenSidebar({super.key, required this.controller});
   final GardenController controller;
   @override
-  Widget build(BuildContext context) => Container(
-    width: 240,
-    color: const Color(0xFFF9F9F9),
+  Widget build(BuildContext context) => SidebarSurface(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(
+        SizedBox(
           height: 54,
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 20),
@@ -33,7 +33,7 @@ class GardenSidebar extends StatelessWidget {
         ),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: EdgeInsets.symmetric(horizontal: 12),
             child: SidebarDrives(controller: controller),
           ),
         ),

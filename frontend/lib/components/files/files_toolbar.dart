@@ -1,5 +1,6 @@
+import '../system_icon.dart';
+
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../state/files_controller.dart';
 import 'toolbar_button.dart';
@@ -41,7 +42,7 @@ class FilesToolbar extends StatelessWidget {
                     : controller.path.isEmpty
                     ? onBackToDrives
                     : () => controller.goTo(controller.path.length - 1),
-                icon: LucideIcons.arrowLeft,
+                icon: SystemIcons.arrowLeft,
               ),
             ],
           ),
@@ -73,8 +74,8 @@ class FilesToolbar extends StatelessWidget {
                     ),
                   ),
                   for (var i = 0; i < controller.path.length; i++) ...[
-                    const Icon(
-                      LucideIcons.chevronRight,
+                    const SystemIcon(
+                      SystemIcons.chevronRight,
                       size: 12,
                       color: Colors.grey,
                     ),
@@ -114,14 +115,14 @@ class FilesToolbar extends StatelessWidget {
                 ToolbarButton(
                   tooltip: 'Reconnect live updates',
                   onPressed: controller.busy ? null : controller.reconnect,
-                  icon: LucideIcons.wifiOff,
+                  icon: SystemIcons.wifiOff,
                 ),
               if (onInvite != null &&
                   const {'Owner', 'Manager'}.contains(controller.drive!.role))
                 ToolbarButton(
                   tooltip: 'Manage drive sharing',
                   onPressed: controller.busy ? null : onInvite,
-                  icon: LucideIcons.link,
+                  icon: SystemIcons.link,
                 ),
               ListenableBuilder(
                 listenable: controller.imports,
@@ -130,7 +131,7 @@ class FilesToolbar extends StatelessWidget {
                   onPressed: controller.imports.busy || !controller.canWrite
                       ? null
                       : onImport,
-                  icon: LucideIcons.upload,
+                  icon: SystemIcons.upload,
                 ),
               ),
               SizedBox(
@@ -140,9 +141,9 @@ class FilesToolbar extends StatelessWidget {
                   tooltip: 'Create',
                   enabled: !controller.busy && controller.canWrite,
                   padding: EdgeInsets.zero,
-                  style: ToolbarButton.style,
-                  icon: const Icon(
-                    LucideIcons.plus,
+                  style: ToolbarButton.style(context),
+                  icon: const SystemIcon(
+                    SystemIcons.plus,
                     size: 15,
                     color: Color(0xFF4E4E4A),
                   ),

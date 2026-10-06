@@ -1715,6 +1715,33 @@ class Endpoints extends _is.EndpointDispatch {
                         params['notificationId'],
                       ),
         ),
+        'setTrashed': _is.MethodConnector(
+          name: 'setTrashed',
+          params: {
+            'notificationId': _is.ParameterDescription(
+              name: 'notificationId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'trashed': _is.ParameterDescription(
+              name: 'trashed',
+              type: _is.getType<bool>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['notifications']
+                          as _ifqfc08z.NotificationsEndpoint)
+                      .setTrashed(
+                        session,
+                        params['notificationId'],
+                        params['trashed'],
+                      ),
+        ),
         'watch': _is.MethodStreamConnector(
           name: 'watch',
           params: {

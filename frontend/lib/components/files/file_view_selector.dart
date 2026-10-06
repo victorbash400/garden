@@ -1,5 +1,6 @@
+import '../system_icon.dart';
+
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../state/files_controller.dart';
 import 'toolbar_group.dart';
@@ -21,9 +22,9 @@ class FileViewSelector extends StatelessWidget {
           selected: controller.viewMode == mode,
           onPressed: () => controller.setViewMode(mode),
           icon: switch (mode) {
-            FileViewMode.grid => LucideIcons.layoutGrid,
-            FileViewMode.list => LucideIcons.list,
-            FileViewMode.columns => LucideIcons.columns3,
+            FileViewMode.grid => SystemIcons.layoutGrid,
+            FileViewMode.list => SystemIcons.list,
+            FileViewMode.columns => SystemIcons.columns3,
           },
         ),
     ],

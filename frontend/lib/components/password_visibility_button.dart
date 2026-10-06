@@ -1,5 +1,6 @@
+import 'system_icon.dart';
+
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../ui/garden_theme.dart';
 
@@ -8,16 +9,18 @@ class PasswordVisibilityButton extends StatelessWidget {
     super.key,
     required this.visible,
     this.onPressed,
+    this.color = GardenTheme.secondary,
   });
 
   final bool visible;
+  final Color color;
   final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) => IconButton(
     tooltip: visible ? 'Hide password' : 'Show password',
     onPressed: onPressed,
-    icon: Icon(visible ? LucideIcons.eyeOff : LucideIcons.eye, size: 18),
-    color: GardenTheme.secondary,
+    icon: SystemIcon(visible ? SystemIcons.eyeOff : SystemIcons.eye, size: 18),
+    color: color,
   );
 }

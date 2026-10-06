@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../ui/garden_colors.dart';
+
 import '../../model/cache_sample.dart';
 import 'cache_history_painter.dart';
 import 'cache_usage_bar.dart';
@@ -15,7 +17,10 @@ class CacheHistoryGraph extends StatelessWidget {
       (peak, sample) => sample.bytes > peak ? sample.bytes : peak,
     );
     final maximum = peak < 1024 * 1024 ? 1024 * 1024 : (peak * 1.1).ceil();
-    const labelStyle = TextStyle(fontSize: 11, color: Color(0xFF77777A));
+    final labelStyle = TextStyle(
+      fontSize: 11,
+      color: GardenColors.of(context).secondary,
+    );
     return Semantics(
       label: 'Cache usage history over five minutes',
       value: samples.isEmpty
@@ -25,12 +30,12 @@ class CacheHistoryGraph extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Text('Last 5 minutes', style: labelStyle),
-              const Spacer(),
+              Text('Last 5 minutes', style: labelStyle),
+              Spacer(),
               Text(CacheUsageBar.bytes(maximum), style: labelStyle),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           SizedBox(
             height: 120,
             width: double.infinity,
@@ -39,12 +44,14 @@ class CacheHistoryGraph extends StatelessWidget {
                 painter: CacheHistoryPainter(
                   samples: List.of(samples),
                   maximum: maximum,
+                  accent: GardenColors.of(context).accent,
+                  gridColor: GardenColors.of(context).border,
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 6),
-          const Row(
+          SizedBox(height: 6),
+          Row(
             children: [
               Text('5 min ago', style: labelStyle),
               Spacer(),

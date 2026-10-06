@@ -1,7 +1,11 @@
+import 'system_icon.dart';
+
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+
+import '../ui/garden_colors.dart';
 
 import 'tree_folder_icon.dart';
+import 'file_icon.dart';
 import 'list_row.dart';
 
 class TreeRow extends StatelessWidget {
@@ -20,7 +24,7 @@ class TreeRow extends StatelessWidget {
   });
   final Widget? actions;
   final String label;
-  final IconData icon;
+  final SystemIcons icon;
   final bool selected;
   final bool expanded;
   final bool? folderOpen;
@@ -60,11 +64,11 @@ class TreeRow extends StatelessWidget {
                           turns: expanded ? 0.25 : 0,
                           duration: MediaQuery.disableAnimationsOf(context)
                               ? Duration.zero
-                              : const Duration(milliseconds: 220),
-                          child: const Icon(
-                            LucideIcons.chevronRight,
-                            size: 13,
-                            color: Color(0xFF858581),
+                              : Duration(milliseconds: 220),
+                          child: SystemIcon(
+                            SystemIcons.chevronRight,
+                            size: 14,
+                            color: GardenColors.of(context).ink,
                           ),
                         ),
                       ),
@@ -75,25 +79,30 @@ class TreeRow extends StatelessWidget {
                 onPressed: onOpen,
                 style: buttonStyle,
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 2, right: 8),
+                  padding: EdgeInsets.only(left: 2, right: 8),
                   child: Row(
                     children: [
-                      icon == LucideIcons.folder ||
-                              icon == LucideIcons.hardDrive
+                      icon == SystemIcons.folder ||
+                              icon == SystemIcons.hardDrive
                           ? TreeFolderIcon(
                               connected: connected,
                               open: folderOpen ?? (expanded || selected),
-                              drive: icon == LucideIcons.hardDrive,
+                              drive: icon == SystemIcons.hardDrive,
                             )
                           : SizedBox(
                               width: 24,
-                              child: Icon(
-                                icon,
-                                size: 16,
-                                color: const Color(0xFF5C8FC4),
-                              ),
+                              child: icon == SystemIcons.file
+                                  ? FileIcon(
+                                      size: 24,
+                                      color: GardenColors.of(context).ink,
+                                    )
+                                  : SystemIcon(
+                                      icon,
+                                      size: 16,
+                                      color: GardenColors.of(context).ink,
+                                    ),
                             ),
-                      const SizedBox(width: 6),
+                      SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           label,
@@ -102,9 +111,7 @@ class TreeRow extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
-                            color: selected
-                                ? const Color(0xFF8839EF)
-                                : const Color(0xFF333330),
+                            color: GardenColors.of(context).ink,
                           ),
                         ),
                       ),

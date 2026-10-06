@@ -1,5 +1,8 @@
+import '../system_icon.dart';
+
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+
+import '../sidebar_surface.dart';
 
 import '../../state/garden_controller.dart';
 import 'settings_category.dart';
@@ -10,16 +13,11 @@ class SettingsSidebar extends StatelessWidget {
   const SettingsSidebar({super.key, required this.controller});
   final GardenController controller;
   @override
-  Widget build(BuildContext context) => Container(
-    width: 240,
-    decoration: const BoxDecoration(
-      color: Color(0xFFF9F9F9),
-      border: Border(right: BorderSide(color: Color(0xFFE8E8E8))),
-    ),
+  Widget build(BuildContext context) => SidebarSurface(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(
+        SizedBox(
           height: 54,
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 20),
@@ -34,7 +32,7 @@ class SettingsSidebar extends StatelessWidget {
         ),
         SettingsCategory(
           label: 'Account',
-          icon: const Icon(LucideIcons.userRound),
+          icon: SystemIcon(SystemIcons.userRound),
           selected: controller.settingsSection == SettingsSection.account,
           onTap: controller.busy
               ? null
@@ -42,7 +40,7 @@ class SettingsSidebar extends StatelessWidget {
         ),
         SettingsCategory(
           label: 'Storage',
-          icon: const Icon(LucideIcons.hardDrive),
+          icon: SystemIcon(SystemIcons.hardDrive),
           selected: controller.settingsSection == SettingsSection.storage,
           onTap: controller.busy
               ? null
@@ -50,7 +48,7 @@ class SettingsSidebar extends StatelessWidget {
         ),
         SettingsCategory(
           label: 'Connections',
-          icon: const Icon(LucideIcons.plug),
+          icon: SystemIcon(SystemIcons.plug),
           selected: controller.settingsSection == SettingsSection.connections,
           onTap: controller.busy
               ? null
@@ -58,30 +56,36 @@ class SettingsSidebar extends StatelessWidget {
         ),
         SettingsCategory(
           label: 'Drives',
-          icon: const Icon(LucideIcons.hardDrive),
+          icon: const SystemIcon(SystemIcons.hardDrive),
           selected: controller.settingsSection == SettingsSection.drives,
           onTap: () => controller.selectSettings(SettingsSection.drives),
         ),
         SettingsCategory(
           label: 'Notifications',
-          icon: const Icon(LucideIcons.bell),
+          icon: const SystemIcon(SystemIcons.bell),
           selected: controller.settingsSection == SettingsSection.notifications,
           onTap: () => controller.selectSettings(SettingsSection.notifications),
         ),
         SettingsCategory(
+          label: 'Appearance',
+          icon: SystemIcon(SystemIcons.palette),
+          selected: controller.settingsSection == SettingsSection.appearance,
+          onTap: () => controller.selectSettings(SettingsSection.appearance),
+        ),
+        SettingsCategory(
           label: 'Activity',
-          icon: const ActivityIcon(),
+          icon: ActivityIcon(),
           selected: controller.settingsSection == SettingsSection.activity,
           onTap: () => controller.selectSettings(SettingsSection.activity),
         ),
-        const Spacer(),
+        Spacer(),
         SettingsCategory(
           label: 'Back to drives',
-          icon: const Icon(LucideIcons.arrowLeft),
+          icon: SystemIcon(SystemIcons.arrowLeft),
           selected: false,
           onTap: controller.busy ? null : controller.back,
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         SidebarAccountFooter(controller: controller),
       ],
     ),

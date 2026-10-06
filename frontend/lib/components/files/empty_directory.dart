@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../ui/garden_colors.dart';
+
 class EmptyDirectory extends StatelessWidget {
   const EmptyDirectory({super.key});
   @override
@@ -12,9 +14,11 @@ class EmptyDirectory extends StatelessWidget {
           for (var index = 0; index < (size.maxHeight / 32).floor(); index++)
             Container(
               height: 32,
-              margin: const EdgeInsets.symmetric(horizontal: 8),
+              margin: EdgeInsets.symmetric(horizontal: 8),
               decoration: BoxDecoration(
-                color: index.isEven ? const Color(0xFFF7F7F7) : Colors.white,
+                color: index.isEven
+                    ? GardenColors.of(context).stripe
+                    : GardenColors.of(context).panel,
                 borderRadius: BorderRadius.circular(5),
               ),
             ),

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../ui/garden_colors.dart';
+
 import 'package:garden_client/garden_client.dart';
 
 import 'file_size.dart';
@@ -11,7 +14,7 @@ class FileRowValues extends StatelessWidget {
   Widget build(BuildContext context) {
     final date = node.updatedAt.toLocal();
     return DefaultTextStyle.merge(
-      style: const TextStyle(fontSize: 12, color: Color(0xFF777773)),
+      style: TextStyle(fontSize: 12, color: GardenColors.of(context).secondary),
       child: Row(
         children: [
           if (width >= 480)

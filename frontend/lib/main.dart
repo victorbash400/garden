@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'services/local_preferences.dart';
+import 'services/appearance_store.dart';
+import 'state/appearance_controller.dart';
 import 'services/serverpod_gateway.dart';
 import 'services/files/serverpod_files_gateway.dart';
 import 'native/mac_finder_mounts.dart';
@@ -46,6 +48,7 @@ Future<void> main() async {
   controller = GardenController(
     gateway,
     LocalPreferences(),
+    appearance: AppearanceController(LocalAppearanceStore()),
     accountWindow: accountWindow,
     security: AccountSecurityController(gateway),
     finder: finder,

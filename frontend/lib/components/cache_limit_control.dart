@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../ui/garden_colors.dart';
+
 class CacheLimitControl extends StatefulWidget {
   const CacheLimitControl({
     super.key,
@@ -29,9 +31,18 @@ class _CacheLimitControlState extends State<CacheLimitControl> {
     children: [
       Row(
         children: [
-          const Text('Cache limit'),
-          const Spacer(),
-          Text(value.round() == 0 ? 'No disk cache' : '${value.round()} GiB'),
+          Text(
+            'Cache limit',
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+          ),
+          Spacer(),
+          Text(
+            value.round() == 0 ? 'No disk cache' : '${value.round()} GiB',
+            style: TextStyle(
+              fontSize: 13,
+              color: GardenColors.of(context).secondary,
+            ),
+          ),
         ],
       ),
       SliderTheme(
@@ -40,10 +51,10 @@ class _CacheLimitControlState extends State<CacheLimitControl> {
           overlayColor: Colors.transparent,
           trackHeight: 3,
           tickMarkShape: SliderTickMarkShape.noTickMark,
-          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-          activeTrackColor: const Color(0xFF313133),
-          inactiveTrackColor: const Color(0xFFE0E0E3),
-          thumbColor: const Color(0xFF313133),
+          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
+          activeTrackColor: GardenColors.of(context).ink,
+          inactiveTrackColor: GardenColors.of(context).border,
+          thumbColor: GardenColors.of(context).ink,
         ),
         child: Slider(
           value: value,

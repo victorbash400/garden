@@ -1,3 +1,4 @@
+import 'package:garden_flutter/ui/garden_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -24,6 +25,7 @@ void main() {
   testWidgets('Activity expands measured read details', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: GardenTheme.light,
         home: Scaffold(
           body: ActivityRow(
             drive: 'Pepsi',
@@ -55,6 +57,7 @@ void main() {
     var renamed = false;
     await tester.pumpWidget(
       MaterialApp(
+        theme: GardenTheme.light,
         home: Scaffold(
           body: HoverRename(
             onRename: () => renamed = true,

@@ -1,6 +1,6 @@
+import 'system_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:garden_client/garden_client.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../state/garden_controller.dart';
 import 'drive_folder_branch.dart';
@@ -38,7 +38,7 @@ class _SidebarDrivesState extends State<SidebarDrives> {
               child: TreeRow(
                 label: drive.name,
                 actions: DriveRowActions(drive: drive, controller: controller),
-                icon: LucideIcons.hardDrive,
+                icon: SystemIcons.hardDrive,
                 connected: drive.role != 'Owner',
                 depth: 0,
                 selected:

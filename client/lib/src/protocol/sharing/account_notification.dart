@@ -23,6 +23,7 @@ abstract class AccountNotification
     required this.title,
     required this.createdAt,
     this.readAt,
+    this.trashedAt,
   });
 
   factory AccountNotification({
@@ -34,6 +35,7 @@ abstract class AccountNotification
     required String title,
     required DateTime createdAt,
     DateTime? readAt,
+    DateTime? trashedAt,
   }) = _AccountNotificationImpl;
 
   factory AccountNotification.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -50,6 +52,9 @@ abstract class AccountNotification
       readAt: jsonSerialization['readAt'] == null
           ? null
           : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['readAt']),
+      trashedAt: jsonSerialization['trashedAt'] == null
+          ? null
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['trashedAt']),
     );
   }
 
@@ -72,6 +77,8 @@ abstract class AccountNotification
 
   DateTime? readAt;
 
+  DateTime? trashedAt;
+
   /// Returns a shallow copy of this [AccountNotification]
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
@@ -84,6 +91,7 @@ abstract class AccountNotification
     String? title,
     DateTime? createdAt,
     DateTime? readAt,
+    DateTime? trashedAt,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -97,6 +105,7 @@ abstract class AccountNotification
       'title': title,
       'createdAt': createdAt.toJson(),
       if (readAt != null) 'readAt': readAt?.toJson(),
+      if (trashedAt != null) 'trashedAt': trashedAt?.toJson(),
     };
   }
 
@@ -112,6 +121,7 @@ abstract class AccountNotification
       'title': title,
       'createdAt': createdAt.toJson(),
       if (readAt != null) 'readAt': readAt?.toJson(),
+      if (trashedAt != null) 'trashedAt': trashedAt?.toJson(),
     };
   }
 
@@ -133,6 +143,7 @@ class _AccountNotificationImpl extends AccountNotification {
     required String title,
     required DateTime createdAt,
     DateTime? readAt,
+    DateTime? trashedAt,
   }) : super._(
          id: id,
          recipientEmail: recipientEmail,
@@ -142,6 +153,7 @@ class _AccountNotificationImpl extends AccountNotification {
          title: title,
          createdAt: createdAt,
          readAt: readAt,
+         trashedAt: trashedAt,
        );
 
   /// Returns a shallow copy of this [AccountNotification]
@@ -157,6 +169,7 @@ class _AccountNotificationImpl extends AccountNotification {
     String? title,
     DateTime? createdAt,
     Object? readAt = _Undefined,
+    Object? trashedAt = _Undefined,
   }) {
     return AccountNotification(
       id: id is int? ? id : this.id,
@@ -167,6 +180,7 @@ class _AccountNotificationImpl extends AccountNotification {
       title: title ?? this.title,
       createdAt: createdAt ?? this.createdAt,
       readAt: readAt is DateTime? ? readAt : this.readAt,
+      trashedAt: trashedAt is DateTime? ? trashedAt : this.trashedAt,
     );
   }
 }
