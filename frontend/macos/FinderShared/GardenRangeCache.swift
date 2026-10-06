@@ -27,6 +27,7 @@ actor GardenRangeCache {
   private var flights: [String: Flight] = [:]
   private var windows: [String: GardenReadWindow] = [:]
   private var indexes: [String: GardenWebMIndex] = [:]
+  private var mp4Indexes: [String: GardenMP4Index] = [:]
   private var readAhead: [String: (UUID, Task<Void, Never>)] = [:]
   private var readAheadDone: [String: Set<Int>] = [:]
   private var readAheadCursor: [String: Int] = [:]
@@ -52,6 +53,7 @@ actor GardenRangeCache {
     let pendingTickets = Array(ticketFlights.values)
     windows.removeAll()
     indexes.removeAll()
+    mp4Indexes.removeAll()
     for (_, task) in readAhead.values { task.cancel() }
     readAhead.removeAll()
     readAheadDone.removeAll()
@@ -143,9 +145,13 @@ actor GardenRangeCache {
 
   private func scheduleReadAhead(node: GardenNode, offset: Int, path: String?) {
     let name = "\(node.id)-\(node.version)"
-    guard let index = indexes[name] else { return }
+    guard indexes[name] != nil || mp4Indexes[name] != nil else { return }
     readAheadCursor[name] = offset
-    let pages = index.nextPages(after: offset, count: 12, excluding: readAheadDone[name] ?? [])
+    let excluded = readAheadDone[name] ?? []
+    let pages: [Int]
+    if let index = indexes[name] { pages = index.nextPages(after: offset, count: 12, excluding: excluded) }
+    else if let index = mp4Indexes[name] { pages = index.nextPages(after: offset, count: 12, excluding: excluded) }
+    else { return }
     for page in pages {
       let key = "\(name)-\(page)"
       guard readAhead[key] == nil, readAheadDone[name]?.contains(page) != true else { continue }
@@ -171,6 +177,17 @@ actor GardenRangeCache {
 
   private func discoverIndex(node: GardenNode, data: Data, offset: Int) {
     let name = "\(node.id)-\(node.version)"
+    if var index = mp4Indexes[name] {
+      index.discoverFooter(data, offset: offset, fileSize: node.size)
+      mp4Indexes[name] = index
+      return
+    }
+    if offset == 0, indexes[name] == nil, mp4Indexes.count < 128,
+      let index = GardenMP4Index.parse(data, fileSize: node.size) {
+      mp4Indexes[name] = index
+      prefetchMP4Footer(node: node)
+      return
+    }
     var index = indexes[name]
     let initial = index == nil
     if index == nil, offset == 0, indexes.count < 128 {
@@ -180,6 +197,24 @@ actor GardenRangeCache {
     index.discoverClusters(in: data, offset: offset, fileSize: node.size)
     indexes[name] = index
     if initial { prefetchPayload(node: node, start: 0, path: nil) }
+  }
+
+  private func prefetchMP4Footer(node: GardenNode) {
+    guard readAhead.count < 48 else { return }
+    let key = "\(node.id)-\(node.version)-footer"
+    guard readAhead[key] == nil else { return }
+    let id = UUID()
+    let task = Task {
+      defer { if readAhead[key]?.0 == id { readAhead.removeValue(forKey: key) } }
+      do {
+        _ = try await self.block(node: node, index: (node.size - 1) / Self.smallBlockSize,
+          fetchSize: Self.smallBlockSize, persist: true, path: nil, speculative: true)
+        try Task.checkCancellation()
+        self.scheduleReadAhead(node: node, offset: self.readAheadCursor["\(node.id)-\(node.version)"] ?? 0, path: nil)
+      } catch is CancellationError { }
+      catch { FileHandle.standardError.write(Data("Garden MP4 index read: \(error.localizedDescription)\n".utf8)) }
+    }
+    readAhead[key] = (id, task)
   }
 
   private func ticket(node: GardenNode) async throws -> GardenDownload {

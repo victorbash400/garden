@@ -169,6 +169,10 @@
 		A30D20261004000000000900 /* RemoteEngineAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20D20261004000000000009 /* RemoteEngineAttributes.swift */; };
 		A30D20261004000000000A00 /* RemoteAttributeCallbacks.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20D2026100400000000000A /* RemoteAttributeCallbacks.swift */; };
 		A30D20261004000000000B00 /* RemoteExtendedAttributeCallbacks.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20D2026100400000000000B /* RemoteExtendedAttributeCallbacks.swift */; };
+		F04A2680A5AB4B78B9C20F02 /* GardenMP4Index.swift in Sources */ = {isa = PBXBuildFile; fileRef = F04A2680A5AB4B78B9C20F00 /* GardenMP4Index.swift */; };
+		F04A2680A5AB4B78B9C20F03 /* GardenMP4Index.swift in Sources */ = {isa = PBXBuildFile; fileRef = F04A2680A5AB4B78B9C20F00 /* GardenMP4Index.swift */; };
+		F04A2680A5AB4B78B9C20F04 /* GardenMP4Index.swift in Sources */ = {isa = PBXBuildFile; fileRef = F04A2680A5AB4B78B9C20F00 /* GardenMP4Index.swift */; };
+		F04A2680A5AB4B78B9C20F05 /* GardenMP4Index.swift in Sources */ = {isa = PBXBuildFile; fileRef = F04A2680A5AB4B78B9C20F00 /* GardenMP4Index.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -351,6 +355,7 @@
 		A20D20261004000000000009 /* RemoteEngineAttributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteEngineAttributes.swift; path = RemoteDrive/Engine/RemoteEngineAttributes.swift; sourceTree = "<group>"; };
 		A20D2026100400000000000A /* RemoteAttributeCallbacks.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteAttributeCallbacks.swift; path = RemoteDrive/Engine/RemoteAttributeCallbacks.swift; sourceTree = "<group>"; };
 		A20D2026100400000000000B /* RemoteExtendedAttributeCallbacks.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteExtendedAttributeCallbacks.swift; path = RemoteDrive/Engine/RemoteExtendedAttributeCallbacks.swift; sourceTree = "<group>"; };
+		F04A2680A5AB4B78B9C20F00 /* GardenMP4Index.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenMP4Index.swift; path = FinderShared/GardenMP4Index.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -451,6 +456,7 @@
 				081BAFC548A1CD53E423E5FC /* GardenRangeCache.swift */,
 				66787A23AB72A346FAE5C85A /* GardenReadWindow.swift */,
 				0E129589D69939A305550A3F /* GardenWebMIndex.swift */,
+				F04A2680A5AB4B78B9C20F00 /* GardenMP4Index.swift */,
 				76F3200B441B18D31AA1194D /* StreamingExtension */,
 				64DDB6D8FE3F6399EF15AAFC /* GardenReadPermits.swift */,
 				323C797BE6BBC8942382CA08 /* GardenMultipartUpload.swift */,
@@ -875,6 +881,7 @@
 				85DF0A9A69A75A375F6BC25E /* GardenRangeCache.swift in Sources */,
 				C6C69299D03DEF54D7C84206 /* GardenReadWindow.swift in Sources */,
 				8B0DCA90A587542EA8364CCF /* GardenWebMIndex.swift in Sources */,
+				F04A2680A5AB4B78B9C20F02 /* GardenMP4Index.swift in Sources */,
 				FAC358EF6047694223FE0EF2 /* GardenReadPermits.swift in Sources */,
 				1CA837D6BAC00AD63BA96528 /* GardenStreamingReadOnly.swift in Sources */,
 				B49F2A8900DA9C67E918DD55 /* GardenMultipartUpload.swift in Sources */,
@@ -926,6 +933,7 @@
 				E9C000109326835801B929D1 /* GardenRangeCache.swift in Sources */,
 				1B342A7E733592E5D78E16A7 /* GardenReadWindow.swift in Sources */,
 				ECBCC464B1801259663BB7A3 /* GardenWebMIndex.swift in Sources */,
+				F04A2680A5AB4B78B9C20F03 /* GardenMP4Index.swift in Sources */,
 				E6844C82A582C1A8ED500A78 /* GardenNode.swift in Sources */,
 				A30D20261004000000000802 /* GardenFileAttributes.swift in Sources */,
 				EAE0ACEB69D452E5B8A04ED2 /* GardenReadPermits.swift in Sources */,
@@ -965,6 +973,7 @@
 				E45EC7BF2C9DA709CF5B5B82 /* GardenRangeCache.swift in Sources */,
 				05C8F1D5A448B92E19483AA6 /* GardenReadWindow.swift in Sources */,
 				24722064B813E88B429FBDA9 /* GardenWebMIndex.swift in Sources */,
+				F04A2680A5AB4B78B9C20F04 /* GardenMP4Index.swift in Sources */,
 				7CE6C00E3C2EEADBCF5DFFA0 /* GardenReadPermits.swift in Sources */,
 				327013FB001B5BE9DEB84197 /* GardenMultipartUpload.swift in Sources */,
 				7598515577DB805016E025DC /* GardenObjectRequests.swift in Sources */,
@@ -1010,6 +1019,7 @@
 				D64DE4D03D35E27CD67EEFE1 /* GardenRangeCache.swift in Sources */,
 				70731121D7DC5381B681A7E8 /* GardenReadWindow.swift in Sources */,
 				3132AA8F1947FFF4DF6CB99D /* GardenWebMIndex.swift in Sources */,
+				F04A2680A5AB4B78B9C20F05 /* GardenMP4Index.swift in Sources */,
 				26BAE73D6567562D297AFFC4 /* GardenObjectRequests.swift in Sources */,
 				88F7CA26569067E0C83C95B8 /* GardenBandwidth.swift in Sources */,
 				B8B059DAE8B68C3019F3005E /* GardenActivity.swift in Sources */,
