@@ -81,6 +81,29 @@ actor GardenRangeCache {
     windows[windowKey] = window
     let first = offset / blockSize
     let last = (end - 1) / blockSize
+    let result: Data
+    if first == last {
+      let bytes = try await block(node: node, index: first, fetchSize: fetchSize, persist: persist, path: path)
+      try Task.checkCancellation()
+      let start = offset - first * blockSize
+      guard bytes.count >= start + end - offset else { throw GardenAPIError.invalidResponse }
+      result = Data(bytes[start..<(start + end - offset)])
+    } else {
+      result = try await readPages(node: node, offset: offset, end: end, first: first, last: last,
+        fetchSize: fetchSize, persist: persist, path: path)
+    }
+    if persist {
+      if fetchSize == GardenReadWindow.maximumSize {
+        schedulePayload(node: node, after: end, path: path, count: window.payloadReadAheadBlocks)
+      }
+      scheduleReadAhead(node: node, offset: offset, path: path)
+    }
+    return result
+  }
+
+  private func readPages(node: GardenNode, offset: Int, end: Int, first: Int, last: Int,
+    fetchSize: Int, persist: Bool, path: String?) async throws -> Data {
+    let blockSize = Self.smallBlockSize
     let blocks = try await withThrowingTaskGroup(of: (Int, Data).self) { group in
       var next = first
       for _ in 0..<min(GardenReadPermits.capacity, last - first + 1) {
@@ -109,12 +132,6 @@ actor GardenRangeCache {
       result.append(bytes[start..<(start + count)])
     }
     guard result.count == end - offset else { throw GardenAPIError.invalidResponse }
-    if persist {
-      if fetchSize == GardenReadWindow.maximumSize {
-        schedulePayload(node: node, after: end, path: path, count: window.payloadReadAheadBlocks)
-      }
-      scheduleReadAhead(node: node, offset: offset, path: path)
-    }
     return result
   }
 
@@ -246,17 +263,22 @@ actor GardenRangeCache {
 
   private func cached(node: GardenNode, index: Int, persist: Bool) async throws -> Data? {
     let offset = index * Self.smallBlockSize
-    // Read old bulk blocks as well, so changing request sizes does not download the same data again.
-    for size in [Self.blockSize, Self.smallBlockSize] {
-      let start = offset / size * size
-      let cacheKey = "\(namespace)/\(node.id)-\(node.version)-\(size)-\(offset / size)"
-      let expected = min(size, node.size - start)
-      var bytes = await GardenReadBuffer.shared.read(cacheKey)
-      if bytes == nil, persist { bytes = try await disk.read(cacheKey, expected: expected) }
-      if let bytes {
-        guard bytes.count == expected else { throw GardenAPIError.invalidResponse }
-        let end = min(offset + Self.smallBlockSize, node.size) - start
-        return Data(bytes[(offset - start)..<end])
+    // Check all memory entries before disk, including bulk blocks from older caches.
+    for fromDisk in [false, true] {
+      if fromDisk && !persist { break }
+      for size in [Self.blockSize, Self.smallBlockSize] {
+        let start = offset / size * size
+        let cacheKey = "\(namespace)/\(node.id)-\(node.version)-\(size)-\(offset / size)"
+        let expected = min(size, node.size - start)
+        let bytes: Data?
+        if fromDisk { bytes = try await disk.read(cacheKey, expected: expected) }
+        else { bytes = await GardenReadBuffer.shared.read(cacheKey) }
+        if let bytes {
+          guard bytes.count == expected else { throw GardenAPIError.invalidResponse }
+          if fromDisk { await GardenReadBuffer.shared.store(bytes, key: cacheKey) }
+          let end = min(offset + Self.smallBlockSize, node.size) - start
+          return Data(bytes[(offset - start)..<end])
+        }
       }
     }
     return nil
