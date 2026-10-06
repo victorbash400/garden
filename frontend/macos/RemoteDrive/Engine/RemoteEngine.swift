@@ -320,7 +320,6 @@ actor RemoteEngine {
   }
 
   private func refreshPermission() async throws {
-    driveRole = nil
     do {
       let credential = try await api.streamCredential()
       let value = try await api.call("driveMembers", "accessRole", ["gardenId": credential.driveID])
