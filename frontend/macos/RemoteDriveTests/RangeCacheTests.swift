@@ -31,8 +31,8 @@ actor RangeSource {
     }
     await cache.invalidate()
     let requests = await source.requests
-    try require(requests.count <= 4, "Nearby reads must share bulk windows")
-    try require(await cache.remoteBytes <= 2 * 1024 * 1024, "Read-ahead must stay one block ahead")
+    try require(requests.count <= 6, "Nearby reads must share bounded bulk windows")
+    try require(await cache.remoteBytes <= 4 * 1024 * 1024, "Fast read-ahead must stay within three blocks ahead")
     print("16 sequential 64 KiB reads: \(requests.count) requests including read-ahead, \(start.duration(to: .now))")
     _ = try await cache.read(node: node, offset: 1234, length: 700000)
     try require(await source.requests.count == requests.count, "Changing read size must reuse cached pages")
@@ -81,9 +81,9 @@ actor RangeSource {
       try require(data == Data((offset..<(offset + 4096)).map { UInt8($0 % 251) }), "Small audio reads differ")
     }
     await cache.invalidate()
-    try require(await source.requests.count - audioBefore <= 5, "Small sequential audio reads must reuse read-ahead")
-    try require(await cache.remoteBytes - bytesBefore <= 3 * 1024 * 1024 + 65536,
-      "Small-read prefetch must stay within one bulk window ahead")
+    try require(await source.requests.count - audioBefore <= 7, "Small sequential audio reads must reuse bounded read-ahead")
+    try require(await cache.remoteBytes - bytesBefore <= 5 * 1024 * 1024 + 65536,
+      "Fast small-read prefetch must stay within three bulk windows ahead")
     print("512 small audio reads: byte correctness, shared requests and bounded read-ahead passed")
     for length in [16384, 32768] {
       let media = try GardenNode(["id": length, "parentId": 0, "name": "media.webm", "kind": "file", "size": size,
@@ -99,10 +99,21 @@ actor RangeSource {
         }
       }
       await cache.invalidate()
-      try require(await source.requests.count - before <= 5, "Sequential media reads must reuse bounded windows")
-      try require(await cache.remoteBytes - bytesBefore <= 3 * 1024 * 1024 + 65536,
-        "Media read-ahead must stay one block ahead")
+      try require(await source.requests.count - before <= 7, "Sequential media reads must reuse bounded windows")
+      try require(await cache.remoteBytes - bytesBefore <= 5 * 1024 * 1024 + 65536,
+        "Fast media read-ahead must stay within three blocks ahead")
     }
     print("16 and 32 KiB media streams: byte correctness and bounded read-ahead passed")
+    let instant = ContinuousClock.now
+    var fast = GardenReadWindow()
+    var slow = GardenReadWindow()
+    for index in 0..<32 {
+      _ = fast.observe(offset: index * 32768, length: 32768, now: instant.advanced(by: .milliseconds(index)))
+      _ = slow.observe(offset: index * 32768, length: 32768, now: instant.advanced(by: .milliseconds(index * 40)))
+    }
+    try require(fast.payloadReadAheadBlocks == 3, "Sustained fast consumers need a bounded three-block pipeline")
+    try require(slow.payloadReadAheadBlocks == 1, "Paced consumers must keep the smaller read-ahead window")
+    _ = fast.observe(offset: 90 * 1024 * 1024, length: 32768, now: instant.advanced(by: .seconds(2)))
+    try require(fast.payloadReadAheadBlocks == 1, "A distant seek must reset the payload pipeline")
   }
 }

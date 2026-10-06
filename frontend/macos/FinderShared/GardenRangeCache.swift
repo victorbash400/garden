@@ -111,16 +111,19 @@ actor GardenRangeCache {
     guard result.count == end - offset else { throw GardenAPIError.invalidResponse }
     if persist {
       if fetchSize == GardenReadWindow.maximumSize {
-        schedulePayload(node: node, after: end, path: path)
+        schedulePayload(node: node, after: end, path: path, count: window.payloadReadAheadBlocks)
       }
       scheduleReadAhead(node: node, offset: offset, path: path)
     }
     return result
   }
 
-  private func schedulePayload(node: GardenNode, after offset: Int, path: String?) {
+  private func schedulePayload(node: GardenNode, after offset: Int, path: String?, count: Int) {
     let start = ((offset - 1) / Self.blockSize + 1) * Self.blockSize
-    prefetchPayload(node: node, start: start, path: path)
+    guard start < node.size else { return }
+    for index in 0..<min(count, (node.size - 1 - start) / Self.blockSize + 1) {
+      prefetchPayload(node: node, start: start + index * Self.blockSize, path: path)
+    }
   }
 
   private func prefetchPayload(node: GardenNode, start: Int, path: String?) {
