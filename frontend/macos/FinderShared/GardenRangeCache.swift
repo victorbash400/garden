@@ -104,6 +104,25 @@ actor GardenRangeCache {
   private func readPages(node: GardenNode, offset: Int, end: Int, first: Int, last: Int,
     fetchSize: Int, persist: Bool, path: String?) async throws -> Data {
     let blockSize = Self.smallBlockSize
+    if end - offset >= blockSize,
+      let pages = await GardenReadBuffer.shared.read((first...last).map { key(node, index: $0) }) {
+      var result = Data(capacity: end - offset)
+      for (position, bytes) in pages.enumerated() {
+        let started = Date()
+        try Task.checkCancellation()
+        let page = (first + position) * blockSize
+        guard bytes.count == min(blockSize, node.size - page) else { throw GardenAPIError.invalidResponse }
+        discoverIndex(node: node, data: bytes, offset: page)
+        cacheHits += 1
+        let start = max(offset - page, 0)
+        let count = min(end - page - start, bytes.count - start)
+        result.append(bytes[start..<(start + count)])
+        await GardenActivity.shared.record(domain: domain, name: path ?? node.name, action: "Read", source: "Cache",
+          node: node.id, bytes: bytes.count, milliseconds: Date().timeIntervalSince(started) * 1000)
+      }
+      guard result.count == end - offset else { throw GardenAPIError.invalidResponse }
+      return result
+    }
     let blocks = try await withThrowingTaskGroup(of: (Int, Data).self) { group in
       var next = first
       for _ in 0..<min(GardenReadPermits.capacity, last - first + 1) {

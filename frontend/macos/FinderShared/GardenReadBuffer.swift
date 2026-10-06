@@ -16,6 +16,18 @@ actor GardenReadBuffer {
     return entry.0
   }
 
+  func read(_ keys: [String]) -> [Data]? {
+    var result: [Data] = []
+    result.reserveCapacity(keys.count)
+    for key in keys {
+      guard let entry = entries[key] else { return nil }
+      clock &+= 1
+      entries[key] = (entry.0, clock)
+      result.append(entry.0)
+    }
+    return result
+  }
+
   func store(_ data: Data, key: String) {
     guard data.count <= capacity else { return }
     if let previous = entries.removeValue(forKey: key) { used -= previous.0.count }
