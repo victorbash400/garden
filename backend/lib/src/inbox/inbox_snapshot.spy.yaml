@@ -1,0 +1,4 @@
+class: InboxSnapshot
+fields:
+  entries: List<InboxEntry>
+  cursor: int

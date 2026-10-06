@@ -1,0 +1,11 @@
+class: InboxEvent
+table: inbox_event
+fields:
+  userId: String
+  gardenId: int
+  conversationId: int?
+  kind: String
+  createdAt: DateTime
+indexes:
+  inbox_user_cursor:
+    fields: userId, id

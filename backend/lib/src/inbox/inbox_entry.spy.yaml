@@ -1,0 +1,13 @@
+class: InboxEntry
+fields:
+  gardenId: int
+  driveName: String
+  conversationId: int?
+  title: String
+  createdAt: DateTime?
+  creatorId: String?
+  members: List<PublicIdentity>
+  unreadCount: int
+  latestText: String
+  latestAt: DateTime?
+  isNew: bool, default=false

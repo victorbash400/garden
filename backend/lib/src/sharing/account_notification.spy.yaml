@@ -3,6 +3,7 @@ table: account_notification
 fields:
   recipientEmail: String
   gardenId: int?
+  conversationId: int?
   invitationId: int?
   kind: String
   title: String

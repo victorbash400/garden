@@ -47,6 +47,14 @@ void main() {
             createdAt: DateTime.now().toUtc(),
           ),
         );
+        await EmailAccount.db.insertRow(
+          session,
+          EmailAccount(
+            authUserId: user.id!,
+            email: address,
+            passwordHash: 'unused',
+          ),
+        );
         return builder.copyWith(
           authentication: AuthenticationOverride.authenticationInfo(
             user.id!.toString(),
@@ -55,6 +63,119 @@ void main() {
         );
       }
 
+      test(
+        'Inbox discovers new conversations, delivers unread messages and isolates recipients',
+        () async {
+          final owner = await account('inbox-owner@example.com');
+          final receiver = await account('inbox-receiver@example.com');
+          final outsider = await account('inbox-outsider@example.com');
+          final drive = await endpoints.garden.create(owner, 'Inbox drive');
+          for (final member in [receiver, outsider]) {
+            await GardenMember.db.insertRow(
+              owner.build(),
+              GardenMember(
+                gardenId: drive.id,
+                userId: member.build().authenticated!.userIdentifier,
+                role: 'Viewer',
+              ),
+            );
+          }
+          final before = await endpoints.inbox.snapshot(receiver);
+          final changes = StreamIterator(
+            endpoints.inbox.watch(receiver, before.cursor),
+          );
+          final arriving = changes.moveNext();
+          final conversation = await endpoints.conversations.create(
+            owner,
+            drive.id,
+            [receiver.build().authenticated!.userIdentifier],
+            'Design review',
+          );
+          final id = conversation.conversation.id!;
+          expect(await arriving.timeout(const Duration(seconds: 5)), isTrue);
+          expect(changes.current.kind, 'chatAdded');
+          expect(changes.current.conversationId, id);
+          var entry = (await endpoints.inbox.snapshot(
+            receiver,
+          )).entries.firstWhere((entry) => entry.conversationId == id);
+          expect(entry.title, 'Design review');
+          expect(entry.isNew, isTrue);
+          expect(
+            (await endpoints.inbox.snapshot(
+              outsider,
+            )).entries.where((entry) => entry.conversationId == id),
+            isEmpty,
+          );
+          await endpoints.inbox.seen(receiver, id);
+          entry = (await endpoints.inbox.snapshot(
+            receiver,
+          )).entries.firstWhere((entry) => entry.conversationId == id);
+          expect(entry.isNew, isFalse);
+          final folder = await endpoints.files.create(
+            owner,
+            drive.id,
+            0,
+            'Assets',
+            NodeKind.folder,
+          );
+          final message = await endpoints.conversationMessages.send(
+            owner,
+            id,
+            'Please review',
+            null,
+            folder.id,
+          );
+          entry = (await endpoints.inbox.snapshot(
+            receiver,
+          )).entries.firstWhere((entry) => entry.conversationId == id);
+          expect(entry.unreadCount, 1);
+          expect(entry.latestText, 'Please review');
+          final notices = await AccountNotification.db.find(
+            owner.build(),
+            where: (row) =>
+                row.recipientEmail.equals('inbox-receiver@example.com') &
+                row.conversationId.equals(id),
+          );
+          expect(
+            notices.map((notice) => notice.kind),
+            containsAll(['chatAdded', 'chatMessage']),
+          );
+          await endpoints.conversationMessages.markRead(
+            receiver,
+            id,
+            message.id!,
+          );
+          expect(
+            (await endpoints.inbox.snapshot(receiver)).entries
+                .firstWhere((entry) => entry.conversationId == id)
+                .unreadCount,
+            0,
+          );
+          await expectLater(
+            endpoints.conversations.rename(receiver, id, 'Forbidden'),
+            throwsA(isA<GardenException>()),
+          );
+          await endpoints.conversations.rename(owner, id, 'Renamed review');
+          expect(
+            (await endpoints.inbox.snapshot(
+              receiver,
+            )).entries.firstWhere((entry) => entry.conversationId == id).title,
+            'Renamed review',
+          );
+          await endpoints.conversations.delete(owner, id);
+          expect(
+            (await endpoints.inbox.snapshot(
+              receiver,
+            )).entries.where((entry) => entry.conversationId == id),
+            isEmpty,
+          );
+          await expectLater(
+            endpoints.conversationMessages.snapshot(receiver, id),
+            throwsA(isA<GardenException>()),
+          );
+          await changes.cancel();
+        },
+      );
       test(
         'existing users receive private unique names; rename uniqueness is case insensitive',
         () async {

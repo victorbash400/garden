@@ -18,6 +18,7 @@ abstract class AccountNotification
     this.id,
     required this.recipientEmail,
     this.gardenId,
+    this.conversationId,
     this.invitationId,
     required this.kind,
     required this.title,
@@ -30,6 +31,7 @@ abstract class AccountNotification
     int? id,
     required String recipientEmail,
     int? gardenId,
+    int? conversationId,
     int? invitationId,
     required String kind,
     required String title,
@@ -43,6 +45,7 @@ abstract class AccountNotification
       id: jsonSerialization['id'] as int?,
       recipientEmail: jsonSerialization['recipientEmail'] as String,
       gardenId: jsonSerialization['gardenId'] as int?,
+      conversationId: jsonSerialization['conversationId'] as int?,
       invitationId: jsonSerialization['invitationId'] as int?,
       kind: jsonSerialization['kind'] as String,
       title: jsonSerialization['title'] as String,
@@ -67,6 +70,8 @@ abstract class AccountNotification
 
   int? gardenId;
 
+  int? conversationId;
+
   int? invitationId;
 
   String kind;
@@ -86,6 +91,7 @@ abstract class AccountNotification
     int? id,
     String? recipientEmail,
     int? gardenId,
+    int? conversationId,
     int? invitationId,
     String? kind,
     String? title,
@@ -100,6 +106,7 @@ abstract class AccountNotification
       if (id != null) 'id': id,
       'recipientEmail': recipientEmail,
       if (gardenId != null) 'gardenId': gardenId,
+      if (conversationId != null) 'conversationId': conversationId,
       if (invitationId != null) 'invitationId': invitationId,
       'kind': kind,
       'title': title,
@@ -116,6 +123,7 @@ abstract class AccountNotification
       if (id != null) 'id': id,
       'recipientEmail': recipientEmail,
       if (gardenId != null) 'gardenId': gardenId,
+      if (conversationId != null) 'conversationId': conversationId,
       if (invitationId != null) 'invitationId': invitationId,
       'kind': kind,
       'title': title,
@@ -138,6 +146,7 @@ class _AccountNotificationImpl extends AccountNotification {
     int? id,
     required String recipientEmail,
     int? gardenId,
+    int? conversationId,
     int? invitationId,
     required String kind,
     required String title,
@@ -148,6 +157,7 @@ class _AccountNotificationImpl extends AccountNotification {
          id: id,
          recipientEmail: recipientEmail,
          gardenId: gardenId,
+         conversationId: conversationId,
          invitationId: invitationId,
          kind: kind,
          title: title,
@@ -164,6 +174,7 @@ class _AccountNotificationImpl extends AccountNotification {
     Object? id = _Undefined,
     String? recipientEmail,
     Object? gardenId = _Undefined,
+    Object? conversationId = _Undefined,
     Object? invitationId = _Undefined,
     String? kind,
     String? title,
@@ -175,6 +186,9 @@ class _AccountNotificationImpl extends AccountNotification {
       id: id is int? ? id : this.id,
       recipientEmail: recipientEmail ?? this.recipientEmail,
       gardenId: gardenId is int? ? gardenId : this.gardenId,
+      conversationId: conversationId is int?
+          ? conversationId
+          : this.conversationId,
       invitationId: invitationId is int? ? invitationId : this.invitationId,
       kind: kind ?? this.kind,
       title: title ?? this.title,

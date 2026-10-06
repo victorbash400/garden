@@ -74,6 +74,9 @@ import 'gardens/garden_member.dart' as _icenu3t8;
 import 'gardens/garden_record.dart' as _iwqk3oef;
 import 'gardens/garden_summary.dart' as _i5zbrq86;
 import 'greetings/greeting.dart' as _izw8z7ou;
+import 'inbox/inbox_entry.dart' as _ic7xu85a;
+import 'inbox/inbox_event.dart' as _ihabtcf0;
+import 'inbox/inbox_snapshot.dart' as _ikwold7q;
 import 'sharing/account_notification.dart' as _i8nfb11w;
 import 'sharing/drive_invitation.dart' as _iks3nfjn;
 import 'sharing/drive_management.dart' as _ihkyi9jp;
@@ -109,6 +112,9 @@ export 'gardens/garden_member.dart';
 export 'gardens/garden_record.dart';
 export 'gardens/garden_summary.dart';
 export 'greetings/greeting.dart';
+export 'inbox/inbox_entry.dart';
+export 'inbox/inbox_event.dart';
+export 'inbox/inbox_snapshot.dart';
 export 'sharing/account_notification.dart';
 export 'sharing/drive_invitation.dart';
 export 'sharing/drive_management.dart';
@@ -143,6 +149,12 @@ class Protocol extends _is.DatabaseSerializationManager {
         ),
         _isp.ColumnDefinition(
           name: 'gardenId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'conversationId',
           columnType: _isp.ColumnType.bigint,
           isNullable: true,
           dartType: 'int?',
@@ -1559,6 +1571,72 @@ class Protocol extends _is.DatabaseSerializationManager {
       ],
       managed: true,
     ),
+    _isp.TableDefinition(
+      name: 'inbox_event',
+      dartName: 'InboxEvent',
+      schema: 'public',
+      module: 'garden',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'userId',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'gardenId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'conversationId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'kind',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'inbox_user_cursor',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'userId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
     ..._iais.Protocol.targetTableDefinitions,
     ..._iacs.Protocol.targetTableDefinitions,
     ..._isp.Protocol.targetTableDefinitions,
@@ -1686,6 +1764,15 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (t == _izw8z7ou.Greeting) {
       return _izw8z7ou.Greeting.fromJson(data) as T;
+    }
+    if (t == _ic7xu85a.InboxEntry) {
+      return _ic7xu85a.InboxEntry.fromJson(data) as T;
+    }
+    if (t == _ihabtcf0.InboxEvent) {
+      return _ihabtcf0.InboxEvent.fromJson(data) as T;
+    }
+    if (t == _ikwold7q.InboxSnapshot) {
+      return _ikwold7q.InboxSnapshot.fromJson(data) as T;
     }
     if (t == _i8nfb11w.AccountNotification) {
       return _i8nfb11w.AccountNotification.fromJson(data) as T;
@@ -1820,6 +1907,16 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _is.getType<_izw8z7ou.Greeting?>()) {
       return (data != null ? _izw8z7ou.Greeting.fromJson(data) : null) as T;
     }
+    if (t == _is.getType<_ic7xu85a.InboxEntry?>()) {
+      return (data != null ? _ic7xu85a.InboxEntry.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_ihabtcf0.InboxEvent?>()) {
+      return (data != null ? _ihabtcf0.InboxEvent.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_ikwold7q.InboxSnapshot?>()) {
+      return (data != null ? _ikwold7q.InboxSnapshot.fromJson(data) : null)
+          as T;
+    }
     if (t == _is.getType<_i8nfb11w.AccountNotification?>()) {
       return (data != null
               ? _i8nfb11w.AccountNotification.fromJson(data)
@@ -1874,6 +1971,12 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == List<_i4wn0cbe.DriveEvent>) {
       return (data as List)
               .map((e) => deserialize<_i4wn0cbe.DriveEvent>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ic7xu85a.InboxEntry>) {
+      return (data as List)
+              .map((e) => deserialize<_ic7xu85a.InboxEntry>(e))
               .toList()
           as T;
     }
@@ -2064,6 +2167,9 @@ class Protocol extends _is.DatabaseSerializationManager {
       _iwqk3oef.GardenRecord => 'GardenRecord',
       _i5zbrq86.GardenSummary => 'GardenSummary',
       _izw8z7ou.Greeting => 'Greeting',
+      _ic7xu85a.InboxEntry => 'InboxEntry',
+      _ihabtcf0.InboxEvent => 'InboxEvent',
+      _ikwold7q.InboxSnapshot => 'InboxSnapshot',
       _i8nfb11w.AccountNotification => 'AccountNotification',
       _iks3nfjn.DriveInvitation => 'DriveInvitation',
       _ihkyi9jp.DriveManagement => 'DriveManagement',
@@ -2146,6 +2252,12 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'GardenSummary';
       case _izw8z7ou.Greeting():
         return 'Greeting';
+      case _ic7xu85a.InboxEntry():
+        return 'InboxEntry';
+      case _ihabtcf0.InboxEvent():
+        return 'InboxEvent';
+      case _ikwold7q.InboxSnapshot():
+        return 'InboxSnapshot';
       case _i8nfb11w.AccountNotification():
         return 'AccountNotification';
       case _iks3nfjn.DriveInvitation():
@@ -2278,6 +2390,15 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (dataClassName == 'Greeting') {
       return deserialize<_izw8z7ou.Greeting>(data['data']);
     }
+    if (dataClassName == 'InboxEntry') {
+      return deserialize<_ic7xu85a.InboxEntry>(data['data']);
+    }
+    if (dataClassName == 'InboxEvent') {
+      return deserialize<_ihabtcf0.InboxEvent>(data['data']);
+    }
+    if (dataClassName == 'InboxSnapshot') {
+      return deserialize<_ikwold7q.InboxSnapshot>(data['data']);
+    }
     if (dataClassName == 'AccountNotification') {
       return deserialize<_i8nfb11w.AccountNotification>(data['data']);
     }
@@ -2359,6 +2480,8 @@ class Protocol extends _is.DatabaseSerializationManager {
         return _icenu3t8.GardenMember.t;
       case _iwqk3oef.GardenRecord:
         return _iwqk3oef.GardenRecord.t;
+      case _ihabtcf0.InboxEvent:
+        return _ihabtcf0.InboxEvent.t;
       case _i8nfb11w.AccountNotification:
         return _i8nfb11w.AccountNotification.t;
       case _iks3nfjn.DriveInvitation:

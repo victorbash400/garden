@@ -1,4 +1,6 @@
 import 'dart:async';
+import '../inbox/inbox_delivery.dart';
+import '../inbox/inbox_reads.dart';
 import '../chat/chat_pages.dart';
 import 'package:serverpod/serverpod.dart';
 import '../accounts/usernames.dart';
@@ -138,6 +140,7 @@ class ConversationMessagesEndpoint extends Endpoint {
     final conversation = await ConversationAccess.require(session, id);
     final identity = await Usernames.ensure(session, DriveAccess.user(session));
     late DriveEvent event;
+    late InboxDelivery delivery;
     final result = await session.db.transaction((transaction) async {
       final drive = await DriveAccess.lock(
         session,
@@ -192,14 +195,24 @@ class ConversationMessagesEndpoint extends Endpoint {
         ),
         transaction: transaction,
       );
+      delivery = await InboxDelivery.record(
+        session,
+        transaction,
+        drive.id!,
+        id,
+        'chatMessage',
+        '${identity.username} sent a message in ${drive.name}',
+      );
       return message;
     });
     await DriveJournal.publish(session, event);
+    await delivery.publish(session);
     return result;
   }
 
   Future<void> markRead(Session session, int id, int messageId) async {
     final conversation = await ConversationAccess.require(session, id);
+    InboxReads? delivery;
     await session.db.transaction((transaction) async {
       await DriveAccess.lock(
         session,
@@ -231,7 +244,14 @@ class ConversationMessagesEndpoint extends Endpoint {
           transaction: transaction,
         );
       }
+      delivery = await InboxReads.record(
+        session,
+        transaction,
+        conversation.gardenId,
+        id,
+      );
     });
+    await delivery?.publish(session);
   }
 
   Stream<DriveMessage> watch(Session session, int id, int afterId) async* {

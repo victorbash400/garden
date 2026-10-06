@@ -46,6 +46,9 @@ import 'package:garden_client/src/protocol/gardens/garden_summary.dart'
     as _iwcj6pye;
 import 'package:garden_client/src/protocol/greetings/greeting.dart'
     as _iz66whiu;
+import 'package:garden_client/src/protocol/inbox/inbox_event.dart' as _ijhc7k6l;
+import 'package:garden_client/src/protocol/inbox/inbox_snapshot.dart'
+    as _i5b35gfj;
 import 'package:garden_client/src/protocol/sharing/account_notification.dart'
     as _ijqj61ga;
 import 'package:garden_client/src/protocol/sharing/drive_invitation.dart'
@@ -585,6 +588,30 @@ class EndpointConversations extends _isc.EndpointRef {
       'title': title,
     },
   );
+
+  _ida.Future<void> rename(
+    int id,
+    String title,
+  ) => caller.callServerEndpoint<void>(
+    'conversations',
+    'rename',
+    {
+      'id': id,
+      'title': title,
+    },
+  );
+
+  _ida.Future<void> delete(int id) => caller.callServerEndpoint<void>(
+    'conversations',
+    'delete',
+    {'id': id},
+  );
+
+  _ida.Future<void> leave(int id) => caller.callServerEndpoint<void>(
+    'conversations',
+    'leave',
+    {'id': id},
+  );
 }
 
 /// {@category Endpoint}
@@ -1029,6 +1056,38 @@ class EndpointGreeting extends _isc.EndpointRef {
 }
 
 /// {@category Endpoint}
+class EndpointInbox extends _isc.EndpointRef {
+  EndpointInbox(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'inbox';
+
+  _ida.Future<_i5b35gfj.InboxSnapshot> snapshot() =>
+      caller.callServerEndpoint<_i5b35gfj.InboxSnapshot>(
+        'inbox',
+        'snapshot',
+        {},
+      );
+
+  _ida.Future<void> seen(int id) => caller.callServerEndpoint<void>(
+    'inbox',
+    'seen',
+    {'id': id},
+  );
+
+  _ida.Stream<_ijhc7k6l.InboxEvent> watch(int afterId) =>
+      caller.callStreamingServerEndpoint<
+        _ida.Stream<_ijhc7k6l.InboxEvent>,
+        _ijhc7k6l.InboxEvent
+      >(
+        'inbox',
+        'watch',
+        {'afterId': afterId},
+        {},
+      );
+}
+
+/// {@category Endpoint}
 class EndpointDriveInvitations extends _isc.EndpointRef {
   EndpointDriveInvitations(_isc.EndpointCaller caller) : super(caller);
 
@@ -1260,6 +1319,7 @@ class Client extends _isc.ServerpodClientShared {
     filesystem = EndpointFilesystem(this);
     garden = EndpointGarden(this);
     greeting = EndpointGreeting(this);
+    inbox = EndpointInbox(this);
     driveInvitations = EndpointDriveInvitations(this);
     driveManagement = EndpointDriveManagement(this);
     driveMembers = EndpointDriveMembers(this);
@@ -1293,6 +1353,8 @@ class Client extends _isc.ServerpodClientShared {
 
   late final EndpointGreeting greeting;
 
+  late final EndpointInbox inbox;
+
   late final EndpointDriveInvitations driveInvitations;
 
   late final EndpointDriveManagement driveManagement;
@@ -1318,6 +1380,7 @@ class Client extends _isc.ServerpodClientShared {
     'filesystem': filesystem,
     'garden': garden,
     'greeting': greeting,
+    'inbox': inbox,
     'driveInvitations': driveInvitations,
     'driveManagement': driveManagement,
     'driveMembers': driveMembers,

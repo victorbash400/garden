@@ -4,6 +4,8 @@ import '../files/drive_access.dart';
 import '../gardens/drive_permissions.dart';
 import '../generated/protocol.dart';
 import 'conversation_access.dart';
+import '../inbox/inbox_delivery.dart';
+import 'conversation_mutations.dart';
 
 class ConversationsEndpoint extends Endpoint {
   @override
@@ -77,8 +79,9 @@ class ConversationsEndpoint extends Endpoint {
   ) async {
     await DriveAccess.require(session, driveId);
     await Usernames.ensure(session, DriveAccess.user(session));
-    return session.db.transaction((transaction) async {
-      await DriveAccess.lock(
+    InboxDelivery? delivery;
+    final result = await session.db.transaction((transaction) async {
+      final drive = await DriveAccess.lock(
         session,
         driveId,
         transaction,
@@ -104,7 +107,7 @@ class ConversationsEndpoint extends Endpoint {
         );
       }
       final sorted = ids.toList()..sort();
-      final key = ids.length == 2 ? sorted.join(':') : null;
+      final key = ids.length == 2 && name.isEmpty ? sorted.join(':') : null;
       if (key != null) {
         final existing = await Conversation.db.findFirstRow(
           session,
@@ -125,7 +128,7 @@ class ConversationsEndpoint extends Endpoint {
         Conversation(
           gardenId: driveId,
           creatorId: user,
-          title: ids.length == 2 ? '' : name,
+          title: name,
           directKey: key,
           createdAt: DateTime.now().toUtc(),
         ),
@@ -142,11 +145,28 @@ class ConversationsEndpoint extends Endpoint {
           transaction: transaction,
         );
       }
+      delivery = await InboxDelivery.record(
+        session,
+        transaction,
+        driveId,
+        conversation.id,
+        'chatAdded',
+        name.isEmpty ? 'New conversation in ${drive.name}' : 'Added to $name',
+      );
       return ConversationAccess.summary(
         session,
         conversation,
         transaction: transaction,
       );
     });
+    await delivery?.publish(session);
+    return result;
   }
+
+  Future<void> rename(Session session, int id, String title) =>
+      ConversationMutations.rename(session, id, title);
+  Future<void> delete(Session session, int id) =>
+      ConversationMutations.delete(session, id);
+  Future<void> leave(Session session, int id) =>
+      ConversationMutations.leave(session, id);
 }

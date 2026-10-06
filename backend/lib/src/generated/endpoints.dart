@@ -34,6 +34,7 @@ import '../files/files_endpoint.dart' as _idx8vriz;
 import '../files/filesystem_endpoint.dart' as _im12bomv;
 import '../gardens/garden_endpoint.dart' as _isd11de7;
 import '../greetings/greeting_endpoint.dart' as _il624ik7;
+import '../inbox/inbox_endpoint.dart' as _i4we402o;
 import '../sharing/drive_invitations_endpoint.dart' as _ixmifqa6;
 import '../sharing/drive_management_endpoint.dart' as _ibbydm1q;
 import '../sharing/drive_members_endpoint.dart' as _ikohprpe;
@@ -120,6 +121,12 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'greeting',
+          null,
+        ),
+      'inbox': _i4we402o.InboxEndpoint()
+        ..initialize(
+          server,
+          'inbox',
           null,
         ),
       'driveInvitations': _ixmifqa6.DriveInvitationsEndpoint()
@@ -979,6 +986,75 @@ class Endpoints extends _is.EndpointDispatch {
                         params['driveId'],
                         params['recipients'],
                         params['title'],
+                      ),
+        ),
+        'rename': _is.MethodConnector(
+          name: 'rename',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'title': _is.ParameterDescription(
+              name: 'title',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['conversations']
+                          as _ilt2yzl9.ConversationsEndpoint)
+                      .rename(
+                        session,
+                        params['id'],
+                        params['title'],
+                      ),
+        ),
+        'delete': _is.MethodConnector(
+          name: 'delete',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['conversations']
+                          as _ilt2yzl9.ConversationsEndpoint)
+                      .delete(
+                        session,
+                        params['id'],
+                      ),
+        ),
+        'leave': _is.MethodConnector(
+          name: 'leave',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['conversations']
+                          as _ilt2yzl9.ConversationsEndpoint)
+                      .leave(
+                        session,
+                        params['id'],
                       ),
         ),
       },
@@ -1924,6 +2000,61 @@ class Endpoints extends _is.EndpointDispatch {
                     session,
                     params['name'],
                   ),
+        ),
+      },
+    );
+    connectors['inbox'] = _is.EndpointConnector(
+      name: 'inbox',
+      endpoint: endpoints['inbox']!,
+      methodConnectors: {
+        'snapshot': _is.MethodConnector(
+          name: 'snapshot',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['inbox'] as _i4we402o.InboxEndpoint)
+                  .snapshot(session),
+        ),
+        'seen': _is.MethodConnector(
+          name: 'seen',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['inbox'] as _i4we402o.InboxEndpoint).seen(
+                session,
+                params['id'],
+              ),
+        ),
+        'watch': _is.MethodStreamConnector(
+          name: 'watch',
+          params: {
+            'afterId': _is.ParameterDescription(
+              name: 'afterId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          streamParams: {},
+          returnType: _is.MethodStreamReturnType.streamType,
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+                Map<String, Stream> streamParams,
+              ) => (endpoints['inbox'] as _i4we402o.InboxEndpoint).watch(
+                session,
+                params['afterId'],
+              ),
         ),
       },
     );

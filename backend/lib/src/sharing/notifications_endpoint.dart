@@ -3,6 +3,8 @@ import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
 import 'recipient_identity.dart';
 import 'account_notices.dart';
+import '../inbox/inbox_journal.dart';
+import '../files/drive_access.dart';
 
 class NotificationsEndpoint extends Endpoint {
   @override
@@ -35,6 +37,7 @@ class NotificationsEndpoint extends Endpoint {
     bool? trashed,
   }) async {
     final email = await RecipientIdentity.email(session);
+    List<InboxEvent> inbox = [];
     final updated = await session.db.transaction((transaction) async {
       final notification = await AccountNotification.db.findById(
         session,
@@ -49,6 +52,16 @@ class NotificationsEndpoint extends Endpoint {
       if (trashed != null) {
         notification.trashedAt = trashed ? DateTime.now().toUtc() : null;
       }
+      if (notification.kind == 'chatAdded') {
+        inbox = await InboxJournal.record(
+          session,
+          transaction,
+          [DriveAccess.user(session)],
+          notification.gardenId!,
+          notification.conversationId,
+          'read',
+        );
+      }
       return AccountNotification.db.updateRow(
         session,
         notification,
@@ -56,6 +69,7 @@ class NotificationsEndpoint extends Endpoint {
       );
     });
     await AccountNotices.publish(session, updated);
+    await InboxJournal.publish(session, inbox);
   }
 
   Stream<AccountNotification> watch(Session session, int afterId) async* {

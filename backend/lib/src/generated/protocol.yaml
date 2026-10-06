@@ -39,6 +39,9 @@ conversations:
   - list:
   - get:
   - create:
+  - rename:
+  - delete:
+  - leave:
 collaboration:
   - comments:
   - comment:
@@ -83,6 +86,10 @@ garden:
   - delete:
 greeting:
   - hello:
+inbox:
+  - snapshot:
+  - seen:
+  - watch:
 driveInvitations:
   - invite:
   - received:

@@ -4,9 +4,11 @@ import '../files/drive_access.dart';
 import '../files/drive_journal.dart';
 import '../generated/protocol.dart';
 import 'account_notices.dart';
+import '../inbox/inbox_journal.dart';
 
 class MemberChange {
-  MemberChange(this.event, this.notices);
+  MemberChange(this.event, this.notices, this.inbox);
+  final List<InboxEvent> inbox;
   final DriveEvent event;
   final List<AccountNotification> notices;
 
@@ -53,11 +55,23 @@ class MemberChange {
         );
       }
     }
-    return MemberChange(event, notices);
+    return MemberChange(
+      event,
+      notices,
+      await InboxJournal.record(
+        session,
+        transaction,
+        affected.keys,
+        drive.id!,
+        null,
+        'access',
+      ),
+    );
   }
 
   Future<void> publish(Session session) async {
     await DriveJournal.publish(session, event);
+    await InboxJournal.publish(session, inbox);
     for (final notice in notices) {
       await AccountNotices.publish(session, notice);
     }
