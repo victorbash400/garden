@@ -32,10 +32,13 @@ class MultipartTransfer {
     var part = 1;
     var first = 0;
     var urls = <String>[];
-    final pending = <Future<void>>[];
+    final pending = <Future<void>>{};
     (Object, StackTrace)? failure;
     try {
       await for (final bytes in parts(input, version.partSize!)) {
+        if (failure case final error?) {
+          Error.throwWithStackTrace(error.$1, error.$2);
+        }
         cancellation?.check();
         final checksum = await partChecksum(bytes);
         cancellation?.check();
@@ -58,20 +61,22 @@ class MultipartTransfer {
           );
         }
         final url = Uri.parse(urls[part - first]);
-        final operation = _put(client, url, bytes, cancellation).then(
-          (_) {
-            sent += bytes.length;
-            onProgress?.call(sent);
-          },
-          onError: (Object error, StackTrace stack) {
-            failure ??= (error, stack);
-          },
-        );
+        late final Future<void> operation;
+        operation = _put(client, url, bytes, cancellation)
+            .then(
+              (_) {
+                sent += bytes.length;
+                onProgress?.call(sent);
+              },
+              onError: (Object error, StackTrace stack) {
+                failure ??= (error, stack);
+              },
+            )
+            .whenComplete(() => pending.remove(operation));
         pending.add(operation);
         part++;
         if (pending.length == 3) {
-          await Future.wait(pending, eagerError: false);
-          pending.clear();
+          await Future.any(pending);
           if (failure case final error?) {
             Error.throwWithStackTrace(error.$1, error.$2);
           }
@@ -86,6 +91,8 @@ class MultipartTransfer {
       }
       final verified = await gateway.uploadedParts(version.id!);
       if (verified.length != expected.length ||
+          verified.map((part) => part.number).toSet().length !=
+              expected.length ||
           verified.any((part) {
             final value = expected[part.number];
             return value == null ||
