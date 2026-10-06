@@ -60,6 +60,8 @@
 		7CE6C00E3C2EEADBCF5DFFA0 /* GardenReadPermits.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64DDB6D8FE3F6399EF15AAFC /* GardenReadPermits.swift */; };
 		805B49A9BB38C082F1F565F1 /* FinderDomainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBFF06A0D3701CBA9BBF3EF2 /* FinderDomainManager.swift */; };
 		85DF0A9A69A75A375F6BC25E /* GardenRangeCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 081BAFC548A1CD53E423E5FC /* GardenRangeCache.swift */; };
+		C6C69299D03DEF54D7C84206 /* GardenReadWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66787A23AB72A346FAE5C85A /* GardenReadWindow.swift */; };
+		8B0DCA90A587542EA8364CCF /* GardenWebMIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E129589D69939A305550A3F /* GardenWebMIndex.swift */; };
 		932E11ADD36A74FD71E1BCD1 /* GardenEnumerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D33975B290D3833331A5ED7 /* GardenEnumerator.swift */; };
 		93C2E6D4C5E03E5BB279B77B /* FinderCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7A65DF6BF53C6D521B7B380 /* FinderCredential.swift */; };
 		97AA4F544A35B9FBD5F34071 /* GardenNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E80EEA4C2EDA2C0390B33422 /* GardenNode.swift */; };
@@ -74,8 +76,12 @@
 		C36A5F1C0E9B80E1CEC20C8C /* GardenNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E80EEA4C2EDA2C0390B33422 /* GardenNode.swift */; };
 		E25B32C16FDD678CDDF940AA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8AB1F02B9F6E420FC69954F5 /* Cocoa.framework */; };
 		E45EC7BF2C9DA709CF5B5B82 /* GardenRangeCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 081BAFC548A1CD53E423E5FC /* GardenRangeCache.swift */; };
+		05C8F1D5A448B92E19483AA6 /* GardenReadWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66787A23AB72A346FAE5C85A /* GardenReadWindow.swift */; };
+		24722064B813E88B429FBDA9 /* GardenWebMIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E129589D69939A305550A3F /* GardenWebMIndex.swift */; };
 		E6844C82A582C1A8ED500A78 /* GardenNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E80EEA4C2EDA2C0390B33422 /* GardenNode.swift */; };
 		E9C000109326835801B929D1 /* GardenRangeCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 081BAFC548A1CD53E423E5FC /* GardenRangeCache.swift */; };
+		1B342A7E733592E5D78E16A7 /* GardenReadWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66787A23AB72A346FAE5C85A /* GardenReadWindow.swift */; };
+		ECBCC464B1801259663BB7A3 /* GardenWebMIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E129589D69939A305550A3F /* GardenWebMIndex.swift */; };
 		EAE0ACEB69D452E5B8A04ED2 /* GardenReadPermits.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64DDB6D8FE3F6399EF15AAFC /* GardenReadPermits.swift */; };
 		F8E5D28E858EC92180A95955 /* FinderCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7A65DF6BF53C6D521B7B380 /* FinderCredential.swift */; };
 		FAC358EF6047694223FE0EF2 /* GardenReadPermits.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64DDB6D8FE3F6399EF15AAFC /* GardenReadPermits.swift */; };
@@ -134,6 +140,8 @@
 		CC027569F6E608DFECFB2518 /* com.victorbash.garden.remote.plist in Embed remote launch agent */ = {isa = PBXBuildFile; fileRef = DE097E844B0F66BA23BACBCF /* com.victorbash.garden.remote.plist */; };
 		D020BD67412B77D4CA6A07C9 /* GardenRemoteControlProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E288565348303873EB2732F /* GardenRemoteControlProtocol.swift */; };
 		D64DE4D03D35E27CD67EEFE1 /* GardenRangeCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 081BAFC548A1CD53E423E5FC /* GardenRangeCache.swift */; };
+		70731121D7DC5381B681A7E8 /* GardenReadWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66787A23AB72A346FAE5C85A /* GardenReadWindow.swift */; };
+		3132AA8F1947FFF4DF6CB99D /* GardenWebMIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E129589D69939A305550A3F /* GardenWebMIndex.swift */; };
 		D950DECE0A1A55A1F7D7E8D3 /* GardenDiskCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC157F51BB04B9283619829 /* GardenDiskCache.swift */; };
 		E0313A8B059362BD80493BE1 /* GardenReadBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8178C29FCB4348CB9F159D39 /* GardenReadBuffer.swift */; };
 		E2398474F096391BA972A07D /* RemoteChanges.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE8CA78F3FD310A1CB90A7F5 /* RemoteChanges.swift */; };
@@ -248,6 +256,8 @@
 		A40000000000000000000002 /* WindowAccounts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowAccounts.swift; sourceTree = "<group>"; };
 		A40000000000000000000001 /* GardenWindows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenWindows.swift; sourceTree = "<group>"; };
 		081BAFC548A1CD53E423E5FC /* GardenRangeCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenRangeCache.swift; path = FinderShared/GardenRangeCache.swift; sourceTree = "<group>"; };
+		66787A23AB72A346FAE5C85A /* GardenReadWindow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenReadWindow.swift; path = FinderShared/GardenReadWindow.swift; sourceTree = "<group>"; };
+		0E129589D69939A305550A3F /* GardenWebMIndex.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenWebMIndex.swift; path = FinderShared/GardenWebMIndex.swift; sourceTree = "<group>"; };
 		173EA74C13F90026956280D2 /* GardenObjectRequests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenObjectRequests.swift; path = FinderShared/GardenObjectRequests.swift; sourceTree = "<group>"; };
 		CF8F409BC2E2A333913FB95C /* GardenBandwidth.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenBandwidth.swift; path = FinderShared/GardenBandwidth.swift; sourceTree = "<group>"; };
 		2CEAF9DFC80D94DB4AEA3CAE /* GardenActivity.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GardenActivity.swift; path = FinderShared/GardenActivity.swift; sourceTree = "<group>"; };
@@ -435,6 +445,8 @@
 				8178C29FCB4348CB9F159D39 /* GardenReadBuffer.swift */,
 				139AF11EBF884621B5881DDD /* GardenCacheWatch.swift */,
 				081BAFC548A1CD53E423E5FC /* GardenRangeCache.swift */,
+				66787A23AB72A346FAE5C85A /* GardenReadWindow.swift */,
+				0E129589D69939A305550A3F /* GardenWebMIndex.swift */,
 				76F3200B441B18D31AA1194D /* StreamingExtension */,
 				64DDB6D8FE3F6399EF15AAFC /* GardenReadPermits.swift */,
 				323C797BE6BBC8942382CA08 /* GardenMultipartUpload.swift */,
@@ -855,6 +867,8 @@
 				A30D20261004000000000800 /* GardenFileAttributes.swift in Sources */,
 				0B73494BD26D4437DC235208 /* GardenAPI.swift in Sources */,
 				85DF0A9A69A75A375F6BC25E /* GardenRangeCache.swift in Sources */,
+				C6C69299D03DEF54D7C84206 /* GardenReadWindow.swift in Sources */,
+				8B0DCA90A587542EA8364CCF /* GardenWebMIndex.swift in Sources */,
 				FAC358EF6047694223FE0EF2 /* GardenReadPermits.swift in Sources */,
 				1CA837D6BAC00AD63BA96528 /* GardenStreamingReadOnly.swift in Sources */,
 				B49F2A8900DA9C67E918DD55 /* GardenMultipartUpload.swift in Sources */,
@@ -904,6 +918,8 @@
 				805B49A9BB38C082F1F565F1 /* FinderDomainManager.swift in Sources */,
 				7551C4C4EFC2E6825A2207BA /* GardenAPI.swift in Sources */,
 				E9C000109326835801B929D1 /* GardenRangeCache.swift in Sources */,
+				1B342A7E733592E5D78E16A7 /* GardenReadWindow.swift in Sources */,
+				ECBCC464B1801259663BB7A3 /* GardenWebMIndex.swift in Sources */,
 				E6844C82A582C1A8ED500A78 /* GardenNode.swift in Sources */,
 				A30D20261004000000000802 /* GardenFileAttributes.swift in Sources */,
 				EAE0ACEB69D452E5B8A04ED2 /* GardenReadPermits.swift in Sources */,
@@ -939,6 +955,8 @@
 				A30D20261004000000000801 /* GardenFileAttributes.swift in Sources */,
 				AA2A3E9AEDCB62FB57D5DFC4 /* GardenAPI.swift in Sources */,
 				E45EC7BF2C9DA709CF5B5B82 /* GardenRangeCache.swift in Sources */,
+				05C8F1D5A448B92E19483AA6 /* GardenReadWindow.swift in Sources */,
+				24722064B813E88B429FBDA9 /* GardenWebMIndex.swift in Sources */,
 				7CE6C00E3C2EEADBCF5DFFA0 /* GardenReadPermits.swift in Sources */,
 				327013FB001B5BE9DEB84197 /* GardenMultipartUpload.swift in Sources */,
 				7598515577DB805016E025DC /* GardenObjectRequests.swift in Sources */,
@@ -982,6 +1000,8 @@
 				85183AA7136C6425A4547E22 /* GardenRangeWriter.swift in Sources */,
 				EEF04E3EE0F02CAEC9C4820C /* GardenMultipartUpload.swift in Sources */,
 				D64DE4D03D35E27CD67EEFE1 /* GardenRangeCache.swift in Sources */,
+				70731121D7DC5381B681A7E8 /* GardenReadWindow.swift in Sources */,
+				3132AA8F1947FFF4DF6CB99D /* GardenWebMIndex.swift in Sources */,
 				26BAE73D6567562D297AFFC4 /* GardenObjectRequests.swift in Sources */,
 				88F7CA26569067E0C83C95B8 /* GardenBandwidth.swift in Sources */,
 				B8B059DAE8B68C3019F3005E /* GardenActivity.swift in Sources */,

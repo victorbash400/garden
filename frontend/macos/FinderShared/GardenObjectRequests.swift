@@ -5,6 +5,7 @@ struct GardenObjectRequests {
     let configuration = URLSessionConfiguration.ephemeral
     configuration.urlCache = nil
     configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+    configuration.httpMaximumConnectionsPerHost = GardenReadPermits.capacity
     return URLSession(configuration: configuration)
   }()
 
