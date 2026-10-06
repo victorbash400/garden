@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../ui/garden_colors.dart';
 import '../files/toolbar_button.dart';
-import '../settings/settings_inline_button.dart';
+import '../files/toolbar_group.dart';
 import '../system_icon.dart';
-import '../chat/chat_drawer_button.dart';
 
 class InboxToolbar extends StatelessWidget {
   const InboxToolbar({
@@ -12,36 +12,38 @@ class InboxToolbar extends StatelessWidget {
     this.invitesUnread = 0,
     required this.onInvites,
     required this.onInbox,
-    required this.onNew,
-    required this.onDrawer,
   });
   final int invitesUnread;
   final bool invites;
-  final VoidCallback onInvites, onInbox, onNew, onDrawer;
+  final VoidCallback onInvites, onInbox;
+
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.all(12),
-    child: Row(
-      children: [
-        ChatDrawerButton(open: false, onPressed: onDrawer),
-        SettingsInlineButton(
-          label: 'Inbox',
-          primary: !invites,
-          onPressed: onInbox,
-        ),
-        SettingsInlineButton(
-          label: invitesUnread == 0 ? 'Invites' : 'Invites ($invitesUnread)',
-          primary: invites,
-          onPressed: onInvites,
-        ),
-        const Spacer(),
-        if (!invites)
+    child: Align(
+      alignment: Alignment.centerLeft,
+      child: ToolbarGroup(
+        children: [
           ToolbarButton(
-            tooltip: 'New conversation',
-            icon: SystemIcons.squarePen,
-            onPressed: onNew,
+            tooltip: 'Inbox',
+            icon: SystemIcons.inbox,
+            selected: !invites,
+            onPressed: onInbox,
           ),
-      ],
+          Badge(
+            isLabelVisible: invitesUnread > 0,
+            backgroundColor: GardenColors.of(context).accent,
+            smallSize: 6,
+            offset: const Offset(-7, 7),
+            child: ToolbarButton(
+              tooltip: 'Invites',
+              icon: SystemIcons.mail,
+              selected: invites,
+              onPressed: onInvites,
+            ),
+          ),
+        ],
+      ),
     ),
   );
 }

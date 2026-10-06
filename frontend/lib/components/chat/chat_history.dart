@@ -31,37 +31,42 @@ class ChatHistory extends StatelessWidget {
           bottomRight: Radius.circular(12),
         ),
       ),
-      padding: const EdgeInsets.all(8),
       child: Column(
         children: [
-          ListRow(
-            onTap: controller.sending ? null : onNew,
-            child: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-              child: Row(
-                children: [
-                  SystemIcon(SystemIcons.squarePen, size: 16),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'New conversation',
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 12),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+            child: ListRow(
+              onTap: controller.sending ? null : onNew,
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                child: Row(
+                  children: [
+                    SystemIcon(SystemIcons.squarePen, size: 16),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'New conversation',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 12),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
           const SizedBox(height: 8),
-          ListRow(
-            selected: controller.conversation == null,
-            onTap: () => controller.selectConversation(null),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
-              child: Text(
-                'Everyone in $driveName',
-                style: const TextStyle(fontSize: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: ListRow(
+              selected: controller.conversation == null,
+              onTap: () => controller.selectConversation(null),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
+                child: Text(
+                  'Everyone in $driveName',
+                  style: const TextStyle(fontSize: 12),
+                ),
               ),
             ),
           ),
@@ -77,6 +82,7 @@ class ChatHistory extends StatelessWidget {
                 return false;
               },
               child: ListView.builder(
+                padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
                 itemCount: items.length,
                 itemBuilder: (_, index) {
                   final item = items[index];

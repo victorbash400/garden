@@ -6,7 +6,7 @@ import '../services/chat_gateway.dart';
 import 'package:garden_client/garden_client.dart';
 
 import '../components/inbox/inbox_toolbar.dart';
-import '../components/inbox/inbox_conversation_list.dart';
+import '../components/inbox/inbox_workspace.dart';
 import '../components/inbox/inbox_new_conversation.dart';
 import '../components/chat/chat_panel.dart';
 import '../components/chat/chat_reference_picker.dart';
@@ -43,8 +43,6 @@ class _InboxViewState extends State<InboxView> {
                 0,
             onInvites: () => setState(() => invites = true),
             onInbox: () => setState(() => invites = false),
-            onNew: () => InboxNewConversation.open(context, inbox),
-            onDrawer: () => setState(() => drawer = !drawer),
           ),
           if (inbox.error != null)
             ErrorNotice(
@@ -62,32 +60,28 @@ class _InboxViewState extends State<InboxView> {
                       invitationsOnly: true,
                     ),
                   )
-                : Row(
-                    children: [
-                      if (drawer)
-                        SizedBox(
-                          width: 260,
-                          child: InboxConversationList(controller: inbox),
-                        ),
-                      Expanded(
-                        child: inbox.chat == null || !inbox.chat!.visible
-                            ? const Center(child: Text('Select a conversation'))
-                            : ChatPanel(
-                                controller: inbox.chat!,
+                : InboxWorkspace(
+                    controller: inbox,
+                    expanded: drawer,
+                    onDrawer: () => setState(() => drawer = !drawer),
+                    onNew: () => InboxNewConversation.open(context, inbox),
+                    conversation: inbox.chat == null || !inbox.chat!.visible
+                        ? const Center(child: Text('Select a conversation'))
+                        : ChatPanel(
+                            controller: inbox.chat!,
+                            driveName: inbox.selected?.driveName ?? '',
+                            showHistory: false,
+                            embedded: true,
+                            onFile: (id) => openReference(id),
+                            onMention: () => showDialog(
+                              context: context,
+                              builder: (_) => ChatReferencePicker(
+                                gateway: widget.controller.files!.gateway,
+                                driveId: inbox.chat!.driveId,
                                 driveName: inbox.selected?.driveName ?? '',
-                                showHistory: false,
-                                onFile: (id) => openReference(id),
-                                onMention: () => showDialog(
-                                  context: context,
-                                  builder: (_) => ChatReferencePicker(
-                                    gateway: widget.controller.files!.gateway,
-                                    driveId: inbox.chat!.driveId,
-                                    driveName: inbox.selected?.driveName ?? '',
-                                  ),
-                                ),
                               ),
-                      ),
-                    ],
+                            ),
+                          ),
                   ),
           ),
         ],

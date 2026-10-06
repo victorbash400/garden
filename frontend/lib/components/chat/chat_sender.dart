@@ -10,14 +10,15 @@ class ChatSender extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     mainAxisSize: MainAxisSize.min,
     children: [
-      Flexible(
-        child: Text(
-          username,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+      if (username.isNotEmpty)
+        Flexible(
+          child: Text(
+            username,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+          ),
         ),
-      ),
-      const SizedBox(width: 8),
+      if (username.isNotEmpty) const SizedBox(width: 8),
       Text(
         '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
         style: TextStyle(

@@ -18,8 +18,9 @@ class ChatPanel extends StatelessWidget {
     required this.onFile,
     required this.onMention,
     this.showHistory = true,
+    this.embedded = false,
   });
-  final bool showHistory;
+  final bool showHistory, embedded;
   final ChatController controller;
   final String driveName;
   final ValueChanged<int> onFile;
@@ -27,13 +28,20 @@ class ChatPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    margin: const EdgeInsets.fromLTRB(8, 8, 12, 12),
+    margin: embedded
+        ? EdgeInsets.zero
+        : const EdgeInsets.fromLTRB(8, 8, 12, 12),
     clipBehavior: Clip.antiAlias,
     decoration: BoxDecoration(
-      border: Border.all(color: GardenColors.of(context).border),
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: embedded ? null : BorderRadius.circular(14),
       color: GardenColors.of(context).panel,
     ),
+    foregroundDecoration: embedded
+        ? null
+        : BoxDecoration(
+            border: Border.all(color: GardenColors.of(context).border),
+            borderRadius: BorderRadius.circular(14),
+          ),
     child: Column(
       children: [
         ChatHeader(
@@ -80,18 +88,38 @@ class ChatPanel extends StatelessWidget {
                     behavior: HitTestBehavior.opaque,
                   ),
                 ),
-              if (controller.historyVisible)
+              if (showHistory)
                 Positioned(
                   left: 0,
                   top: 0,
                   bottom: 0,
-                  child: ChatHistory(
-                    controller: controller,
-                    driveName: driveName,
-                    onNew: () => showDialog(
-                      context: context,
-                      builder: (_) => NewChatDialog(chat: controller),
+                  child: AnimatedSwitcher(
+                    duration: MediaQuery.disableAnimationsOf(context)
+                        ? Duration.zero
+                        : const Duration(milliseconds: 240),
+                    transitionBuilder: (child, animation) => SlideTransition(
+                      position:
+                          Tween<Offset>(
+                            begin: const Offset(-1, 0),
+                            end: Offset.zero,
+                          ).animate(
+                            CurvedAnimation(
+                              parent: animation,
+                              curve: Curves.easeInOutCubic,
+                            ),
+                          ),
+                      child: child,
                     ),
+                    child: controller.historyVisible
+                        ? ChatHistory(
+                            controller: controller,
+                            driveName: driveName,
+                            onNew: () => showDialog(
+                              context: context,
+                              builder: (_) => NewChatDialog(chat: controller),
+                            ),
+                          )
+                        : const SizedBox.shrink(),
                   ),
                 ),
             ],

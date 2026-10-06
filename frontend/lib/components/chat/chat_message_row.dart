@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:garden_client/garden_client.dart';
 
-import '../../ui/garden_colors.dart';
-import '../file_icon.dart';
+import 'chat_message_bubble.dart';
 import 'chat_sender.dart';
-import '../inbox/conversation_avatar.dart';
 
 class ChatMessageRow extends StatelessWidget {
   const ChatMessageRow({
@@ -40,86 +38,42 @@ class ChatMessageRow extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final colors = GardenColors.of(context);
-    final name = username ?? message.username;
-    return GestureDetector(
-      onSecondaryTapDown: (event) => menu(context, event.globalPosition),
-      onLongPressStart: (event) => menu(context, event.globalPosition),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(24, showSender ? 16 : 2, 24, 2),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (!own) ...[
-              SizedBox(
-                width: 30,
-                child: showSender ? const ConversationAvatar(size: 30) : null,
-              ),
-              const SizedBox(width: 10),
-            ],
-            Expanded(
-              child: Align(
-                alignment: own ? Alignment.centerRight : Alignment.centerLeft,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 8,
+  Widget build(BuildContext context) => GestureDetector(
+    onSecondaryTapDown: (event) => menu(context, event.globalPosition),
+    onLongPressStart: (event) => menu(context, event.globalPosition),
+    child: Padding(
+      padding: EdgeInsets.fromLTRB(20, showSender ? 18 : 2, 20, 2),
+      child: LayoutBuilder(
+        builder: (context, constraints) => Align(
+          alignment: own ? Alignment.centerRight : Alignment.centerLeft,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: constraints.maxWidth * .78),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: own
+                  ? CrossAxisAlignment.end
+                  : CrossAxisAlignment.start,
+              children: [
+                if (showSender)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(4, 0, 4, 5),
+                    child: ChatSender(
+                      username: own ? '' : username ?? message.username,
+                      time: message.createdAt.toLocal(),
+                    ),
                   ),
-                  decoration: BoxDecoration(
-                    color: own ? colors.selection : colors.surface,
-                    border: Border.all(color: colors.border),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (showSender)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 3),
-                          child: ChatSender(
-                            username: own ? 'You' : name,
-                            time: message.createdAt.toLocal(),
-                          ),
-                        ),
-                      if (message.text.isNotEmpty)
-                        SelectableText(
-                          message.text,
-                          textWidthBasis: TextWidthBasis.longestLine,
-                          style: const TextStyle(fontSize: 13, height: 1.5),
-                        ),
-                      if (message.nodeId != null)
-                        TextButton.icon(
-                          onPressed: () => onFile(message.nodeId!),
-                          icon: const FileIcon(size: 18),
-                          label: Text(
-                            message.nodeName!,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        ),
-                      if (hasReplies)
-                        TextButton(
-                          onPressed: onReply,
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: const Size(0, 26),
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: const Text(
-                            'View thread',
-                            style: TextStyle(fontSize: 11),
-                          ),
-                        ),
-                    ],
-                  ),
+                ChatMessageBubble(
+                  message: message,
+                  own: own,
+                  hasReplies: hasReplies,
+                  onReply: onReply,
+                  onFile: onFile,
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
-    );
-  }
+    ),
+  );
 }

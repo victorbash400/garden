@@ -5,6 +5,7 @@ import '../../state/inbox_controller.dart';
 import '../../ui/garden_colors.dart';
 import '../list_row.dart';
 import 'conversation_avatar.dart';
+import 'inbox_timestamp.dart';
 
 class InboxRow extends StatelessWidget {
   const InboxRow({
@@ -25,10 +26,11 @@ class InboxRow extends StatelessWidget {
       selected: selected,
       onTap: onOpen,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
         child: Row(
           children: [
             ConversationAvatar(
+              size: 30,
               group: entry.members.length > 2 || entry.conversationId == null,
             ),
             const SizedBox(width: 10),
@@ -36,25 +38,39 @@ class InboxRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    InboxController.label(entry, user),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: (entry.unreadCount > 0 || entry.isNew)
-                          ? FontWeight.w600
-                          : FontWeight.w500,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          InboxController.label(entry, user),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: (entry.unreadCount > 0 || entry.isNew)
+                                ? FontWeight.w600
+                                : FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      if (entry.latestAt != null) ...[
+                        const SizedBox(width: 8),
+                        InboxTimestamp(time: entry.latestAt!),
+                      ],
+                    ],
                   ),
-                  const SizedBox(height: 3),
+                  const SizedBox(height: 5),
                   Text(
                     entry.latestText.isEmpty
                         ? entry.driveName
                         : entry.latestText,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 11, color: colors.secondary),
+                    style: TextStyle(
+                      fontSize: 12,
+                      height: 1.4,
+                      color: colors.secondary,
+                    ),
                   ),
                 ],
               ),

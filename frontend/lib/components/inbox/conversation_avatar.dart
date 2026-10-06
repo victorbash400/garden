@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../ui/garden_colors.dart';
 import '../system_icon.dart';
 
 class ConversationAvatar extends StatelessWidget {
@@ -8,22 +7,13 @@ class ConversationAvatar extends StatelessWidget {
   final bool group;
   final double size;
   @override
-  Widget build(BuildContext context) => Container(
-    width: size,
-    height: size,
-    alignment: Alignment.center,
-    decoration: BoxDecoration(
-      color: GardenColors.of(context).selection,
-      shape: BoxShape.circle,
+  Widget build(BuildContext context) => SizedBox.square(
+    dimension: size,
+    child: Center(
+      child: SystemIcon(
+        group ? SystemIcons.users : SystemIcons.userRound,
+        size: size * .65,
+      ),
     ),
-    child: group
-        ? Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SystemIcon(SystemIcons.userRound, size: size * .36),
-              SystemIcon(SystemIcons.userRound, size: size * .36),
-            ],
-          )
-        : SystemIcon(SystemIcons.userRound, size: size * .53),
   );
 }
