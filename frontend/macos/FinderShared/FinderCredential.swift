@@ -1,5 +1,6 @@
 import Foundation
 import Security
+import LocalAuthentication
 
 struct FinderCredential: Codable {
   let serverURL: String
@@ -54,8 +55,12 @@ enum FinderCredentialStore {
   }
 
   private static func baseQuery(_ domainID: String) -> [String: Any] {
-    [
+    let authentication = LAContext()
+    authentication.interactionNotAllowed = true
+    return [
       kSecClass as String: kSecClassGenericPassword,
+      kSecUseDataProtectionKeychain as String: true,
+      kSecUseAuthenticationContext as String: authentication,
       kSecAttrAccessGroup as String: accessGroup,
       kSecAttrService as String: service,
       kSecAttrAccount as String: domainID,
@@ -68,6 +73,8 @@ enum FinderCredentialError: LocalizedError {
 
   var errorDescription: String? {
     switch self {
+    case .keychain(let status) where status == errSecInteractionNotAllowed || status == errSecAuthFailed:
+      return "Garden Finder cannot access its saved connection. Unlock your Mac, then check connections in Garden."
     case .keychain(let status):
       let detail = SecCopyErrorMessageString(status, nil) as String? ?? "Unknown Keychain error"
       return "Garden Finder Keychain error \(status): \(detail)"
