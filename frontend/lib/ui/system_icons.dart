@@ -17,7 +17,7 @@ enum SystemIcons {
   file('file-text'),
   picture('image'),
   film('film'),
-  audio('audio-lines'),
+  audio('music-2'),
   textDocument('file-text'),
   code('code'),
   archive('archive'),
