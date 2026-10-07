@@ -319,6 +319,14 @@ actor GardenRangeCache {
       name.hasPrefix(prefix) && flight.offset <= offset && flight.offset + flight.length >= offset + length
     })?.value {
       if !speculative { await permits.promote(flight.id) }
+      let waitStarted = ContinuousClock.now
+      defer {
+        if Self.traceReads {
+          let message = "Range join node=\(node.id) version=\(node.version) offset=\(offset) length=\(length) "
+            + "speculative=\(speculative) wait=\(waitStarted.duration(to: .now))\n"
+          FileHandle.standardError.write(Data(message.utf8))
+        }
+      }
       let data = try await flight.task.value
       return Data(data[(offset - flight.offset)..<(offset - flight.offset + length)])
     }
@@ -409,7 +417,7 @@ actor GardenRangeCache {
     defer { Task { await self.permits.release() } }
     defer {
       if Self.traceReads {
-        let message = "Range node=\(node.id) version=\(node.version) offset=\(offset) length=\(length) "
+        let message = "Range node=\(node.id) version=\(node.version) offset=\(offset) length=\(length) speculative=\(speculative) "
           + "authorization=\(started.duration(to: authorized)) queue=\(authorized.duration(to: acquired)) "
           + "transfer=\(acquired.duration(to: .now))\n"
         FileHandle.standardError.write(Data(message.utf8))
