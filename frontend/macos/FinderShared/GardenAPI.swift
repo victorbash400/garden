@@ -166,6 +166,35 @@ actor GardenAPI {
     return bytes
   }
 
+  func readRanges(id: Int, version: Int, size: Int, offsets: [Int], lengths: [Int]) async throws -> [Data] {
+    guard size >= 0, !offsets.isEmpty, offsets.count <= 16, offsets.count == lengths.count,
+      offsets.allSatisfy({ $0 >= 0 && $0 <= size }),
+      lengths.allSatisfy({ $0 > 0 && $0 <= 64 * 1024 }) else { throw GardenAPIError.invalidResponse }
+    let expected = zip(offsets, lengths).map { min($0.1, size - $0.0) }
+    try await GardenBandwidth.shared.pace(bytes: Int64(expected.reduce(0, +)), upload: false)
+    let value = try await call("content", "readRanges", [
+      "nodeId": id, "versionId": version, "offsets": offsets, "lengths": lengths,
+    ])
+    return try Self.rangeBytes(value, lengths: expected)
+  }
+
+  static func rangeBytes(_ value: Any, lengths: [Int]) throws -> [Data] {
+    guard let encoded = value as? [String], encoded.count == lengths.count else {
+      throw GardenAPIError.invalidResponse
+    }
+    return try zip(encoded, lengths).map { text, length in
+      guard text.count >= 20, text.hasPrefix("decode('"), text.hasSuffix("', 'base64')") else {
+        throw GardenAPIError.invalidResponse
+      }
+      let start = text.index(text.startIndex, offsetBy: 8)
+      let end = text.index(text.endIndex, offsetBy: -12)
+      guard let bytes = Data(base64Encoded: String(text[start..<end])), bytes.count == length else {
+        throw GardenAPIError.invalidResponse
+      }
+      return bytes
+    }
+  }
+
   func download(id: Int, version: Int) async throws -> GardenDownload {
     let value = try object(await call("content", "download", ["nodeId": id, "versionId": version]))
     guard let size = value["size"] as? Int, let expiry = value["expiresAt"] as? String else {
