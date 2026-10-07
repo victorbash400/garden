@@ -2078,6 +2078,13 @@ class Protocol extends _is.DatabaseSerializationManager {
               .toList()
           as T;
     }
+    if (t == List<_idt.ByteData>) {
+      return (data as List).map((e) => deserialize<_idt.ByteData>(e)).toList()
+          as T;
+    }
+    if (t == List<int>) {
+      return (data as List).map((e) => deserialize<int>(e)).toList() as T;
+    }
     if (t == List<_iwzwya1z.FileVersion>) {
       return (data as List)
               .map((e) => deserialize<_iwzwya1z.FileVersion>(e))

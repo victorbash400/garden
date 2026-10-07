@@ -205,14 +205,29 @@ class MultipartObjectStore {
     expiresAt: DateTime.now().toUtc().add(const Duration(minutes: 2)),
   );
 
-  Future<Uint8List> read(String path, int offset, int length) async {
+  Future<Uint8List> read(String path, int offset, int length, int size) async {
     final response = await client.getObject(
       bucket: bucket,
       key: path,
       range: 'bytes=$offset-${offset + length - 1}',
     );
+    return validateRead(response, offset, length, size);
+  }
+
+  static Uint8List validateRead(
+    aws.GetObjectOutput response,
+    int offset,
+    int length,
+    int size,
+  ) {
     final bytes = response.body;
-    if (bytes == null || bytes.length != length) {
+    if (offset < 0 ||
+        length <= 0 ||
+        size < offset ||
+        length > size - offset ||
+        bytes == null ||
+        bytes.length != length ||
+        response.contentRange != 'bytes $offset-${offset + length - 1}/$size') {
       throw StateError('Incomplete S3 range.');
     }
     return bytes;

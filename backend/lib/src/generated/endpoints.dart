@@ -1426,6 +1426,43 @@ class Endpoints extends _is.EndpointDispatch {
                     params['versionId'],
                   ),
         ),
+        'readRanges': _is.MethodConnector(
+          name: 'readRanges',
+          params: {
+            'nodeId': _is.ParameterDescription(
+              name: 'nodeId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'versionId': _is.ParameterDescription(
+              name: 'versionId',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'offsets': _is.ParameterDescription(
+              name: 'offsets',
+              type: _is.getType<List<int>>(),
+              nullable: false,
+            ),
+            'lengths': _is.ParameterDescription(
+              name: 'lengths',
+              type: _is.getType<List<int>>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['content'] as _iqqtuyco.ContentEndpoint)
+                  .readRanges(
+                    session,
+                    params['nodeId'],
+                    params['versionId'],
+                    params['offsets'],
+                    params['lengths'],
+                  ),
+        ),
         'read': _is.MethodConnector(
           name: 'read',
           params: {

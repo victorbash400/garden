@@ -9,6 +9,7 @@ import '../gardens/drive_permissions.dart';
 import 'drive_access.dart';
 import 'drive_journal.dart';
 import 'edit_uploads.dart';
+import 'content_ranges.dart';
 import 'multipart_object_store.dart';
 import 'multipart_copy.dart';
 import 'upload_cleanup_tasks.dart';
@@ -450,6 +451,14 @@ class ContentEndpoint extends Endpoint {
     return result;
   }
 
+  Future<List<ByteData>> readRanges(
+    Session session,
+    int nodeId,
+    int versionId,
+    List<int> offsets,
+    List<int> lengths,
+  ) => ContentRanges.read(session, nodeId, versionId, offsets, lengths);
+
   Future<ByteData> read(
     Session session,
     int nodeId,
@@ -475,7 +484,12 @@ class ContentEndpoint extends Endpoint {
       final store = MultipartObjectStore(session);
       try {
         return ByteData.sublistView(
-          await store.read(version.objectPath!, offset, end - offset),
+          await store.read(
+            version.objectPath!,
+            offset,
+            end - offset,
+            version.size,
+          ),
         );
       } finally {
         store.close();

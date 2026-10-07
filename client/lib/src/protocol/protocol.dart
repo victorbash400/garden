@@ -551,6 +551,13 @@ class Protocol extends _isc.SerializationManager {
               .toList()
           as T;
     }
+    if (t == List<_idt.ByteData>) {
+      return (data as List).map((e) => deserialize<_idt.ByteData>(e)).toList()
+          as T;
+    }
+    if (t == List<int>) {
+      return (data as List).map((e) => deserialize<int>(e)).toList() as T;
+    }
     if (t == List<_ibt6e7l6.FileVersion>) {
       return (data as List)
               .map((e) => deserialize<_ibt6e7l6.FileVersion>(e))

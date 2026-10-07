@@ -2132,6 +2132,45 @@ class _ContentEndpoint {
     });
   }
 
+  _ida.Future<List<_idt.ByteData>> readRanges(
+    _ist.TestSessionBuilder sessionBuilder,
+    int nodeId,
+    int versionId,
+    List<int> offsets,
+    List<int> lengths,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'content',
+            method: 'readRanges',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'content',
+          methodName: 'readRanges',
+          parameters: _ist.testObjectToJson({
+            'nodeId': nodeId,
+            'versionId': versionId,
+            'offsets': offsets,
+            'lengths': lengths,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_idt.ByteData>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _ida.Future<_idt.ByteData> read(
     _ist.TestSessionBuilder sessionBuilder,
     int nodeId,

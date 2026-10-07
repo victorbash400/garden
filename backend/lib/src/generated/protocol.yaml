@@ -57,6 +57,7 @@ content:
   - download:
   - writeChunk:
   - finish:
+  - readRanges:
   - read:
   - versions:
 files:

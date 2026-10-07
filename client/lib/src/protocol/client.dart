@@ -781,6 +781,22 @@ class EndpointContent extends _isc.EndpointRef {
         {'versionId': versionId},
       );
 
+  _ida.Future<List<_idt.ByteData>> readRanges(
+    int nodeId,
+    int versionId,
+    List<int> offsets,
+    List<int> lengths,
+  ) => caller.callServerEndpoint<List<_idt.ByteData>>(
+    'content',
+    'readRanges',
+    {
+      'nodeId': nodeId,
+      'versionId': versionId,
+      'offsets': offsets,
+      'lengths': lengths,
+    },
+  );
+
   _ida.Future<_idt.ByteData> read(
     int nodeId,
     int versionId,
