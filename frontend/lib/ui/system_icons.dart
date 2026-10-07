@@ -9,7 +9,7 @@ enum SystemIcons {
   chevronRight('chevron_right'),
   chevronUp('chevron_up'),
   circleHelp('question_circle'),
-  columns3('split_three'),
+  columns3('lucide-columns-3', lucide: true),
   download('download'),
   ellipsis('menu_horizontal'),
   eye('eye'),
@@ -24,8 +24,8 @@ enum SystemIcons {
   folder('folder_closed'),
   folderPlus('folder_add'),
   hardDrive('harddrive'),
-  house('home'),
-  layoutGrid('grid'),
+  house('lucide-house', lucide: true),
+  layoutGrid('lucide-grid-2x2', lucide: true),
   link('link'),
   list('list'),
   loaderCircle('loader'),
@@ -40,23 +40,24 @@ enum SystemIcons {
   reply('undo'),
   send('paper_plane'),
   settings('settings'),
-  share2('share'),
+  share2('lucide-share-2', lucide: true),
   external('external'),
-  inbox('inbox'),
+  inbox('lucide-inbox', lucide: true),
   squareActivity('heart_rate'),
   squarePen('write'),
   trash2('trash'),
   triangleAlert('warning_triangle'),
   upload('upload'),
-  importFiles('import'),
-  userPlus('user_add'),
+  importFiles('lucide-import', lucide: true),
+  userPlus('lucide-user-round-plus', lucide: true),
   userRound('user_male_circle'),
   users('users'),
   wifiOff('wifi_error'),
   x('cross'),
   folderOpen('folder_open');
 
-  const SystemIcons(this.fileName);
+  const SystemIcons(this.fileName, {this.lucide = false});
   final String fileName;
+  final bool lucide;
   String get asset => 'assets/icons/$fileName.svg';
 }

@@ -19,11 +19,9 @@ class SystemIcon extends StatelessWidget {
     final iconColor = colors != null && ink == colors.ink ? colors.icon : ink;
     final opacity = theme.opacity ?? 1;
     final dimension = size ?? theme.size ?? 18;
-    if (icon == SystemIcons.house || icon == SystemIcons.inbox) {
+    if (icon.lucide) {
       return SvgPicture.asset(
-        icon == SystemIcons.house
-            ? 'assets/icons/lucide-house.svg'
-            : 'assets/icons/lucide-inbox.svg',
+        icon.asset,
         width: dimension,
         height: dimension,
         excludeFromSemantics: true,

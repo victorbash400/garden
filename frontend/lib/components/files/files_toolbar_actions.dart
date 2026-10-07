@@ -70,7 +70,7 @@ class FilesToolbarActions extends StatelessWidget {
                   onPressed: controller.selected == null || !controller.canWrite
                       ? null
                       : onShare,
-                  icon: SystemIcons.external,
+                  icon: SystemIcons.share2,
                 )
               : null,
           onChat != null
