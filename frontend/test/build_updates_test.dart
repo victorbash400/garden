@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:garden_flutter/ui/garden_theme.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_flutter/components/build_update_banner.dart';
@@ -27,8 +28,11 @@ void main() {
     );
   }
 
+  var relaunchCalls = 0;
   setUp(() {
+    relaunchCalls = 0;
     messenger.setMockMethodCallHandler(AccountWindow.channel, (call) async {
+      if (call.method == 'relaunch') relaunchCalls++;
       if (call.method == 'initialize') {
         return {
           'id': 'main',
@@ -51,6 +55,7 @@ void main() {
       await window.initialize();
       await tester.pumpWidget(
         MaterialApp(
+          theme: GardenTheme.light,
           home: Scaffold(
             body: SizedBox(
               width: 240,
@@ -59,19 +64,23 @@ void main() {
           ),
         ),
       );
-      expect(find.text('Relaunch'), findsNothing);
+      expect(find.text('Software Update Available'), findsNothing);
       await native('build', {
         'ready': true,
         'restarting': false,
         'error': null,
       });
       await tester.pump();
-      expect(find.text('New build ready'), findsOneWidget);
-      expect(find.text('Relaunch'), findsOneWidget);
+      expect(find.text('Software Update Available'), findsOneWidget);
       expect(
         tester.getSize(find.byType(BuildUpdateBanner)).height,
-        lessThan(150),
+        lessThanOrEqualTo(56),
       );
+      expect(find.byType(Badge), findsOneWidget);
+      final button = tester.widget<TextButton>(find.byType(TextButton));
+      expect(button.style!.backgroundColor!.resolve({}), Colors.transparent);
+      await tester.tap(find.text('Software Update Available'));
+      expect(relaunchCalls, 1);
       await native('build', {'ready': true, 'restarting': true, 'error': null});
       await tester.pump();
       expect(
@@ -84,7 +93,7 @@ void main() {
         'error': null,
       });
       await tester.pump();
-      expect(find.text('New build ready'), findsNothing);
+      expect(find.text('Software Update Available'), findsNothing);
     },
   );
 
@@ -109,19 +118,49 @@ void main() {
     expect(tester.getTopLeft(fields.first), formPosition);
     expect(
       tester.getSize(find.byType(BuildUpdateBanner)).height,
-      lessThan(150),
+      lessThanOrEqualTo(56),
     );
     expect(controller.busy, false);
     await tester.enterText(fields.at(0), 'edited@garden.test');
     await tester.tap(find.byTooltip('Dismiss update'));
     await tester.pump();
-    expect(find.text('New build ready'), findsNothing);
+    expect(find.text('Software Update Available'), findsNothing);
     expect(find.text('edited@garden.test'), findsOneWidget);
     expect(find.text('password-for-test'), findsOneWidget);
     expect(tester.getTopLeft(fields.first), formPosition);
     expect(controller.page, GardenPage.register);
     await tester.pumpWidget(const SizedBox.shrink());
     controller.dispose();
+    window.dispose();
+  });
+
+  testWidgets('a failed relaunch shows the error and allows retry', (
+    tester,
+  ) async {
+    messenger.setMockMethodCallHandler(AccountWindow.channel, (call) async {
+      if (call.method == 'relaunch') {
+        throw PlatformException(code: 'relaunch_failed');
+      }
+      return null;
+    });
+    final window = AccountWindow()..updateReady = true;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: GardenTheme.light,
+        home: Scaffold(
+          body: SizedBox(width: 240, child: BuildUpdateBanner(window: window)),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Software Update Available'));
+    await tester.pumpAndSettle();
+    expect(find.text('Could not relaunch Garden. Try again.'), findsOneWidget);
+    expect(
+      tester.widget<TextButton>(find.byType(TextButton)).onPressed,
+      isNotNull,
+    );
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
     window.dispose();
   });
 

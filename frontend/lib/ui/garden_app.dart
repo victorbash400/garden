@@ -118,6 +118,7 @@ class GardenApp extends StatelessWidget {
                       width: 240,
                       child: BuildUpdateBanner(
                         window: controller.accountWindow!,
+                        onDark: _showAccountBackground,
                       ),
                     ),
                 ],
