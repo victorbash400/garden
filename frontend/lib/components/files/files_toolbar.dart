@@ -1,12 +1,9 @@
-import '../system_icon.dart';
-
 import 'package:flutter/material.dart';
 
 import 'home_breadcrumb.dart';
 
 import '../../state/files_controller.dart';
-import 'toolbar_button.dart';
-import 'toolbar_group.dart';
+import 'files_toolbar_back_button.dart';
 import 'files_toolbar_actions.dart';
 
 class FilesToolbar extends StatelessWidget {
@@ -44,20 +41,15 @@ class FilesToolbar extends StatelessWidget {
       );
       final navigation = Row(
         children: [
-          ToolbarGroup(
-            children: [
-              ToolbarButton(
-                tooltip: controller.path.isEmpty
-                    ? 'Back to drives'
-                    : 'Parent folder',
-                onPressed: controller.busy
-                    ? null
-                    : controller.path.isEmpty
-                    ? onBackToDrives
-                    : () => controller.goTo(controller.path.length - 1),
-                icon: SystemIcons.arrowLeft,
-              ),
-            ],
+          FilesToolbarBackButton(
+            tooltip: controller.path.isEmpty
+                ? 'Back to drives'
+                : 'Parent folder',
+            onPressed: controller.busy
+                ? null
+                : controller.path.isEmpty
+                ? onBackToDrives
+                : () => controller.goTo(controller.path.length - 1),
           ),
           SizedBox(width: 12),
           Expanded(
