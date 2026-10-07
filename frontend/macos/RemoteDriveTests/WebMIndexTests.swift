@@ -45,6 +45,20 @@ import Foundation
     sparse.discoverClusters(in: Data([0x1f, 0x43, 0xb6, 0x75, 0x81, 0]), offset: 100,
       fileSize: 256 * 1024)
     try require(sparse.offsets == [0, 65536, 65542, 131072], "Bytes outside indexed headers must not invent clusters")
+    let nearLimit = Array(stride(from: 0, to: 16383 * 8, by: 8))
+    var limited = GardenWebMIndex(offsets: nearLimit)
+    var pair = Data(repeating: 0, count: 16)
+    pair.replaceSubrange(0..<6, with: [0x1f, 0x43, 0xb6, 0x75, 0x81, 0])
+    pair.replaceSubrange(8..<14, with: [0x1f, 0x43, 0xb6, 0x75, 0x81, 0])
+    limited.discoverClusters(in: pair, offset: 0, fileSize: 16384 * 8)
+    try require(limited.offsets == nearLimit, "An oversized discovery must preserve the entire existing index")
+    pair[4] = 0x89
+    limited.discoverClusters(in: pair, offset: 0, fileSize: 16384 * 8)
+    try require(limited.offsets.count == 16384 && limited.offsets.contains(14),
+      "Duplicate discoveries must count once when filling the index limit")
+    let complete = limited.offsets
+    limited.discoverClusters(in: pair, offset: 0, fileSize: 16384 * 8)
+    try require(limited.offsets == complete, "Repeated discoveries at capacity must remain unchanged")
     for argument in CommandLine.arguments.dropFirst() {
       let file = URL(fileURLWithPath: argument)
       let handle = try FileHandle(forReadingFrom: file)

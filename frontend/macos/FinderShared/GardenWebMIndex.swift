@@ -19,8 +19,9 @@ struct GardenWebMIndex {
       if next < fileSize, position == offsets.count || offsets[position] != next { discovered.append(next) }
     }
     guard !discovered.isEmpty else { return }
-    let combined = Array(Set(offsets + discovered)).sorted()
-    if combined.count <= 16384 { offsets = combined }
+    let additions = Array(Set(discovered)).sorted()
+    guard offsets.count + additions.count <= 16384 else { return }
+    for next in additions { offsets.insert(next, at: lowerBound(next)) }
   }
 
   private func lowerBound(_ offset: Int) -> Int {
