@@ -3,6 +3,8 @@ import '../system_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../sidebar_surface.dart';
+import '../scroll_edge.dart';
+import '../../ui/garden_colors.dart';
 
 import '../../state/garden_controller.dart';
 import 'settings_category.dart';
@@ -30,55 +32,86 @@ class SettingsSidebar extends StatelessWidget {
             ),
           ),
         ),
-        SettingsCategory(
-          label: 'Account',
-          icon: SystemIcon(SystemIcons.userRound),
-          selected: controller.settingsSection == SettingsSection.account,
-          onTap: controller.busy
-              ? null
-              : () => controller.selectSettings(SettingsSection.account),
+        Expanded(
+          child: ScrollEdge(
+            color: GardenColors.of(context).sidebar,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  SettingsCategory(
+                    label: 'Account',
+                    icon: SystemIcon(SystemIcons.userRound),
+                    selected:
+                        controller.settingsSection == SettingsSection.account,
+                    onTap: controller.busy
+                        ? null
+                        : () => controller.selectSettings(
+                            SettingsSection.account,
+                          ),
+                  ),
+                  SettingsCategory(
+                    label: 'Storage',
+                    icon: SystemIcon(SystemIcons.hardDrive),
+                    selected:
+                        controller.settingsSection == SettingsSection.storage,
+                    onTap: controller.busy
+                        ? null
+                        : () => controller.selectSettings(
+                            SettingsSection.storage,
+                          ),
+                  ),
+                  SettingsCategory(
+                    label: 'Connections',
+                    icon: SystemIcon(SystemIcons.plug),
+                    selected:
+                        controller.settingsSection ==
+                        SettingsSection.connections,
+                    onTap: controller.busy
+                        ? null
+                        : () => controller.selectSettings(
+                            SettingsSection.connections,
+                          ),
+                  ),
+                  SettingsCategory(
+                    label: 'Drives',
+                    icon: const SystemIcon(SystemIcons.hardDrive),
+                    selected:
+                        controller.settingsSection == SettingsSection.drives,
+                    onTap: () =>
+                        controller.selectSettings(SettingsSection.drives),
+                  ),
+                  SettingsCategory(
+                    label: 'Notifications',
+                    icon: const SystemIcon(SystemIcons.bell),
+                    selected:
+                        controller.settingsSection ==
+                        SettingsSection.notifications,
+                    onTap: () => controller.selectSettings(
+                      SettingsSection.notifications,
+                    ),
+                  ),
+                  SettingsCategory(
+                    label: 'Appearance',
+                    icon: SystemIcon(SystemIcons.palette),
+                    selected:
+                        controller.settingsSection ==
+                        SettingsSection.appearance,
+                    onTap: () =>
+                        controller.selectSettings(SettingsSection.appearance),
+                  ),
+                  SettingsCategory(
+                    label: 'Activity',
+                    icon: ActivityIcon(),
+                    selected:
+                        controller.settingsSection == SettingsSection.activity,
+                    onTap: () =>
+                        controller.selectSettings(SettingsSection.activity),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
-        SettingsCategory(
-          label: 'Storage',
-          icon: SystemIcon(SystemIcons.hardDrive),
-          selected: controller.settingsSection == SettingsSection.storage,
-          onTap: controller.busy
-              ? null
-              : () => controller.selectSettings(SettingsSection.storage),
-        ),
-        SettingsCategory(
-          label: 'Connections',
-          icon: SystemIcon(SystemIcons.plug),
-          selected: controller.settingsSection == SettingsSection.connections,
-          onTap: controller.busy
-              ? null
-              : () => controller.selectSettings(SettingsSection.connections),
-        ),
-        SettingsCategory(
-          label: 'Drives',
-          icon: const SystemIcon(SystemIcons.hardDrive),
-          selected: controller.settingsSection == SettingsSection.drives,
-          onTap: () => controller.selectSettings(SettingsSection.drives),
-        ),
-        SettingsCategory(
-          label: 'Notifications',
-          icon: const SystemIcon(SystemIcons.bell),
-          selected: controller.settingsSection == SettingsSection.notifications,
-          onTap: () => controller.selectSettings(SettingsSection.notifications),
-        ),
-        SettingsCategory(
-          label: 'Appearance',
-          icon: SystemIcon(SystemIcons.palette),
-          selected: controller.settingsSection == SettingsSection.appearance,
-          onTap: () => controller.selectSettings(SettingsSection.appearance),
-        ),
-        SettingsCategory(
-          label: 'Activity',
-          icon: ActivityIcon(),
-          selected: controller.settingsSection == SettingsSection.activity,
-          onTap: () => controller.selectSettings(SettingsSection.activity),
-        ),
-        Spacer(),
         SettingsCategory(
           label: 'Back to drives',
           icon: SystemIcon(SystemIcons.arrowLeft),

@@ -14,9 +14,13 @@ class InboxSidebar extends StatelessWidget {
     required this.expanded,
     required this.onDrawer,
     required this.onNew,
+    this.expandedWidth = 280,
+    this.onSelected,
   });
   final InboxController controller;
   final bool expanded;
+  final double expandedWidth;
+  final VoidCallback? onSelected;
   final VoidCallback onDrawer, onNew;
 
   @override
@@ -28,7 +32,7 @@ class InboxSidebar extends StatelessWidget {
     return AnimatedContainer(
       duration: duration,
       curve: Curves.easeInOutCubic,
-      width: expanded ? 280 : 50,
+      width: expanded ? expandedWidth : 50,
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
         color: colors.sidebar,
@@ -36,8 +40,8 @@ class InboxSidebar extends StatelessWidget {
       ),
       child: OverflowBox(
         alignment: Alignment.topLeft,
-        minWidth: 279,
-        maxWidth: 279,
+        minWidth: expandedWidth - 1,
+        maxWidth: expandedWidth - 1,
         child: Column(
           children: [
             SizedBox(
@@ -75,7 +79,10 @@ class InboxSidebar extends StatelessWidget {
                   child: AnimatedOpacity(
                     opacity: expanded ? 1 : 0,
                     duration: duration,
-                    child: InboxConversationList(controller: controller),
+                    child: InboxConversationList(
+                      controller: controller,
+                      onSelected: onSelected,
+                    ),
                   ),
                 ),
               ),

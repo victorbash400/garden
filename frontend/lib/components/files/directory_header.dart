@@ -12,7 +12,11 @@ class DirectoryHeader extends StatelessWidget {
           Expanded(child: Text('Name')),
           if (constraints.maxWidth >= 480)
             SizedBox(width: 140, child: Text('Date modified')),
-          SizedBox(width: 80, child: Text('Size', textAlign: TextAlign.right)),
+          if (constraints.maxWidth >= 240)
+            SizedBox(
+              width: 80,
+              child: Text('Size', textAlign: TextAlign.right),
+            ),
           if (constraints.maxWidth >= 360)
             SizedBox(
               width: 90,

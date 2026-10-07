@@ -31,9 +31,12 @@ class _ListRowState extends State<ListRow> {
       selected: widget.selected,
       onTap: widget.onDoubleTap == null ? null : widget.onTap,
       child: Material(
+        animationDuration: MediaQuery.disableAnimationsOf(context)
+            ? Duration.zero
+            : const Duration(milliseconds: 120),
         color: widget.selected
             ? GardenColors.of(context).selection
-            : hovered
+            : hovered && widget.onTap != null
             ? GardenColors.of(context).hover
             : widget.striped
             ? GardenColors.of(context).stripe

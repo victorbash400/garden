@@ -7,7 +7,7 @@ class SidebarSurface extends StatelessWidget {
   final Widget child;
   @override
   Widget build(BuildContext context) => Container(
-    width: 240,
+    width: MediaQuery.sizeOf(context).width < 800 ? 200 : 240,
     decoration: BoxDecoration(
       color: GardenColors.of(context).sidebar,
       border: Border(

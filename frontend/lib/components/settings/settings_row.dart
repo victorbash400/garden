@@ -8,25 +8,37 @@ class SettingsRow extends StatelessWidget {
   final Widget value;
   @override
   Widget build(BuildContext context) => Padding(
-    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-    child: Row(
-      children: [
-        Text(label, style: TextStyle(fontSize: 13)),
-        SizedBox(width: 24),
-        Expanded(
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: DefaultTextStyle(
-              style: TextStyle(
-                fontFamily: Theme.of(context).textTheme.bodyMedium!.fontFamily,
-                fontSize: 13,
-                color: GardenColors.of(context).secondary,
-              ),
-              child: value,
-            ),
+    padding: const EdgeInsets.all(16),
+    child: LayoutBuilder(
+      builder: (context, constraints) {
+        final labelWidget = Text(label, style: const TextStyle(fontSize: 13));
+        final control = DefaultTextStyle.merge(
+          style: TextStyle(
+            fontSize: 13,
+            color: GardenColors.of(context).secondary,
           ),
-        ),
-      ],
+          child: value,
+        );
+        if (constraints.maxWidth < 380) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              labelWidget,
+              const SizedBox(height: 10),
+              Align(alignment: Alignment.centerRight, child: control),
+            ],
+          );
+        }
+        return Row(
+          children: [
+            Flexible(child: labelWidget),
+            const SizedBox(width: 24),
+            Expanded(
+              child: Align(alignment: Alignment.centerRight, child: control),
+            ),
+          ],
+        );
+      },
     ),
   );
 }

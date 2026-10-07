@@ -7,8 +7,7 @@ import 'home_breadcrumb.dart';
 import '../../state/files_controller.dart';
 import 'toolbar_button.dart';
 import 'toolbar_group.dart';
-import '../connection_notice_button.dart';
-import 'file_view_selector.dart';
+import 'files_toolbar_actions.dart';
 
 class FilesToolbar extends StatelessWidget {
   const FilesToolbar({
@@ -31,11 +30,19 @@ class FilesToolbar extends StatelessWidget {
   final int chatUnread;
   final bool chatVisible;
   @override
-  Widget build(BuildContext context) => SizedBox(
-    height: 56,
-    child: Padding(
-      padding: EdgeInsets.symmetric(horizontal: 14),
-      child: Row(
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final actions = FilesToolbarActions(
+        controller: controller,
+        onImport: onImport,
+        onInvite: onInvite,
+        onConnections: onConnections,
+        onChat: onChat,
+        onShare: onShare,
+        chatUnread: chatUnread,
+        chatVisible: chatVisible,
+      );
+      final navigation = Row(
         children: [
           ToolbarGroup(
             children: [
@@ -59,59 +66,28 @@ class FilesToolbar extends StatelessWidget {
               onHome: onBackToDrives,
             ),
           ),
-          FileViewSelector(controller: controller),
-          SizedBox(width: 8),
-          ToolbarGroup(
-            children: [
-              if (onConnections != null)
-                ConnectionNoticeButton(onPressed: onConnections),
-              if (!controller.live)
-                ToolbarButton(
-                  tooltip: 'Reconnect live updates',
-                  onPressed: controller.busy ? null : controller.reconnect,
-                  icon: SystemIcons.wifiOff,
-                ),
-              if (controller.path.isEmpty &&
-                  onInvite != null &&
-                  const {'Owner', 'Manager'}.contains(controller.drive!.role))
-                ToolbarButton(
-                  tooltip: 'Invite to drive',
-                  onPressed: controller.busy ? null : onInvite,
-                  icon: SystemIcons.userPlus,
-                ),
-              ListenableBuilder(
-                listenable: controller.imports,
-                builder: (_, _) => ToolbarButton(
-                  tooltip: 'Import files',
-                  onPressed: controller.imports.busy || !controller.canWrite
-                      ? null
-                      : onImport,
-                  icon: SystemIcons.importFiles,
+        ],
+      );
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        child: constraints.maxWidth < 620
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(height: 44, child: navigation),
+                  Align(alignment: Alignment.centerRight, child: actions),
+                ],
+              )
+            : SizedBox(
+                height: 44,
+                child: Row(
+                  children: [
+                    Expanded(child: navigation),
+                    actions,
+                  ],
                 ),
               ),
-              if (onShare != null)
-                ToolbarButton(
-                  tooltip: 'Share',
-                  onPressed: controller.selected == null || !controller.canWrite
-                      ? null
-                      : onShare,
-                  icon: SystemIcons.external,
-                ),
-              if (onChat != null)
-                Badge(
-                  isLabelVisible: chatUnread > 0,
-                  label: Text('$chatUnread'),
-                  child: ToolbarButton(
-                    tooltip: 'Inbox',
-                    selected: chatVisible,
-                    onPressed: onChat,
-                    icon: SystemIcons.inbox,
-                  ),
-                ),
-            ],
-          ),
-        ],
-      ),
-    ),
+      );
+    },
   );
 }

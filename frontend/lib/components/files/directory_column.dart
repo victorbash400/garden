@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../scroll_edge.dart';
+
 import '../../ui/garden_colors.dart';
 
 import '../../state/files_controller.dart';
@@ -39,13 +41,16 @@ class DirectoryColumn extends StatelessWidget {
           child: NodeContextMenu(
             controller: controller,
             parentId: parent,
-            child: ListView.builder(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-              itemCount: nodes.length,
-              itemBuilder: (_, index) => ColumnNodeRow(
-                controller: controller,
-                node: nodes[index],
-                depth: depth,
+            child: ScrollEdge(
+              color: GardenColors.of(context).panel,
+              child: ListView.builder(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                itemCount: nodes.length,
+                itemBuilder: (_, index) => ColumnNodeRow(
+                  controller: controller,
+                  node: nodes[index],
+                  depth: depth,
+                ),
               ),
             ),
           ),

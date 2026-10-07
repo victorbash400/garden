@@ -22,13 +22,14 @@ class FileRowValues extends StatelessWidget {
               width: 140,
               child: Text('${date.day}/${date.month}/${date.year}'),
             ),
-          SizedBox(
-            width: 80,
-            child: Text(
-              node.kind == NodeKind.folder ? '—' : fileSize(node.size),
-              textAlign: TextAlign.right,
+          if (width >= 240)
+            SizedBox(
+              width: 80,
+              child: Text(
+                node.kind == NodeKind.folder ? '—' : fileSize(node.size),
+                textAlign: TextAlign.right,
+              ),
             ),
-          ),
           if (width >= 360)
             SizedBox(
               width: 90,

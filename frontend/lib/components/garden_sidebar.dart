@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'scroll_edge.dart';
+import '../ui/garden_colors.dart';
+
 import 'sidebar_surface.dart';
 
 import '../state/garden_controller.dart';
@@ -31,7 +34,12 @@ class GardenSidebar extends StatelessWidget {
             ),
           ),
         ),
-        Expanded(child: SidebarDrives(controller: controller)),
+        Expanded(
+          child: ScrollEdge(
+            color: GardenColors.of(context).sidebar,
+            child: SidebarDrives(controller: controller),
+          ),
+        ),
         SidebarAccountFooter(controller: controller),
       ],
     ),

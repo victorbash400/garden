@@ -10,26 +10,27 @@ class SettingsTransition extends StatelessWidget {
   final bool enabled;
 
   @override
-  Widget build(BuildContext context) => AnimatedSwitcher(
-    duration: !enabled || MediaQuery.disableAnimationsOf(context)
-        ? Duration.zero
-        : const Duration(milliseconds: 200),
-    switchInCurve: Curves.easeOutCubic,
-    switchOutCurve: Curves.easeInCubic,
-    layoutBuilder: (current, previous) => Stack(
-      alignment: Alignment.topCenter,
-      children: [...previous, ?current],
-    ),
-    transitionBuilder: (child, animation) => FadeTransition(
-      opacity: animation,
-      child: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(.025, 0),
-          end: Offset.zero,
-        ).animate(animation),
-        child: child,
-      ),
-    ),
-    child: child,
-  );
+  Widget build(BuildContext context) =>
+      !enabled || MediaQuery.disableAnimationsOf(context)
+      ? child
+      : AnimatedSwitcher(
+          duration: const Duration(milliseconds: 180),
+          reverseDuration: const Duration(milliseconds: 100),
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeInCubic,
+          layoutBuilder: (current, previous) =>
+              Stack(alignment: Alignment.topCenter, children: [?current]),
+          transitionBuilder: (child, animation) => FadeTransition(
+            opacity: animation,
+            child: AnimatedBuilder(
+              animation: animation,
+              child: child,
+              builder: (_, child) => Transform.translate(
+                offset: Offset(8 * (1 - animation.value), 0),
+                child: child,
+              ),
+            ),
+          ),
+          child: child,
+        );
 }

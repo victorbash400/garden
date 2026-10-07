@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+
+import '../scroll_edge.dart';
+import '../../ui/garden_colors.dart';
+
 import 'package:garden_client/garden_client.dart';
 
 import '../../state/files_controller.dart';
@@ -16,27 +20,30 @@ class DirectoryList extends StatelessWidget {
     if (controller.nodes.isEmpty && !controller.busy) {
       return const EmptyDirectory();
     }
-    return AbsorbPointer(
-      absorbing: controller.busy,
-      child: ListView.builder(
-        itemCount: controller.nodes.length,
-        itemBuilder: (_, index) {
-          final FileNode node = controller.nodes[index];
-          return NodeContextMenu(
-            controller: controller,
-            node: node,
-            child: FileRow(
+    return ScrollEdge(
+      color: GardenColors.of(context).panel,
+      child: AbsorbPointer(
+        absorbing: controller.busy,
+        child: ListView.builder(
+          itemCount: controller.nodes.length,
+          itemBuilder: (_, index) {
+            final FileNode node = controller.nodes[index];
+            return NodeContextMenu(
+              controller: controller,
               node: node,
-              canWrite: controller.canWrite,
-              canPreview: controller.previewFile != null,
-              striped: index.isEven,
-              selected: controller.selected?.id == node.id,
-              onSelect: () => controller.select(node),
-              onOpen: () => actions.open(node),
-              onAction: (action) => actions.perform(node, action),
-            ),
-          );
-        },
+              child: FileRow(
+                node: node,
+                canWrite: controller.canWrite,
+                canPreview: controller.previewFile != null,
+                striped: index.isEven,
+                selected: controller.selected?.id == node.id,
+                onSelect: () => controller.select(node),
+                onOpen: () => actions.open(node),
+                onAction: (action) => actions.perform(node, action),
+              ),
+            );
+          },
+        ),
       ),
     );
   }

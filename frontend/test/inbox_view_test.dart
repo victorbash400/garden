@@ -77,7 +77,12 @@ void main() {
       expect(find.text('Review'), findsOneWidget);
       expect(find.byType(ConversationAvatar), findsOneWidget);
       expect(find.byTooltip('New conversation'), findsOneWidget);
-      await tester.tap(find.text('Review'));
+      await tester.tap(
+        find.descendant(
+          of: find.byType(InboxSidebar),
+          matching: find.text('Review'),
+        ),
+      );
       await tester.pumpAndSettle();
       expect(service.seenId, 2);
       expect(find.byTooltip('Conversation options'), findsOneWidget);
@@ -111,9 +116,45 @@ void main() {
         isTrue,
       );
       expect(find.text('Review'), findsWidgets);
+      await tester.enterText(find.byType(TextField), 'Draft before resizing');
       tester.view.physicalSize = const Size(640, 740);
       await tester.pumpAndSettle();
       expect(find.text('Can you review the Assets folder?'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      tester.view.physicalSize = const Size(460, 620);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      await tester.tap(
+        find.descendant(
+          of: find.byType(InboxSidebar),
+          matching: find.text('Review'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<InboxWorkspace>(find.byType(InboxWorkspace)).expanded,
+        isFalse,
+      );
+      expect(tester.getSize(find.byType(ChatPanel)).width, greaterThan(350));
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).controller!.text,
+        'Draft before resizing',
+      );
+      await tester.enterText(find.byType(TextField), 'Keep my draft');
+      await tester.tap(find.byTooltip('Conversations'));
+      await tester.pumpAndSettle();
+      expect(tester.getSize(find.byType(InboxSidebar)).width, closeTo(436, 1));
+      await tester.tap(
+        find.descendant(
+          of: find.byType(InboxSidebar),
+          matching: find.text('Review'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).controller!.text,
+        'Keep my draft',
+      );
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
       controller.dispose();
