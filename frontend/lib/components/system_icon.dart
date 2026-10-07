@@ -19,37 +19,14 @@ class SystemIcon extends StatelessWidget {
     final iconColor = colors != null && ink == colors.ink ? colors.icon : ink;
     final opacity = theme.opacity ?? 1;
     final dimension = size ?? theme.size ?? 18;
-    if (icon.lucide) {
-      return SvgPicture.asset(
-        icon.asset,
-        width: dimension,
-        height: dimension,
-        excludeFromSemantics: true,
-        colorFilter: ColorFilter.mode(
-          iconColor.withValues(alpha: iconColor.a * opacity),
-          BlendMode.srcIn,
-        ),
-      );
-    }
-    // System UIcons includes more canvas padding than Lucide.
-    final drawingSize = dimension * 1.25;
-    return SizedBox.square(
-      dimension: dimension,
-      child: OverflowBox(
-        minWidth: drawingSize,
-        maxWidth: drawingSize,
-        minHeight: drawingSize,
-        maxHeight: drawingSize,
-        child: SvgPicture.asset(
-          icon.asset,
-          width: drawingSize,
-          height: drawingSize,
-          excludeFromSemantics: true,
-          colorFilter: ColorFilter.mode(
-            iconColor.withValues(alpha: iconColor.a * opacity),
-            BlendMode.srcIn,
-          ),
-        ),
+    return SvgPicture.asset(
+      icon.asset,
+      width: dimension,
+      height: dimension,
+      excludeFromSemantics: true,
+      colorFilter: ColorFilter.mode(
+        iconColor.withValues(alpha: iconColor.a * opacity),
+        BlendMode.srcIn,
       ),
     );
   }
