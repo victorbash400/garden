@@ -33,13 +33,21 @@ class ToolbarButton extends StatelessWidget {
   Widget build(BuildContext context) => IconButton(
     tooltip: tooltip,
     onPressed: onPressed,
-    style: selected
-        ? style(context).copyWith(
-            backgroundColor: WidgetStatePropertyAll(
-              GardenColors.of(context).selection,
-            ),
-          )
-        : style(context),
-    icon: SystemIcon(icon, size: 18),
+    style: style(context).copyWith(
+      animationDuration: MediaQuery.disableAnimationsOf(context)
+          ? Duration.zero
+          : const Duration(milliseconds: 140),
+      backgroundColor: WidgetStatePropertyAll(
+        selected ? GardenColors.of(context).selection : Colors.transparent,
+      ),
+    ),
+    icon: AnimatedSwitcher(
+      duration: MediaQuery.disableAnimationsOf(context)
+          ? Duration.zero
+          : const Duration(milliseconds: 140),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      child: SystemIcon(icon, key: ValueKey(icon), size: 18),
+    ),
   );
 }

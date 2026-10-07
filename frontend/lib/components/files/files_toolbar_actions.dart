@@ -35,22 +35,25 @@ class FilesToolbarActions extends StatelessWidget {
       FileViewSelector(controller: controller),
       ToolbarGroup(
         children: [
-          if (onConnections != null)
-            ConnectionNoticeButton(onPressed: onConnections),
-          if (!controller.live)
-            ToolbarButton(
-              tooltip: 'Reconnect live updates',
-              onPressed: controller.busy ? null : controller.reconnect,
-              icon: SystemIcons.wifiOff,
-            ),
-          if (controller.path.isEmpty &&
-              onInvite != null &&
-              const {'Owner', 'Manager'}.contains(controller.drive!.role))
-            ToolbarButton(
-              tooltip: 'Invite to drive',
-              onPressed: controller.busy ? null : onInvite,
-              icon: SystemIcons.userPlus,
-            ),
+          onConnections != null
+              ? ConnectionNoticeButton(onPressed: onConnections)
+              : null,
+          !controller.live
+              ? ToolbarButton(
+                  tooltip: 'Reconnect live updates',
+                  onPressed: controller.busy ? null : controller.reconnect,
+                  icon: SystemIcons.wifiOff,
+                )
+              : null,
+          controller.path.isEmpty &&
+                  onInvite != null &&
+                  const {'Owner', 'Manager'}.contains(controller.drive!.role)
+              ? ToolbarButton(
+                  tooltip: 'Invite to drive',
+                  onPressed: controller.busy ? null : onInvite,
+                  icon: SystemIcons.userPlus,
+                )
+              : null,
           ListenableBuilder(
             listenable: controller.imports,
             builder: (_, _) => ToolbarButton(
@@ -61,25 +64,27 @@ class FilesToolbarActions extends StatelessWidget {
               icon: SystemIcons.importFiles,
             ),
           ),
-          if (onShare != null)
-            ToolbarButton(
-              tooltip: 'Share',
-              onPressed: controller.selected == null || !controller.canWrite
-                  ? null
-                  : onShare,
-              icon: SystemIcons.external,
-            ),
-          if (onChat != null)
-            Badge(
-              isLabelVisible: chatUnread > 0,
-              label: Text('$chatUnread'),
-              child: ToolbarButton(
-                tooltip: 'Inbox',
-                selected: chatVisible,
-                onPressed: onChat,
-                icon: SystemIcons.inbox,
-              ),
-            ),
+          onShare != null
+              ? ToolbarButton(
+                  tooltip: 'Share',
+                  onPressed: controller.selected == null || !controller.canWrite
+                      ? null
+                      : onShare,
+                  icon: SystemIcons.external,
+                )
+              : null,
+          onChat != null
+              ? Badge(
+                  isLabelVisible: chatUnread > 0,
+                  label: Text('$chatUnread'),
+                  child: ToolbarButton(
+                    tooltip: 'Inbox',
+                    selected: chatVisible,
+                    onPressed: onChat,
+                    icon: SystemIcons.inbox,
+                  ),
+                )
+              : null,
         ],
       ),
     ],

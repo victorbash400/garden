@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../state/chat_controller.dart';
 import '../system_icon.dart';
 import '../files/toolbar_button.dart';
+import '../files/toolbar_item_transition.dart';
 import 'chat_audience_dialog.dart';
 import 'chat_drawer_button.dart';
 import '../inbox/conversation_menu.dart';
@@ -29,12 +30,15 @@ class ChatHeader extends StatelessWidget {
             open: controller.historyVisible,
             onPressed: controller.showHistory,
           ),
-        if (controller.thread != null)
-          ToolbarButton(
-            tooltip: 'Back to conversation',
-            icon: SystemIcons.arrowLeft,
-            onPressed: () => controller.openThread(null),
-          ),
+        ToolbarItemTransition(
+          child: controller.thread != null
+              ? ToolbarButton(
+                  tooltip: 'Back to conversation',
+                  icon: SystemIcons.arrowLeft,
+                  onPressed: () => controller.openThread(null),
+                )
+              : null,
+        ),
         if (!showHistory)
           ConversationAvatar(
             size: 28,
