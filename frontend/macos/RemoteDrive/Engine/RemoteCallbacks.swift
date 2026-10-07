@@ -140,7 +140,7 @@ func remoteList(_ context: UnsafeMutableRawPointer?, _ handle: UInt64, _ offset:
   status {
     let remoteEngine = try engine(context)
     guard let callback, offset >= 0 else { throw POSIXError(.EINVAL) }
-    let nodes = try wait { try await remoteEngine.list(handle) }
+    let nodes = try wait { try await remoteEngine.list(handle, offset: offset) }
     guard offset <= nodes.count + 2 else { throw POSIXError(.EINVAL) }
     for position in Int(offset)..<(nodes.count + 2) {
       let node = position < 2 ? nil : nodes[position - 2]

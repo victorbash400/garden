@@ -294,9 +294,15 @@ actor RemoteEngine {
     if let node = handles[handle], !node.folder { try await publish(node.id) }
   }
 
-  func list(_ handle: UInt64) throws -> [GardenNode] {
+  func list(_ handle: UInt64, offset: Int64 = 0) throws -> [GardenNode] {
     try requireRead()
-    guard let nodes = directories[handle] else { throw POSIXError(.EBADF) }
+    guard var nodes = directories[handle] else { throw POSIXError(.EBADF) }
+    guard offset >= 0 else { throw POSIXError(.EINVAL) }
+    // Refresh a rewound directory while retaining stable cookies during the same enumeration.
+    if offset == 0 {
+      nodes = try metadata.children(handles[handle]?.id ?? 0)
+      directories[handle] = nodes
+    }
     return try nodes.map { try visible($0)! }
   }
 
