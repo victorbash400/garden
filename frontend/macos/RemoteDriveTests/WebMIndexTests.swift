@@ -16,10 +16,10 @@ import Foundation
       throw NSError(domain: "WebMIndexTests", code: 2)
     }
     try require(index.offsets == [1048586,2097162], "Cue offsets must be relative to Segment payload")
-    try require(index.nextPages(after: 0, count: 1) == [16], "The read-ahead window must stay bounded")
-    try require(index.nextPages(after: 0, count: 1, excluding: [16]) == [32], "Completed pages must not block refilling")
+    try require(index.nextPages(after: 0, count: 1) == [1048586 / GardenReadWindow.pageSize], "The read-ahead window must stay bounded")
+    try require(index.nextPages(after: 0, count: 1, excluding: [1048586 / GardenReadWindow.pageSize]) == [2097162 / GardenReadWindow.pageSize], "Completed pages must not block refilling")
     try require(index.nextPages(after: 0, count: 12, distance: 1024 * 1024).isEmpty, "Read-ahead must not pass its distance limit")
-    try require(index.nextPages(after: 1048586, count: 12) == [32], "A seek must move the window forward")
+    try require(index.nextPages(after: 1048586, count: 12) == [2097162 / GardenReadWindow.pageSize], "A seek must move the window forward")
     try require(index.nextPages(after: 2097162, count: 12).isEmpty, "No fetches beyond the index")
     try require(GardenWebMIndex.parse(Data(bytes.dropLast()), fileSize: 4 * 1024 * 1024) == nil, "Truncated cues must not be guessed")
     try require(GardenWebMIndex.parse(Data(bytes), fileSize: 100) == nil, "Out-of-file positions must be rejected")

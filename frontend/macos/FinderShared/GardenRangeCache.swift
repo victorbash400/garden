@@ -76,7 +76,8 @@ actor GardenRangeCache {
     let blockSize = Self.smallBlockSize
     let windowKey = "\(node.id)-\(node.version)"
     var window = windows[windowKey] ?? GardenReadWindow()
-    let fetchSize = persist ? window.observe(offset: offset, length: length) : blockSize
+    let observed = persist ? window.observe(offset: offset, length: length) : blockSize
+    let fetchSize = offset == 0 ? max(observed, 64 * 1024) : observed
     if windows.count >= 128, windows[windowKey] == nil { windows.removeAll() }
     windows[windowKey] = window
     let first = offset / blockSize
@@ -199,7 +200,7 @@ actor GardenRangeCache {
       let task = Task {
         defer { if readAhead[key]?.0 == id { readAhead.removeValue(forKey: key) } }
         do {
-          _ = try await self.block(node: node, index: page, fetchSize: Self.smallBlockSize,
+          _ = try await self.block(node: node, index: page, fetchSize: 2 * Self.smallBlockSize,
             persist: true, path: path, speculative: true)
           try Task.checkCancellation()
           self.readAheadDone[name, default: []].insert(page)
@@ -247,7 +248,7 @@ actor GardenRangeCache {
       defer { if readAhead[key]?.0 == id { readAhead.removeValue(forKey: key) } }
       do {
         _ = try await self.block(node: node, index: (node.size - 1) / Self.smallBlockSize,
-          fetchSize: Self.smallBlockSize, persist: true, path: nil, speculative: true)
+          fetchSize: 64 * 1024, persist: true, path: nil, speculative: true)
         try Task.checkCancellation()
         self.scheduleReadAhead(node: node, offset: self.readAheadCursor["\(node.id)-\(node.version)"] ?? 0, path: nil)
       } catch is CancellationError { }
@@ -285,7 +286,7 @@ actor GardenRangeCache {
     // Check all memory entries before disk, including bulk blocks from older caches.
     for fromDisk in [false, true] {
       if fromDisk && !persist { break }
-      for size in [Self.blockSize, Self.smallBlockSize] {
+      for size in [Self.blockSize, 64 * 1024, Self.smallBlockSize] {
         let start = offset / size * size
         let cacheKey = "\(namespace)/\(node.id)-\(node.version)-\(size)-\(offset / size)"
         let expected = min(size, node.size - start)
@@ -330,7 +331,8 @@ actor GardenRangeCache {
       let data = try await flight.task.value
       return Data(data[(offset - flight.offset)..<(offset - flight.offset + length)])
     }
-    let start = offset / fetchSize * fetchSize
+    let start = speculative && fetchSize == 2 * Self.smallBlockSize
+      ? offset : offset / fetchSize * fetchSize
     let end = min(start + fetchSize, node.size)
     let flightKey = "\(prefix)\(start)-\(end)"
     let id = UUID()
@@ -396,6 +398,7 @@ actor GardenRangeCache {
     remoteBytes += bytes.count
     await GardenActivity.shared.record(domain: domain, name: path ?? node.name, action: "Read", source: "Cloud",
       node: node.id, bytes: bytes.count, milliseconds: Date().timeIntervalSince(started) * 1000)
+    discoverIndex(node: node, data: bytes, offset: offset)
     for page in stride(from: offset, to: end, by: Self.smallBlockSize) {
       let pageEnd = min(page + Self.smallBlockSize, end)
       let data = Data(bytes[(page - offset)..<(pageEnd - offset)])

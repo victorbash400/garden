@@ -1,7 +1,7 @@
 import Foundation
 
 struct GardenReadWindow {
-  static let pageSize = 64 * 1024
+  static let pageSize = 16 * 1024
   static let maximumSize = 1024 * 1024
   private struct Stream {
     var start: Int
@@ -31,7 +31,7 @@ struct GardenReadWindow {
     if streams.count > 8 { streams.removeFirst() }
     payloadReadAheadBlocks = length >= Self.maximumSize
       || (offset + length - start >= Self.maximumSize && fastReads >= 3) ? 3 : 1
-    if length > Self.pageSize || nearbyReads >= 3 { return Self.maximumSize }
-    return nearbyReads > 0 ? 256 * 1024 : Self.pageSize
+    if length > 64 * 1024 || nearbyReads >= 3 { return Self.maximumSize }
+    return nearbyReads > 0 ? 256 * 1024 : (length > Self.pageSize ? 32 * 1024 : Self.pageSize)
   }
 }

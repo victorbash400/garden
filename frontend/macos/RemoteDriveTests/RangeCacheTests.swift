@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 actor RangeSource {
   var requests: [(Int, Int)] = []
@@ -40,7 +41,7 @@ actor RangeSource {
     let far = 90 * 1024 * 1024
     let random = try await cache.read(node: node, offset: far + 123, length: 256)
     try require(random == Data(((far + 123)..<(far + 379)).map { UInt8($0 % 251) }), "Seek bytes differ")
-    try require(await source.requests.filter { $0.0 == far }.map { $0.1 } == [65536],
+    try require(await source.requests.filter { $0.0 == far }.map { $0.1 } == [GardenReadWindow.pageSize],
       "An isolated seek must issue only one small request")
     let uncached = 60 * 1024 * 1024
     try await withThrowingTaskGroup(of: Data.self) { group in
@@ -62,6 +63,18 @@ actor RangeSource {
     record["version"] = 2
     _ = try await reopened.read(node: GardenNode(record), offset: 0, length: 1)
     try require(await source.requests.count == count + 1, "New versions must not reuse old pages")
+    let legacyOffset = 80 * 1024 * 1024
+    let namespace = SHA256.hash(data: Data(domain.utf8)).map { String(format: "%02x", $0) }.joined()
+    let legacyDisk = GardenDiskCache(directory: root, limit: 8 * 1024 * 1024)
+    let legacyBytes = Data((legacyOffset..<(legacyOffset + 65536)).map { UInt8($0 % 251) })
+    try await legacyDisk.store(legacyBytes, key: "\(namespace)/1-1-65536-\(legacyOffset / 65536)")
+    let legacyBefore = await source.requests.count
+    let legacyRead = try await reopened.read(node: node, offset: legacyOffset + 16384 + 123, length: 32000)
+    let legacyStart = legacyOffset + 16384 + 123
+    try require(legacyRead == Data((legacyStart..<(legacyStart + 32000)).map { UInt8($0 % 251) }),
+      "Legacy 64 KiB cache pages must provide exact smaller slices")
+    try require(await source.requests.count == legacyBefore, "Changing page size must not redownload valid existing cache pages")
+    print("Legacy 64 KiB disk pages reused without transfer")
     print("Byte correctness, partial seeks, concurrent reuse, EOF, disk reuse and version isolation passed")
     var streams = GardenReadWindow()
     for step in 0..<4 {

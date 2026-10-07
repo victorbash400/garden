@@ -27,7 +27,7 @@ import Foundation
       let bytes = footer(positions, version: version)
       index.discoverFooter(bytes, offset: 6_000_000_000 - bytes.count, fileSize: 6_000_000_000)
       try require(index.offsets == ([20] + positions.map(Int.init)).sorted(), "32-bit and 64-bit fragment locations must preserve exact file offsets")
-      try require(index.nextPages(after: 0, count: 1, excluding: [0]) == [15], "Read-ahead must honor exclusions and page limits")
+      try require(index.nextPages(after: 0, count: 1, excluding: [0]) == [1_000_000 / GardenReadWindow.pageSize], "Read-ahead must honor exclusions and page limits")
       if version == 1 { try require(index.nextPages(after: 2_000_000, count: 12, excluding: []).isEmpty, "Distant seeks must stay outside the 64 MiB window") }
       var truncated = initial
       truncated.discoverFooter(bytes.dropLast(), offset: 6_000_000_000 - bytes.count, fileSize: 6_000_000_000)
