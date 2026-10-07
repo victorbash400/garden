@@ -43,6 +43,7 @@ import Foundation
       for index in 0..<12 {
         let written = unit.withUnsafeBytes { write(descriptor, $0.baseAddress, unit.count) }
         try require(written == unit.count, "Mounted sequential write \(index) must succeed, errno \(errno)")
+        try require(try await engine.writes.used <= 1024 * 1024, "Write staging must remain within its 1 MiB budget")
       }
       print("Mounted create and 3 MiB writes passed under a 1 MiB staging budget")
       var tail = [UInt8](repeating: 0, count: 32)
@@ -65,8 +66,10 @@ import Foundation
       }
       var attributes = stat()
       let attributeResult = fstat(descriptor, &attributes)
-      try require(attributeResult == 0 && attributes.st_size == file.size && attributes.st_blocks == 0,
-        "Mounted logical size must update while payload allocation stays zero: size \(attributes.st_size), blocks \(attributes.st_blocks), errno \(errno)")
+      let logicalBlocks = file.size / 512 + (file.size % 512 == 0 ? 0 : 1)
+      try require(attributeResult == 0 && attributes.st_size == file.size && attributes.st_blocks == logicalBlocks,
+        "Mounted metadata must report committed size and cloud allocation: size \(attributes.st_size), blocks \(attributes.st_blocks), errno \(errno)")
+      try require(try await engine.writes.used == 0, "Published bytes must leave no local staging extents")
       try require(ftruncate(descriptor, 32) == 0, "Mounted shrink must succeed")
       try require(ftruncate(descriptor, 96) == 0, "Mounted sparse growth must succeed")
       try require(fsync(descriptor) == 0, "Truncation must commit on fsync")
@@ -143,7 +146,7 @@ import Foundation
       try await mount.unmount()
       try await running.value
       await engine.stop()
-      print("Mounted write checks passed: create, bounded backpressure, read-your-writes, zero blocks, truncate, append, close publication, rename, delete and unmount")
+      print("Mounted write checks passed: create, bounded backpressure, read-your-writes, cloud allocation metadata, truncate, append, close publication, rename, delete and unmount")
     } catch {
       if descriptor >= 0 { close(descriptor); descriptor = -1 }
       do { try await mount.unmount(); try await running.value }

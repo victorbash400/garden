@@ -100,6 +100,24 @@ actor RangeSource {
     try require(await cache.remoteBytes - bytesBefore <= 5 * 1024 * 1024 + 65536,
       "Fast small-read prefetch must stay within three bulk windows ahead")
     print("512 small audio reads: byte correctness, shared requests and bounded read-ahead passed")
+
+    let transient = try GardenNode(["id": 3, "parentId": 0, "name": "edit.bin", "kind": "file", "size": size,
+      "version": 1, "updatedAt": "2026-10-06T00:00:00.000Z", "deleted": false])
+    let transientBefore = await source.requests.count
+    let transientOffset = 90 * 1024 * 1024
+    let transientBytes = try await cache.read(node: transient, offset: transientOffset,
+      length: 1024 * 1024, persist: false)
+    try require(transientBytes == Data((transientOffset..<(transientOffset + 1024 * 1024)).map { UInt8($0 % 251) }),
+      "Uncached edit-base reads must preserve every byte")
+    try require(await source.requests.count - transientBefore <= 16,
+      "Small metadata pages must not multiply transfers for uncached edit-base reads")
+    await GardenReadBuffer.shared.clear()
+    let transientCompleted = await source.requests.count
+    _ = try await cache.read(node: transient, offset: transientOffset, length: 16384)
+    try require(await source.requests.count == transientCompleted + 1,
+      "Transient edit-base reads must not populate the persistent disk cache")
+    print("Uncached edit-base bytes, transfer bounds and disk exclusion passed")
+
     for length in [16384, 32768] {
       let media = try GardenNode(["id": length, "parentId": 0, "name": "media.webm", "kind": "file", "size": size,
         "version": 1, "updatedAt": "2026-10-06T00:00:00.000Z", "deleted": false])

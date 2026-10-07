@@ -76,7 +76,7 @@ actor GardenRangeCache {
     let blockSize = Self.smallBlockSize
     let windowKey = "\(node.id)-\(node.version)"
     var window = windows[windowKey] ?? GardenReadWindow()
-    let observed = persist ? window.observe(offset: offset, length: length) : blockSize
+    let observed = persist ? window.observe(offset: offset, length: length) : 64 * 1024
     let fetchSize = offset == 0 ? max(observed, 64 * 1024) : observed
     if windows.count >= 128, windows[windowKey] == nil { windows.removeAll() }
     windows[windowKey] = window
