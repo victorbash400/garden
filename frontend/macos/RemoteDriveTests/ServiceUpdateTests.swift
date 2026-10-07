@@ -56,7 +56,7 @@ import Darwin
       catch let error as NSError where error.domain == "ServiceUpdateTest" {
         print("Busy update response: \(error.localizedDescription)")
         print("Busy update status: \(try await manager.status(accountID: account, driveIDs: [credential.driveID]))")
-        guard error.localizedDescription.contains("could not unmount"),
+        guard error.localizedDescription.contains("Close files on “Service Update Test”"),
           try await manager.status(accountID: account, driveIDs: [credential.driveID])["enabled"] == [credential.driveID],
           FileManager.default.fileExists(atPath: registration.mountPath) else { throw POSIXError(.EIO) }
       }

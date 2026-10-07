@@ -19,6 +19,7 @@ actor RemoteEngine {
   private var handles: [UInt64: GardenNode] = [:]
   private var directories: [UInt64: [GardenNode]] = [:]
   private var nextHandle: UInt64 = 1
+  var hasOpenFiles: Bool { handles.values.contains { !$0.folder } }
   private var subscription: RemoteSubscription?
   private var driveRole: RemoteDrivePermission?
   private(set) var accessWithdrawn = false

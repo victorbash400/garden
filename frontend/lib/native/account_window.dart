@@ -81,6 +81,11 @@ class AccountWindow extends ChangeNotifier {
     notifyListeners();
   }
 
+  void dismissUpdateError() {
+    updateError = null;
+    notifyListeners();
+  }
+
   void _setBuild(Object? value) {
     if (value is! Map ||
         value['ready'] is! bool ||

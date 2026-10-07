@@ -237,6 +237,16 @@ actor RemoteManager {
     entries.removeAll()
   }
 
+  func prepareUpdate() async throws {
+    for entry in entries.values {
+      if let mount = entry.mount, await mount.engine.hasOpenFiles {
+        throw NSError(domain: "GardenRemoteUpdate", code: Int(EBUSY), userInfo:
+          [NSLocalizedDescriptionKey: "Close files on “\(entry.registration.name)” in other apps, then try Update again. Your pending changes are preserved."])
+      }
+    }
+    try await shutdown()
+  }
+
   private func mount(_ id: String) async throws -> RemoteMount {
     guard !stopping, let entry = entries[id], !entry.removing else { throw POSIXError(.ENODEV) }
     guard entry.registration.retiring != true else {

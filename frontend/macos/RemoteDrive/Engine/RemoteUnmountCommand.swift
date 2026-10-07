@@ -18,7 +18,7 @@ final class RemoteUnmountCommand: @unchecked Sendable {
     process.terminationHandler = { [self] process in
       lock.withLock { exited = true; deadline?.cancel(); deadline = nil }
       let result: Result<Void, Error> = process.terminationReason == .exit && process.terminationStatus == 0
-        ? .success(()) : .failure(error(Int(process.terminationStatus), "macOS could not unmount \(path)."))
+        ? .success(()) : .failure(error(Int(process.terminationStatus), "Garden could not disconnect this drive. Close its files and Finder windows in other apps, then try again. Pending changes are preserved."))
       didExit(result)
       completion.resolve(result)
       process.terminationHandler = nil

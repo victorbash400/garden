@@ -63,7 +63,7 @@ final class RemoteControlService: NSObject, NSXPCListenerDelegate, GardenRemoteC
     case "reconnect":
       guard let driveID = request.driveID else { throw POSIXError(.EINVAL) }
       try await manager.reconnect(accountID: request.accountID, driveID: driveID)
-    case "prepareUpdate": try await manager.shutdown()
+    case "prepareUpdate": try await manager.prepareUpdate()
     default: throw POSIXError(.ENOSYS)
     }
     return NSNull()
