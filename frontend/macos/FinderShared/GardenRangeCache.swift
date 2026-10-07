@@ -346,7 +346,7 @@ actor GardenRangeCache {
         if let data = try await self.cached(node: node, index: page / Self.smallBlockSize, persist: persist) {
           if let missingStart {
             result.append(try await self.fetchAndStore(node: node, offset: missingStart, end: page,
-              persist: persist, path: path, speculative: speculative, permitID: id,
+              persist: persist && fetchSize != Self.blockSize, path: path, speculative: speculative, permitID: id,
               generation: currentGeneration, started: started))
           }
           missingStart = nil
@@ -356,7 +356,7 @@ actor GardenRangeCache {
         }) {
           if let missingStart {
             result.append(try await self.fetchAndStore(node: node, offset: missingStart, end: page,
-              persist: persist, path: path, speculative: speculative, permitID: id,
+              persist: persist && fetchSize != Self.blockSize, path: path, speculative: speculative, permitID: id,
               generation: currentGeneration, started: started))
           }
           missingStart = nil
@@ -368,8 +368,16 @@ actor GardenRangeCache {
       }
       if let missingStart {
         result.append(try await self.fetchAndStore(node: node, offset: missingStart, end: end,
-          persist: persist, path: path, speculative: speculative, permitID: id,
+          persist: persist && fetchSize != Self.blockSize, path: path, speculative: speculative, permitID: id,
           generation: currentGeneration, started: started))
+      }
+      if fetchSize == Self.blockSize {
+        try Task.checkCancellation()
+        guard currentGeneration == self.generation else { throw CancellationError() }
+        guard result.count == end - start else { throw GardenAPIError.invalidResponse }
+        let blockKey = "\(namespace)/\(node.id)-\(node.version)-\(Self.blockSize)-\(start / Self.blockSize)"
+        await GardenReadBuffer.shared.store(result, key: blockKey)
+        if persist { try await disk.store(result, key: blockKey) }
       }
       return result
     }
