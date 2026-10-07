@@ -1,4 +1,5 @@
 import 'warning_icon.dart';
+import '../ui/garden_colors.dart';
 
 import 'package:flutter/material.dart';
 
@@ -15,12 +16,14 @@ class ErrorPopup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
+    final colors = GardenColors.of(context);
     return Dialog(
       insetPadding: const EdgeInsets.all(24),
+      backgroundColor: colors.panel,
+      surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-        side: BorderSide(color: colors.outline),
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: colors.border),
       ),
       child: SizedBox(
         width: 340,
@@ -32,12 +35,17 @@ class ErrorPopup extends StatelessWidget {
             children: [
               const Center(child: WarningIcon()),
               const SizedBox(height: 20),
-              Semantics(
-                liveRegion: true,
-                child: SelectableText(
-                  message,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium,
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Semantics(
+                    liveRegion: true,
+                    child: SelectableText(
+                      message,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium
+                          ?.copyWith(color: colors.ink, height: 1.45),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 24),

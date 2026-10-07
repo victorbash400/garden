@@ -1,3 +1,5 @@
+import 'dart:async' as async;
+
 import 'package:passkeys/exceptions.dart';
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart';
 import 'package:flutter/services.dart';
@@ -24,6 +26,8 @@ String errorMessage(Object error) => switch (error) {
     EmailAccountRequestExceptionReason.unknown =>
       'Could not verify the account. Please try again.',
   },
+  async.TimeoutException() =>
+    'Garden took too long to respond. Check your connection and try again.',
   ServerpodClientNetworkException() =>
     'Could not connect to Garden. Check your connection and try again.',
   ServerpodClientUnauthorized() => 'Please sign in again to continue.',
@@ -39,7 +43,10 @@ String errorMessage(Object error) => switch (error) {
     'This passkey is already registered.',
   PlatformException(code: '-128') => 'Authentication canceled.',
   MissingPluginException() => 'Restart Garden to load the native controls.',
-  PlatformException() => error.message ?? 'Native request failed.',
+  PlatformException() =>
+    error.message?.trim().isNotEmpty == true
+        ? error.message!
+        : 'The macOS request could not be completed. Try again.',
   StateError() => error.message,
   GardenException() => error.message,
   _ => 'The request could not be completed. Please try again.',

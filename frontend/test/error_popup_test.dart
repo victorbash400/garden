@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_flutter/components/error_notice.dart';
 import 'package:garden_flutter/components/error_popup.dart';
@@ -29,6 +32,50 @@ void main() {
       isNot(contains('internal data')),
     );
   });
+  test('timeouts and empty native errors explain the next step', () {
+    expect(
+      errorMessage(TimeoutException('transport details')),
+      'Garden took too long to respond. Check your connection and try again.',
+    );
+    expect(
+      errorMessage(PlatformException(code: 'native', message: ' ')),
+      'The macOS request could not be completed. Try again.',
+    );
+  });
+
+  testWidgets('long errors scroll while actions stay reachable', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 340);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    var retries = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: GardenTheme.light,
+        home: Scaffold(
+          body: ErrorNotice(
+            message: List.filled(30, 'The file could not be opened.').join(' '),
+            action: 'Retry',
+            onAction: () => retries++,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    await tester.drag(
+      find.byType(SingleChildScrollView).first,
+      const Offset(0, -120),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Retry'));
+    await tester.pumpAndSettle();
+    expect(retries, 1);
+    expect(find.byType(ErrorPopup), findsNothing);
+  });
+
   testWidgets('errors queue, dismiss, and do not reopen on rebuild', (
     tester,
   ) async {
