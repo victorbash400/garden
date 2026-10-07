@@ -110,6 +110,17 @@ final class RemoteMetadata {
     try query("SELECT payload FROM nodes WHERE id=?", number: id).first
   }
 
+  func pathComponent(_ id: Int) throws -> (name: String, parent: Int)? {
+    let statement = try prepare("SELECT json_extract(CAST(payload AS TEXT),'$.name'),parent FROM nodes WHERE id=?")
+    defer { sqlite3_finalize(statement) }
+    sqlite3_bind_int64(statement, 1, Int64(id))
+    let status = sqlite3_step(statement)
+    if status == SQLITE_DONE { return nil }
+    guard status == SQLITE_ROW, let name = sqlite3_column_text(statement, 0) else { throw failure() }
+    let bytes = UnsafeBufferPointer(start: name, count: Int(sqlite3_column_bytes(statement, 0)))
+    return (String(decoding: bytes, as: UTF8.self), Int(sqlite3_column_int64(statement, 1)))
+  }
+
   func volumeNode() throws -> GardenNode {
     if let node = try query("SELECT payload FROM volume_attributes WHERE id=?", number: 1).first { return node }
     return try GardenNode(["id": 0, "parentId": 0, "name": "", "kind": "folder", "size": 0,

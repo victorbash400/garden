@@ -196,11 +196,11 @@ actor RemoteEngine {
     var names: [String] = []
     while current != 0 {
       guard seen.insert(current).inserted else { throw POSIXError(.ELOOP) }
-      guard let node = try metadata.node(current) else { throw POSIXError(.ENOENT) }
+      guard let node = try metadata.pathComponent(current) else { throw POSIXError(.ENOENT) }
       guard !node.name.isEmpty, node.name != ".", node.name != "..", !node.name.contains("/"),
         !node.name.contains("\0") else { throw POSIXError(.EINVAL) }
       names.append(node.name)
-      current = node.parentID
+      current = node.parent
     }
     return names.reversed().joined(separator: "/")
   }
