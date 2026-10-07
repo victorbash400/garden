@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../ui/garden_colors.dart';
 import '../system_icon.dart';
 
 class ConversationAvatar extends StatelessWidget {
@@ -9,10 +10,16 @@ class ConversationAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SizedBox.square(
     dimension: size,
-    child: Center(
-      child: SystemIcon(
-        group ? SystemIcons.users : SystemIcons.userRound,
-        size: size * .65,
+    child: DecoratedBox(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: GardenColors.of(context).hover,
+      ),
+      child: Center(
+        child: SystemIcon(
+          group ? SystemIcons.users : SystemIcons.userRound,
+          size: size * .65,
+        ),
       ),
     ),
   );

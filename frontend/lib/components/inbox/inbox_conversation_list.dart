@@ -21,10 +21,18 @@ class InboxConversationList extends StatelessWidget {
           child: ListView.separated(
             padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
             itemCount: controller.entries.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 4),
+            separatorBuilder: (context, _) => Padding(
+              padding: const EdgeInsets.only(left: 54, right: 10),
+              child: Divider(
+                height: 1,
+                thickness: 1,
+                color: GardenColors.of(context).divider,
+              ),
+            ),
             itemBuilder: (_, index) {
               final entry = controller.entries[index];
               return InboxRow(
+                key: ValueKey(InboxController.key(entry)),
                 entry: entry,
                 user: controller.userId,
                 selected: controller.selectedKey == InboxController.key(entry),

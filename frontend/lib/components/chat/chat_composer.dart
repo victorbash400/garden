@@ -77,11 +77,11 @@ class _ChatComposerState extends State<ChatComposer> {
       child: Container(
         constraints: const BoxConstraints(maxWidth: 760),
         margin: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-        padding: const EdgeInsets.fromLTRB(12, 10, 8, 7),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         decoration: BoxDecoration(
           color: colors.surface,
           border: Border.all(color: colors.border),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(22),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -94,48 +94,56 @@ class _ChatComposerState extends State<ChatComposer> {
                     ? () => setState(() => reference = null)
                     : null,
               ),
-            CallbackShortcuts(
-              bindings: {
-                const SingleActivator(LogicalKeyboardKey.enter): () => send(),
-              },
-              child: TextField(
-                onChanged: (text) {
-                  if (text.endsWith('@') &&
-                      (text.length == 1 ||
-                          text[text.length - 2].trim().isEmpty)) {
-                    mention();
-                  }
-                },
-                autofocus: true,
-                controller: input,
-                focusNode: focus,
-                enabled: enabled,
-                minLines: 1,
-                maxLines: 4,
-                maxLength: 4000,
-                style: const TextStyle(fontSize: 13, height: 1.5),
-                decoration: InputDecoration(
-                  hintText: 'Message ${widget.audience}',
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  disabledBorder: InputBorder.none,
-                  filled: false,
-                  counterText: '',
-                  contentPadding: EdgeInsets.zero,
-                  isDense: true,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 ToolbarButton(
                   tooltip: 'Mention file or folder',
                   icon: SystemIcons.link,
                   onPressed: enabled ? mention : null,
                 ),
-                const Spacer(),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 7),
+                    child: CallbackShortcuts(
+                      bindings: {
+                        const SingleActivator(LogicalKeyboardKey.enter): () =>
+                            send(),
+                      },
+                      child: TextField(
+                        onChanged: (text) {
+                          if (text.endsWith('@') &&
+                              (text.length == 1 ||
+                                  text[text.length - 2].trim().isEmpty)) {
+                            mention();
+                          }
+                        },
+                        autofocus: true,
+                        controller: input,
+                        focusNode: focus,
+                        enabled: enabled,
+                        minLines: 1,
+                        maxLines: 4,
+                        maxLength: 4000,
+                        style: const TextStyle(fontSize: 13, height: 1.5),
+                        decoration: InputDecoration(
+                          hintText: 'Message ${widget.audience}',
+                          hintMaxLines: 1,
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          disabledBorder: InputBorder.none,
+                          filled: false,
+                          counterText: '',
+                          contentPadding: EdgeInsets.zero,
+                          isDense: true,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
                 ValueListenableBuilder(
                   valueListenable: input,
                   builder: (_, value, _) =>

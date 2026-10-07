@@ -14,12 +14,13 @@ class ChatMessageRow extends StatelessWidget {
     required this.own,
     required this.hasReplies,
     this.username,
+    this.groupEnd = true,
   });
   final DriveMessage message;
   final String? username;
   final VoidCallback onReply;
   final ValueChanged<int> onFile;
-  final bool showSender, hasReplies, own;
+  final bool showSender, hasReplies, own, groupEnd;
 
   Future<void> menu(BuildContext context, Offset position) async {
     final choice = await showMenu<String>(
@@ -42,12 +43,12 @@ class ChatMessageRow extends StatelessWidget {
     onSecondaryTapDown: (event) => menu(context, event.globalPosition),
     onLongPressStart: (event) => menu(context, event.globalPosition),
     child: Padding(
-      padding: EdgeInsets.fromLTRB(20, showSender ? 18 : 2, 20, 2),
+      padding: EdgeInsets.fromLTRB(16, showSender ? 12 : 2, 16, 2),
       child: LayoutBuilder(
         builder: (context, constraints) => Align(
           alignment: own ? Alignment.centerRight : Alignment.centerLeft,
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: constraints.maxWidth * .78),
+            constraints: BoxConstraints(maxWidth: constraints.maxWidth * .82),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: own
@@ -56,7 +57,7 @@ class ChatMessageRow extends StatelessWidget {
               children: [
                 if (showSender)
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(4, 0, 4, 5),
+                    padding: const EdgeInsets.fromLTRB(4, 0, 4, 4),
                     child: ChatSender(
                       username: own ? '' : username ?? message.username,
                       time: message.createdAt.toLocal(),
@@ -66,6 +67,8 @@ class ChatMessageRow extends StatelessWidget {
                   message: message,
                   own: own,
                   hasReplies: hasReplies,
+                  groupStart: showSender,
+                  groupEnd: groupEnd,
                   onReply: onReply,
                   onFile: onFile,
                 ),

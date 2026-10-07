@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../state/chat_controller.dart';
 import 'conversation_action_dialog.dart';
 import '../system_icon.dart';
+import '../files/toolbar_button.dart';
 
 class ConversationMenu extends StatelessWidget {
   const ConversationMenu({super.key, required this.chat});
@@ -14,6 +15,8 @@ class ConversationMenu extends StatelessWidget {
     final creator = value.conversation.creatorId == chat.userId;
     return PopupMenuButton<String>(
       tooltip: 'Conversation options',
+      padding: EdgeInsets.zero,
+      style: ToolbarButton.style(context),
       icon: const SystemIcon(SystemIcons.ellipsis, size: 17),
       onSelected: (action) => showDialog(
         context: context,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:garden_client/garden_client.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_flutter/state/garden_controller.dart';
@@ -21,6 +22,9 @@ void main() {
   testWidgets(
     'Inbox lists incoming conversations and uses theme bubbles without avatar initials',
     (tester) async {
+      final font = FontLoader('Geist')
+        ..addFont(rootBundle.load('assets/fonts/Geist-Regular.ttf'));
+      await font.load();
       tester.view.physicalSize = const Size(1040, 740);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);

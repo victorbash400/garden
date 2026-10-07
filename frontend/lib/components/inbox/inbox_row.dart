@@ -26,11 +26,11 @@ class InboxRow extends StatelessWidget {
       selected: selected,
       onTap: onOpen,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         child: Row(
           children: [
             ConversationAvatar(
-              size: 30,
+              size: 34,
               group: entry.members.length > 2 || entry.conversationId == null,
             ),
             const SizedBox(width: 10),
@@ -59,7 +59,7 @@ class InboxRow extends StatelessWidget {
                       ],
                     ],
                   ),
-                  const SizedBox(height: 5),
+                  const SizedBox(height: 3),
                   Text(
                     entry.latestText.isEmpty
                         ? entry.driveName
@@ -68,7 +68,7 @@ class InboxRow extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 12,
-                      height: 1.4,
+                      height: 1.3,
                       color: colors.secondary,
                     ),
                   ),

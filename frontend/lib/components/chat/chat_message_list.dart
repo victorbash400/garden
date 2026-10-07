@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:garden_client/garden_client.dart';
 
 import '../scroll_edge.dart';
 import '../../ui/garden_colors.dart';
@@ -17,20 +18,22 @@ class ChatMessageList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final thread = controller.thread;
-    final items = controller.messages
+    final messages = controller.messages;
+    final items = messages
         .where(
           (m) => thread == null
               ? m.replyToId == null
               : m.id == thread.id || m.replyToId == thread.id,
         )
         .toList();
-    final replyParents = controller.messages
+    final replyParents = messages
         .map((message) => message.replyToId)
         .nonNulls
         .toSet();
     final hasOlder = thread == null
         ? controller.hasOlder
         : controller.threadHasOlder;
+    final indices = {for (var i = 0; i < items.length; i++) items[i].id!: i};
     return ScrollEdge(
       color: GardenColors.of(context).panel,
       child: NotificationListener<ScrollNotification>(
@@ -44,26 +47,26 @@ class ChatMessageList extends StatelessWidget {
           return false;
         },
         child: ListView.builder(
-          padding: const EdgeInsets.symmetric(vertical: 20),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           reverse: true,
           itemCount: items.length,
+          findChildIndexCallback: (key) =>
+              key is ValueKey<int> ? indices[key.value] : null,
           itemBuilder: (context, index) {
             final message = items[index];
             return Align(
+              key: ValueKey(message.id!),
               alignment: Alignment.topCenter,
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 760),
                 child: ChatMessageRow(
-                  key: ValueKey(message.id),
                   message: message,
                   own: message.authorId == controller.userId,
                   showSender:
                       index == items.length - 1 ||
-                      items[index + 1].authorId != message.authorId ||
-                      message.createdAt
-                              .difference(items[index + 1].createdAt)
-                              .inMinutes >=
-                          5,
+                      !_sameGroup(message, items[index + 1]),
+                  groupEnd:
+                      index == 0 || !_sameGroup(items[index - 1], message),
                   hasReplies:
                       thread == null &&
                       message.replyToId == null &&
@@ -79,4 +82,14 @@ class ChatMessageList extends StatelessWidget {
       ),
     );
   }
+}
+
+bool _sameGroup(DriveMessage newer, DriveMessage older) {
+  final current = newer.createdAt.toLocal();
+  final previous = older.createdAt.toLocal();
+  return newer.authorId == older.authorId &&
+      current.year == previous.year &&
+      current.month == previous.month &&
+      current.day == previous.day &&
+      current.difference(previous).abs() < const Duration(minutes: 5);
 }

@@ -12,9 +12,11 @@ class ChatMessageBubble extends StatelessWidget {
     required this.hasReplies,
     required this.onReply,
     required this.onFile,
+    this.groupStart = true,
+    this.groupEnd = true,
   });
   final DriveMessage message;
-  final bool own, hasReplies;
+  final bool own, hasReplies, groupStart, groupEnd;
   final VoidCallback onReply;
   final ValueChanged<int> onFile;
 
@@ -22,14 +24,14 @@ class ChatMessageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = GardenColors.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: own ? colors.selection : colors.hover,
         borderRadius: BorderRadius.only(
-          topLeft: const Radius.circular(18),
-          topRight: const Radius.circular(18),
-          bottomLeft: Radius.circular(own ? 18 : 5),
-          bottomRight: Radius.circular(own ? 5 : 18),
+          topLeft: Radius.circular(!own && !groupStart ? 6 : 18),
+          topRight: Radius.circular(own && !groupStart ? 6 : 18),
+          bottomLeft: Radius.circular(!own && groupEnd ? 5 : 18),
+          bottomRight: Radius.circular(own && groupEnd ? 5 : 18),
         ),
       ),
       child: Column(
@@ -40,7 +42,7 @@ class ChatMessageBubble extends StatelessWidget {
             SelectableText(
               message.text,
               textWidthBasis: TextWidthBasis.longestLine,
-              style: TextStyle(fontSize: 13, height: 1.45, color: colors.ink),
+              style: TextStyle(fontSize: 13, height: 1.35, color: colors.ink),
             ),
           if (message.nodeId != null)
             TextButton.icon(

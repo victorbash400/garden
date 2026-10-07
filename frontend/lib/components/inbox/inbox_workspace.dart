@@ -46,7 +46,7 @@ class InboxWorkspace extends StatelessWidget {
           return Stack(
             children: [
               AnimatedPositioned(
-                duration: MediaQuery.disableAnimationsOf(context)
+                duration: narrow || MediaQuery.disableAnimationsOf(context)
                     ? Duration.zero
                     : const Duration(milliseconds: 240),
                 curve: Curves.easeInOutCubic,
