@@ -17,10 +17,10 @@ struct GardenMP4Index {
   }
 
   mutating func discoverFooter(_ data: Data, offset: Int, fileSize: Int) {
+    guard offset >= 0, offset <= fileSize, data.count == fileSize - offset,
+      data.count >= 16 else { return }
     let bytes = Array(data)
-    guard offset >= 0, offset <= fileSize, bytes.count == fileSize - offset,
-      bytes.count >= 16,
-      let footer = Self.atom(bytes, at: bytes.count - 16, fileSize: bytes.count), footer.type == "mfro",
+    guard let footer = Self.atom(bytes, at: bytes.count - 16, fileSize: bytes.count), footer.type == "mfro",
       footer.end == bytes.count, let size = Self.integer(bytes, at: bytes.count - 4, length: 4),
       size >= 24, size <= UInt64(bytes.count) else { return }
     let start = bytes.count - Int(size)
