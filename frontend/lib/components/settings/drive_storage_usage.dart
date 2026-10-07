@@ -6,6 +6,7 @@ import '../../services/drive_storage_usage.dart';
 import '../../services/sharing/drive_sharing_service.dart';
 import '../../utils/error_message.dart';
 import '../system_icon.dart';
+import 'settings_icon_button.dart';
 import 'cache_usage_bar.dart';
 import 'settings_group.dart';
 import 'settings_issue.dart';
@@ -61,14 +62,14 @@ class _DriveStorageUsageState extends State<DriveStorageUsageControls> {
                         ),
                 ),
                 const SizedBox(width: 8),
-                IconButton(
+                SettingsIconButton(
                   tooltip: 'Refresh storage usage',
                   onPressed: busy
                       ? null
                       : () => setState(() {
                           request = _read();
                         }),
-                  icon: const SystemIcon(SystemIcons.refreshCw, size: 16),
+                  icon: SystemIcons.refreshCw,
                 ),
               ],
             ),

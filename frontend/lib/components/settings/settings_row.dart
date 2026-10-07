@@ -13,6 +13,7 @@ class SettingsRow extends StatelessWidget {
       builder: (context, constraints) {
         final labelWidget = Text(label, style: const TextStyle(fontSize: 13));
         final control = DefaultTextStyle.merge(
+          textAlign: TextAlign.right,
           style: TextStyle(
             fontSize: 13,
             color: GardenColors.of(context).secondary,
@@ -31,7 +32,7 @@ class SettingsRow extends StatelessWidget {
         }
         return Row(
           children: [
-            Flexible(child: labelWidget),
+            Expanded(child: labelWidget),
             const SizedBox(width: 24),
             Expanded(
               child: Align(alignment: Alignment.centerRight, child: control),

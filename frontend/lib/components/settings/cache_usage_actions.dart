@@ -9,6 +9,7 @@ class CacheUsageActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Wrap(
+    alignment: WrapAlignment.end,
     spacing: 8,
     runSpacing: 8,
     children: [

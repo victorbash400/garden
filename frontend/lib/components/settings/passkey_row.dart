@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'settings_row.dart';
+import 'settings_inline_button.dart';
 
 class PasskeyRow extends StatelessWidget {
   const PasskeyRow({
@@ -16,7 +17,7 @@ class PasskeyRow extends StatelessWidget {
         .formatMediumDate(createdAt.toLocal());
     return SettingsRow(
       label: 'Passkey · $date',
-      value: TextButton(onPressed: onRemove, child: const Text('Remove')),
+      value: SettingsInlineButton(onPressed: onRemove, label: 'Remove'),
     );
   }
 }

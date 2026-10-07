@@ -55,15 +55,16 @@ class DriveSettingsActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SettingsRow(
     label: 'Drive',
-    value: Row(
-      mainAxisSize: MainAxisSize.min,
+    value: Wrap(
+      alignment: WrapAlignment.end,
+      spacing: 8,
+      runSpacing: 8,
       children: [
         if (owner) ...[
           SettingsInlineButton(
             label: 'Rename…',
             onPressed: busy ? null : () => rename(context),
           ),
-          const SizedBox(width: 8),
         ],
         SettingsInlineButton(
           label: owner ? 'Delete…' : 'Leave…',

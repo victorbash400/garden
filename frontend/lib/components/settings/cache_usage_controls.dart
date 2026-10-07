@@ -22,7 +22,7 @@ class CacheUsageControls extends StatelessWidget {
         children: [
           OverflowBar(
             alignment: MainAxisAlignment.spaceBetween,
-            overflowAlignment: OverflowBarAlignment.start,
+            overflowAlignment: OverflowBarAlignment.end,
             spacing: 12,
             overflowSpacing: 12,
             children: [

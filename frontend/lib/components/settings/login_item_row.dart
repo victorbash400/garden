@@ -30,11 +30,13 @@ class LoginItemRow extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Flexible(child: Text(label)),
-          if (state == LoginItemState.requiresApproval)
+          if (state == LoginItemState.requiresApproval) ...[
+            const SizedBox(width: 12),
             SettingsInlineButton(
               onPressed: controller.busy ? null : controller.openLoginSettings,
               label: 'Approve…',
             ),
+          ],
           const SizedBox(width: 12),
           Switch.adaptive(
             value: enabled,

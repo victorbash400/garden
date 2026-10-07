@@ -27,7 +27,7 @@ class NotificationsToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) => OverflowBar(
     alignment: MainAxisAlignment.spaceBetween,
-    overflowAlignment: OverflowBarAlignment.start,
+    overflowAlignment: OverflowBarAlignment.end,
     spacing: 12,
     overflowSpacing: 12,
     children: [

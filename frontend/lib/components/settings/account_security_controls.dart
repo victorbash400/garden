@@ -8,6 +8,7 @@ import '../../model/account_info.dart';
 import '../../state/account_security_controller.dart';
 import 'settings_group.dart';
 import 'settings_row.dart';
+import 'settings_inline_button.dart';
 import 'passkey_row.dart';
 import 'touch_id_control.dart';
 
@@ -63,11 +64,11 @@ class _AccountSecurityControlsState extends State<AccountSecurityControls> {
             children: [
               SettingsRow(
                 label: 'Passkeys',
-                value: TextButton(
+                value: SettingsInlineButton(
                   onPressed: !security.configured || security.busy
                       ? null
                       : () => security.addPasskey(widget.account),
-                  child: Text('Add passkey'),
+                  label: 'Add passkey',
                 ),
               ),
               for (final key in security.keys)
