@@ -15,7 +15,6 @@ import '../components/files/import_status_bar.dart';
 import '../components/garden_sidebar.dart';
 import '../components/garden_menu_bar.dart';
 import '../components/settings/settings_sidebar.dart';
-import '../components/settings/settings_transition.dart';
 import '../views/account_form.dart';
 import '../views/files_view.dart';
 import '../views/gardens_view.dart';
@@ -93,16 +92,13 @@ class GardenApp extends StatelessWidget {
                                   ),
                                 ),
                               Expanded(
-                                child: SettingsTransition(
-                                  enabled: _showSidebar,
-                                  child: KeyedSubtree(
-                                    key: ValueKey(controller.page),
-                                    child: _showAccountBackground
-                                        ? AccountBackground(
-                                            child: _content(context),
-                                          )
-                                        : _content(context),
-                                  ),
+                                child: KeyedSubtree(
+                                  key: ValueKey(controller.page),
+                                  child: _showAccountBackground
+                                      ? AccountBackground(
+                                          child: _content(context),
+                                        )
+                                      : _content(context),
                                 ),
                               ),
                               if (controller.files != null)
@@ -209,7 +205,7 @@ class GardenApp extends StatelessWidget {
       ),
     ),
     GardenPage.files => FilesView(
-      key: ValueKey('${controller.account!.id}:${controller.files!.drive!.id}'),
+      key: ValueKey(controller.account!.id),
       controller: controller.files!,
       chatService: controller.gateway is ChatGateway
           ? ServerpodChatService((controller.gateway as ChatGateway).client)

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../files/toolbar_entrance.dart';
-
 import '../../ui/garden_colors.dart';
 import '../files/toolbar_button.dart';
 import '../files/toolbar_group.dart';
@@ -20,33 +18,31 @@ class InboxToolbar extends StatelessWidget {
   final VoidCallback onInvites, onInbox;
 
   @override
-  Widget build(BuildContext context) => ToolbarEntrance(
-    child: Padding(
-      padding: const EdgeInsets.all(12),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: ToolbarGroup(
-          children: [
-            ToolbarButton(
-              tooltip: 'Inbox',
-              icon: SystemIcons.inbox,
-              selected: !invites,
-              onPressed: onInbox,
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.all(12),
+    child: Align(
+      alignment: Alignment.centerLeft,
+      child: ToolbarGroup(
+        children: [
+          ToolbarButton(
+            tooltip: 'Inbox',
+            icon: SystemIcons.inbox,
+            selected: !invites,
+            onPressed: onInbox,
+          ),
+          Badge(
+            isLabelVisible: invitesUnread > 0,
+            backgroundColor: GardenColors.of(context).accent,
+            smallSize: 6,
+            offset: const Offset(-7, 7),
+            child: ToolbarButton(
+              tooltip: 'Invites',
+              icon: SystemIcons.mail,
+              selected: invites,
+              onPressed: onInvites,
             ),
-            Badge(
-              isLabelVisible: invitesUnread > 0,
-              backgroundColor: GardenColors.of(context).accent,
-              smallSize: 6,
-              offset: const Offset(-7, 7),
-              child: ToolbarButton(
-                tooltip: 'Invites',
-                icon: SystemIcons.mail,
-                selected: invites,
-                onPressed: onInvites,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     ),
   );

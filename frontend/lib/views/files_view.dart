@@ -47,6 +47,7 @@ class FilesView extends StatefulWidget {
 
 class _FilesViewState extends State<FilesView> with WidgetsBindingObserver {
   ChatController? chat;
+  late int driveId;
   StreamSubscription<void>? focus;
   FilesController get controller => widget.controller;
   String get userId => widget.userId;
@@ -57,6 +58,22 @@ class _FilesViewState extends State<FilesView> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    bindChat();
+  }
+
+  @override
+  void didUpdateWidget(FilesView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (driveId != controller.drive!.id ||
+        oldWidget.controller != controller ||
+        oldWidget.userId != userId) {
+      unbindChat(oldWidget);
+      bindChat();
+    }
+  }
+
+  void bindChat() {
+    driveId = controller.drive!.id;
     final service = widget.chatService;
     if (service != null) {
       chat = ChatController(service, controller.drive!.id, userId)
@@ -97,14 +114,20 @@ class _FilesViewState extends State<FilesView> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    unbindChat(widget);
+    super.dispose();
+  }
+
+  void unbindChat(FilesView previous) {
     unawaited(focus?.cancel());
-    final service = widget.chatService;
+    focus = null;
+    final service = previous.chatService;
     if (service is ServerpodChatService) {
       service.client.connectivityMonitor?.removeListener(connectivityChanged);
     }
-    controller.shareNode = null;
+    previous.controller.shareNode = null;
     chat?.dispose();
-    super.dispose();
+    chat = null;
   }
 
   Future<void> shareNode(FileNode node) async {
