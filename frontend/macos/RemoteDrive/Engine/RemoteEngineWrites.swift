@@ -81,7 +81,7 @@ extension RemoteEngine {
         throw NSError(domain: "GardenWriteConflict", code: Int(EEXIST), userInfo:
           [NSLocalizedDescriptionKey: "Edits to \(draft.base.name) were saved as \(committed.name)."])
       }
-      await writeStatus(nil, paths: ["/" + (try path(node))])
+      await writeStatus(nil, paths: ["/" + (try path(draft.base.parentID == 0 ? nil : draft.base.parentID))])
     } catch {
       await writeStatus(error.localizedDescription)
       throw error

@@ -10,6 +10,7 @@ actor RemoteEngine {
   var scheduledPublications: [Int: Task<Void, Never>] = [:]
   private var writeIssue: String?
   private var mutationTask: Task<Void, Error>?
+  private var localMutationPaths: [String: Int] = [:]
   private var invalidate: @Sendable ([String]) -> Void = { _ in }
   private var settled: @Sendable () async -> Void = {}
   private var changed: @Sendable () async -> Void = {}
@@ -91,6 +92,14 @@ actor RemoteEngine {
 
   func mutate(_ mutation: RemoteMutation) async throws {
     try requireWrite()
+    let localPaths = Set([mutation.path] + (mutation.destination.map { [$0] } ?? []))
+    for path in localPaths { localMutationPaths[path, default: 0] += 1 }
+    defer {
+      for path in localPaths {
+        if localMutationPaths[path] == 1 { localMutationPaths.removeValue(forKey: path) }
+        else { localMutationPaths[path]? -= 1 }
+      }
+    }
     if mutation.operation == .unlink || mutation.operation == .rename {
       if let node = try metadata.lookup(mutation.path), !node.folder { try await publish(node.id) }
       if let destination = mutation.destination {
@@ -219,17 +228,27 @@ actor RemoteEngine {
     guard change.revision > (try metadata.revision ?? 0) else { return }
     var paths: Set<String> = []
     if let id = change.node?.id, let old = try metadata.node(id) {
-      paths.insert(try invalidationPath(old.id))
+      let oldPath = try invalidationPath(old.id)
+      if try shouldRefresh(old, path: oldPath) { paths.insert(oldPath) }
       paths.insert(try invalidationPath(old.parentID == 0 ? nil : old.parentID))
     }
     try metadata.apply(change)
     if let node = change.node, !node.deleted {
       // FSKit shares an inode's FUSE handle across local descriptors. Content changes must update that handle too.
       for handle in handles.keys where handles[handle]?.id == node.id { handles[handle] = node }
-      paths.insert("/" + (try path(node.id)))
+      let newPath = "/" + (try path(node.id))
+      if try shouldRefresh(node, path: newPath) { paths.insert(newPath) }
       paths.insert("/" + (try path(node.parentID == 0 ? nil : node.parentID)))
     }
     invalidate(Array(paths))
+  }
+
+  private func shouldRefresh(_ node: GardenNode, path: String) throws -> Bool {
+    // The kernel already reflects its own mutations and writes. Reapplying EOF while
+    // those writes are buffered can discard accepted pages in the FSKit backend.
+    if node.folder { return true }
+    guard localMutationPaths[path] == nil, publications[node.id] == nil else { return false }
+    return try writes.state(node.id) == nil
   }
 
   private func invalidationPath(_ id: Int?) throws -> String {
