@@ -23,7 +23,7 @@ xcrun swiftc -O -parse-as-library -swift-version 5 -import-objc-header "$root/Re
   "$root/RemoteDrive/Control/RemoteRegistration.swift" "$root/RemoteDrive/Control/RemoteManager.swift" \
   "$root/RemoteDrive/Control/RemoteControlService.swift" "$root/RemoteDrive/Control/RemoteCacheControl.swift" \
   "$root/FinderShared/GardenRemoteControlProtocol.swift" "$root/FinderShared/GardenCacheServiceProtocol.swift" \
-  "$root/FinderShared/FinderCredential.swift" "$root/FinderShared/GardenNode.swift" \
+  "$root/FinderShared/GardenCredentialLock.swift" "$root/FinderShared/FinderCredential.swift" "$root/FinderShared/GardenNode.swift" \
   "$root/FinderShared/GardenFileAttributes.swift" \
   "$root/FinderShared/GardenAPI.swift" "$root/FinderShared/GardenMultipartUpload.swift" \
   "$root/FinderShared/GardenActivity.swift" "$root/FinderShared/GardenBandwidth.swift" "$root/FinderShared/GardenObjectRequests.swift" "$root/FinderShared/GardenRangeCache.swift" \

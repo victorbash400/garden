@@ -71,9 +71,11 @@ actor GardenAPI {
   private let domainID: String
   private var refreshTask: Task<FinderCredential, Error>?
   private var cachedCredential: FinderCredential?
+  private let session: URLSession
 
-  init(domainID: String) {
+  init(domainID: String, session: URLSession = .shared) {
     self.domainID = domainID
+    self.session = session
   }
 
   func streamCredential() throws -> FinderCredential { try credential() }
@@ -279,6 +281,11 @@ actor GardenAPI {
     }
     if let refreshTask { return try await refreshTask.value }
     let task = Task<FinderCredential, Error> {
+      let lock = try await GardenCredentialLock.acquire(domainID: domainID)
+      defer { lock.release() }
+      try Task.checkCancellation()
+      let latest = try FinderCredentialStore.read(domainID)
+      if latest.token != staleToken { return latest }
       let value = try await send(
         "jwtRefresh", "refreshAccessToken",
         ["refreshToken": latest.refreshToken], token: nil
@@ -319,7 +326,7 @@ actor GardenAPI {
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
     if let token { request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }
     request.httpBody = try JSONSerialization.data(withJSONObject: arguments)
-    let (data, response) = try await URLSession.shared.data(for: request)
+    let (data, response) = try await session.data(for: request)
     guard let response = response as? HTTPURLResponse else {
       throw GardenAPIError.invalidResponse
     }

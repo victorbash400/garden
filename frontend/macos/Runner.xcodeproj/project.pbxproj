@@ -21,6 +21,10 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		ED99315BC9EA446EA6A413C3 /* GardenCredentialLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC1B739510354105B5D414ED /* GardenCredentialLock.swift */; };
+		73EE694C6ACC4760AF6ADDAF /* GardenCredentialLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC1B739510354105B5D414ED /* GardenCredentialLock.swift */; };
+		7DFD5C7D523444F5AFB2506E /* GardenCredentialLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC1B739510354105B5D414ED /* GardenCredentialLock.swift */; };
+		BB35CC48CC374C978F2396AB /* GardenCredentialLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC1B739510354105B5D414ED /* GardenCredentialLock.swift */; };
 		A50000000000000000000010 /* GardenRelaunchReceipt.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50000000000000000000011 /* GardenRelaunchReceipt.swift */; };
 		A50000000000000000000007 /* GardenMemory.c in Sources */ = {isa = PBXBuildFile; fileRef = A50000000000000000000008 /* GardenMemory.c */; };
 		A50000000000000000000005 /* GardenSessionHandoff.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50000000000000000000006 /* GardenSessionHandoff.swift */; };
@@ -253,6 +257,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		DC1B739510354105B5D414ED /* GardenCredentialLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinderShared/GardenCredentialLock.swift; sourceTree = "<group>"; };
 		A50000000000000000000011 /* GardenRelaunchReceipt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenRelaunchReceipt.swift; sourceTree = "<group>"; };
 		A50000000000000000000008 /* GardenMemory.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = GardenMemory.c; sourceTree = "<group>"; };
 		A50000000000000000000009 /* GardenMemory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GardenMemory.h; sourceTree = "<group>"; };
@@ -600,6 +605,7 @@
 		B15DA367A708CFAC0D4F7B0B /* FinderShared */ = {
 			isa = PBXGroup;
 			children = (
+				DC1B739510354105B5D414ED /* GardenCredentialLock.swift */,
 				B7A65DF6BF53C6D521B7B380 /* FinderCredential.swift */,
 				E80EEA4C2EDA2C0390B33422 /* GardenNode.swift */,
 				A20D20261004000000000008 /* GardenFileAttributes.swift */,
@@ -874,6 +880,7 @@
 				C0482349DBE085A07660D385 /* GardenStreamingIndex.swift in Sources */,
 				AA8EE38746BA28C77EB678A4 /* GardenStreamingVolume.swift in Sources */,
 				A0CAC4CA25F0A9946B89177C /* GardenStreamingItem.swift in Sources */,
+				BB35CC48CC374C978F2396AB /* GardenCredentialLock.swift in Sources */,
 				F8E5D28E858EC92180A95955 /* FinderCredential.swift in Sources */,
 				97AA4F544A35B9FBD5F34071 /* GardenNode.swift in Sources */,
 				A30D20261004000000000800 /* GardenFileAttributes.swift in Sources */,
@@ -927,6 +934,7 @@
 				33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */,
 				A20000000000000000000001 /* NativeSetupBridge.swift in Sources */,
 				335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */,
+				7DFD5C7D523444F5AFB2506E /* GardenCredentialLock.swift in Sources */,
 				93C2E6D4C5E03E5BB279B77B /* FinderCredential.swift in Sources */,
 				805B49A9BB38C082F1F565F1 /* FinderDomainManager.swift in Sources */,
 				7551C4C4EFC2E6825A2207BA /* GardenAPI.swift in Sources */,
@@ -966,6 +974,7 @@
 				6F8849C716F84748896D2036 /* GardenCacheWatch.swift in Sources */,
 				49D52B7A5FA59A146655C404 /* GardenFileProvider.swift in Sources */,
 				932E11ADD36A74FD71E1BCD1 /* GardenEnumerator.swift in Sources */,
+				73EE694C6ACC4760AF6ADDAF /* GardenCredentialLock.swift in Sources */,
 				14F8DF57F2F53B0521DFDBF0 /* FinderCredential.swift in Sources */,
 				C36A5F1C0E9B80E1CEC20C8C /* GardenNode.swift in Sources */,
 				A30D20261004000000000801 /* GardenFileAttributes.swift in Sources */,
@@ -1012,6 +1021,7 @@
 				139BEABACED83768D54D279D /* RemoteControlService.swift in Sources */,
 				2A58E3781CD8BB9C0424D1C7 /* RemoteAgentMain.swift in Sources */,
 				B2B3EA75BBC72C68FA9B1402 /* RemoteCacheControl.swift in Sources */,
+				ED99315BC9EA446EA6A413C3 /* GardenCredentialLock.swift in Sources */,
 				BBEF27CCCE444BAD4C818FAD /* FinderCredential.swift in Sources */,
 				D950DECE0A1A55A1F7D7E8D3 /* GardenDiskCache.swift in Sources */,
 				85183AA7136C6425A4547E22 /* GardenRangeWriter.swift in Sources */,
