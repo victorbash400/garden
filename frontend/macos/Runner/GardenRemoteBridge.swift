@@ -7,6 +7,14 @@ enum GardenRemoteBridge {
     try await SMAppService.agent(plistName: GardenRemoteService.plist).unregister()
   }
 
+  @MainActor static func prepareUpdate() async throws {
+    let service = SMAppService.agent(plistName: GardenRemoteService.plist)
+    guard service.status == .enabled else { return }
+    _ = try await request("prepareUpdate", GardenRemoteRequest(accountID: ""))
+    try await service.unregister()
+    try registerService()
+  }
+
   @MainActor static func registerService() throws {
     let service = SMAppService.agent(plistName: GardenRemoteService.plist)
     if service.status == .notRegistered || service.status == .notFound { try service.register() }

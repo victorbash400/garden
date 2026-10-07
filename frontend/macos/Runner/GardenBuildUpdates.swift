@@ -69,6 +69,12 @@ import Cocoa
     let handoff: String
     do { handoff = try GardenSessionHandoff.create(sessions) }
     catch { cancel("Could not preserve the account sessions. Try again."); return }
+    do { try await GardenRemoteBridge.prepareUpdate() }
+    catch {
+      GardenSessionHandoff.remove(handoff)
+      cancel("Could not update Garden's background service: \(error.localizedDescription)")
+      return
+    }
     beforeLaunch()
     let configuration = NSWorkspace.OpenConfiguration()
     configuration.createsNewApplicationInstance = true
