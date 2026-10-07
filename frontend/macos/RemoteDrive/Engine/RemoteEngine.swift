@@ -14,6 +14,7 @@ actor RemoteEngine {
   private var settled: @Sendable () async -> Void = {}
   private var changed: @Sendable () async -> Void = {}
   private var mutationIssue: String?
+  private var readIssue: String?
   private var handles: [UInt64: GardenNode] = [:]
   private var directories: [UInt64: [GardenNode]] = [:]
   private var nextHandle: UInt64 = 1
@@ -24,16 +25,18 @@ actor RemoteEngine {
     get async {
       if let writeIssue { return writeIssue }
       if let mutationIssue { return mutationIssue }
+      if let readIssue { return readIssue }
       return await subscription?.issue
     }
   }
 
   let activityDomain: String
 
-  init(domainID: String, state: URL, cache: URL, limit: Int64, writeLimit: Int = 256 * 1024 * 1024) throws {
+  init(domainID: String, state: URL, cache: URL, limit: Int64, writeLimit: Int = 256 * 1024 * 1024,
+    readRange: (@Sendable (GardenNode, Int, Int) async throws -> Data)? = nil) throws {
     activityDomain = domainID
     api = GardenAPI(domainID: domainID)
-    ranges = GardenRangeCache(api: api, domainID: domainID, diskLimit: Int(limit), directory: cache)
+    ranges = GardenRangeCache(api: api, domainID: domainID, diskLimit: Int(limit), directory: cache, readRange: readRange)
     metadata = try RemoteMetadata(url: state.appendingPathComponent("metadata.sqlite"), namespace: domainID)
     mutations = try RemoteMutationJournal(url: state.appendingPathComponent("mutations.sqlite"), namespace: domainID)
     writes = try RemoteWriteJournal(url: state.appendingPathComponent("writes.sqlite"), namespace: domainID, limit: writeLimit)
@@ -178,6 +181,7 @@ actor RemoteEngine {
       try await flushAll()
     }
     try await subscription?.reconnect()
+    readIssue = nil
     await settled()
   }
 
@@ -284,7 +288,14 @@ actor RemoteEngine {
       try requireRead()
       return bytes
     }
-    let bytes = try await ranges.read(node: node, offset: offset, length: length, path: try path(node.id))
+    let bytes: Data
+    do {
+      bytes = try await ranges.read(node: node, offset: offset, length: length, path: try path(node.id))
+    } catch GardenAPIError.unauthorized {
+      readIssue = GardenAPIError.unauthorized.localizedDescription
+      await changed()
+      throw GardenAPIError.unauthorized
+    }
     try requireRead()
     return bytes
   }

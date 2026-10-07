@@ -2,6 +2,13 @@ import Foundation
 import Darwin
 
 @main struct ServiceUpdateTests {
+  static func restoreCredential(_ domain: String, source: String) throws {
+    let latest = try FinderCredentialStore.read(domain)
+    let current = try FinderCredentialStore.read(source)
+    guard latest.tokenID == current.tokenID else { return }
+    try FinderCredentialStore.save(FinderCredential(serverURL: current.serverURL, accountID: current.accountID,
+      driveID: current.driveID, tokenID: current.tokenID, token: latest.token, refreshToken: latest.refreshToken), domainID: source)
+  }
   static func prepare(_ service: RemoteControlService) async throws {
     let result = RemoteCompletion<Data>()
     let payload = try JSONEncoder().encode(GardenRemoteRequest(accountID: ""))
@@ -63,6 +70,7 @@ import Darwin
         try journal.pending().isEmpty,
         !FileManager.default.fileExists(atPath: registration.mountPath),
         try RemoteRegistry(root: root).read() == [registration] else { throw POSIXError(.EIO) }
+      try restoreCredential(registration.domainID, source: source)
       try await api.delete(folder.id)
       try FinderCredentialStore.remove(registration.domainID)
       try FileManager.default.removeItem(at: root)
@@ -71,6 +79,7 @@ import Darwin
       if descriptor >= 0 { close(descriptor) }
       do { try await manager.shutdown() }
       catch { RemoteLog.error(error); throw error }
+      try restoreCredential(registration.domainID, source: source)
       try await api.delete(folder.id)
       try FinderCredentialStore.remove(registration.domainID)
       try FileManager.default.removeItem(at: root)
