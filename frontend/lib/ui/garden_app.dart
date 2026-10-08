@@ -88,8 +88,15 @@ class GardenApp extends StatelessWidget {
                                   ),
                                   child: ErrorNotice(
                                     message: controller.error!,
-                                    onDismiss: () =>
-                                        controller.navigate(controller.page),
+                                    dismissLabel: controller.sessionExpired
+                                        ? 'Sign in'
+                                        : 'OK',
+                                    canDismiss: !controller.sessionExpired,
+                                    onDismiss: controller.sessionExpired
+                                        ? controller.acknowledgeSessionExpiry
+                                        : () => controller.navigate(
+                                            controller.page,
+                                          ),
                                   ),
                                 ),
                               Expanded(

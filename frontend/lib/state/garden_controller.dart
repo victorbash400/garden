@@ -1,6 +1,10 @@
 import 'dart:async';
 
+import 'package:garden_client/garden_client.dart'
+    show ServerpodClientUnauthorized;
+
 import '../services/chat_gateway.dart';
+import '../services/session_gateway.dart';
 import '../services/inbox_service.dart';
 import 'inbox_controller.dart';
 
@@ -79,6 +83,13 @@ class GardenController extends ChangeNotifier {
         onAccessChanged: () => unawaited(_refreshDriveAccess()),
       );
       notifications!.addListener(notifyListeners);
+    }
+    if (gateway is SessionGateway) {
+      _sessionEvents = (gateway as SessionGateway).sessionExpired.listen((_) {
+        if (!_changingDriveAccess && account != null) {
+          _sessionCleanup = _expireSession();
+        }
+      });
     }
     accountWindow?.prepareRelaunch = _prepareRelaunch;
     if (gateway is RelaunchSessionGateway) {
@@ -599,25 +610,64 @@ class GardenController extends ChangeNotifier {
       } else {
         await gateway.signOut();
       }
-      account = null;
-      setupVisible = false;
-      ActivityLog.instance.account = null;
-      gardens = [];
-      selected = null;
-      finderStatus = const FinderStatus();
-      finderSyncing = false;
-      finderIssue = null;
-      serviceAvailable = false;
-      registrationPassword = '';
-      registrationId = null;
-      savedEmail = null;
-      page = GardenPage.signIn;
+      _clearAccount();
     } catch (_) {
       final current = account;
       if (current != null) await accountWindow?.setAccount(current);
       rethrow;
     } finally {
       _changingDriveAccess = false;
+    }
+  }
+
+  StreamSubscription<void>? _sessionEvents;
+  Future<void>? _sessionCleanup;
+  bool sessionExpired = false;
+
+  void acknowledgeSessionExpiry() {
+    sessionExpired = false;
+    error = null;
+    page = GardenPage.signIn;
+    notifyListeners();
+  }
+
+  void _clearAccount() {
+    account = null;
+    setupVisible = false;
+    ActivityLog.instance.account = null;
+    gardens = [];
+    selected = null;
+    finderStatus = const FinderStatus();
+    finderSyncing = false;
+    finderIssue = null;
+    serviceAvailable = false;
+    registrationPassword = '';
+    registrationId = null;
+    savedEmail = null;
+    page = GardenPage.signIn;
+  }
+
+  Future<void> _expireSession() async {
+    final expired = account!;
+    _accessGeneration++;
+    _changingDriveAccess = true;
+    _clearAccount();
+    sessionExpired = true;
+    error = 'Please sign in again to continue.';
+    notifyListeners();
+    try {
+      await files?.close();
+      await inbox?.close();
+      await notifications?.close();
+      await finderUpdates?.close();
+      await _finderWork;
+      final disconnect = await accountWindow?.releaseAccount() ?? true;
+      if (disconnect) await finder?.signOut(expired);
+    } catch (failure) {
+      error = 'Please sign in again to continue. ${errorMessage(failure)}';
+    } finally {
+      _changingDriveAccess = false;
+      notifyListeners();
     }
   }
 
@@ -679,6 +729,7 @@ class GardenController extends ChangeNotifier {
   @override
   void dispose() {
     _accessGeneration++;
+    _sessionEvents?.cancel();
     notifications?.removeListener(notifyListeners);
     notifications?.dispose();
     inbox?.removeListener(notifyListeners);
@@ -698,9 +749,12 @@ class GardenController extends ChangeNotifier {
     error = null;
     notifyListeners();
     try {
+      await _sessionCleanup;
       await action();
     } catch (failure) {
-      error = errorMessage(failure);
+      if (failure is! ServerpodClientUnauthorized || !sessionExpired) {
+        error = errorMessage(failure);
+      }
     } finally {
       _busy = false;
       notifyListeners();

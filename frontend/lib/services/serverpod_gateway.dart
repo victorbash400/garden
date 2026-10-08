@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:garden_client/garden_client.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
 
 import '../model/account_info.dart';
 import 'username_gateway.dart';
+import 'session_gateway.dart';
+import 'authenticated_client.dart';
 import 'account_deletion_gateway.dart';
 import 'chat_gateway.dart';
 import '../model/garden_info.dart';
@@ -18,6 +22,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ServerpodGateway
     implements
         GardenGateway,
+        SessionGateway,
         AccountDeletionGateway,
         RelaunchSessionGateway,
         SharingGateway,
@@ -27,11 +32,11 @@ class ServerpodGateway
     this.serverUrl, {
     String windowId = 'main',
     this.relaunchSession,
-  }) : client = Client(serverUrl),
-       storage = SessionAuthStorage(serverUrl, windowId: windowId),
+  }) : storage = SessionAuthStorage(serverUrl, windowId: windowId),
        savedEmailKey = windowId == 'main'
            ? 'garden.savedEmail.$serverUrl'
            : 'garden.savedEmail.$serverUrl.$windowId' {
+    client = AuthenticatedClient(serverUrl, checkSession: _checkSession);
     client.authSessionManager = FlutterAuthSessionManager(storage: storage);
     client.connectivityMonitor = FlutterConnectivityMonitor();
   }
@@ -74,7 +79,39 @@ class ServerpodGateway
   }
 
   @override
-  final Client client;
+  late final Client client;
+  final _expired = StreamController<void>.broadcast(sync: true);
+  bool _checkingSession = false;
+  @override
+  Stream<void> get sessionExpired => _expired.stream;
+
+  Future<void> _checkSession() async {
+    if (_checkingSession || !client.auth.isAuthenticated) return;
+    _checkingSession = true;
+    try {
+      final result = await client.auth.refreshAuthKey(force: true);
+      if (result == RefreshAuthKeyResult.failedOther) {
+        throw StateError(
+          'Could not verify your session. Check your connection and try again.',
+        );
+      }
+      var valid = false;
+      if (result != RefreshAuthKeyResult.failedUnauthorized) {
+        try {
+          valid = await client.modules.serverpod_auth_core.status.isSignedIn();
+        } on ServerpodClientUnauthorized {
+          valid = false;
+        }
+      }
+      if (valid) return;
+      await forgetSavedLogin();
+      await client.auth.updateSignedInUser(null);
+      _expired.add(null);
+    } finally {
+      _checkingSession = false;
+    }
+  }
+
   final SessionAuthStorage storage;
   final String savedEmailKey;
   String get touchIdKey => '$savedEmailKey.touchId';
@@ -235,5 +272,6 @@ class ServerpodGateway
   void dispose() {
     client.connectivityMonitor?.dispose();
     client.close();
+    _expired.close();
   }
 }
