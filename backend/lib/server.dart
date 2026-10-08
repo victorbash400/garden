@@ -38,6 +38,7 @@ void run(List<String> args) async {
 
   // Start the server.
   await pod.start();
+  await seedJudgeDemoAccount(pod);
   if (Platform.environment['GARDEN_SEED_DEMO'] == 'true') {
     await seedDemoAccount(pod);
   }
