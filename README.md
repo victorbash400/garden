@@ -29,6 +29,8 @@ A shared drive keeps the working files in one location while teammates use their
 
 ## Architecture
 
+See [architecture.md](architecture.md) for the complete system diagrams, Serverpod feature map and implementation flows.
+
 ```mermaid
 flowchart TD
     Flutter[Flutter macOS app] --> Client[Generated Serverpod Dart client]
