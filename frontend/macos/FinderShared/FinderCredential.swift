@@ -16,6 +16,13 @@ enum FinderCredentialStore {
   private static let service = "Garden Finder"
 
   static func read(_ domainID: String) throws -> FinderCredential {
+    #if GARDEN_MANUAL_INSTALL
+    let path = try localURL(domainID)
+    guard FileManager.default.fileExists(atPath: path.path) else {
+      throw FinderCredentialError.keychain(errSecItemNotFound)
+    }
+    return try JSONDecoder().decode(FinderCredential.self, from: Data(contentsOf: path))
+    #else
     var query = baseQuery(domainID)
     query[kSecReturnData as String] = true
     query[kSecMatchLimit as String] = kSecMatchLimitOne
@@ -25,10 +32,16 @@ enum FinderCredentialStore {
       throw FinderCredentialError.keychain(status)
     }
     return try JSONDecoder().decode(FinderCredential.self, from: data)
+    #endif
   }
 
   static func save(_ credential: FinderCredential, domainID: String) throws {
     let data = try JSONEncoder().encode(credential)
+    #if GARDEN_MANUAL_INSTALL
+    let path = try localURL(domainID)
+    try data.write(to: path, options: .atomic)
+    try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: path.path)
+    #else
     let query = baseQuery(domainID)
     let status = SecItemUpdate(
       query as CFDictionary,
@@ -45,14 +58,45 @@ enum FinderCredentialStore {
     guard addStatus == errSecSuccess else {
       throw FinderCredentialError.keychain(addStatus)
     }
+    #endif
   }
 
   static func remove(_ domainID: String) throws {
+    #if GARDEN_MANUAL_INSTALL
+    let path = try localURL(domainID)
+    if FileManager.default.fileExists(atPath: path.path) {
+      try FileManager.default.removeItem(at: path)
+    }
+    #else
     let status = SecItemDelete(baseQuery(domainID) as CFDictionary)
     guard status == errSecSuccess || status == errSecItemNotFound else {
       throw FinderCredentialError.keychain(status)
     }
+    #endif
   }
+
+  #if GARDEN_MANUAL_INSTALL
+  private static func localURL(_ domainID: String) throws -> URL {
+    guard !domainID.isEmpty, domainID.utf8.count <= 120 else { throw POSIXError(.EINVAL) }
+    let root = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+      .appendingPathComponent("GardenRemote/Connections", isDirectory: true)
+    try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true,
+      attributes: [.posixPermissions: 0o700])
+    let attributes = try FileManager.default.attributesOfItem(atPath: root.path)
+    guard attributes[.type] as? FileAttributeType == .typeDirectory,
+      attributes[.ownerAccountID] as? UInt32 == getuid() else { throw POSIXError(.EACCES) }
+    try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: root.path)
+    let filename = domainID.utf8.map { String(format: "%02x", $0) }.joined()
+    let path = root.appendingPathComponent(filename + ".json")
+    if FileManager.default.fileExists(atPath: path.path) {
+      let item = try FileManager.default.attributesOfItem(atPath: path.path)
+      guard item[.type] as? FileAttributeType == .typeRegular,
+        item[.ownerAccountID] as? UInt32 == getuid() else { throw POSIXError(.EACCES) }
+      try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: path.path)
+    }
+    return path
+  }
+  #endif
 
   private static func baseQuery(_ domainID: String) -> [String: Any] {
     let authentication = LAContext()

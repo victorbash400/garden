@@ -8,10 +8,10 @@ Garden judge setup
    Only approve the app obtained from this repository's release.
    Apple instructions: https://support.apple.com/102445
 
-   Manual approval does not remove development provisioning restrictions.
-   A release restricted to registered development devices cannot be used
-   on an unregistered Mac. Use the judge distribution asset, not a local
-   development build.
+   Use the judge download, which does not require registering your Mac with
+   Apple Developer. You do not need Flutter, Xcode, or a local backend.
+   Finder sessions are stored in a private local file for this judge build;
+   software running as your macOS user can access it. Sign out when finished.
 
 3. Create an account with your email and enter the verification code.
    If demo credentials were provided, sign in with those instead.
