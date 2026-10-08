@@ -39,8 +39,9 @@ Future<void> _createAccount(
             email: email,
             transaction: transaction,
           ) !=
-          null)
+          null) {
         return;
+      }
       final user = await auth.authUsers.create(
         session,
         transaction: transaction,
