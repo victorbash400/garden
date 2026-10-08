@@ -20,7 +20,8 @@ Garden judge setup
 4. After creating an account, follow the setup modal. It can also be reopened
    in Settings > Account > Open setup.
 
-5. Finder drives require macFUSE: https://macfuse.github.io/
+5. Finder drives require macOS 15.4 or later and macFUSE:
+   https://macfuse.github.io/
    Install macFUSE and approve its File System Extension in System Settings >
    General > Login Items & Extensions. Allow Garden background activity there.
    Follow macFUSE's own version and compatibility requirements.

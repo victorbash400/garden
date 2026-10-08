@@ -14,7 +14,8 @@ class FinderPermissionStep extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       const Text(
-        'Finder drives require macFUSE. Install it, then approve macFUSE '
+        'Finder drives require macOS 15.4 or later and macFUSE. '
+        'Install macFUSE, then approve it '
         'in System Settings → General → Login Items & Extensions → '
         'File System Extensions. Allow Garden background activity there too.',
       ),

@@ -55,8 +55,9 @@ enum NativeSetupBridge {
 
   static func status() -> [String: Any] {
     let helper = Bundle.main.bundleURL.appendingPathComponent("Contents/Helpers/GardenRemote.app")
-    let available = Bundle(url: helper)?.bundleIdentifier == "com.victorbash.garden.remote"
+    var available = Bundle(url: helper)?.bundleIdentifier == "com.victorbash.garden.remote"
       && FileManager.default.fileExists(atPath: "/Library/Filesystems/macfuse.fs")
+    if #unavailable(macOS 15.4) { available = false }
     var login = "unsupported"
     if #available(macOS 13.0, *) {
       switch SMAppService.mainApp.status {

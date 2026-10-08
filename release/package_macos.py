@@ -15,6 +15,12 @@ def validate_app(app):
         info = plistlib.load(source)
     if info.get('CFBundleIdentifier') != 'com.victorbash.garden':
         raise ValueError('Expected a Garden application bundle.')
+    helper = app / 'Contents/Helpers/GardenRemote.app/Contents/Info.plist'
+    if not helper.is_file():
+        raise ValueError('The Garden Finder helper is missing from the app.')
+    with helper.open('rb') as source:
+        if plistlib.load(source).get('CFBundleIdentifier') != 'com.victorbash.garden.remote':
+            raise ValueError('The app contains an unexpected Finder helper.')
     run('codesign', '--verify', '--deep', '--strict', str(app))
     for profile in app.rglob('embedded.provisionprofile'):
         data = plistlib.loads(run('security', 'cms', '-D', '-i', str(profile)).stdout)
