@@ -24,13 +24,13 @@ Both clients use the same backend metadata and permissions. A rename in Finder a
 
 Storage implementation
 
-Applications do not necessarily read a file from beginning to end. They seek to headers, indexes and specific regions, then revisit data during playback or editing. Downloading the entire object for each of those operations would turn filesystem access into a sequence of large transfers.
+Applications seek to headers, indexes and specific file regions, then revisit data during playback or editing. Garden serves those operations through byte-range reads, connecting the application’s file offsets to the corresponding cloud content.
 
-Garden translates reads into byte-range requests. Its cache reuses fetched ranges, combines concurrent requests for the same data and adjusts read windows to the access pattern. Cached data is associated with a file version so it is not reused as content from a newer version. A configurable disk limit bounds the read cache rather than requiring the whole drive to fit locally.
+The cache reuses fetched ranges, combines concurrent requests for the same data and adjusts read windows to the access pattern. Version-specific cache entries keep reads associated with the correct file content. Users control local read-cache storage through a configurable disk limit.
 
-Filesystem writes and cloud uploads finish on different timescales. Garden persists writes in a local SQLite journal before publishing them, retaining pending edits across interruptions. The publisher starts from a base file version, uploads changed regions and copies eligible unchanged multipart regions within S3. Resuming an upload checks the parts already present instead of restarting every transfer.
+Garden persists writes in a local SQLite journal and publishes them to cloud storage, preserving pending edits across interruptions. The publisher starts from a base file version, uploads changed regions and copies eligible unchanged multipart regions within S3. Resuming an upload checks the parts already present instead of restarting every transfer.
 
-Serverpod validates the completed upload before committing a new file version. Incomplete uploads remain separate from the visible committed version. If another writer has changed the base version, Garden preserves the competing edit as a conflict copy. Each filesystem mutation also carries an operation ID, allowing Serverpod to return a recorded result when a request is retried after its response was lost.
+Serverpod validates the completed upload before committing a new file version. Version commits make completed content available to the drive. Competing edits are preserved as separate conflict copies. Each filesystem mutation also carries an operation ID, allowing Serverpod to return a recorded result when a request is retried after its response was lost.
 
 https://github.com/victorbash400/garden/blob/main/backend/lib/src/files/content_endpoint.dart
 
@@ -48,8 +48,8 @@ https://github.com/victorbash400/garden/blob/main/backend/lib/src/files/drive_jo
 
 Lessons learnt
 
-Application read patterns mattered as much as network throughput. Small, repeated filesystem reads could trigger excessive cloud transfers even when the application used only part of a file. Tracing those requests led us to narrower read-ahead windows, shared in-flight fetches and aggregate cache storage. On the same captured 49,864-read MP4 trace, aggregate storage reduced replay time from 283.47 to 183.69 seconds with identical returned data and remote bytes, a 35.2% reduction in that comparison.
+Tracing real application reads guided the cache design. Read-ahead windows, shared in-flight fetches and aggregate cache storage were tuned around repeated reads and seeks. Aggregate cache storage reduced replay time by 35.2% on a captured 49,864-read MP4 workload, with identical returned data and remote bytes.
 
-Reading quickly was only one part of making the drive usable. Editing introduced partial writes, retries and competing versions. Persisting writes before publication and committing versions through Serverpod made those transitions explicit, rather than treating a completed local save as a completed cloud upload.
+Reliable editing required coordinating local persistence with cloud publication. The SQLite write journal retains edits, while Serverpod transactions coordinate committed versions and change events. Operation receipts and resumable uploads make repeated requests part of the same save operation.
 
-End-to-end checks also exposed problems that isolated reads could not: mount lifecycle, project reopening and file integrity after export. We checked the rendered media against an independent cloud download and reopened the saved Resolve project after remounting. Building around those complete operations gave us a more useful measure of the filesystem than transfer speed alone.
+Testing complete workflows shaped the implementation across mounting, editing, export and reopening. Rendered media was verified against an independent cloud download, and saved Resolve projects reopened after remounting with their media paths intact. These checks connected filesystem performance to the work applications actually perform.
