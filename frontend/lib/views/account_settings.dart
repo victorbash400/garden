@@ -5,6 +5,7 @@ import '../components/settings/username_control.dart';
 import '../components/settings/account_security_controls.dart';
 import '../components/settings/settings_row.dart';
 import '../components/settings/settings_action_row.dart';
+import '../components/settings/setup_checklist.dart';
 import '../state/garden_controller.dart';
 
 class AccountSettings extends StatelessWidget {
@@ -13,6 +14,8 @@ class AccountSettings extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(
     children: [
+      SetupChecklist(controller: controller),
+      const SizedBox(height: 20),
       if (controller.security != null) ...[
         AccountSecurityControls(
           controller: controller.security!,
