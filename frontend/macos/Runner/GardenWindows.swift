@@ -42,6 +42,22 @@ import Cocoa
         result(FlutterError(code: "window", message: "Account window is closed.", details: nil)); return
       }
       switch call.method {
+      case "appearance":
+        guard let value = call.arguments as? [String: Any],
+              let color = value["color"] as? NSNumber,
+              let dark = value["dark"] as? Bool,
+              color.int64Value >= 0, color.int64Value <= 0xFFFFFFFF else {
+          result(FlutterError(code: "appearance", message: "Invalid window appearance.", details: nil)); return
+        }
+        let argb = color.uint32Value
+        window.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
+        window.titlebarAppearsTransparent = true
+        window.backgroundColor = NSColor(
+          srgbRed: CGFloat((argb >> 16) & 0xFF) / 255,
+          green: CGFloat((argb >> 8) & 0xFF) / 255,
+          blue: CGFloat(argb & 0xFF) / 255,
+          alpha: 1)
+        result(nil)
       case "initialize": result(["id": slot, "active": window.isMainWindow, "windows": list(), "build": GardenBuildUpdates.state, "session": sessions.removeValue(forKey: slot) ?? NSNull(), "sessionError": sessions["error"] ?? NSNull()])
       case "ready":
         if let state = restored.removeValue(forKey: slot), let frame = state["frame"] as? String {

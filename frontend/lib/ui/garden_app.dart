@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../views/inbox_view.dart';
 import '../components/setup/setup_modal.dart';
+import '../components/window_appearance.dart';
 
 import '../services/chat_gateway.dart';
 import '../services/sharing/drive_sharing_service.dart';
@@ -54,6 +55,11 @@ class GardenApp extends StatelessWidget {
           ? controller.appearance?.mode ?? ThemeMode.light
           : ThemeMode.light,
       themeAnimationDuration: Duration.zero,
+      builder: (context, child) => WindowAppearance(
+        window: controller.accountWindow,
+        onError: controller.reportError,
+        child: child!,
+      ),
       home: GardenMenuBar(
         controller: controller,
         child: FinderStatusObserver(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../components/account_card.dart';
-
+import '../components/sign_in_surface.dart';
 import '../components/garden_field.dart';
 import '../components/passkey_sign_in_button.dart';
 import '../state/account_security_controller.dart';
@@ -76,15 +75,16 @@ class _AccountFormState extends State<AccountForm> {
     child: SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: AutofillGroup(
-        child: AccountCard(
-          child: SizedBox(
-            width: 340,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 396),
+          child: SignInSurface(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (widget.savedEmail != null) ...[
                   SavedLoginButton(
+                    onDark: true,
                     email: widget.savedEmail!,
                     touchId: widget.security?.touchId ?? false,
                     onContinue: widget.busy ? null : widget.onContinueSaved,
@@ -93,6 +93,7 @@ class _AccountFormState extends State<AccountForm> {
                   const SizedBox(height: 20),
                 ],
                 GardenField(
+                  onDark: true,
                   label: widget.isRegistration ? 'Email' : 'Email or username',
                   autofillHints: const [
                     AutofillHints.username,
@@ -107,6 +108,7 @@ class _AccountFormState extends State<AccountForm> {
                 ),
                 const SizedBox(height: 20),
                 GardenField(
+                  onDark: true,
                   label: 'Password',
                   autofillHints: [
                     widget.isRegistration
@@ -121,6 +123,7 @@ class _AccountFormState extends State<AccountForm> {
                 if (widget.showDemo || widget.onCreateAccount != null) ...[
                   const SizedBox(height: 12),
                   AccountFormLinks(
+                    onDark: true,
                     showDemo: widget.showDemo,
                     onFillDemo: widget.busy ? null : fillDemo,
                     onCreateAccount: widget.busy
@@ -131,12 +134,15 @@ class _AccountFormState extends State<AccountForm> {
                 ],
                 const SizedBox(height: 24),
                 GardenButton(
+                  onDark: true,
+                  disabledBackgroundColor: const Color(0xFFE0E6DA),
                   label: widget.busy ? 'Please wait' : widget.submitLabel,
                   onPressed: canSubmit ? submit : null,
                 ),
                 if (widget.onPasskey != null) ...[
                   const SizedBox(height: 12),
                   PasskeySignInButton(
+                    onDark: true,
                     security: widget.security!,
                     busy: widget.busy,
                     onPressed: widget.onPasskey!,
@@ -145,8 +151,9 @@ class _AccountFormState extends State<AccountForm> {
                 if (widget.onBack != null) ...[
                   const SizedBox(height: 12),
                   GardenButton(
+                    onDark: true,
+                    disabledBackgroundColor: const Color(0xFFE0E6DA),
                     label: 'Back',
-                    secondary: true,
                     onPressed: widget.busy ? null : widget.onBack,
                   ),
                 ],

@@ -21,7 +21,10 @@ class ProfileButton extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 12),
       child: Material(
         color: GardenColors.of(context).hover,
-        borderRadius: BorderRadius.circular(20),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(color: GardenColors.of(context).sidebarBorder),
+        ),
         child: PopupMenuButton<String>(
           tooltip: 'Account menu',
           popUpAnimationStyle: AnimationStyle.noAnimation,
@@ -31,7 +34,7 @@ class ProfileButton extends StatelessWidget {
             0,
             -(36.0 * (controller.accountWindow == null ? 5 : 6) + 16),
           ),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(18),
           constraints: BoxConstraints(minWidth: 216, maxWidth: 300),
           color: GardenColors.of(context).panel,
           surfaceTintColor: Colors.transparent,
@@ -117,43 +120,17 @@ class ProfileButton extends StatelessWidget {
           ],
           child: Semantics(
             button: true,
-            label: 'Account menu',
-            child: SizedBox(
-              height: 40,
-              child: Ink(
-                padding: EdgeInsets.symmetric(horizontal: 10),
-                decoration: BoxDecoration(
-                  color: GardenColors.of(context).hover,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 12,
-                      backgroundColor: GardenColors.of(context).hover,
-                      child: Text(
-                        name.isEmpty
-                            ? '?'
-                            : name.characters.first.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: GardenColors.of(context).ink,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
+            label: 'Account menu for $name',
+            child: SizedBox.square(
+              dimension: 36,
+              child: Center(
+                child: Text(
+                  name.isEmpty ? '?' : name.characters.first.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: GardenColors.of(context).ink,
+                  ),
                 ),
               ),
             ),

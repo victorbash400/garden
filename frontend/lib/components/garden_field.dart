@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../ui/garden_theme.dart';
+import '../ui/garden_colors.dart';
 import 'password_visibility_button.dart';
+import 'sign_in_field_icon.dart';
+import 'sign_in_field_surface.dart';
 
 class GardenField extends StatefulWidget {
   const GardenField({
@@ -9,6 +11,7 @@ class GardenField extends StatefulWidget {
     required this.label,
     required this.controller,
     this.obscure = false,
+    this.onDark = false,
     this.enabled = true,
     this.autofocus = false,
     this.onSubmitted,
@@ -18,6 +21,7 @@ class GardenField extends StatefulWidget {
   final String label;
   final TextEditingController controller;
   final bool obscure;
+  final bool onDark;
   final bool enabled;
   final bool autofocus;
   final ValueChanged<String>? onSubmitted;
@@ -43,48 +47,84 @@ class _GardenFieldState extends State<GardenField> {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(
-        widget.label,
-        style: const TextStyle(fontSize: 12, color: GardenTheme.secondary),
-      ),
-      const SizedBox(height: 8),
-      TextField(
-        controller: widget.controller,
-        autofillHints: widget.autofillHints,
-        obscureText: widget.obscure && !passwordVisible,
-        autocorrect: !widget.obscure,
-        enableSuggestions: !widget.obscure,
-        enabled: widget.enabled,
-        autofocus: widget.autofocus,
-        onSubmitted: widget.onSubmitted,
-        keyboardType: widget.keyboardType,
-        decoration: InputDecoration(
-          suffixIcon: widget.obscure
-              ? PasswordVisibilityButton(
-                  visible: passwordVisible,
-                  onPressed: widget.enabled
-                      ? () => setState(() => passwordVisible = !passwordVisible)
-                      : null,
-                )
+      if (!widget.onDark)
+        Text(
+          widget.label,
+          style: TextStyle(
+            fontSize: 12,
+            color: GardenColors.of(context).secondary,
+          ),
+        ),
+      if (!widget.onDark) const SizedBox(height: 8),
+      SignInFieldSurface(
+        enabled: widget.onDark,
+        child: TextField(
+          controller: widget.controller,
+          autofillHints: widget.autofillHints,
+          obscureText: widget.obscure && !passwordVisible,
+          autocorrect: !widget.obscure,
+          enableSuggestions: !widget.obscure,
+          enabled: widget.enabled,
+          autofocus: widget.autofocus,
+          onSubmitted: widget.onSubmitted,
+          keyboardType: widget.keyboardType,
+          style: widget.onDark
+              ? const TextStyle(color: Color(0xFFF2F5EE), fontSize: 14)
               : null,
-          isDense: true,
-          filled: true,
-          fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 14,
-            vertical: 14,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFFDADADD)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFFDADADD)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: GardenTheme.blue),
+          cursorColor: widget.onDark ? const Color(0xFFE7ECE1) : null,
+          decoration: InputDecoration(
+            hintText: widget.onDark ? widget.label : null,
+            hintStyle: widget.onDark
+                ? const TextStyle(color: Color(0xFFD4DCCE), fontSize: 14)
+                : null,
+            prefixIcon: widget.onDark
+                ? SignInFieldIcon(password: widget.obscure)
+                : null,
+            suffixIcon: widget.obscure
+                ? PasswordVisibilityButton(
+                    visible: passwordVisible,
+                    color: widget.onDark
+                        ? const Color(0xFFD4DCCE)
+                        : GardenColors.of(context).secondary,
+                    onPressed: widget.enabled
+                        ? () =>
+                              setState(() => passwordVisible = !passwordVisible)
+                        : null,
+                  )
+                : null,
+            isDense: true,
+            filled: true,
+            fillColor: widget.onDark
+                ? const Color(0x506A7567)
+                : GardenColors.of(context).panel,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: widget.onDark ? 19 : 14,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(widget.onDark ? 30 : 10),
+              borderSide: BorderSide(
+                color: widget.onDark
+                    ? const Color(0x508E9B87)
+                    : GardenColors.of(context).border,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(widget.onDark ? 30 : 10),
+              borderSide: BorderSide(
+                color: widget.onDark
+                    ? const Color(0x508E9B87)
+                    : GardenColors.of(context).border,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(widget.onDark ? 30 : 10),
+              borderSide: BorderSide(
+                color: widget.onDark
+                    ? const Color(0xFFBFCCB6)
+                    : GardenColors.of(context).accent,
+              ),
+            ),
           ),
         ),
       ),

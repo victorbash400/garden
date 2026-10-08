@@ -8,10 +8,12 @@ class AccountFormLinks extends StatelessWidget {
     required this.showDemo,
     required this.showCreateAccount,
     this.onFillDemo,
+    this.onDark = false,
     this.onCreateAccount,
   });
 
   final bool showDemo;
+  final bool onDark;
   final bool showCreateAccount;
   final VoidCallback? onFillDemo;
   final VoidCallback? onCreateAccount;
@@ -22,7 +24,7 @@ class AccountFormLinks extends StatelessWidget {
     spacing: 12,
     runSpacing: 8,
     children: [
-      if (showDemo) DemoAccountButton(onFill: onFillDemo),
+      if (showDemo) DemoAccountButton(onFill: onFillDemo, onDark: onDark),
       if (showCreateAccount)
         TextButton(
           onPressed: onCreateAccount,

@@ -59,7 +59,14 @@ void main() {
       await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
       expect(controller.account!.username, 'my_username');
+      expect(find.text('M'), findsOneWidget);
+      expect(find.text('my_username'), findsNothing);
+      await tester.tap(find.byType(ProfileButton));
+      await tester.pumpAndSettle();
       expect(find.text('my_username'), findsOneWidget);
+      await tester.tap(find.text('Settings'));
+      await tester.pumpAndSettle();
+      expect(controller.page, GardenPage.settings);
       expect(find.text('private@example.com'), findsNothing);
       gateway.reject = true;
       await tester.tap(find.text('Edit username'));

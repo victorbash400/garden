@@ -7,6 +7,7 @@ import '../state/garden_controller.dart';
 import 'drive_folder_branch.dart';
 import 'tree_row.dart';
 import 'sidebar_item.dart';
+import 'lucide_icon.dart';
 import 'drive_section_header.dart';
 import 'drive_row_actions.dart';
 import 'files/node_drag_surface.dart';
@@ -28,14 +29,14 @@ class _SidebarDrivesState extends State<SidebarDrives> {
       children: [
         SidebarItem(
           label: 'Home',
-          icon: SystemIcons.house,
+          icon: const LucideIcon(LucideIcons.house, size: 20),
           selected: controller.page == GardenPage.gardens,
           onTap: () => controller.navigate(GardenPage.gardens),
         ),
         if (controller.inbox != null)
           SidebarItem(
             label: 'Inbox',
-            icon: SystemIcons.inbox,
+            icon: const LucideIcon(LucideIcons.inbox, size: 20),
             badge: controller.inbox!.unread,
             selected: controller.page == GardenPage.inbox,
             onTap: controller.openInbox,

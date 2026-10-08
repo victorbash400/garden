@@ -17,7 +17,8 @@ class SidebarAccountFooter extends StatelessWidget {
         BuildUpdateBanner(window: controller.accountWindow!),
       Row(
         children: [
-          Expanded(child: ProfileButton(controller: controller)),
+          ProfileButton(controller: controller),
+          const Spacer(),
           if (controller.account != null && controller.notifications != null)
             Padding(
               padding: const EdgeInsets.only(right: 12),

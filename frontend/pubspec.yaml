@@ -30,11 +30,12 @@ flutter:
   uses-material-design: true
   assets:
     - assets/icons/
-    - assets/auth-background.webp
+    - assets/garden-moss.webp
     - assets/garden.svg
     - assets/activity.svg
     - assets/folder-closed.svg
     - assets/folder-open.svg
+    - assets/document.svg
   fonts:
     - family: GoogleSans
       fonts:

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../components/account_card.dart';
-
 import '../components/garden_button.dart';
 import '../components/verification_code_input.dart';
 import '../state/garden_controller.dart';
@@ -40,9 +39,9 @@ class _VerificationViewState extends State<VerificationView> {
   Widget build(BuildContext context) => Center(
     child: SingleChildScrollView(
       padding: const EdgeInsets.all(24),
-      child: AccountCard(
-        child: SizedBox(
-          width: 380,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 436),
+        child: AccountCard(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,

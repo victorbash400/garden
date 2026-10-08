@@ -1,4 +1,5 @@
 import 'system_icon.dart';
+
 import 'package:flutter/material.dart';
 
 import 'garden_button.dart';
@@ -6,6 +7,7 @@ import 'garden_button.dart';
 class SavedLoginButton extends StatelessWidget {
   const SavedLoginButton({
     super.key,
+    this.onDark = false,
     required this.email,
     this.touchId = false,
     required this.onContinue,
@@ -15,6 +17,7 @@ class SavedLoginButton extends StatelessWidget {
   final String email;
   final VoidCallback? onContinue;
   final VoidCallback? onForget;
+  final bool onDark;
   @override
   Widget build(BuildContext context) => Row(
     children: [
@@ -22,6 +25,7 @@ class SavedLoginButton extends StatelessWidget {
         child: GardenButton(
           label: touchId ? 'Use Touch ID · $email' : 'Continue as $email',
           secondary: true,
+          onDark: onDark,
           onPressed: onContinue,
         ),
       ),

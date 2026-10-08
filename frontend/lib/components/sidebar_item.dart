@@ -1,5 +1,3 @@
-import 'system_icon.dart';
-
 import 'package:flutter/material.dart';
 
 import '../ui/garden_colors.dart';
@@ -14,7 +12,7 @@ class SidebarItem extends StatelessWidget {
     this.badge = 0,
   });
   final int badge;
-  final SystemIcons icon;
+  final Widget icon;
   final String label;
   final bool selected;
   final VoidCallback? onTap;
@@ -31,7 +29,7 @@ class SidebarItem extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 10, vertical: 7),
           child: Row(
             children: [
-              SystemIcon(icon, size: 16),
+              icon,
               SizedBox(width: 9),
               Expanded(
                 child: Text(

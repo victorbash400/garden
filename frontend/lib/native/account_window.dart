@@ -67,6 +67,12 @@ class AccountWindow extends ChangeNotifier {
 
   Future<void> ready() => channel.invokeMethod<void>('ready');
 
+  Future<void> setAppearance(Color color, Brightness brightness) =>
+      channel.invokeMethod<void>('appearance', {
+        'color': color.toARGB32(),
+        'dark': brightness == Brightness.dark,
+      });
+
   Future<void> relaunch() async {
     try {
       await channel.invokeMethod<void>('relaunch');
