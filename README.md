@@ -7,15 +7,15 @@
 [![AWS S3](https://img.shields.io/badge/File_storage-AWS_S3-569A31)](backend/lib/src/files/file_storage.dart)
 [![macOS preview](https://img.shields.io/badge/Download-macOS_preview-2D2D2B?logo=apple&logoColor=white)](https://github.com/victorbash400/garden/releases/tag/v0.1.0-preview.2)
 
-Cloud storage becomes expensive when the same work has to live in several places. A video project moves between an editor, local disks, a cloud subscription and a shared team folder. Each move adds another copy, another download and another question about which file is current. Object storage from services such as AWS and Google Cloud offers another way to store the bytes, but a bucket alone is not a drive that applications can use.
+Garden is a remote filesystem for working directly with cloud storage. It mounts as a drive on your Mac, so you can open, edit and save files from the applications you already use.
 
-**Garden makes the cloud drive a working location.** Create a personal or shared drive, open it in Finder, edit with your usual applications and save directly to that drive. Garden handles the file reads, cloud publication, permissions and updates between collaborators.
+Downloading remote files before using them consumes local disk space and makes access depend on transfer completion. Garden streams the byte ranges an application requests and keeps a bounded local cache. Files remain in cloud storage; saving to the mounted drive publishes your changes back to it.
 
-Built with **Flutter and Serverpod**, Garden starts on **macOS**. Serverpod Cloud hosts the backend and PostgreSQL application data; private AWS S3 holds file content. Additional platforms and user-connected storage providers are planned.
+You can access your drives from another Mac by signing in, or share a drive with your team. Members access the same files through their own accounts, with permissions controlling who can read, edit and manage the drive. Conversations and file references are available alongside the shared files.
 
 ![Garden home with personal drives and invitations](screenshots/drives.png)
 
-## From stored files to working files
+## Using Garden
 
 Garden's Flutter app provides drive management, a file browser, uploads, downloads, storage controls and an Inbox. Its native Swift helper mounts the same drives through macFUSE's FSKit backend. Finder, DaVinci Resolve, Preview and other desktop applications access ordinary filesystem paths while Garden retrieves and publishes cloud data underneath.
 
@@ -45,7 +45,9 @@ flowchart TD
     Mount --> Local[(SQLite write journal / bounded range cache)]
 ```
 
-Serverpod owns **metadata and messaging**, not just login. PostgreSQL persists its generated models; S3 stores the file bytes. Both Flutter and the filesystem helper use the same authorization and file lifecycle, so an operation performed in Finder is visible to the application and other authorized clients.
+The macOS application is built with Flutter and a Swift filesystem helper. The backend runs on Serverpod Cloud, with PostgreSQL for application data and private AWS S3 for file content.
+
+Serverpod manages **accounts, metadata, permissions, versions and messages**. PostgreSQL persists its generated models; S3 stores the file bytes. Both Flutter and the filesystem helper use the same authorization and file lifecycle, so an operation performed in Finder is visible to the application and other authorized clients.
 
 ### Typed models, database integrity and generated clients
 
@@ -252,3 +254,7 @@ dart test
 Tests cover [email-bound invitation acceptance](backend/test/integration/drive_invitations_test.dart), [membership changes](backend/test/integration/drive_members_test.dart), [sharing events](backend/test/integration/sharing_events_test.dart), [filesystem mutations](backend/test/integration/filesystem_test.dart), [permissions](backend/test/integration/drive_permissions_test.dart), [account deletion](backend/test/integration/account_deletion_test.dart), [bounded reads](backend/test/unit/bounded_range_reads_test.dart) and [multipart copying](backend/test/unit/multipart_copy_test.dart). Native [write publisher](frontend/macos/RemoteDriveTests/WritePublisherTests.swift) and [range cache](frontend/macos/RemoteDriveTests/RangeCacheTests.swift) tests exercise the mounted engine independently of Flutter.
 
 Live release checks include email verification, drive creation, native mounting, MP4/WAV/PNG/Markdown saves matched against cloud reads, and mount removal on logout. These complement the automated tests; UI test fixtures alone do not establish a working cloud roundtrip.
+
+## Platform and storage support
+
+The current application supports macOS and the hosted AWS S3 backend. Additional device platforms and user-connected storage providers are planned.

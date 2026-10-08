@@ -2,25 +2,21 @@
 
 ## Inspiration and problem
 
-A creative project rarely stays inside one application. Footage is opened in a video editor, images in a photo tool, documents in another app, and the finished work is sent to someone else. The files move with it: from a cloud folder to a local disk, into a project directory, then back to the cloud.
+Cloud storage gives you access to more capacity than your computer has, but working with remote files often still requires downloading them first or keeping a synchronized local copy. Your available disk space then limits what you can open and work on. Sharing the files also requires managing access and making changes available to the other people using them.
 
-That movement has a cost. Large media fills local storage, duplicate copies accumulate, and teams have to keep track of which version belongs where. Paying for more storage does not resolve the work involved in downloading, organizing, editing and uploading the same files again. Object storage from providers such as AWS and Google Cloud gives developers a place to put the bytes, but using those bytes as a working drive requires another layer.
-
-Garden grew from a practical question: **can the cloud folder itself be the place where the work happens?**
+Garden exposes remote storage as a filesystem, so you can open, edit and save files through your applications without synchronizing the entire drive to your computer. The filesystem retrieves data as it is requested and publishes changes when you save to the drive.
 
 ## Users
 
-Garden is for people whose files need to move between applications and collaborators: video editors, photographers, designers, developers and small teams. An editor needs source media and project files in a stable location. A photographer needs to open an image, save an edit and share the result. A team needs shared access without passing another archive around every time something changes.
-
-The longer-term aim is access from the devices a person owns, with a choice of cloud storage providers. The first implementation is a macOS application connected to a hosted backend and private AWS S3 storage. Other device platforms and user-connected providers are future work.
+Garden is for individuals and teams who need to work directly with remote files across applications. Personal drives provide a place to keep and use your files. Shared drives let collaborators access the same files through their own accounts, with separate read, edit and management permissions.
 
 ## Solution
 
-Garden turns cloud files into personal and shared drives. Users create a drive, invite collaborators, organize folders and open files through Garden or Finder. Their usual applications can read from and save to the mounted drive using ordinary filesystem paths.
+Garden is a remote filesystem that mounts cloud storage as a regular drive on your Mac. Create a drive, organize folders, open files in your applications and save back to the same drive. Garden streams requested byte ranges, manages its local cache and publishes file changes to cloud storage.
 
 ![Garden showing personal drives and invitations](screenshots/drives.png)
 
-The difference becomes visible while working, rather than while storing a file:
+The mounted filesystem changes how remote files are accessed:
 
 | Step | Upload/download workflow | Garden's mounted workflow |
 | --- | --- | --- |
@@ -73,6 +69,6 @@ The backend runs on Serverpod Cloud. The current production file provider is AWS
 
 ## Impact
 
-Garden makes cloud storage useful inside the tools people already use. The intended benefit is less manual file movement, fewer duplicate working copies and a shared location that remains meaningful across applications. A bounded cache gives users control over local disk use, while drive permissions and file-linked conversations keep access and discussion close to the work.
+Garden lets users open and save remote files through a mounted drive instead of managing a separate download and upload for each edit. The cache has a configurable disk limit. Shared drives provide access controls, and file-linked conversations let members discuss the files they are working on.
 
-The current preview demonstrates the complete path from email signup to a shared drive, native file access, cloud saves and safe logout. It is available as a [macOS download](https://github.com/victorbash400/garden/releases/tag/v0.1.0-preview.2), with an onboarding checklist and [installation instructions](release/INSTALL.txt). The next steps are broader media testing, more storage providers and access from additional device platforms. Storage-cost savings depend on provider pricing, transfers and usage; no universal cost reduction is claimed.
+The current preview demonstrates the complete path from email signup to a shared drive, native file access, cloud saves and safe logout. It is available as a [macOS download](https://github.com/victorbash400/garden/releases/tag/v0.1.0-preview.2), with an onboarding checklist and [installation instructions](release/INSTALL.txt). The next steps are broader media testing, more storage providers and access from additional device platforms.
