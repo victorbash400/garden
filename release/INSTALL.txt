@@ -28,3 +28,9 @@ Garden setup
 
 6. Create or join a drive, check connections, then open the drive in Finder.
    The account setup checklist shows whether the drive is connected.
+
+7. Account setup remains available in Settings > Account. To delete an account,
+   choose Delete account and confirm its email. This permanently removes drives
+   you own, their cloud files and your login. Shared drives you own are also
+   removed for their members. Files in drives owned by other people remain.
+   Your email can be used for a new account after deletion succeeds.

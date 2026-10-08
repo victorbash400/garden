@@ -39,7 +39,7 @@ def signing_team(bundle, manual_approval=False):
 
 def validate_manual_bundle(info, entitlements, has_profile):
     if info.get('GardenCredentialMode') != 'owner-file':
-        raise ValueError('Manual approval requires the local-session build flavor.')
+        raise ValueError('Manual approval requires local session storage.')
     if has_profile:
         raise ValueError('The manual-install app must not contain provisioning profiles.')
     for key in ('keychain-access-groups', 'com.apple.application-identifier',
