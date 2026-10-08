@@ -86,7 +86,7 @@ class GardenController extends ChangeNotifier {
     }
     if (gateway is SessionGateway) {
       _sessionEvents = (gateway as SessionGateway).sessionExpired.listen((_) {
-        if (!_changingDriveAccess && account != null) {
+        if (account != null && !sessionExpired) {
           _sessionCleanup = _expireSession();
         }
       });

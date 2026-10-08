@@ -31,6 +31,14 @@ class ExpiryFixture extends TestGateway implements SessionGateway {
   Stream<void> get sessionExpired => events.stream;
 }
 
+class RejectedDelete extends ExpiryFixture {
+  @override
+  Future<void> deleteDrive(int id) async {
+    events.add(null);
+    throw ServerpodClientUnauthorized();
+  }
+}
+
 class BusyFinder extends TestFinder {
   @override
   Future<void> signOut(account) async =>
@@ -174,6 +182,25 @@ void main() {
     await tester.pumpAndSettle();
     expect(dismissed, isTrue);
   });
+  test(
+    'auth rejection during drive deletion still expires the account',
+    () async {
+      final gateway = RejectedDelete();
+      final controller = GardenController(
+        gateway,
+        MemoryPreferences(),
+        finder: TestFinder(),
+      );
+      addTearDown(controller.dispose);
+      addTearDown(gateway.events.close);
+      await controller.signIn('fixture@example.test', 'fixture');
+      await controller.deleteDrive(await gateway.createGarden('Fixture'));
+      await Future<void>.delayed(Duration.zero);
+      expect(controller.account, isNull);
+      expect(controller.sessionExpired, isTrue);
+      expect(controller.page, GardenPage.signIn);
+    },
+  );
   test('busy Finder cannot leave an expired account active', () async {
     final gateway = ExpiryFixture();
     final controller = GardenController(
