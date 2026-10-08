@@ -2,9 +2,13 @@
 
 ## Inspiration and problem
 
-Cloud storage gives you access to more capacity than your computer has, but working with remote files often still requires downloading them first or keeping a synchronized local copy. Your available disk space then limits what you can open and work on. Sharing the files also requires managing access and making changes available to the other people using them.
+Creators, researchers and teams can work with datasets and file collections larger than the storage available on their computers. Downloading those files before opening them, or synchronizing a full folder locally, consumes disk space and delays access. Using several computers means maintaining more local copies or transferring the data again when you change devices.
 
-Garden exposes remote storage as a filesystem, so you can open, edit and save files through your applications without synchronizing the entire drive to your computer. The filesystem retrieves data as it is requested and publishes changes when you save to the drive.
+Expanding local storage adds cost and hardware to manage. [Rising NAND prices](https://www.sec.gov/Archives/edgar/data/723125/000072312526000015/mu-20260528.htm) also put pressure on storage costs. Cloud storage provides remote capacity, but access through uploads and downloads still leaves users managing local working copies. Teams also need control over who can read and edit the files, and a way to make saved changes available to other members.
+
+Garden is a remote filesystem that mounts cloud storage as a drive on your Mac. You can open, edit and save files directly from your applications, sign in on another Mac to access the same drives, and give collaborators access through their own accounts.
+
+Applications use ordinary file operations against the mounted drive. Garden streams the requested byte ranges, serves previously fetched data from its local cache and publishes saved changes to cloud storage. The cache has a configurable size limit, so accessing a large drive does not require keeping a full local copy. Personal and shared drives use the same filesystem; membership determines which operations each account can perform.
 
 ## Users
 
@@ -25,7 +29,7 @@ The mounted filesystem changes how remote files are accessed:
 | Save the result | Save locally, then upload the result | Save to the drive; Garden journals and publishes the write |
 | Work with a team | Distribute files and coordinate access separately | Share drive membership, permissions and file-linked conversations |
 
-Garden still stores cloud data and uses local cache space. Its contribution is the filesystem and collaboration layer around that storage. Applications may request an entire file, and cold reads still depend on network and cloud latency. The aim is to avoid unnecessary copies and transfers, not to promise that remote storage behaves like a local SSD.
+Garden uses local cache space for fetched ranges and a write journal for accepted edits. Repeated reads can use cached data; uncached reads depend on the network and cloud service. An application that requests every byte can still cause a full-file transfer.
 
 ### Editing directly in DaVinci Resolve
 
