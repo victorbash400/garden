@@ -6,7 +6,7 @@ Large file collections tie access to the capacity of individual computers. Expan
 
 Garden is a remote filesystem built with Flutter and Serverpod. It mounts cloud storage as a drive on macOS, making remote files accessible to existing applications without synchronizing a complete copy to each computer. The same drive can be accessed from multiple Macs and shared with a team.
 
-DaVinci Resolve can edit media from a Garden drive and render directly back to it. The mounted filesystem supports cuts, reordered video and audio, and saved project archives that reopen with their media paths intact. Documents, images and audio use the same drive, without a separate integration for each application.
+You can edit video in DaVinci Resolve, work on images in a photo editor, edit audio in an audio application, and update documents or code in your usual editor directly from a Garden drive. Applications use the mounted files and save changes back to cloud storage through the same filesystem, without a separate Garden integration for each application.
 
 Serverpod and Flutter
 
