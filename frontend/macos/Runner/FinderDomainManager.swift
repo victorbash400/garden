@@ -6,6 +6,10 @@ import Foundation
 enum FinderDomainManager {
   static func retire(accountID: String) async throws {
     guard UUID(uuidString: accountID)?.uuidString.lowercased() == accountID else { throw POSIXError(.EINVAL) }
+    guard let plugins = Bundle.main.builtInPlugInsURL,
+      FileManager.default.fileExists(atPath: plugins.appendingPathComponent("GardenFinder.appex").path) else {
+      return
+    }
     let prefix = "account-\(accountID)-drive-"
     let domains = try await NSFileProviderManager.domains()
     var preservedFiles: [URL] = []
