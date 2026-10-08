@@ -67,7 +67,10 @@ actor RemoteManager {
       credential.driveID == registration.driveID else { throw POSIXError(.EINVAL) }
     let id = registration.domainID
     if let entry = entries[id] {
-      if entry.removing || entry.registration != registration { throw POSIXError(.EBUSY) }
+      if entry.removing { throw POSIXError(.EBUSY) }
+      if entry.registration.retiring == true {
+        try await resumeRetirement(entry, registration: registration, credential: credential)
+      } else if entry.registration != registration { throw POSIXError(.EBUSY) }
       if entry.starting != nil { _ = try await mount(id); return }
       if let current = entry.mount {
         if await current.engine.issue == nil { return }
@@ -82,6 +85,31 @@ actor RemoteManager {
     }
     try FinderCredentialStore.save(credential, domainID: id)
     _ = try await mount(id)
+  }
+
+  private func resumeRetirement(_ entry: RemoteDriveEntry, registration: RemoteRegistration,
+    credential: FinderCredential) async throws {
+    entry.removing = true
+    defer { entry.removing = false }
+    // The authenticated app supplies a new credential for this same account and drive.
+    // Stop the previous mount without publishing or deleting its accepted edits.
+    let state = root.appendingPathComponent(registration.domainID)
+    if entry.registration.accessWithdrawn == true {
+      let writes = try RemoteWriteJournal(url: state.appendingPathComponent("writes.sqlite"),
+        namespace: registration.domainID, limit: 256 * 1024 * 1024)
+      let mutations = try RemoteMutationJournal(url: state.appendingPathComponent("mutations.sqlite"),
+        namespace: registration.domainID)
+      guard try writes.pending().isEmpty && mutations.first() == nil else {
+        throw NSError(domain: "GardenRemoteRemoval", code: Int(EBUSY), userInfo:
+          [NSLocalizedDescriptionKey: "Pending changes on “\(registration.name)” need review after drive access was removed. Your changes are preserved."])
+      }
+    }
+    try await unmount(entry, preserveWrites: true)
+    try FinderCredentialStore.save(credential, domainID: registration.domainID)
+    let previous = entry.registration
+    entry.registration = registration
+    do { try save() }
+    catch { entry.registration = previous; throw error }
   }
 
   func rename(accountID: String, driveID: Int, name: String) async throws {
@@ -120,7 +148,8 @@ actor RemoteManager {
     var missing: [Int] = []
     for driveID in driveIDs {
       let id = domainID(accountID, driveID)
-      guard entries[id] != nil else { missing.append(driveID); continue }
+      guard let entry = entries[id] else { missing.append(driveID); continue }
+      if entry.registration.retiring == true { missing.append(driveID); continue }
       do {
         let current = try await mount(id)
         if await current.engine.issue != nil { try await current.engine.reconnect() }

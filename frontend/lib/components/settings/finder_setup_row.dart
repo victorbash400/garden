@@ -38,8 +38,20 @@ class FinderSetupRow extends StatelessWidget {
           if (available != false && controller.finder != null) ...[
             const SizedBox(width: 12),
             SettingsInlineButton(
-              onPressed: controller.busy ? null : controller.openFinderSettings,
-              label: status.disabled.isNotEmpty ? 'Enable…' : 'Manage…',
+              onPressed: controller.busy || controller.finderSyncing
+                  ? null
+                  : status.disabled.isNotEmpty
+                  ? controller.openFinderSettings
+                  : controller.finderIssue != null ||
+                        status.disconnected.isNotEmpty
+                  ? controller.checkConnections
+                  : () => controller.selectSettings(SettingsSection.drives),
+              label: status.disabled.isNotEmpty
+                  ? 'Enable…'
+                  : controller.finderIssue != null ||
+                        status.disconnected.isNotEmpty
+                  ? 'Reconnect'
+                  : 'Manage…',
             ),
           ],
         ],

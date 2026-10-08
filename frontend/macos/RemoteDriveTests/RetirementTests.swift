@@ -68,6 +68,36 @@ import Security
       "Credential deletion with an interrupted registry commit must be replayable")
     try await recovery.reconcile(accountID: account, driveIDs: [])
     try require(try interruptedRegistry.read().isEmpty, "Interrupted finalization must complete on retry")
+    let reconnectRoot = root.appendingPathComponent("reconnect")
+    let reconnectRegistry = try RemoteRegistry(root: reconnectRoot)
+    try reconnectRegistry.save([retiring])
+    let reconnectJournal = try RemoteWriteJournal(
+      url: reconnectRoot.appendingPathComponent(retiring.domainID).appendingPathComponent("writes.sqlite"),
+      namespace: retiring.domainID, limit: 256 * 1024 * 1024)
+    try reconnectJournal.write(node, offset: 0, bytes: Data([5, 6, 7, 8]))
+    let reconnect = try RemoteManager(root: reconnectRoot, cache: root.appendingPathComponent("reconnect-cache"))
+    try require(try await reconnect.missing(accountID: account, driveIDs: [1]) == [1],
+      "Interrupted retirement must request a new authenticated Finder credential")
+    let renewed = FinderCredential(serverURL: "http://127.0.0.1:1/", accountID: account,
+      driveID: 1, tokenID: "renewed", token: "test", refreshToken: "test")
+    do { try await reconnect.register(registrations[0], credential: renewed); throw POSIXError(.EIO) }
+    catch {
+      // The offline fixture cannot mount; its registration and journal must still recover.
+      try require(try reconnectRegistry.read().first?.retiring != true,
+        "A signed-in registration must cancel interrupted retirement before remounting")
+      try require(try FinderCredentialStore.read(retiring.domainID).tokenID == "renewed",
+        "Recovery must use the newly authenticated credential")
+      try require(try reconnectJournal.used == 4, "Recovery must preserve every pending byte")
+    }
+    retiring.accessWithdrawn = true
+    try reconnectRegistry.save([retiring])
+    let withdrawn = try RemoteManager(root: reconnectRoot, cache: root.appendingPathComponent("withdrawn-cache"))
+    do { try await withdrawn.register(registrations[0], credential: renewed); throw POSIXError(.EIO) }
+    catch let error as NSError {
+      try require(error.domain == "GardenRemoteRemoval", "Withdrawn access with pending edits needs explicit review")
+    }
+    try require(try reconnectJournal.used == 4 && reconnectRegistry.read().first?.retiring == true,
+      "Recovery must not discard or republish edits retained after access withdrawal")
     print("Retirement: account isolation, retained credentials, replay, publication failure retention, pending-write refusal and interrupted finalization passed")
   }
 }
