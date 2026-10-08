@@ -28,7 +28,7 @@ Invite collaborators with Owner, Manager, Editor or Viewer permissions. Garden c
 
 ## How Serverpod runs Garden
 
-Serverpod owns authentication, persistent metadata, permissions, file versions and live updates. Flutter uses its generated Dart client; the native filesystem helper talks to the same authenticated endpoints.
+Serverpod owns authentication, persistent metadata, messages, permissions, file versions and live updates. Its database layer stores this application data in PostgreSQL; AWS S3 stores the file bytes. Flutter uses its generated Dart client; the native filesystem helper talks to the same authenticated endpoints.
 
 ```text
 Flutter app                 Finder / desktop applications
@@ -39,7 +39,7 @@ Generated Dart client            Swift + macFUSE helper
                        │
            ┌───────────┴───────────┐
            ▼                       ▼
-       PostgreSQL              Private AWS S3
+   Serverpod PostgreSQL        Private AWS S3
   metadata, membership,        file content and
   versions, messages           multipart uploads
 ```
