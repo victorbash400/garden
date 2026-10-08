@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../state/garden_controller.dart';
+import '../../native/setup_links.dart';
 import 'settings_row.dart';
 import 'settings_inline_button.dart';
 
@@ -12,7 +13,13 @@ class FinderSetupRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final available = controller.nativeSetup?.status?.finderAvailable;
     final status = controller.finderStatus;
-    final label = available == false
+    final missing = controller.nativeSetup?.status?.macFuseInstalled == false;
+    final supported = controller.nativeSetup?.status?.finderSupported != false;
+    final label = !supported
+        ? 'Requires macOS 15.4 or later'
+        : missing
+        ? 'macFUSE not installed'
+        : available == false
         ? 'Finder integration unavailable'
         : controller.finderSyncing
         ? 'Connecting'
@@ -35,7 +42,15 @@ class FinderSetupRow extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Flexible(child: Text(label)),
-          if (available != false && controller.finder != null) ...[
+          if (missing && supported) ...[
+            const SizedBox(width: 12),
+            SettingsInlineButton(
+              label: 'Get macFUSE',
+              onPressed: controller.busy
+                  ? null
+                  : () => controller.openSetupHelp(SetupLink.macFuse),
+            ),
+          ] else if (available != false && controller.finder != null) ...[
             const SizedBox(width: 12),
             SettingsInlineButton(
               onPressed: controller.busy || controller.finderSyncing

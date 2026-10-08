@@ -11,18 +11,29 @@ class SystemSetupStatus {
   const SystemSetupStatus({
     required this.finderAvailable,
     required this.launchAtLogin,
+    this.macFuseInstalled = true,
+    this.finderSupported = true,
   });
   final bool finderAvailable;
+  final bool macFuseInstalled;
+  final bool finderSupported;
   final LoginItemState launchAtLogin;
 
   factory SystemSetupStatus.fromMap(Map<Object?, Object?> data) {
     final available = data['finderAvailable'];
     final login = data['launchAtLogin'];
-    if (available is! bool || login is! String) {
+    final installed = data['macFuseInstalled'];
+    final supported = data['finderSupported'];
+    if (available is! bool ||
+        login is! String ||
+        installed is! bool ||
+        supported is! bool) {
       throw const FormatException('Invalid native setup status.');
     }
     return SystemSetupStatus(
       finderAvailable: available,
+      macFuseInstalled: installed,
+      finderSupported: supported,
       launchAtLogin: LoginItemState.values.byName(login),
     );
   }

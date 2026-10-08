@@ -29,7 +29,7 @@ enum NativeSetupBridge {
         case "openHelp":
           let links = [
             "approval": "https://support.apple.com/102445",
-            "macFuse": "https://macfuse.github.io/"
+            "macFuse": "https://macfuse.io/"
           ]
           guard let name = call.arguments as? String,
             let address = links[name], let url = URL(string: address),
@@ -55,9 +55,12 @@ enum NativeSetupBridge {
 
   static func status() -> [String: Any] {
     let helper = Bundle.main.bundleURL.appendingPathComponent("Contents/Helpers/GardenRemote.app")
-    var available = Bundle(url: helper)?.bundleIdentifier == "com.victorbash.garden.remote"
-      && FileManager.default.fileExists(atPath: "/Library/Filesystems/macfuse.fs")
-    if #unavailable(macOS 15.4) { available = false }
+    let installed = FileManager.default.fileExists(atPath:
+      "/Library/Filesystems/macfuse.fs/Contents/Resources/macfuse.app/Contents/Extensions/io.macfuse.app.fsmodule.macfuse-local.appex")
+    var supported = true
+    if #unavailable(macOS 15.4) { supported = false }
+    let available = supported && installed
+      && Bundle(url: helper)?.bundleIdentifier == "com.victorbash.garden.remote"
     var login = "unsupported"
     if #available(macOS 13.0, *) {
       switch SMAppService.mainApp.status {
@@ -68,7 +71,7 @@ enum NativeSetupBridge {
       @unknown default: login = "unknown"
       }
     }
-    return ["finderAvailable": available, "launchAtLogin": login]
+    return ["finderAvailable": available, "macFuseInstalled": installed, "finderSupported": supported, "launchAtLogin": login]
   }
 
   static func openLoginSettings() throws {
