@@ -1,58 +1,47 @@
 Garden
 
-Inspiration and problem
+Remote storage
 
-Creators, researchers and teams work with file collections that can exceed the storage available on their computers. Downloading those files before using them consumes disk space and delays access. Keeping full copies on several computers repeats that storage requirement, while external drives add hardware to purchase, carry and manage. Cloud storage provides capacity, but using it through separate downloads and uploads still requires a local working copy and another transfer whenever an edit is finished.
+Large file collections tie access to the capacity of individual computers. Expanding local storage means buying more hardware, while synchronizing a cloud collection repeats its disk requirements on each device. For creators, researchers and teams, the storage available remotely can be much larger than the storage available where the work happens. Downloading files before working on them leaves that constraint in place.
 
-Garden is a remote filesystem built with Flutter and Serverpod. It mounts cloud storage as a drive on your Mac, so you can open, edit and save files through your existing applications. Serverpod manages the accounts, drive metadata, memberships, file versions, messages and live updates that let several users and computers work against the same stored data.
+Garden is a remote filesystem built with Flutter and Serverpod. It mounts cloud storage as a drive on macOS, making remote files accessible to existing applications through normal filesystem operations. Serverpod coordinates authentication, drive metadata, permissions, file versions and collaboration. The backend runs on Serverpod Cloud, PostgreSQL holds application data, and private AWS S3 holds file content.
 
-Open a file from the drive, work on it in your application and save back to the same folder. Garden streams the file data your application needs and saves your changes to the cloud. You can use a drive larger than your computer's disk without keeping a full local copy of it.
+The drive can be accessed from multiple Macs and shared with a team without keeping a complete copy on each computer. DaVinci Resolve can edit media from the mounted drive and render back to it. Documents, images and audio use the same filesystem, so access is not tied to a separate integration for each application.
 
-Users and use cases
+Filesystem and application state
 
-An individual can keep files in a personal drive and access that drive from another Mac by signing in. Applications use the mounted path to open documents, images, audio, media and other files. Garden handles the remote reads and writes underneath those filesystem operations.
+A desktop application expects directories, file offsets and writes. Object storage exposes objects and transfers. Garden connects those interfaces through a Swift helper using macFUSE's FSKit backend. The helper translates filesystem operations into authenticated Serverpod requests, while Flutter provides drive browsing, account setup, sharing, conversations and storage controls.
 
-A team can share a drive without giving every member the same authority. Editors can change files, Viewers can read them, Managers can administer eligible memberships, and the Owner controls the drive. Members use their own accounts to access the shared files and discuss them through conversations with file and folder references.
+Both clients use the same backend metadata and permissions. A rename in Finder and a rename in Garden change the same file record. File content is stored separately from its name, parent folder, membership rules and version history, allowing Serverpod to coordinate the drive without storing large media objects in PostgreSQL.
 
-You can edit video in DaVinci Resolve using media on a Garden drive. Import the media from its mounted path, cut and reorder linked video and audio, then render the result directly to Garden. Project archives can be saved to the same drive and reopened with their media paths intact. Images, audio, documents and other files are also accessible through the drive, so users can work across applications without manually downloading a separate working copy and uploading each result.
+Serverpod generates the Dart client and database access from the backend's models and endpoints. Flutter controllers manage application state and stream subscriptions through that client. The authentication session manager supplies the account session used by backend requests and native integration.
 
-Mounting and sharing drives
-
-Users create drives, organize folders and import files through the Flutter application. The same drives appear in Finder through a Swift helper using macFUSE's FSKit backend. Desktop applications can read, seek, rename and write files through ordinary filesystem paths. Garden's browser and the mounted drive use the same Serverpod file operations and permission checks.
-
-Sharing begins with an email invitation and a selected role. Serverpod checks whether the sender can grant that role, then stores the invitation and an account notification together. The invitation expires after seven days. Acceptance checks the signed-in recipient's email, the invitation's current state and the sender's current authority before creating membership in a database transaction. Repeated acceptance returns the existing membership.
-
-Membership changes produce permission events and account notices. File requests check current access on the server, including requests from the native helper. The Inbox stores conversations, invitations, unread state and file references, so discussion and access changes remain associated with the shared drive.
-
-Serverpod and Flutter architecture
-
-The Flutter application handles account setup, drive browsing, sharing controls, the Inbox, storage settings and native integration. It uses Serverpod's generated Dart client and authentication session manager. Controllers own the application state and stream subscriptions; widgets display that state and invoke the corresponding actions. The authentication gateway connects the generated client to FlutterAuthSessionManager and FlutterConnectivityMonitor.
-
-Flutter client and session integration:
 https://github.com/victorbash400/garden/blob/main/frontend/lib/services/serverpod_gateway.dart
 
-The backend runs on Serverpod Cloud. Serverpod's model definitions generate database access, serialization and client methods for drives, folders, file nodes, versions, memberships, invitations and conversations. PostgreSQL persists this application data through Serverpod's database layer. Private AWS S3 stores file bytes. Serverpod owns metadata, messages and permissions; S3 holds the file content.
+Reading remote files
 
-File mutations and their revision records are committed in the same database transaction. After commit, Serverpod messaging notifies connected clients. File streams replay persisted revisions before delivering new events, allowing a client to reconnect from its saved cursor. The stream subscribes before catch-up begins so changes made during replay are buffered. The Inbox uses a recipient-scoped snapshot and cursor stream. These streams deliver file and conversation changes to the Flutter application and native helper.
+Applications do not necessarily read a file from beginning to end. They seek to headers, indexes and specific regions, then revisit data during playback or editing. Downloading the entire object for each of those operations would turn filesystem access into a sequence of large transfers.
 
-Transactional revisions and live Serverpod streams:
-https://github.com/victorbash400/garden/blob/main/backend/lib/src/files/drive_journal.dart
+Garden translates reads into byte-range requests. Its cache reuses fetched ranges, combines concurrent requests for the same data and adjusts read windows to the access pattern. Cached data is associated with a file version so it is not reused as content from a newer version. A configurable disk limit bounds the read cache rather than requiring the whole drive to fit locally.
 
-The native helper connects to the same authenticated Serverpod endpoints as Flutter. Each filesystem mutation carries an operation ID. Serverpod stores the request and result as a receipt, so retrying an operation after a lost response returns its existing result instead of applying the mutation again. Reusing an operation ID with different arguments fails explicitly.
+This makes the requested portion of a remote file available without first synchronizing the collection. Repeated reads can use the cache; uncached reads still depend on the network and cloud response time.
 
-Streaming reads and publishing edits
+Saving edits
 
-The native range cache fetches the parts of a file requested by an application, shares in-flight requests and reuses cached ranges for repeated reads. Read windows adapt to the access pattern. Cached reads are served from local storage, and uncached ranges are retrieved from the cloud. Users control the cache limit in Storage settings.
+Filesystem writes and cloud uploads finish on different timescales. Garden persists writes in a local SQLite journal before publishing them, retaining pending edits across interruptions. The publisher starts from a base file version, uploads changed regions and copies eligible unchanged multipart regions within S3. Resuming an upload checks the parts already present instead of restarting every transfer.
 
-Writes are persisted in a local SQLite journal before cloud publication. The helper starts an edit against a base file version, uploads changed multipart regions and can copy eligible unchanged regions within S3. Uploaded parts are checked when resuming a transfer. Serverpod validates the completed content before committing the new file version and publishing its revision.
+Serverpod validates the completed upload before committing a new file version. Incomplete uploads remain separate from the visible committed version. If another writer has changed the base version, Garden preserves the competing edit as a conflict copy. Each filesystem mutation also carries an operation ID, allowing Serverpod to return a recorded result when a request is retried after its response was lost.
 
-If another writer has changed the base version, Garden creates a conflict copy instead of silently replacing that writer's file. The write journal, resumable upload and transactional commit preserve the edit across interruptions while keeping incomplete uploads separate from committed versions.
-
-Cloud upload and version commit:
 https://github.com/victorbash400/garden/blob/main/backend/lib/src/files/content_endpoint.dart
 
-Impact and current implementation
+Shared drives and live updates
 
-Garden reduces the local copies and manual transfers required to work with remote files. Users can access a drive from another computer without preparing a full synchronized copy, and teams can grant access to shared data through individual accounts. Applications continue to use filesystem operations while Serverpod coordinates identity, metadata, permissions, versions and collaboration.
+Drive invitations assign Owner, Manager, Editor or Viewer permissions. Serverpod checks the sender's authority when an invitation is created and again when it is accepted, along with the recipient's identity and the invitation's expiry and status. Membership is created transactionally. File operations enforce current access on the server for both Flutter and the mounted drive.
 
-Users can download the macOS application, create an account with email verification, create or join a drive and connect it in Finder through the setup checklist. Signing out removes the account's mounted drives. Serverpod Cloud provides the hosted backend, AWS S3 stores file content, and macFUSE provides Finder mounting.
+The Inbox combines drive conversations, private conversations, invitations, unread state and file references. Serverpod stores these alongside the drive metadata, connecting collaboration to the files and memberships it concerns.
+
+A live notification alone is insufficient when a client disconnects. Garden commits file changes and their revision records in the same database transaction, then publishes the event through Serverpod messaging. Clients resume streams from saved cursors and replay persisted changes. Subscribing before replay buffers changes that arrive during catch-up, closing the gap between historical and live state. The Inbox uses the same snapshot-and-cursor approach for account events.
+
+https://github.com/victorbash400/garden/blob/main/backend/lib/src/files/drive_journal.dart
+
+Garden separates remote capacity from the size of a computer's disk while retaining the filesystem interface applications already use. Flutter brings file access and collaboration into one application; Serverpod maintains the shared identity, permissions and versioned state across devices.
