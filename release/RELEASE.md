@@ -21,5 +21,6 @@ Settings > Account > Delete account requires your email as confirmation. Success
 - Installed the disk image into /Applications and launched the standard app. Setup links, ordered checklist and drive creation passed. Its signed helper mounted a fresh drive. PNG, MP4, WAV and Markdown files saved through that mount matched independent backend reads byte for byte. The PNG opened in Preview and the MP4 opened in QuickTime.
 - Native private-file storage, frontend account deletion and backend deletion failure/retry tests passed. Release bundle signatures and disk-image verification passed.
 - Published v0.1.0-preview.1, downloaded its actual GitHub assets, verified SHA256SUMS.txt and the DMG checksum, installed that download and relaunched with the saved account. All four setup checklist steps showed Done; the deletion confirmation was inspected and cancelled.
+- Finder listed all four saved fixtures. Logout correctly refused a busy Preview file; after quitting the test viewer, retry removed the mount and returned to sign-in.
 
 This machine already had macFUSE installed and approved. Approval on a second, clean Mac is not verified. Existing development builds can leave an older helper registered; quit development builds before testing the release. Do not force-unmount a drive with unsaved changes.
