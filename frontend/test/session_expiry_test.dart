@@ -201,6 +201,20 @@ void main() {
       expect(controller.page, GardenPage.signIn);
     },
   );
+  test(
+    'rejected saved session routes to sign in before account restoration',
+    () async {
+      final gateway = ExpiryFixture();
+      final controller = GardenController(gateway, MemoryPreferences());
+      addTearDown(controller.dispose);
+      addTearDown(gateway.events.close);
+      gateway.events.add(null);
+      await Future<void>.delayed(Duration.zero);
+      expect(controller.account, isNull);
+      expect(controller.sessionExpired, isTrue);
+      expect(controller.page, GardenPage.signIn);
+    },
+  );
   test('busy Finder cannot leave an expired account active', () async {
     final gateway = ExpiryFixture();
     final controller = GardenController(

@@ -86,7 +86,7 @@ class GardenController extends ChangeNotifier {
     }
     if (gateway is SessionGateway) {
       _sessionEvents = (gateway as SessionGateway).sessionExpired.listen((_) {
-        if (account != null && !sessionExpired) {
+        if (!sessionExpired) {
           _sessionCleanup = _expireSession();
         }
       });
@@ -648,7 +648,7 @@ class GardenController extends ChangeNotifier {
   }
 
   Future<void> _expireSession() async {
-    final expired = account!;
+    final expired = account;
     _accessGeneration++;
     _changingDriveAccess = true;
     _clearAccount();
@@ -662,7 +662,7 @@ class GardenController extends ChangeNotifier {
       await finderUpdates?.close();
       await _finderWork;
       final disconnect = await accountWindow?.releaseAccount() ?? true;
-      if (disconnect) await finder?.signOut(expired);
+      if (disconnect && expired != null) await finder?.signOut(expired);
     } catch (failure) {
       error = 'Please sign in again to continue. ${errorMessage(failure)}';
     } finally {
