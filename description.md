@@ -22,10 +22,6 @@ Users create drives, organize folders and import files through the Flutter appli
 
 Sharing begins with an email invitation and a selected role. Serverpod checks whether the sender can grant that role, then stores the invitation and an account notification together. The invitation expires after seven days. Acceptance checks the signed-in recipient's email, the invitation's current state and the sender's current authority before creating membership in a database transaction. Repeated acceptance returns the existing membership.
 
-Invitation creation and acceptance are implemented in Serverpod endpoints:
-https://github.com/victorbash400/garden/blob/main/backend/lib/src/sharing/drive_invitations_endpoint.dart
-https://github.com/victorbash400/garden/blob/main/backend/lib/src/sharing/invitation_acceptance.dart
-
 Membership changes produce permission events and account notices. File requests check current access on the server, including requests from the native helper. The Inbox stores conversations, invitations, unread state and file references, so discussion and access changes remain associated with the shared drive.
 
 Serverpod and Flutter architecture
@@ -36,9 +32,6 @@ Flutter client and session integration:
 https://github.com/victorbash400/garden/blob/main/frontend/lib/services/serverpod_gateway.dart
 
 The backend runs on Serverpod Cloud. Serverpod's model definitions generate database access, serialization and client methods for drives, folders, file nodes, versions, memberships, invitations and conversations. PostgreSQL persists this application data through Serverpod's database layer. Private AWS S3 stores file bytes. Serverpod owns metadata, messages and permissions; S3 holds the file content.
-
-Serverpod model definition for file metadata:
-https://github.com/victorbash400/garden/blob/main/backend/lib/src/files/file_node.spy.yaml
 
 File mutations and their revision records are committed in the same database transaction. After commit, Serverpod messaging notifies connected clients. File streams replay persisted revisions before delivering new events, allowing a client to reconnect from its saved cursor. The stream subscribes before catch-up begins so changes made during replay are buffered. The Inbox uses a recipient-scoped snapshot and cursor stream. These streams deliver file and conversation changes to the Flutter application and native helper.
 
@@ -57,9 +50,6 @@ If another writer has changed the base version, Garden creates a conflict copy i
 
 Cloud upload and version commit:
 https://github.com/victorbash400/garden/blob/main/backend/lib/src/files/content_endpoint.dart
-
-Native journal-to-cloud write publication:
-https://github.com/victorbash400/garden/blob/main/frontend/macos/RemoteDrive/Engine/RemoteWritePublisher.swift
 
 Impact and current implementation
 
