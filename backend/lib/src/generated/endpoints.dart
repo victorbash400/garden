@@ -21,6 +21,7 @@ import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _iacs;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _iais;
+import '../accounts/account_endpoint.dart' as _izzfgwyn;
 import '../accounts/identities_endpoint.dart' as _i3objh06;
 import '../auth/email_idp_endpoint.dart' as _iuc1hd5t;
 import '../auth/jwt_refresh_endpoint.dart' as _inwq3ztq;
@@ -45,6 +46,12 @@ class Endpoints extends _is.EndpointDispatch {
   @override
   void initializeEndpoints(_is.Server server) {
     var endpoints = <String, _is.Endpoint>{
+      'account': _izzfgwyn.AccountEndpoint()
+        ..initialize(
+          server,
+          'account',
+          null,
+        ),
       'identities': _i3objh06.IdentitiesEndpoint()
         ..initialize(
           server,
@@ -154,6 +161,31 @@ class Endpoints extends _is.EndpointDispatch {
           null,
         ),
     };
+    connectors['account'] = _is.EndpointConnector(
+      name: 'account',
+      endpoint: endpoints['account']!,
+      methodConnectors: {
+        'deleteAccount': _is.MethodConnector(
+          name: 'deleteAccount',
+          params: {
+            'email': _is.ParameterDescription(
+              name: 'email',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['account'] as _izzfgwyn.AccountEndpoint)
+                  .deleteAccount(
+                    session,
+                    params['email'],
+                  ),
+        ),
+      },
+    );
     connectors['identities'] = _is.EndpointConnector(
       name: 'identities',
       endpoint: endpoints['identities']!,

@@ -1,3 +1,5 @@
+account:
+  - deleteAccount:
 identities:
   - members:
 emailIdp:

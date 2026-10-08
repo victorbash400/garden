@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../accounts/account_lifecycle.dart';
 import '../accounts/usernames.dart';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
@@ -123,6 +124,12 @@ class GardenEndpoint extends Endpoint {
     );
     final user = _user(session);
     return session.db.transaction((transaction) async {
+      await AccountLifecycle.lock(session, user, transaction);
+      await AccountLifecycle.requireActive(
+        session,
+        user,
+        transaction: transaction,
+      );
       final record = await GardenRecord.db.insertRow(
         session,
         GardenRecord(

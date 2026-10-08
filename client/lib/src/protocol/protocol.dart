@@ -39,6 +39,7 @@ import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
     as _iaic;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
+import 'accounts/account_deletion.dart' as _i9vi6htv;
 import 'accounts/account_username.dart' as _iltvw8yc;
 import 'accounts/public_identity.dart' as _i70ifst1;
 import 'chat/chat_read.dart' as _i3atmsok;
@@ -77,6 +78,7 @@ import 'sharing/account_notification.dart' as _i8nfb11w;
 import 'sharing/drive_invitation.dart' as _iks3nfjn;
 import 'sharing/drive_management.dart' as _ihkyi9jp;
 import 'sharing/drive_member_details.dart' as _iwfm68rt;
+export 'accounts/account_deletion.dart';
 export 'accounts/account_username.dart';
 export 'accounts/public_identity.dart';
 export 'chat/chat_read.dart';
@@ -151,6 +153,9 @@ class Protocol extends _isc.SerializationManager {
       }
     }
 
+    if (t == _i9vi6htv.AccountDeletion) {
+      return _i9vi6htv.AccountDeletion.fromJson(data) as T;
+    }
     if (t == _iltvw8yc.AccountUsername) {
       return _iltvw8yc.AccountUsername.fromJson(data) as T;
     }
@@ -264,6 +269,10 @@ class Protocol extends _isc.SerializationManager {
     }
     if (t == _iwfm68rt.DriveMemberDetails) {
       return _iwfm68rt.DriveMemberDetails.fromJson(data) as T;
+    }
+    if (t == _isc.getType<_i9vi6htv.AccountDeletion?>()) {
+      return (data != null ? _i9vi6htv.AccountDeletion.fromJson(data) : null)
+          as T;
     }
     if (t == _isc.getType<_iltvw8yc.AccountUsername?>()) {
       return (data != null ? _iltvw8yc.AccountUsername.fromJson(data) : null)
@@ -611,6 +620,7 @@ class Protocol extends _isc.SerializationManager {
 
   static String? getClassNameForType(Type type) {
     return switch (type) {
+      _i9vi6htv.AccountDeletion => 'AccountDeletion',
       _iltvw8yc.AccountUsername => 'AccountUsername',
       _i70ifst1.PublicIdentity => 'PublicIdentity',
       _i3atmsok.ChatRead => 'ChatRead',
@@ -663,6 +673,8 @@ class Protocol extends _isc.SerializationManager {
     }
 
     switch (data) {
+      case _i9vi6htv.AccountDeletion():
+        return 'AccountDeletion';
       case _iltvw8yc.AccountUsername():
         return 'AccountUsername';
       case _i70ifst1.PublicIdentity():
@@ -760,6 +772,9 @@ class Protocol extends _isc.SerializationManager {
     var dataClassName = data['className'];
     if (dataClassName is! String) {
       return super.deserializeByClassName(data);
+    }
+    if (dataClassName == 'AccountDeletion') {
+      return deserialize<_i9vi6htv.AccountDeletion>(data['data']);
     }
     if (dataClassName == 'AccountUsername') {
       return deserialize<_iltvw8yc.AccountUsername>(data['data']);

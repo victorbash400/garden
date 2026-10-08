@@ -41,6 +41,7 @@ import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _iacs;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _iais;
+import 'accounts/account_deletion.dart' as _i9vi6htv;
 import 'accounts/account_username.dart' as _iltvw8yc;
 import 'accounts/public_identity.dart' as _i70ifst1;
 import 'chat/chat_read.dart' as _i3atmsok;
@@ -81,6 +82,7 @@ import 'sharing/account_notification.dart' as _i8nfb11w;
 import 'sharing/drive_invitation.dart' as _iks3nfjn;
 import 'sharing/drive_management.dart' as _ihkyi9jp;
 import 'sharing/drive_member_details.dart' as _iwfm68rt;
+export 'accounts/account_deletion.dart';
 export 'accounts/account_username.dart';
 export 'accounts/public_identity.dart';
 export 'chat/chat_read.dart';
@@ -128,6 +130,50 @@ class Protocol extends _is.DatabaseSerializationManager {
   static final Protocol _instance = Protocol._().._registerHostProtocols();
 
   static List<_isp.TableDefinition> get targetTableDefinitions => [
+    _isp.TableDefinition(
+      name: 'account_deletion',
+      dartName: 'AccountDeletion',
+      schema: 'public',
+      module: 'garden',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'userId',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'account_deletion_user',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'userId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
     _isp.TableDefinition(
       name: 'account_notification',
       dartName: 'AccountNotification',
@@ -1669,6 +1715,9 @@ class Protocol extends _is.DatabaseSerializationManager {
       }
     }
 
+    if (t == _i9vi6htv.AccountDeletion) {
+      return _i9vi6htv.AccountDeletion.fromJson(data) as T;
+    }
     if (t == _iltvw8yc.AccountUsername) {
       return _iltvw8yc.AccountUsername.fromJson(data) as T;
     }
@@ -1785,6 +1834,10 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (t == _iwfm68rt.DriveMemberDetails) {
       return _iwfm68rt.DriveMemberDetails.fromJson(data) as T;
+    }
+    if (t == _is.getType<_i9vi6htv.AccountDeletion?>()) {
+      return (data != null ? _i9vi6htv.AccountDeletion.fromJson(data) : null)
+          as T;
     }
     if (t == _is.getType<_iltvw8yc.AccountUsername?>()) {
       return (data != null ? _iltvw8yc.AccountUsername.fromJson(data) : null)
@@ -2141,6 +2194,7 @@ class Protocol extends _is.DatabaseSerializationManager {
 
   static String? getClassNameForType(Type type) {
     return switch (type) {
+      _i9vi6htv.AccountDeletion => 'AccountDeletion',
       _iltvw8yc.AccountUsername => 'AccountUsername',
       _i70ifst1.PublicIdentity => 'PublicIdentity',
       _i3atmsok.ChatRead => 'ChatRead',
@@ -2195,6 +2249,8 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
 
     switch (data) {
+      case _i9vi6htv.AccountDeletion():
+        return 'AccountDeletion';
       case _iltvw8yc.AccountUsername():
         return 'AccountUsername';
       case _i70ifst1.PublicIdentity():
@@ -2298,6 +2354,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     var dataClassName = data['className'];
     if (dataClassName is! String) {
       return super.deserializeByClassName(data);
+    }
+    if (dataClassName == 'AccountDeletion') {
+      return deserialize<_i9vi6htv.AccountDeletion>(data['data']);
     }
     if (dataClassName == 'AccountUsername') {
       return deserialize<_iltvw8yc.AccountUsername>(data['data']);
@@ -2459,6 +2518,8 @@ class Protocol extends _is.DatabaseSerializationManager {
       }
     }
     switch (t) {
+      case _i9vi6htv.AccountDeletion:
+        return _i9vi6htv.AccountDeletion.t;
       case _iltvw8yc.AccountUsername:
         return _iltvw8yc.AccountUsername.t;
       case _i3atmsok.ChatRead:

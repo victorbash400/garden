@@ -204,6 +204,8 @@ void withServerpod(
 class TestEndpoints {
   late final futureCalls = _FutureCalls();
 
+  late final _AccountEndpoint account;
+
   late final _IdentitiesEndpoint identities;
 
   late final _EmailIdpEndpoint emailIdp;
@@ -248,6 +250,10 @@ class _InternalTestEndpoints extends TestEndpoints
     _is.SerializationManager serializationManager,
     _is.EndpointDispatch endpoints,
   ) {
+    account = _AccountEndpoint(
+      endpoints,
+      serializationManager,
+    );
     identities = _IdentitiesEndpoint(
       endpoints,
       serializationManager,
@@ -325,6 +331,48 @@ class _InternalTestEndpoints extends TestEndpoints
 
 class _FutureCalls {
   late final uploadCleanup = _UploadCleanupFutureCall();
+}
+
+class _AccountEndpoint {
+  _AccountEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _is.EndpointDispatch _endpointDispatch;
+
+  final _is.SerializationManager _serializationManager;
+
+  _ida.Future<void> deleteAccount(
+    _ist.TestSessionBuilder sessionBuilder,
+    String email,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'account',
+            method: 'deleteAccount',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'account',
+          methodName: 'deleteAccount',
+          parameters: _ist.testObjectToJson({'email': email}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<void>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
 }
 
 class _IdentitiesEndpoint {

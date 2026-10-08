@@ -64,6 +64,21 @@ import 'package:serverpod_client/serverpod_client.dart' as _isc;
 import 'protocol.dart' as _il2as5qe;
 
 /// {@category Endpoint}
+class EndpointAccount extends _isc.EndpointRef {
+  EndpointAccount(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'account';
+
+  _ida.Future<void> deleteAccount(String email) =>
+      caller.callServerEndpoint<void>(
+        'account',
+        'deleteAccount',
+        {'email': email},
+      );
+}
+
+/// {@category Endpoint}
 class EndpointIdentities extends _isc.EndpointRef {
   EndpointIdentities(_isc.EndpointCaller caller) : super(caller);
 
@@ -1322,6 +1337,7 @@ class Client extends _isc.ServerpodClientShared {
              disconnectStreamsOnLostInternetConnection,
          httpClientOverride: httpClientOverride,
        ) {
+    account = EndpointAccount(this);
     identities = EndpointIdentities(this);
     emailIdp = EndpointEmailIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
@@ -1342,6 +1358,8 @@ class Client extends _isc.ServerpodClientShared {
     notifications = EndpointNotifications(this);
     modules = Modules(this);
   }
+
+  late final EndpointAccount account;
 
   late final EndpointIdentities identities;
 
@@ -1383,6 +1401,7 @@ class Client extends _isc.ServerpodClientShared {
 
   @override
   Map<String, _isc.EndpointRef> get endpointRefLookup => {
+    'account': account,
     'identities': identities,
     'emailIdp': emailIdp,
     'jwtRefresh': jwtRefresh,

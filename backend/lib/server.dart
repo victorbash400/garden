@@ -3,6 +3,7 @@ import 'package:serverpod_auth_idp_server/providers/passkey.dart';
 import 'src/auth/app_association_route.dart';
 import 'src/auth/demo_account.dart';
 import 'src/auth/garden_email_config.dart';
+import 'src/auth/garden_authentication.dart';
 import 'package:serverpod_auth_idp_server/core.dart';
 import 'src/files/file_storage.dart';
 import 'src/files/upload_cleanup_tasks.dart';
@@ -28,6 +29,8 @@ void run(List<String> args) async {
       const PasskeyIdpConfig(hostname: 'garden.serverpod.space'),
     ],
   );
+
+  pod.authenticationHandler = gardenAuthentication;
 
   pod.webServer.addRoute(
     AppAssociationRoute(),

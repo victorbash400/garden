@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../accounts/account_lifecycle.dart';
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
 import '../gardens/drive_permissions.dart';
@@ -32,6 +33,11 @@ class DriveAccess {
     int gardenId, {
     Transaction? transaction,
   }) async {
+    await AccountLifecycle.requireActive(
+      session,
+      user(session),
+      transaction: transaction,
+    );
     final member = await GardenMember.db.findFirstRow(
       session,
       where: (row) =>

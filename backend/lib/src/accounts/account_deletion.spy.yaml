@@ -1,0 +1,9 @@
+class: AccountDeletion
+table: account_deletion
+fields:
+  userId: String
+  createdAt: DateTime
+indexes:
+  account_deletion_user:
+    fields: userId
+    unique: true
