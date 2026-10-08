@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'services/local_preferences.dart';
+import 'services/local_setup_store.dart';
 import 'services/appearance_store.dart';
 import 'state/appearance_controller.dart';
 import 'services/serverpod_gateway.dart';
@@ -48,6 +49,7 @@ Future<void> main() async {
   controller = GardenController(
     gateway,
     LocalPreferences(),
+    setupStore: LocalSetupStore(),
     appearance: AppearanceController(LocalAppearanceStore()),
     accountWindow: accountWindow,
     security: AccountSecurityController(gateway),

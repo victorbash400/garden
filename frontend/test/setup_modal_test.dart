@@ -3,10 +3,31 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_flutter/components/setup/setup_modal.dart';
 import 'package:garden_flutter/state/garden_controller.dart';
 import 'package:garden_flutter/ui/garden_app.dart';
+import 'package:garden_flutter/services/setup_store.dart';
 
 import 'widget_test.dart' show TestGateway, MemoryPreferences;
 
 void main() {
+  test(
+    'a clean demo account receives setup once per account on this Mac',
+    () async {
+      final store = TestSetupStore();
+      final controller = GardenController(
+        TestGateway(),
+        MemoryPreferences(),
+        setupStore: store,
+      );
+      await controller.signIn('judge-demo@garden.invalid', 'private-password');
+      expect(controller.setupVisible, isTrue);
+      await controller.closeSetup();
+      expect(store.seen, contains('account'));
+      await controller.signIn('judge-demo@garden.invalid', 'private-password');
+      expect(controller.setupVisible, isFalse);
+      controller.openSetup();
+      expect(controller.setupVisible, isTrue);
+      controller.dispose();
+    },
+  );
   testWidgets('registration opens setup; ordinary login does not', (
     tester,
   ) async {
@@ -46,4 +67,16 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     controller.dispose();
   });
+}
+
+class TestSetupStore implements SetupStore {
+  final seen = <String>{};
+
+  @override
+  Future<bool> hasSeenSetup(String accountId) async => seen.contains(accountId);
+
+  @override
+  Future<void> markSetupSeen(String accountId) async {
+    seen.add(accountId);
+  }
 }

@@ -20,6 +20,7 @@ import '../model/garden_info.dart';
 import '../services/garden_gateway.dart';
 import '../services/username_gateway.dart';
 import '../services/preferences_store.dart';
+import '../services/setup_store.dart';
 import '../native/finder_mounts.dart';
 import '../native/finder_previews.dart';
 import '../native/finder_updates.dart';
@@ -66,6 +67,7 @@ class GardenController extends ChangeNotifier {
     this.finder,
     this.finderUpdates,
     this.nativeSetup,
+    this.setupStore,
     this.localServer = false,
   }) : storage = preferences is CacheStore
            ? StorageController(preferences)
@@ -175,6 +177,7 @@ class GardenController extends ChangeNotifier {
   final FinderMounts? finder;
   final FinderUpdates? finderUpdates;
   final NativeSetupController? nativeSetup;
+  final SetupStore? setupStore;
   FinderStatus finderStatus = const FinderStatus();
   Set<int> get finderEnabledDriveIDs => finderStatus.enabled;
   bool get finderPermissionRequired => finderStatus.disabled.isNotEmpty;
@@ -189,10 +192,11 @@ class GardenController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void closeSetup() {
+  Future<void> closeSetup() => _request(() async {
+    final current = account;
+    if (current != null) await setupStore?.markSetupSeen(current.id);
     setupVisible = false;
-    notifyListeners();
-  }
+  });
 
   Future<void> openSetupHelp(SetupLink link) =>
       _request(() => SetupLinks.open(link));
@@ -421,6 +425,10 @@ class GardenController extends ChangeNotifier {
     page = GardenPage.starting;
     gardens = await gateway.listGardens();
     serviceAvailable = true;
+    setupVisible =
+        gardens.isEmpty &&
+        setupStore != null &&
+        !await setupStore!.hasSeenSetup(signedIn.id);
     page = GardenPage.gardens;
     _queueFinderSync();
     if (notifications != null) unawaited(notifications!.start());
