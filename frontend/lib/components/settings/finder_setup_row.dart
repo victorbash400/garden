@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../state/garden_controller.dart';
-import '../../native/setup_links.dart';
 import 'settings_row.dart';
 import 'settings_inline_button.dart';
 
@@ -42,15 +41,7 @@ class FinderSetupRow extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Flexible(child: Text(label)),
-          if (missing && supported) ...[
-            const SizedBox(width: 12),
-            SettingsInlineButton(
-              label: 'Get macFUSE',
-              onPressed: controller.busy
-                  ? null
-                  : () => controller.openSetupHelp(SetupLink.macFuse),
-            ),
-          ] else if (available != false && controller.finder != null) ...[
+          if (available != false && controller.finder != null) ...[
             const SizedBox(width: 12),
             SettingsInlineButton(
               onPressed: controller.busy || controller.finderSyncing

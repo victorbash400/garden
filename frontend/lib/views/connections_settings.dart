@@ -4,6 +4,7 @@ import '../components/settings/settings_group.dart';
 import '../components/settings/settings_row.dart';
 import '../state/garden_controller.dart';
 import '../components/settings/finder_setup_row.dart';
+import '../components/settings/mac_fuse_row.dart';
 import '../components/settings/login_item_row.dart';
 import '../components/settings/background_updates_row.dart';
 import '../components/settings/settings_inline_button.dart';
@@ -29,6 +30,7 @@ class ConnectionsSettings extends StatelessWidget {
             controller.serviceAvailable ? 'Available' : 'Unavailable',
           ),
         ),
+        MacFuseRow(controller: controller),
         FinderSetupRow(controller: controller),
         if (controller.finderUpdates != null)
           BackgroundUpdatesRow(updates: controller.finderUpdates!),

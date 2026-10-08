@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../native/setup_links.dart';
 import '../../state/garden_controller.dart';
 import '../../views/connections_settings.dart';
 import '../settings/settings_inline_button.dart';
@@ -24,12 +23,6 @@ class FinderPermissionStep extends StatelessWidget {
         spacing: 12,
         runSpacing: 12,
         children: [
-          SettingsInlineButton(
-            label: 'Get macFUSE',
-            onPressed: controller.busy
-                ? null
-                : () => controller.openSetupHelp(SetupLink.macFuse),
-          ),
           if (controller.nativeSetup != null)
             SettingsInlineButton(
               label: 'Open System Settings',

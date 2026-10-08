@@ -4,6 +4,7 @@ import 'package:garden_flutter/native/system_setup.dart';
 import 'package:garden_flutter/state/native_setup_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_flutter/components/settings/finder_setup_row.dart';
+import 'package:garden_flutter/views/connections_settings.dart';
 import 'package:garden_flutter/state/garden_controller.dart';
 import 'package:garden_flutter/ui/garden_theme.dart';
 
@@ -85,10 +86,11 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: GardenTheme.light,
-        home: Scaffold(body: FinderSetupRow(controller: controller)),
+        home: Scaffold(body: ConnectionsSettings(controller: controller)),
       ),
     );
     expect(find.text('macFUSE not installed'), findsOneWidget);
+    expect(find.text('Not installed'), findsOneWidget);
     expect(find.text('Get macFUSE'), findsOneWidget);
     await tester.tap(find.text('Get macFUSE'));
     await tester.pumpAndSettle();

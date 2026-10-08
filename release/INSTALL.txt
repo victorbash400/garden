@@ -21,7 +21,7 @@ Garden setup
    in Settings > Account > Open setup.
 
 5. Finder drives require macOS 15.4 or later and macFUSE:
-   https://macfuse.github.io/
+   https://macfuse.io/
    Install macFUSE and approve its File System Extension in System Settings >
    General > Login Items & Extensions. Allow Garden background activity there.
    Follow macFUSE's own version and compatibility requirements.
