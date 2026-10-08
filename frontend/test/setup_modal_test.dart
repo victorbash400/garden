@@ -25,6 +25,7 @@ void main() {
       expect(controller.setupVisible, isFalse);
       controller.openSetup();
       expect(controller.setupVisible, isTrue);
+      await controller.checkFinder();
       controller.dispose();
     },
   );
