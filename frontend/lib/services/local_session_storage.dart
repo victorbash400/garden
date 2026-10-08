@@ -65,15 +65,14 @@ class LocalSessionFiles implements KeyValueStorage {
       if (await file.exists()) await file.delete();
       return;
     }
-    final temporary = File(
-      '${file.path}.$pid.${DateTime.now().microsecondsSinceEpoch}.tmp',
-    );
+    final staging = await directory.createTemp('.session-');
+    final temporary = File('${staging.path}/session');
     try {
       await temporary.writeAsString(value, flush: true);
       await _permissions(temporary.path, '600');
       await temporary.rename(file.path);
     } finally {
-      if (await temporary.exists()) await temporary.delete();
+      await staging.delete(recursive: true);
     }
   }
 }

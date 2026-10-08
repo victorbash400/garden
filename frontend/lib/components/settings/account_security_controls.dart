@@ -90,7 +90,7 @@ class _AccountSecurityControlsState extends State<AccountSecurityControls> {
             Padding(
               padding: EdgeInsets.all(12),
               child: Text(
-                'Passkeys and Touch ID require Apple signing setup.',
+                'Passkeys require Apple signing setup.',
                 style: TextStyle(fontSize: 12),
               ),
             ),

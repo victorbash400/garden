@@ -103,7 +103,7 @@ void main() {
           .onPressed,
       isNull,
     );
-    expect(find.text('Apple signing setup required'), findsOneWidget);
+    expect(find.text('Unavailable with local session storage'), findsOneWidget);
     expect(find.byType(Switch), findsNothing);
     security.gateway.dispose();
     security.dispose();
