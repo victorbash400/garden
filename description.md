@@ -28,8 +28,6 @@ Applications do not necessarily read a file from beginning to end. They seek to 
 
 Garden translates reads into byte-range requests. Its cache reuses fetched ranges, combines concurrent requests for the same data and adjusts read windows to the access pattern. Cached data is associated with a file version so it is not reused as content from a newer version. A configurable disk limit bounds the read cache rather than requiring the whole drive to fit locally.
 
-Two empty-cache runs against a 72.5 MB H.264 MP4 displayed the first frame in 10.83 and 12.24 seconds through the mounted drive. Both decoded 1280 × 720 video and reached 20 seconds of media time. These measurements use a native AVPlayer first-frame check; they measure cold file access, not DaVinci Resolve startup. Repeated reads can use the cache; uncached reads still depend on the network and cloud response time.
-
 Filesystem writes and cloud uploads finish on different timescales. Garden persists writes in a local SQLite journal before publishing them, retaining pending edits across interruptions. The publisher starts from a base file version, uploads changed regions and copies eligible unchanged multipart regions within S3. Resuming an upload checks the parts already present instead of restarting every transfer.
 
 Serverpod validates the completed upload before committing a new file version. Incomplete uploads remain separate from the visible committed version. If another writer has changed the base version, Garden preserves the competing edit as a conflict copy. Each filesystem mutation also carries an operation ID, allowing Serverpod to return a recorded result when a request is retried after its response was lost.
