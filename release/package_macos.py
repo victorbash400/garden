@@ -1,4 +1,5 @@
 import argparse
+from datetime import datetime, timezone
 import plistlib
 import shutil
 import subprocess
@@ -8,6 +9,32 @@ from pathlib import Path
 
 def run(*args):
     return subprocess.run(args, check=True, capture_output=True)
+
+
+def validate_profile(data):
+    if data.get('ProvisionedDevices') and not data.get('ProvisionsAllDevices'):
+        raise ValueError('Device-restricted development provisioning cannot '
+                         'serve as a general judge download.')
+    expiration = data.get('ExpirationDate')
+    if not isinstance(expiration, datetime):
+        raise ValueError('The provisioning profile has no expiration date.')
+    if expiration.tzinfo is None:
+        expiration = expiration.replace(tzinfo=timezone.utc)
+    if expiration <= datetime.now(timezone.utc):
+        raise ValueError('The provisioning profile has expired.')
+
+
+def signing_team(bundle):
+    details = run('codesign', '-dv', '--verbose=4', str(bundle)).stderr.decode()
+    lines = details.splitlines()
+    if not any(line.startswith('Authority=Developer ID Application:') for line in lines):
+        raise ValueError(f'{bundle.name} requires Developer ID Application signing '
+                         'for the current shared Keychain configuration.')
+    team = next((line.partition('=')[2] for line in lines
+                 if line.startswith('TeamIdentifier=')), None)
+    if not team or team == 'not set':
+        raise ValueError(f'{bundle.name} has no signing team.')
+    return team
 
 
 def validate_app(app):
@@ -24,14 +51,12 @@ def validate_app(app):
     run('codesign', '--verify', '--deep', '--strict', str(app))
     for profile in app.rglob('embedded.provisionprofile'):
         data = plistlib.loads(run('security', 'cms', '-D', '-i', str(profile)).stdout)
-        if data.get('ProvisionedDevices') and not data.get('ProvisionsAllDevices'):
-            raise ValueError('Device-restricted development provisioning cannot '
-                             'serve as a general judge download.')
-    details = run('codesign', '-dv', '--verbose=4', str(app)).stderr.decode()
-    if not any(line.startswith('Authority=Developer ID Application:')
-               for line in details.splitlines()):
-        raise ValueError('This package requires Developer ID Application signing. '
-                         'Manual approval does not remove provisioning restrictions.')
+        validate_profile(data)
+    team = signing_team(app)
+    for bundle in app.rglob('*'):
+        if bundle.is_dir() and bundle.suffix in {'.app', '.appex'}:
+            if signing_team(bundle) != team:
+                raise ValueError(f'{bundle.name} is signed by a different team.')
     return info
 
 
