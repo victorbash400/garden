@@ -6,6 +6,7 @@ import '../components/settings/account_security_controls.dart';
 import '../components/settings/settings_row.dart';
 import '../components/settings/settings_action_row.dart';
 import '../components/settings/setup_checklist.dart';
+import '../components/settings/settings_inline_button.dart';
 import '../state/garden_controller.dart';
 
 class AccountSettings extends StatelessWidget {
@@ -14,6 +15,14 @@ class AccountSettings extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(
     children: [
+      Align(
+        alignment: Alignment.centerRight,
+        child: SettingsInlineButton(
+          label: 'Open setup',
+          onPressed: controller.openSetup,
+        ),
+      ),
+      const SizedBox(height: 12),
       SetupChecklist(controller: controller),
       const SizedBox(height: 20),
       if (controller.security != null) ...[

@@ -26,6 +26,18 @@ enum NativeSetupBridge {
         case "openLoginSettings":
           try openLoginSettings()
           result(nil)
+        case "openHelp":
+          let links = [
+            "approval": "https://support.apple.com/102445",
+            "macFuse": "https://macfuse.github.io/"
+          ]
+          guard let name = call.arguments as? String,
+            let address = links[name], let url = URL(string: address),
+            NSWorkspace.shared.open(url) else {
+            throw NSError(domain: "GardenSetup", code: 2,
+              userInfo: [NSLocalizedDescriptionKey: "Could not open the setup instructions."])
+          }
+          result(nil)
         case "setBackgroundActive":
           guard let active = call.arguments as? Bool else {
             throw FinderBridgeError.invalidArguments

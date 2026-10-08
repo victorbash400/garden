@@ -1,0 +1,29 @@
+Garden judge setup
+
+1. Download the Garden disk image from the repository's GitHub Releases page.
+   Copy Garden.app to Applications, then open it from Applications.
+
+2. If macOS blocks the app because the developer cannot be verified, open
+   System Settings > Privacy & Security and choose Open Anyway for Garden.
+   Only approve the app obtained from this repository's release.
+   Apple instructions: https://support.apple.com/102445
+
+   Manual approval does not remove development provisioning restrictions.
+   A release restricted to registered development devices cannot be used
+   on an unregistered Mac. Use the judge distribution asset, not a local
+   development build.
+
+3. Create an account with your email and enter the verification code.
+   If demo credentials were provided, sign in with those instead.
+   Garden connects to the existing hosted backend; no local server is needed.
+
+4. After creating an account, follow the setup modal. It can also be reopened
+   in Settings > Account > Open setup.
+
+5. Finder drives require macFUSE: https://macfuse.github.io/
+   Install macFUSE and approve its File System Extension in System Settings >
+   General > Login Items & Extensions. Allow Garden background activity there.
+   Follow macFUSE's own version and compatibility requirements.
+
+6. Create or join a drive, check connections, then open the drive in Finder.
+   The account setup checklist shows whether the drive is connected.

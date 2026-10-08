@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../views/inbox_view.dart';
+import '../components/setup/setup_modal.dart';
 
 import '../services/chat_gateway.dart';
 import '../services/sharing/drive_sharing_service.dart';
@@ -121,6 +122,8 @@ class GardenApp extends StatelessWidget {
                         onDark: _showAccountBackground,
                       ),
                     ),
+                  if (controller.setupVisible && controller.account != null)
+                    Positioned.fill(child: SetupModal(controller: controller)),
                 ],
               ),
             ),

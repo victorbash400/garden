@@ -13,7 +13,7 @@ class FinderSetupRow extends StatelessWidget {
     final available = controller.nativeSetup?.status?.finderAvailable;
     final status = controller.finderStatus;
     final label = available == false
-        ? 'Mount helper missing'
+        ? 'Finder integration unavailable'
         : controller.finderSyncing
         ? 'Connecting'
         : controller.finderIssue != null

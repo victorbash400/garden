@@ -11,6 +11,7 @@ import 'sharing/notification_controller.dart';
 
 import '../utils/error_message.dart';
 import '../native/account_window.dart';
+import '../native/setup_links.dart';
 import '../services/activity_log.dart';
 import '../services/relaunch_session_gateway.dart';
 
@@ -180,6 +181,21 @@ class GardenController extends ChangeNotifier {
   bool finderSyncing = false;
   String? finderIssue;
   bool serviceAvailable = false;
+  bool setupVisible = false;
+
+  void openSetup() {
+    if (account == null) return;
+    setupVisible = true;
+    notifyListeners();
+  }
+
+  void closeSetup() {
+    setupVisible = false;
+    notifyListeners();
+  }
+
+  Future<void> openSetupHelp(SetupLink link) =>
+      _request(() => SetupLinks.open(link));
   final bool localServer;
   final FilesController? files;
   final GardenGateway gateway;
@@ -243,6 +259,7 @@ class GardenController extends ChangeNotifier {
 
   void navigate(GardenPage destination) {
     if (busy) return;
+    setupVisible = false;
     if (destination == GardenPage.settings && page != GardenPage.settings) {
       _settingsReturn = page;
     }
@@ -319,6 +336,7 @@ class GardenController extends ChangeNotifier {
     registrationPassword = '';
     registrationId = null;
     await _finishAuthentication(signedIn);
+    setupVisible = true;
   });
 
   Future<void> resendVerification() => _request(() async {
@@ -550,6 +568,7 @@ class GardenController extends ChangeNotifier {
       await notifications?.close();
       await gateway.signOut();
       account = null;
+      setupVisible = false;
       ActivityLog.instance.account = null;
       gardens = [];
       selected = null;
