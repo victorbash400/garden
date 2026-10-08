@@ -158,7 +158,7 @@ class GardenApp extends StatelessWidget {
 
   Widget _content(BuildContext context) => switch (controller.page) {
     GardenPage.starting => StartupView(
-      error: controller.error,
+      loading: controller.busy,
       onRetry: controller.retryLoading,
       onSignIn: () => controller.navigate(GardenPage.signIn),
     ),

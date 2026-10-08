@@ -6,12 +6,12 @@ import '../components/garden_mark.dart';
 class StartupView extends StatelessWidget {
   const StartupView({
     super.key,
-    required this.error,
+    required this.loading,
     required this.onRetry,
     required this.onSignIn,
   });
 
-  final String? error;
+  final bool loading;
   final VoidCallback onRetry;
   final VoidCallback onSignIn;
 
@@ -22,7 +22,7 @@ class StartupView extends StatelessWidget {
       children: [
         const GardenMark(size: 36),
         const SizedBox(height: 24),
-        if (error == null)
+        if (loading)
           const SizedBox.square(
             dimension: 18,
             child: CircularProgressIndicator(
