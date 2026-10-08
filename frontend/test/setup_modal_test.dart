@@ -3,11 +3,48 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_flutter/components/setup/setup_modal.dart';
 import 'package:garden_flutter/state/garden_controller.dart';
 import 'package:garden_flutter/ui/garden_app.dart';
+import 'package:garden_flutter/ui/garden_theme.dart';
 import 'package:garden_flutter/services/setup_store.dart';
 
 import 'widget_test.dart' show TestGateway, MemoryPreferences;
 
 void main() {
+  testWidgets('setup fits short content and keeps compact navigation visible', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1024, 900);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final controller = GardenController(TestGateway(), MemoryPreferences());
+    await controller.signIn('test@example.com', 'password');
+    controller.openSetup();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: GardenTheme.light,
+        home: Scaffold(body: SetupModal(controller: controller)),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(const ValueKey('setup-surface'))).height,
+      lessThan(500),
+    );
+    tester.view.physicalSize = const Size(560, 420);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull, reason: 'compact installation step');
+    await tester.tap(find.text('Continue'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull, reason: 'compact Finder step');
+    expect(tester.getRect(find.text('Continue')).bottom, lessThan(420));
+    await tester.tap(find.text('Back'));
+    await tester.pumpAndSettle();
+    expect(find.text('Install Garden'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+    await controller.checkFinder();
+    controller.dispose();
+  });
   test(
     'a clean demo account receives setup once per account on this Mac',
     () async {

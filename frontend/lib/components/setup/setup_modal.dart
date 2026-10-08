@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../state/garden_controller.dart';
 import '../../ui/garden_colors.dart';
-import '../garden_button.dart';
 import '../settings/setup_checklist.dart';
 import 'finder_permission_step.dart';
 import 'installation_step.dart';
+import 'setup_navigation.dart';
 
 class SetupModal extends StatefulWidget {
   const SetupModal({super.key, required this.controller});
@@ -35,8 +35,10 @@ class _SetupModalState extends State<SetupModal> {
           ),
           clipBehavior: Clip.antiAlias,
           child: ConstrainedBox(
+            key: const ValueKey('setup-surface'),
             constraints: const BoxConstraints(maxWidth: 720, maxHeight: 620),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(28, 24, 28, 20),
@@ -62,7 +64,7 @@ class _SetupModalState extends State<SetupModal> {
                     ],
                   ),
                 ),
-                Expanded(
+                Flexible(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 28),
                     child: AnimatedSwitcher(
@@ -80,31 +82,13 @@ class _SetupModalState extends State<SetupModal> {
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(28),
-                  child: Row(
-                    children: [
-                      TextButton(
-                        onPressed: controller.closeSetup,
-                        child: const Text('Set up later'),
-                      ),
-                      const Spacer(),
-                      if (step > 0) ...[
-                        GardenButton(
-                          label: 'Back',
-                          secondary: true,
-                          onPressed: () => setState(() => step--),
-                        ),
-                        const SizedBox(width: 12),
-                      ],
-                      GardenButton(
-                        label: step == 2 ? 'Done' : 'Continue',
-                        onPressed: step == 2
-                            ? controller.closeSetup
-                            : () => setState(() => step++),
-                      ),
-                    ],
-                  ),
+                SetupNavigation(
+                  onLater: controller.closeSetup,
+                  onBack: step > 0 ? () => setState(() => step--) : null,
+                  lastStep: step == 2,
+                  onContinue: step == 2
+                      ? controller.closeSetup
+                      : () => setState(() => step++),
                 ),
               ],
             ),
