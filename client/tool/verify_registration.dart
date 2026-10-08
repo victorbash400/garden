@@ -7,8 +7,10 @@ import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart';
 import 'verify_demo.dart' show MemoryAuthStorage;
 
 Future<void> main(List<String> args) async {
-  if (args.length != 2 || !['begin', 'finish'].contains(args.first)) {
-    throw ArgumentError('Provide begin or finish and a private state file.');
+  if (args.length != 2 || !['begin', 'finish', 'check'].contains(args.first)) {
+    throw ArgumentError(
+      'Provide begin, finish or check and a private state file.',
+    );
   }
   final file = File(args[1]);
   final state = jsonDecode(await file.readAsString()) as Map<String, dynamic>;
@@ -22,6 +24,23 @@ Future<void> main(List<String> args) async {
   client.authKeyProvider = auth;
   int? driveId;
   try {
+    if (args.first == 'check') {
+      final login = await client.emailIdp.login(
+        email: email,
+        password: password,
+      );
+      await auth.updateSignedInUser(login);
+      if ((await client.garden.account()).email != email) {
+        throw StateError('Signed-in identity does not match.');
+      }
+      final keys = await client.passkeyIdp.listKeys();
+      print(
+        'Verified account sign-in and passkey settings query passed '
+        '(${keys.length} registered keys).',
+      );
+      await auth.signOutDevice();
+      return;
+    }
     if (args.first == 'begin') {
       if (state.containsKey('requestId')) {
         throw StateError('Registration already started for this identity.');
