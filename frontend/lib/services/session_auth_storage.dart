@@ -1,4 +1,5 @@
 import 'biometric_session_storage.dart';
+import 'local_session_storage.dart';
 
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
@@ -11,20 +12,8 @@ class SessionAuthStorage implements ClientAuthSuccessStorage {
   }) : biometric =
            protected ?? biometricSessionStorage(serverUrl, windowId: windowId),
        persistent =
-           persistent ??
-           SecureClientAuthSuccessStorage(
-             authSuccessStorageKey: windowId == 'main'
-                 ? 'garden.session.$serverUrl'
-                 : 'garden.session.$serverUrl.$windowId',
-             secureStorage: const FlutterSecureStorage(
-               mOptions: MacOsOptions(
-                 accountName: 'Garden',
-                 usesDataProtectionKeychain: false,
-                 accessibility: KeychainAccessibility.first_unlock_this_device,
-                 synchronizable: false,
-               ),
-             ),
-           );
+           persistent ?? localSessionStorage(serverUrl, windowId: windowId);
+
   final ClientAuthSuccessStorage persistent;
   final ClientAuthSuccessStorage biometric;
   bool touchId = false;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../components/settings/settings_group.dart';
+import '../components/settings/delete_account_dialog.dart';
 import '../components/settings/username_control.dart';
 import '../components/settings/account_security_controls.dart';
 import '../components/settings/settings_row.dart';
@@ -38,6 +39,16 @@ class AccountSettings extends StatelessWidget {
           SettingsRow(
             label: 'Email',
             value: SelectableText(controller.account!.email),
+          ),
+          SettingsActionRow(
+            label: 'Delete account',
+            onTap: controller.busy
+                ? null
+                : () => showDialog<void>(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (_) => DeleteAccountDialog(controller: controller),
+                  ),
           ),
           SettingsActionRow(
             label: 'Sign out',

@@ -20,9 +20,7 @@ class TouchIdControl extends StatelessWidget {
     value: available
         ? Switch.adaptive(value: value, onChanged: onChanged)
         : Text(
-            configured
-                ? 'Set up in System Settings'
-                : 'Apple signing setup required',
+            'Unavailable with local session storage',
           ),
   );
 }

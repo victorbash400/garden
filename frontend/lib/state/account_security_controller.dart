@@ -31,9 +31,7 @@ class AccountSecurityController extends ChangeNotifier {
 
   Future<void> load() => _run(() async {
     await checkConfiguration();
-    available = (await biometrics.getAvailableBiometrics()).contains(
-      BiometricType.fingerprint,
-    );
+    available = false;
     touchId = await gateway.preferences.getBool(gateway.touchIdKey) ?? false;
     keys = await gateway.client.passkeyIdp.listKeys();
   });

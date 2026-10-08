@@ -12,7 +12,6 @@ import Security
     } catch FinderCredentialError.keychain(errSecItemNotFound) {}
     try FinderCredentialStore.save(first, domainID: domain)
     defer { try? FinderCredentialStore.remove(domain) }
-    #if GARDEN_MANUAL_INSTALL
     let root = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
       .appendingPathComponent("GardenRemote/Connections", isDirectory: true)
     let filename = domain.utf8.map { String(format: "%02x", $0) }.joined() + ".json"
@@ -21,7 +20,6 @@ import Security
     let fileAttributes = try FileManager.default.attributesOfItem(atPath: file.path)
     guard directoryAttributes[.posixPermissions] as? Int == 0o700,
       fileAttributes[.posixPermissions] as? Int == 0o600 else { throw POSIXError(.EACCES) }
-    #endif
     let saved = try FinderCredentialStore.read(domain)
     guard saved.token == first.token, saved.accountID == first.accountID else {
       throw NSError(domain: "CredentialStoreTests", code: 2)
@@ -37,7 +35,6 @@ import Security
       _ = try FinderCredentialStore.read(domain)
       throw NSError(domain: "CredentialStoreTests", code: 4)
     } catch FinderCredentialError.keychain(errSecItemNotFound) {}
-    #if GARDEN_MANUAL_INSTALL
     try Data("invalid".utf8).write(to: file, options: .atomic)
     do {
       _ = try FinderCredentialStore.read(domain)
@@ -49,8 +46,5 @@ import Security
       throw POSIXError(.EIO)
     } catch let error as POSIXError where error.code == .EINVAL {}
     print("Credential store: permissions, create, read, update, removal and corrupt-data rejection passed")
-    #else
-    print("Credential store: signed Data Protection Keychain create, read, update and removal passed")
-    #endif
   }
 }

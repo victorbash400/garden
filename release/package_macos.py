@@ -14,7 +14,7 @@ def run(*args):
 def validate_profile(data):
     if data.get('ProvisionedDevices') and not data.get('ProvisionsAllDevices'):
         raise ValueError('Device-restricted development provisioning cannot '
-                         'serve as a general judge download.')
+                         'serve as a general download.')
     expiration = data.get('ExpirationDate')
     if not isinstance(expiration, datetime):
         raise ValueError('The provisioning profile has no expiration date.')
@@ -65,7 +65,7 @@ def validate_app(app, manual_approval=False):
         validate_profile(data)
     if manual_approval:
         if (app / 'Contents/PlugIns').exists() and any((app / 'Contents/PlugIns').iterdir()):
-            raise ValueError('The judge app must not bundle device-restricted extensions.')
+            raise ValueError('The app must not bundle device-restricted extensions.')
         for bundle in (app, helper.parent.parent):
             with (bundle / 'Contents/Info.plist').open('rb') as source:
                 bundle_info = plistlib.load(source)

@@ -18,6 +18,7 @@ import '../services/relaunch_session_gateway.dart';
 import '../model/account_info.dart';
 import '../model/garden_info.dart';
 import '../services/garden_gateway.dart';
+import '../services/account_deletion_gateway.dart';
 import '../services/username_gateway.dart';
 import '../services/preferences_store.dart';
 import '../services/setup_store.dart';
@@ -562,19 +563,42 @@ class GardenController extends ChangeNotifier {
     }
     _queueFinderSync();
   });
-  Future<void> signOut() => _request(() async {
+  Future<void> signOut() => _request(() => _endSession());
+
+  Future<void> deleteAccount(String email) async {
+    if (busy) throw StateError('Another account action is in progress.');
+    if (gateway is! AccountDeletionGateway) {
+      throw StateError('Account deletion is unavailable.');
+    }
+    _busy = true;
+    notifyListeners();
+    try {
+      await _endSession(deletingEmail: email);
+    } finally {
+      _busy = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _endSession({String? deletingEmail}) async {
     _accessGeneration++;
     _changingDriveAccess = true;
     try {
       await _finderWork;
       final current = account;
       final disconnect = await accountWindow?.releaseAccount() ?? true;
-      if (current != null && disconnect) await finder?.signOut(current);
+      if (current != null && (disconnect || deletingEmail != null)) {
+        await finder?.signOut(current);
+      }
       await finderUpdates?.close();
       await files?.close();
       await inbox?.close();
       await notifications?.close();
-      await gateway.signOut();
+      if (deletingEmail != null) {
+        await (gateway as AccountDeletionGateway).deleteAccount(deletingEmail);
+      } else {
+        await gateway.signOut();
+      }
       account = null;
       setupVisible = false;
       ActivityLog.instance.account = null;
@@ -595,7 +619,8 @@ class GardenController extends ChangeNotifier {
     } finally {
       _changingDriveAccess = false;
     }
-  });
+  }
+
   Future<void> setCacheLimit(int gib) => _request(() async {
     if (gib < 0 || gib > 100) {
       throw ArgumentError('Cache limit must be between 0 and 100 GiB.');

@@ -14,8 +14,6 @@ func nativeAuthenticationConfigured() -> Bool {
   guard SecCodeCopySigningInformation(staticCode, SecCSFlags(rawValue: kSecCSSigningInformation), &information) == errSecSuccess,
         let values = information as? [String: Any],
         let entitlements = values[kSecCodeInfoEntitlementsDict as String] as? [String: Any],
-        let domains = entitlements["com.apple.developer.associated-domains"] as? [String],
-        let groups = entitlements["keychain-access-groups"] as? [String] else { return false }
+        let domains = entitlements["com.apple.developer.associated-domains"] as? [String] else { return false }
   return domains.contains("webcredentials:garden.serverpod.space")
-    && groups.contains("387H4ZZF2K.com.victorbash.garden")
 }

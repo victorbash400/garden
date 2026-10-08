@@ -1,5 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/services.dart';
+
+import 'dart:io';
+
+import 'package:garden_flutter/services/local_session_storage.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 import 'package:garden_flutter/services/session_auth_storage.dart';
 
@@ -23,61 +26,64 @@ class StoredSession implements ClientAuthSuccessStorage {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   test(
-    'Keychain tokens use independent ordinary and protected window keys',
+    'local sessions isolate windows, survive restart and remove on sign out',
     () async {
-      const channel = MethodChannel(
-        'plugins.it_nomads.com/flutter_secure_storage',
+      final directory = await Directory.systemTemp.createTemp(
+        'garden-session-test-',
       );
-      final messenger =
-          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
-      final values = <String, String>{};
-      messenger.setMockMethodCallHandler(channel, (call) async {
-        final key = call.arguments['key'] as String;
-        if (call.method == 'write') {
-          values[key] = call.arguments['value'] as String;
-        }
-        if (call.method == 'delete') values.remove(key);
-        if (call.method == 'read') return values[key];
-        return null;
-      });
-      addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
+      addTearDown(() => directory.delete(recursive: true));
       final session = AuthSuccess(
         authStrategy: 'jwt',
-        token: 'test',
-        refreshToken: 'refresh',
+        token: 'fixture',
+        refreshToken: 'fixture-refresh',
         authUserId: UuidValue.fromString(
-          '00000000-0000-0000-0000-000000000001',
+          '00000000-0000-4000-8000-000000000001',
         ),
         scopeNames: {},
       );
-      final first = SessionAuthStorage('https://example.test/')
-        ..remember = true;
-      final second = SessionAuthStorage(
+      final first = localSessionStorage(
+        'https://example.test/',
+        directory: directory,
+      );
+      final second = localSessionStorage(
         'https://example.test/',
         windowId: 'two',
-      )..remember = true;
+        directory: directory,
+      );
       await first.set(session);
       await second.set(session);
       expect(
-        values.keys,
-        containsAll([
-          'garden.session.https://example.test/',
-          'garden.session.https://example.test/.two',
-        ]),
+        (await localSessionStorage(
+          'https://example.test/',
+          directory: directory,
+        ).get())?.token,
+        'fixture',
       );
-      await second.setTouchId(true);
-      expect(
-        values.containsKey('garden.session.https://example.test/'),
-        isTrue,
-      );
-      expect(
-        values.containsKey('garden.touchId.https://example.test/.two'),
-        isTrue,
-      );
-      await second.forget();
-      expect(values.keys, ['garden.session.https://example.test/']);
+      final files = await directory.list().toList();
+      expect(files, hasLength(2));
+      expect((await directory.stat()).mode & 511, 448);
+      for (final file in files) {
+        expect((await file.stat()).mode & 511, 384);
+      }
+      await second.set(null);
+      expect(await second.get(), isNull);
+      expect((await first.get())?.token, 'fixture');
+      await first.set(null);
+      expect(await directory.list().toList(), isEmpty);
     },
   );
+  test('corrupt local session fails visibly', () async {
+    final directory = await Directory.systemTemp.createTemp(
+      'garden-session-corrupt-',
+    );
+    addTearDown(() => directory.delete(recursive: true));
+    final files = LocalSessionFiles(directory: directory);
+    await files.set('https://example.test/\u0000main', 'invalid');
+    await expectLater(
+      localSessionStorage('https://example.test/', directory: directory).get(),
+      throwsA(isA<FormatException>()),
+    );
+  });
   test(
     'session persistence is opt-in and forgetting removes the token',
     () async {
@@ -87,7 +93,7 @@ void main() {
         token: 'test-token',
         refreshToken: 'test-refresh',
         authUserId: UuidValue.fromString(
-          '00000000-0000-0000-0000-000000000001',
+          '00000000-0000-4000-8000-000000000001',
         ),
         scopeNames: {},
       );
@@ -121,7 +127,7 @@ void main() {
         token: 'test',
         refreshToken: 'refresh',
         authUserId: UuidValue.fromString(
-          '00000000-0000-0000-0000-000000000001',
+          '00000000-0000-4000-8000-000000000001',
         ),
         scopeNames: {},
       );

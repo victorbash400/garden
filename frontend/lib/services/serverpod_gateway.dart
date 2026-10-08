@@ -4,6 +4,7 @@ import 'package:serverpod_flutter/serverpod_flutter.dart';
 
 import '../model/account_info.dart';
 import 'username_gateway.dart';
+import 'account_deletion_gateway.dart';
 import 'chat_gateway.dart';
 import '../model/garden_info.dart';
 import 'garden_gateway.dart';
@@ -17,6 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ServerpodGateway
     implements
         GardenGateway,
+        AccountDeletionGateway,
         RelaunchSessionGateway,
         SharingGateway,
         UsernameGateway,
@@ -197,6 +199,13 @@ class ServerpodGateway
       client.garden.rename(driveId, name);
   @override
   Future<void> deleteDrive(int driveId) => client.garden.delete(driveId);
+  @override
+  Future<void> deleteAccount(String email) async {
+    await client.account.deleteAccount(email);
+    await forgetSavedLogin();
+    await client.auth.updateSignedInUser(null);
+  }
+
   @override
   Future<void> signOut() async {
     await client.auth.signOutDevice();
