@@ -14,6 +14,7 @@ import '../components/account_background.dart';
 import '../components/build_update_banner.dart';
 import '../components/finder_status_observer.dart';
 import '../components/files/import_status_bar.dart';
+import '../components/files/file_opening_status.dart';
 import '../components/garden_sidebar.dart';
 import '../components/garden_menu_bar.dart';
 import '../components/settings/settings_sidebar.dart';
@@ -116,6 +117,10 @@ class GardenApp extends StatelessWidget {
                                 ),
                               ),
                               if (controller.files != null)
+                                FileOpeningStatus(
+                                  controller: controller.files!.opening,
+                                ),
+                              if (controller.files != null)
                                 ImportStatusBar(
                                   controller: controller.files!.imports,
                                 ),
@@ -165,6 +170,7 @@ class GardenApp extends StatelessWidget {
   Widget _content(BuildContext context) => switch (controller.page) {
     GardenPage.starting => StartupView(
       loading: controller.busy,
+      status: controller.startupStage,
       onRetry: controller.retryLoading,
       onSignIn: () => controller.navigate(GardenPage.signIn),
     ),
@@ -247,6 +253,7 @@ class GardenApp extends StatelessWidget {
       onConnections: controller.needsFinderAttention
           ? controller.openConnections
           : null,
+      onErrorConnections: controller.openConnections,
     ),
     GardenPage.settings => SettingsView(controller: controller),
     GardenPage.inbox => InboxView(controller: controller),

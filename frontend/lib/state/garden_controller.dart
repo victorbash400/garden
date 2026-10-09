@@ -27,6 +27,7 @@ import '../services/username_gateway.dart';
 import '../services/preferences_store.dart';
 import '../services/setup_store.dart';
 import '../native/finder_mounts.dart';
+import '../native/finder_file_applications.dart';
 import '../native/finder_previews.dart';
 import '../native/finder_updates.dart';
 import '../native/finder_status.dart';
@@ -106,8 +107,41 @@ class GardenController extends ChangeNotifier {
       if (current == null || finder == null) {
         throw StateError('Sign in and enable Finder to open files.');
       }
-      await finder!.openNode(current, node.gardenId, node.id!);
+      final fileFinder = finder;
+      if (fileFinder is FinderFileApplications) {
+        final applicationFinder = fileFinder as FinderFileApplications;
+        final path = await applicationFinder.prepareFile(
+          current,
+          node.gardenId,
+          node.id!,
+        );
+        if (account?.id != current.id) {
+          throw StateError('Sign in again to open this file.');
+        }
+        files?.opening.launching();
+        await applicationFinder.openPreparedFile(path);
+      } else {
+        files?.opening.launching();
+        await finder!.openNode(current, node.gardenId, node.id!);
+      }
     };
+    if (finder is FinderFileApplications) {
+      files?.openFileWith = (node, application) async {
+        final current = account;
+        if (current == null) throw StateError('Sign in to open files.');
+        final fileFinder = finder as FinderFileApplications;
+        final path = await fileFinder.prepareFile(
+          current,
+          node.gardenId,
+          node.id!,
+        );
+        if (account?.id != current.id) {
+          throw StateError('Sign in again to open this file.');
+        }
+        files?.opening.launching(application: 'the selected application');
+        await fileFinder.openPreparedFile(path, application: application);
+      };
+    }
     final previews = finder;
     if (previews is FinderPreviews) {
       files?.previewFile = (node) async {
@@ -228,6 +262,8 @@ class GardenController extends ChangeNotifier {
   Future<void> _finderWork = Future.value();
   bool _changingDriveAccess = false;
   bool get busy => _relaunching || _busy || (files?.busy ?? false);
+  bool get navigationBlocked =>
+      relaunching || sessionExpired || _changingDriveAccess;
   String? error;
   int cacheLimit = 20;
   String? registrationId;
@@ -242,28 +278,69 @@ class GardenController extends ChangeNotifier {
 
   Future<void> initialize() => _request(_loadStartup);
 
+  String startupStage = 'Starting Garden';
+
+  Future<T> _startupRead<T>(
+    Future<T> request,
+    String stage, {
+    int seconds = 15,
+  }) {
+    startupStage = stage;
+    notifyListeners();
+    return request.timeout(
+      Duration(seconds: seconds),
+      onTimeout: () {
+        throw StateError('$stage timed out. Retry or sign in.');
+      },
+    );
+  }
+
   Future<void> _loadStartup() async {
-    await appearance?.load();
+    await _startupRead(
+      appearance?.load() ?? Future.value(),
+      'Loading appearance',
+    );
     if (appearance?.error != null) throw StateError(appearance!.error!);
-    await nativeSetup?.refresh();
-    cacheLimit = await preferences.readCacheLimit();
+    await _startupRead(
+      nativeSetup?.refresh() ?? Future.value(),
+      'Checking macOS setup',
+      seconds: 20,
+    );
+    if (nativeSetup?.error != null) throw StateError(nativeSetup!.error!);
+    cacheLimit = await _startupRead(
+      preferences.readCacheLimit(),
+      'Loading storage settings',
+    );
     final sessionError = accountWindow?.sessionError;
     if (sessionError != null) throw StateError(sessionError);
     if (gateway is RelaunchSessionGateway) {
-      final restored = await (gateway as RelaunchSessionGateway)
-          .restoreRelaunch();
+      final restored = await _startupRead(
+        (gateway as RelaunchSessionGateway).restoreRelaunch(),
+        'Restoring session',
+        seconds: 45,
+      );
       if (restored != null) {
         await _finishAuthentication(restored);
         return;
       }
     }
-    savedEmail = await gateway.savedLogin();
-    await security?.checkConfiguration();
+    savedEmail = await _startupRead(
+      gateway.savedLogin(),
+      'Loading saved sign-in',
+    );
+    await _startupRead(
+      security?.checkConfiguration() ?? Future.value(),
+      'Checking sign-in settings',
+    );
     if (savedEmail == null || security?.touchId == true) {
       page = GardenPage.signIn;
       return;
     }
-    final restored = await gateway.restoreAccount();
+    final restored = await _startupRead(
+      gateway.restoreAccount(),
+      'Verifying session',
+      seconds: 45,
+    );
     if (restored == null) {
       await gateway.forgetSavedLogin();
       savedEmail = null;
@@ -274,7 +351,16 @@ class GardenController extends ChangeNotifier {
   }
 
   void navigate(GardenPage destination) {
-    if (busy) return;
+    if (navigationBlocked) return;
+    if (busy &&
+        !(account != null &&
+            const {
+              GardenPage.settings,
+              GardenPage.gardens,
+              GardenPage.inbox,
+            }.contains(destination))) {
+      return;
+    }
     setupVisible = false;
     if (destination == GardenPage.settings && page != GardenPage.settings) {
       _settingsReturn = page;
@@ -285,14 +371,14 @@ class GardenController extends ChangeNotifier {
   }
 
   void selectSettings(SettingsSection section) {
-    if (busy) return;
+    if (navigationBlocked) return;
     settingsSection = section;
     error = null;
     notifyListeners();
   }
 
   void back() {
-    if (busy) return;
+    if (navigationBlocked || busy && account == null) return;
     navigate(switch (page) {
       GardenPage.signIn || GardenPage.register => GardenPage.signIn,
       GardenPage.verify => GardenPage.register,
@@ -435,7 +521,11 @@ class GardenController extends ChangeNotifier {
     ActivityLog.instance.account = signedIn.id;
     savedEmail = signedIn.email;
     page = GardenPage.starting;
-    gardens = await gateway.listGardens();
+    gardens = await _startupRead(
+      gateway.listGardens(),
+      'Loading drives',
+      seconds: 45,
+    );
     serviceAvailable = true;
     setupVisible =
         gardens.isEmpty &&
@@ -503,9 +593,10 @@ class GardenController extends ChangeNotifier {
   Future<void> _showDrive(GardenInfo drive) async {
     final browser = files;
     if (browser == null) throw StateError('File browser is unavailable.');
+    final previousPage = page;
     selected = drive;
     await browser.open(drive);
-    page = GardenPage.files;
+    if (page == previousPage) page = GardenPage.files;
     if (browser.error != null) throw StateError(browser.error!);
   }
 

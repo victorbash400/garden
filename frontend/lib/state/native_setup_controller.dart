@@ -27,7 +27,7 @@ class NativeSetupController extends ChangeNotifier {
     error = null;
     notifyListeners();
     try {
-      await action();
+      await action().timeout(const Duration(seconds: 15));
     } catch (failure) {
       error = errorMessage(failure);
     } finally {

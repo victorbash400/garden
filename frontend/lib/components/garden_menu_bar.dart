@@ -27,11 +27,10 @@ class GardenMenuBar extends StatelessWidget {
       builder: (context, _) {
         final files = controller.files;
         final available =
-            controller.page == GardenPage.files &&
-            files?.drive != null &&
-            !files!.busy;
+            controller.page == GardenPage.files && files?.drive != null;
+        final writable = available && !files!.busy;
         final actions = files == null ? null : FileActions(context, files);
-        final node = available ? files.selected : null;
+        final node = available ? files!.selected : null;
         PlatformMenuItem item(
           String label,
           VoidCallback? action,
@@ -78,13 +77,13 @@ class GardenMenuBar extends StatelessWidget {
                 ),
                 item(
                   'New Folder…',
-                  available ? () => actions!.create('folder') : null,
+                  writable ? () => actions!.create('folder') : null,
                   LogicalKeyboardKey.keyN,
                   shift: true,
                 ),
                 item(
                   'Import Files…',
-                  available && !files.imports.busy ? actions!.import : null,
+                  writable && !files.imports.busy ? actions!.import : null,
                   LogicalKeyboardKey.keyI,
                   shift: true,
                 ),
@@ -95,13 +94,15 @@ class GardenMenuBar extends StatelessWidget {
                 ),
                 PlatformMenuItem(
                   label: 'Rename…',
-                  onSelected: node == null
+                  onSelected: node == null || !writable
                       ? null
                       : () => actions!.perform(node, 'rename'),
                 ),
                 item(
                   'Delete…',
-                  node == null ? null : () => actions!.perform(node, 'delete'),
+                  node == null || !writable
+                      ? null
+                      : () => actions!.perform(node, 'delete'),
                   LogicalKeyboardKey.backspace,
                 ),
                 item(
@@ -164,7 +165,7 @@ class GardenMenuBar extends StatelessWidget {
                       FileViewMode.list => 'As List',
                       FileViewMode.columns => 'As Columns',
                     },
-                    available ? () => files.setViewMode(mode) : null,
+                    available ? () => files!.setViewMode(mode) : null,
                     switch (mode) {
                       FileViewMode.grid => LogicalKeyboardKey.digit1,
                       FileViewMode.list => LogicalKeyboardKey.digit2,
@@ -173,7 +174,7 @@ class GardenMenuBar extends StatelessWidget {
                   ),
                 PlatformMenuItem(
                   label: 'Parent Folder',
-                  onSelected: available && files.path.isNotEmpty
+                  onSelected: writable && files.path.isNotEmpty
                       ? () => files.goTo(files.path.length - 1)
                       : null,
                 ),

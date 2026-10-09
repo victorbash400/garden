@@ -43,7 +43,7 @@ class _SidebarDrivesState extends State<SidebarDrives> {
           ),
         DriveSectionHeader(
           label: 'Drives',
-          onOpen: controller.busy
+          onOpen: controller.navigationBlocked
               ? null
               : () => controller.navigate(GardenPage.gardens),
         ),

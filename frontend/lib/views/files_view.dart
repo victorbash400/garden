@@ -29,6 +29,7 @@ class FilesView extends StatefulWidget {
     this.inboxUnread,
     this.onInbox,
     this.onConnections,
+    this.onErrorConnections,
     this.onManageDrive,
     this.chatService,
     this.focusEvents,
@@ -41,6 +42,7 @@ class FilesView extends StatefulWidget {
   final String userId;
   final VoidCallback onBackToDrives;
   final VoidCallback? onConnections, onManageDrive;
+  final VoidCallback? onErrorConnections;
   @override
   State<FilesView> createState() => _FilesViewState();
 }
@@ -230,6 +232,17 @@ class _FilesViewState extends State<FilesView> with WidgetsBindingObserver {
                 ErrorNotice(
                   message: controller.error!,
                   onDismiss: controller.dismissError,
+                  action:
+                      controller.openingError &&
+                          widget.onErrorConnections != null
+                      ? 'Connections'
+                      : null,
+                  onAction: controller.openingError
+                      ? () {
+                          controller.dismissError();
+                          widget.onErrorConnections?.call();
+                        }
+                      : null,
                 ),
               Expanded(
                 child: Row(

@@ -20,12 +20,14 @@ class FileRow extends StatelessWidget {
     this.striped = false,
     this.canWrite = true,
     this.canPreview = false,
+    this.onMenu,
   });
   final bool striped, canWrite, canPreview;
   final FileNode node;
   final bool selected;
   final VoidCallback onSelect;
   final VoidCallback onOpen;
+  final VoidCallback? onMenu;
   final ValueChanged<String> onAction;
   @override
   Widget build(BuildContext context) => HoverRename(
@@ -55,17 +57,25 @@ class FileRow extends StatelessWidget {
                   ),
                 ),
                 FileRowValues(node: node, width: constraints.maxWidth - 57),
-                PopupMenuButton<String>(
-                  tooltip: 'File actions',
-                  padding: EdgeInsets.zero,
-                  icon: SystemIcon(SystemIcons.ellipsis, size: 16),
-                  onSelected: onAction,
-                  itemBuilder: (_) => nodeMenuItems(
-                    node,
-                    canWrite: canWrite,
-                    canPreview: canPreview,
+                if (onMenu != null)
+                  IconButton(
+                    tooltip: 'File actions',
+                    onPressed: onMenu,
+                    padding: EdgeInsets.zero,
+                    icon: SystemIcon(SystemIcons.ellipsis, size: 16),
+                  )
+                else
+                  PopupMenuButton<String>(
+                    tooltip: 'File actions',
+                    padding: EdgeInsets.zero,
+                    icon: SystemIcon(SystemIcons.ellipsis, size: 16),
+                    onSelected: onAction,
+                    itemBuilder: (_) => nodeMenuItems(
+                      node,
+                      canWrite: canWrite,
+                      canPreview: canPreview,
+                    ),
                   ),
-                ),
               ],
             ),
           ),

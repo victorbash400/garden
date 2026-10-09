@@ -14,8 +14,11 @@ class MacFuseRow extends StatelessWidget {
     final installed = controller.nativeSetup?.status?.macFuseInstalled;
     return SettingsRow(
       label: 'macFUSE',
-      value: Row(
-        mainAxisSize: MainAxisSize.min,
+      value: Wrap(
+        alignment: WrapAlignment.end,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 12,
+        runSpacing: 8,
         children: [
           Text(
             installed == null
@@ -24,7 +27,6 @@ class MacFuseRow extends StatelessWidget {
                 ? 'Installed'
                 : 'Not installed',
           ),
-          const SizedBox(width: 12),
           SettingsInlineButton(
             label: 'Get macFUSE',
             onPressed: controller.busy

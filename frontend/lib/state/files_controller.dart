@@ -5,6 +5,7 @@ import '../services/activity_log.dart';
 import 'drive_folder_index.dart';
 import 'drive_browser_state.dart';
 import 'file_import_controller.dart';
+import 'file_opening_controller.dart';
 
 import '../utils/error_message.dart';
 
@@ -23,6 +24,7 @@ class FilesController extends ChangeNotifier {
   }
   final FilesGateway gateway;
   late final FileImportController imports;
+  final opening = FileOpeningController();
   final Map<int, DriveBrowserState> _sessions = {};
   final Map<int, DriveFolderIndex> _indexes = {};
   DriveFolderIndex folderIndex(int driveId) =>
@@ -34,6 +36,7 @@ class FilesController extends ChangeNotifier {
   FileNode? selected;
   FileViewMode viewMode = FileViewMode.list;
   Future<void> Function(FileNode)? openFile;
+  Future<void> Function(FileNode, String)? openFileWith;
   Future<void> Function(FileNode)? previewFile;
   void setViewMode(FileViewMode mode) {
     if (mode == viewMode) return;
@@ -44,6 +47,7 @@ class FilesController extends ChangeNotifier {
   bool busy = false;
   bool live = false;
   String? error;
+  bool openingError = false;
   int revision = 0;
   int detailsRevision = 0;
   double? progress;
@@ -98,7 +102,9 @@ class FilesController extends ChangeNotifier {
     _buffer ??= [];
     late DirectoryListing listing;
     try {
-      listing = await gateway.list(drive!.id, parentId);
+      listing = await gateway
+          .list(drive!.id, parentId)
+          .timeout(const Duration(seconds: 45));
     } catch (_) {
       _buffer = null;
       rethrow;
@@ -156,7 +162,14 @@ class FilesController extends ChangeNotifier {
   }
 
   void reportError(Object failure) {
+    openingError = false;
     error = errorMessage(failure);
+    notifyListeners();
+  }
+
+  void reportOpeningError(FileNode node, Object failure) {
+    openingError = true;
+    error = 'Could not open ${node.name}.\n${errorMessage(failure)}';
     notifyListeners();
   }
 
@@ -168,6 +181,7 @@ class FilesController extends ChangeNotifier {
 
   void dismissError() {
     error = null;
+    openingError = false;
     notifyListeners();
   }
 
@@ -217,7 +231,9 @@ class FilesController extends ChangeNotifier {
       final generation = _generation;
       _treeBuffer = [];
       try {
-        final listing = await gateway.list(drive!.id, folderId);
+        final listing = await gateway
+            .list(drive!.id, folderId)
+            .timeout(const Duration(seconds: 45));
         if (generation != _generation) return;
         folders.replaceDirectory(folderId, listing.nodes);
         for (final event in _treeBuffer!) {
@@ -238,7 +254,9 @@ class FilesController extends ChangeNotifier {
     final index = folderIndex(driveId);
     if (index.isLoaded(parentId)) return;
     try {
-      final listing = await gateway.list(driveId, parentId);
+      final listing = await gateway
+          .list(driveId, parentId)
+          .timeout(const Duration(seconds: 45));
       index.replaceDirectory(parentId, listing.nodes);
       _sessions.putIfAbsent(
         driveId,
@@ -426,6 +444,7 @@ class FilesController extends ChangeNotifier {
     _generation++;
     unawaited(_subscription?.cancel());
     imports.dispose();
+    opening.dispose();
     super.dispose();
   }
 }

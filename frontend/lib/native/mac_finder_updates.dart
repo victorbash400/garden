@@ -15,6 +15,7 @@ class MacFinderUpdates extends FinderUpdates {
 
   final Stream<FinderStatus> Function(AccountInfo, List<GardenInfo>) _watch;
   StreamSubscription<FinderStatus>? _subscription;
+  Timer? _initialStatusDeadline;
   FinderUpdateState _state = FinderUpdateState.idle;
   int _generation = 0;
   @override
@@ -47,9 +48,21 @@ class MacFinderUpdates extends FinderUpdates {
     final ids = drives.map((drive) => drive.id).toSet();
     _state = FinderUpdateState.connecting;
     notifyListeners();
+    _initialStatusDeadline = Timer(const Duration(seconds: 45), () {
+      if (generation != _generation) return;
+      _generation++;
+      unawaited(_subscription?.cancel());
+      _subscription = null;
+      _failure(
+        StateError(
+          'Finder did not return drive status. Check connections and retry.',
+        ),
+      );
+    });
     _subscription = _watch(account, drives).listen(
       (status) {
         if (generation != _generation) return;
+        _initialStatusDeadline?.cancel();
         this.status = status;
         error = status.enabled.containsAll(ids)
             ? null
@@ -72,6 +85,7 @@ class MacFinderUpdates extends FinderUpdates {
   }
 
   void _failure(Object failure) {
+    _initialStatusDeadline?.cancel();
     error = errorMessage(failure);
     final registered = status?.registered;
     if (registered != null) {
@@ -83,6 +97,7 @@ class MacFinderUpdates extends FinderUpdates {
 
   @override
   Future<void> close() async {
+    _initialStatusDeadline?.cancel();
     _generation++;
     await _subscription?.cancel();
     _subscription = null;

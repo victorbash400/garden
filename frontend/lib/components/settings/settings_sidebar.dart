@@ -43,7 +43,7 @@ class SettingsSidebar extends StatelessWidget {
                     icon: SystemIcon(SystemIcons.userRound),
                     selected:
                         controller.settingsSection == SettingsSection.account,
-                    onTap: controller.busy
+                    onTap: controller.navigationBlocked
                         ? null
                         : () => controller.selectSettings(
                             SettingsSection.account,
@@ -54,7 +54,7 @@ class SettingsSidebar extends StatelessWidget {
                     icon: SystemIcon(SystemIcons.hardDrive),
                     selected:
                         controller.settingsSection == SettingsSection.storage,
-                    onTap: controller.busy
+                    onTap: controller.navigationBlocked
                         ? null
                         : () => controller.selectSettings(
                             SettingsSection.storage,
@@ -66,7 +66,7 @@ class SettingsSidebar extends StatelessWidget {
                     selected:
                         controller.settingsSection ==
                         SettingsSection.connections,
-                    onTap: controller.busy
+                    onTap: controller.navigationBlocked
                         ? null
                         : () => controller.selectSettings(
                             SettingsSection.connections,
@@ -116,7 +116,7 @@ class SettingsSidebar extends StatelessWidget {
           label: 'Back to drives',
           icon: SystemIcon(SystemIcons.arrowLeft),
           selected: false,
-          onTap: controller.busy ? null : controller.back,
+          onTap: controller.navigationBlocked ? null : controller.back,
         ),
         SizedBox(height: 8),
         SidebarAccountFooter(controller: controller),

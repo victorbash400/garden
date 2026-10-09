@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:garden_client/garden_client.dart';
 
 import '../../state/files_controller.dart';
@@ -64,9 +65,9 @@ class FileActions {
       return;
     }
     try {
-      await opener(node);
+      await controller.opening.run(node, () => opener(node));
     } catch (failure) {
-      controller.reportError(failure);
+      controller.reportOpeningError(node, failure);
     }
   }
 
@@ -104,7 +105,37 @@ class FileActions {
   }
 
   Future<void> perform(FileNode node, String action) async {
-    if (controller.busy) return;
+    if (action.startsWith('openWith:')) {
+      final opener = controller.openFileWith;
+      if (opener == null) {
+        controller.reportError(
+          StateError('Choosing an application is unavailable.'),
+        );
+        return;
+      }
+      try {
+        await controller.opening.run(
+          node,
+          () => opener(node, action.substring(9)),
+        );
+      } on PlatformException catch (failure) {
+        if (failure.code != 'file_open_cancelled') {
+          controller.reportOpeningError(node, failure);
+        }
+      } catch (failure) {
+        controller.reportOpeningError(node, failure);
+      }
+      return;
+    }
+    if (controller.busy &&
+        !const {'open', 'preview', 'export', 'share'}.contains(action)) {
+      controller.reportError(
+        StateError(
+          'A drive change is still in progress. Try again when it finishes.',
+        ),
+      );
+      return;
+    }
     if (!controller.canWrite &&
         const {'edit', 'rename', 'move', 'delete'}.contains(action)) {
       return;
@@ -121,9 +152,9 @@ class FileActions {
           if (preview == null) {
             throw StateError('Native file previews are unavailable.');
           }
-          await preview(node);
+          await controller.opening.run(node, () => preview(node));
         } catch (failure) {
-          controller.reportError(failure);
+          controller.reportOpeningError(node, failure);
         }
       case 'edit':
         await edit(node);

@@ -6,10 +6,12 @@ import '../model/account_info.dart';
 import '../model/garden_info.dart';
 import '../services/serverpod_gateway.dart';
 import 'finder_mounts.dart';
+import 'finder_file_applications.dart';
 import 'finder_previews.dart';
 import 'finder_status.dart';
 
-class MacFinderMounts implements FinderMounts, FinderPreviews {
+class MacFinderMounts
+    implements FinderMounts, FinderPreviews, FinderFileApplications {
   MacFinderMounts(this.gateway, this.serverURL);
 
   final ServerpodGateway gateway;
@@ -17,6 +19,35 @@ class MacFinderMounts implements FinderMounts, FinderPreviews {
   static const _channel = MethodChannel('garden/finder');
   @override
   final Set<int> mountedDriveIDs = {};
+
+  @override
+  Future<String> prepareFile(
+    AccountInfo account,
+    int driveId,
+    int nodeId,
+  ) async {
+    final path = await _channel.invokeMethod<String>('prepareOpen', {
+      'accountID': account.id,
+      'driveID': driveId,
+      'nodeID': nodeId,
+    });
+    if (path == null || path.isEmpty) {
+      throw StateError('Garden did not return the mounted file location.');
+    }
+    return path;
+  }
+
+  @override
+  Future<String> openPreparedFile(String path, {String? application}) async {
+    final opened = await _channel.invokeMethod<String>('openPrepared', {
+      'path': path,
+      'application': application,
+    });
+    if (opened == null || opened.isEmpty) {
+      throw StateError('macOS did not confirm that the file was opened.');
+    }
+    return opened;
+  }
 
   @override
   Future<void> sync(AccountInfo account, List<GardenInfo> drives) async {
@@ -58,10 +89,19 @@ class MacFinderMounts implements FinderMounts, FinderPreviews {
     if (retired.isNotEmpty) {
       await gateway.client.garden.revokeFinderSessions(retired);
     }
-    await _channel.invokeMethod<void>('reconcile', {
-      'accountID': account.id,
-      'driveIDs': ids,
-    });
+    await _channel
+        .invokeMethod<void>('reconcile', {
+          'accountID': account.id,
+          'driveIDs': ids,
+        })
+        .timeout(
+          Duration(seconds: 60 + 45 * ids.length),
+          onTimeout: () {
+            throw StateError(
+              'Finder setup timed out. Pending file changes are preserved. Check Connections and retry.',
+            );
+          },
+        );
     mountedDriveIDs
       ..clear()
       ..addAll(ids);

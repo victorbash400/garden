@@ -28,7 +28,7 @@ class ProfileButton extends StatelessWidget {
         child: PopupMenuButton<String>(
           tooltip: 'Account menu',
           popUpAnimationStyle: AnimationStyle.noAnimation,
-          enabled: !controller.busy,
+          enabled: !controller.navigationBlocked,
           position: PopupMenuPosition.over,
           offset: Offset(
             0,
@@ -95,6 +95,7 @@ class ProfileButton extends StatelessWidget {
             if (controller.accountWindow != null)
               PopupMenuItem(
                 value: 'new',
+                enabled: !controller.busy,
                 height: 36,
                 child: ProfileMenuItem(
                   icon: SystemIcons.appWindow,
@@ -111,6 +112,7 @@ class ProfileButton extends StatelessWidget {
             ),
             PopupMenuItem(
               value: 'signOut',
+              enabled: !controller.busy,
               height: 36,
               child: ProfileMenuItem(
                 icon: SystemIcons.logOut,

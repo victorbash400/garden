@@ -9,11 +9,13 @@ class StartupView extends StatelessWidget {
     required this.loading,
     required this.onRetry,
     required this.onSignIn,
+    this.status = 'Starting Garden',
   });
 
   final bool loading;
   final VoidCallback onRetry;
   final VoidCallback onSignIn;
+  final String status;
 
   @override
   Widget build(BuildContext context) => Center(
@@ -22,15 +24,17 @@ class StartupView extends StatelessWidget {
       children: [
         const GardenMark(size: 36),
         const SizedBox(height: 24),
-        if (loading)
+        if (loading) ...[
           const SizedBox.square(
             dimension: 18,
             child: CircularProgressIndicator(
               strokeWidth: 2,
               color: Colors.black,
             ),
-          )
-        else ...[
+          ),
+          const SizedBox(height: 12),
+          Text(status, style: const TextStyle(fontSize: 12)),
+        ] else ...[
           GardenButton(label: 'Retry', onPressed: onRetry),
           const SizedBox(height: 12),
           GardenButton(label: 'Sign in', secondary: true, onPressed: onSignIn),
