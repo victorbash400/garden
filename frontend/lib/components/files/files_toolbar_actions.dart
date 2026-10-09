@@ -50,7 +50,7 @@ class FilesToolbarActions extends StatelessWidget {
                   const {'Owner', 'Manager'}.contains(controller.drive!.role)
               ? ToolbarButton(
                   tooltip: 'Invite to drive',
-                  onPressed: controller.busy ? null : onInvite,
+                  onPressed: onInvite,
                   icon: SystemIcons.userPlus,
                 )
               : null,

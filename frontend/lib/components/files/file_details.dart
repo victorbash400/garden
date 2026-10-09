@@ -69,7 +69,7 @@ class _FileDetailsState extends State<FileDetails> {
         widget.gateway.comments(nodeId).then<void>((value) {
           loadedComments = value;
         }),
-      ]);
+      ]).timeout(const Duration(seconds: 45));
       if (!mounted || request != generation) return;
       setState(() {
         versions = loadedVersions;

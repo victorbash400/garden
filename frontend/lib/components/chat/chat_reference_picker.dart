@@ -51,10 +51,10 @@ class _ChatReferencePickerState extends State<ChatReferencePicker> {
           cache[id] ??
           (index != null && index.isLoaded(id)
               ? index.directory(id)
-              : (await (widget.files?.gateway ?? widget.gateway!).list(
-                  widget.files?.drive?.id ?? widget.driveId!,
-                  id,
-                )).nodes);
+              : (await (widget.files?.gateway ?? widget.gateway!)
+                        .list(widget.files?.drive?.id ?? widget.driveId!, id)
+                        .timeout(const Duration(seconds: 45)))
+                    .nodes);
       if (!mounted) return;
       cache[id] = values;
       setState(() => nodes = values);

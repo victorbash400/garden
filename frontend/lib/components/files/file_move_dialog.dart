@@ -35,7 +35,9 @@ class _FileMoveDialogState extends State<FileMoveDialog> {
       error = null;
     });
     try {
-      final listing = await widget.gateway.list(widget.node.gardenId, parent);
+      final listing = await widget.gateway
+          .list(widget.node.gardenId, parent)
+          .timeout(const Duration(seconds: 45));
       if (mounted) {
         setState(
           () => folders = listing.nodes
