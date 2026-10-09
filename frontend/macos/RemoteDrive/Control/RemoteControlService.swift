@@ -70,6 +70,9 @@ final class RemoteControlService: NSObject, NSXPCListenerDelegate, GardenRemoteC
     case "location":
       guard let driveID = request.driveID else { throw POSIXError(.EINVAL) }
       return try await manager.location(accountID: request.accountID, driveID: driveID, nodeID: request.nodeID).path
+    case "mount", "unmount":
+      guard let driveID = request.driveID else { throw POSIXError(.EINVAL) }
+      try await manager.setMounted(accountID: request.accountID, driveID: driveID, enabled: method == "mount")
     case "reconnect":
       guard let driveID = request.driveID else { throw POSIXError(.EINVAL) }
       try await manager.reconnect(accountID: request.accountID, driveID: driveID)

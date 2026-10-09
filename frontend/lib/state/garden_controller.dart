@@ -27,6 +27,7 @@ import '../services/username_gateway.dart';
 import '../services/preferences_store.dart';
 import '../services/setup_store.dart';
 import '../native/finder_mounts.dart';
+import '../native/finder_drive_control.dart';
 import '../native/finder_file_applications.dart';
 import '../native/finder_previews.dart';
 import '../native/finder_updates.dart';
@@ -226,7 +227,8 @@ class GardenController extends ChangeNotifier {
   final SetupStore? setupStore;
   FinderStatus finderStatus = const FinderStatus();
   Set<int> get finderEnabledDriveIDs => finderStatus.enabled;
-  bool get finderPermissionRequired => finderStatus.disabled.isNotEmpty;
+  bool get finderPermissionRequired =>
+      nativeSetup?.status?.finderAvailable == false;
   bool finderSyncing = false;
   String? finderIssue;
   bool serviceAvailable = false;
@@ -560,6 +562,37 @@ class GardenController extends ChangeNotifier {
       await files!.reconnect();
     }
   });
+
+  final Set<int> changingMounts = {};
+  bool get canControlMounts => finder is FinderDriveControl;
+
+  Future<void> setDriveMounted(GardenInfo drive, bool mounted) async {
+    final current = account;
+    final controls = finder;
+    if (current == null ||
+        controls is! FinderDriveControl ||
+        !changingMounts.add(drive.id)) {
+      return;
+    }
+    error = null;
+    notifyListeners();
+    try {
+      await _finderWork;
+      if (account?.id != current.id) return;
+      await (controls as FinderDriveControl).setMounted(
+        current,
+        drive.id,
+        mounted,
+      );
+      finderStatus = await finder!.status(current, gardens);
+      finderIssue = null;
+    } catch (failure) {
+      if (account?.id == current.id) error = errorMessage(failure);
+    } finally {
+      changingMounts.remove(drive.id);
+      notifyListeners();
+    }
+  }
 
   Future<void> openInFinder(GardenInfo drive) => _request(() async {
     final signedIn = account;

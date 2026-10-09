@@ -6,12 +6,17 @@ import '../model/account_info.dart';
 import '../model/garden_info.dart';
 import '../services/serverpod_gateway.dart';
 import 'finder_mounts.dart';
+import 'finder_drive_control.dart';
 import 'finder_file_applications.dart';
 import 'finder_previews.dart';
 import 'finder_status.dart';
 
 class MacFinderMounts
-    implements FinderMounts, FinderPreviews, FinderFileApplications {
+    implements
+        FinderMounts,
+        FinderPreviews,
+        FinderFileApplications,
+        FinderDriveControl {
   MacFinderMounts(this.gateway, this.serverURL);
 
   final ServerpodGateway gateway;
@@ -19,6 +24,18 @@ class MacFinderMounts
   static const _channel = MethodChannel('garden/finder');
   @override
   final Set<int> mountedDriveIDs = {};
+
+  @override
+  Future<void> setMounted(
+    AccountInfo account,
+    int driveId,
+    bool mounted,
+  ) async {
+    await _channel.invokeMethod<void>(mounted ? 'mount' : 'unmount', {
+      'accountID': account.id,
+      'driveID': driveId,
+    });
+  }
 
   @override
   Future<String> prepareFile(
@@ -133,7 +150,11 @@ class MacFinderMounts
     if (result == null) {
       throw StateError('Finder did not return connection status.');
     }
-    return FinderStatus.fromMap(result);
+    final status = FinderStatus.fromMap(result);
+    mountedDriveIDs
+      ..clear()
+      ..addAll(status.enabled);
+    return status;
   }
 
   @override

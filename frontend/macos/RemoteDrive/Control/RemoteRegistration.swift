@@ -4,6 +4,7 @@ struct RemoteRegistration: Codable, Equatable, Sendable {
   let accountID: String
   let driveID: Int
   var name: String
+  var suspended: Bool? = nil
   var retiring: Bool? = nil
   var accessWithdrawn: Bool? = nil
 

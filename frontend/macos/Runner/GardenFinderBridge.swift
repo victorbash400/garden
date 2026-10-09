@@ -56,7 +56,9 @@ enum GardenFinderBridge {
             let value = try await GardenRemoteBridge.request(call.method, request)
             if call.method == "reconcile" {
               guard let ids = request.driveIDs else { throw FinderBridgeError.invalidArguments }
-              for id in ids {
+              let status = try await GardenRemoteBridge.request("status", request) as? [String: [Int]]
+              let disabled = Set(status?["disabled"] ?? [])
+              for id in ids where !disabled.contains(id) {
                 _ = try await GardenRemoteBridge.request("location", GardenRemoteRequest(accountID: accountID, driveID: id))
               }
               try await FinderDomainManager.retire(accountID: accountID)
@@ -82,7 +84,7 @@ enum GardenFinderBridge {
               message = "You no longer have access to this drive. Ask its owner to restore access."
             } else if failure.domain == "GardenRemote" && failure.code == 503 {
               code = "finder_unmounted"
-              message = "This drive is not connected. Open Connections in Settings to reconnect it."
+              message = "This drive is not connected. Open Drives in Settings to mount or reconnect it."
             } else if failure.domain == NSOSStatusErrorDomain && failure.code == -10814 {
               code = "file_no_application"
               message = "No installed application can open this file. Choose an application with Open With."

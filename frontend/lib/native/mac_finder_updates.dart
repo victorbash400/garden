@@ -64,7 +64,7 @@ class MacFinderUpdates extends FinderUpdates {
         if (generation != _generation) return;
         _initialStatusDeadline?.cancel();
         this.status = status;
-        error = status.enabled.containsAll(ids)
+        error = {...status.enabled, ...status.disabled}.containsAll(ids)
             ? null
             : 'Finder drives disconnected.';
         _state = error == null

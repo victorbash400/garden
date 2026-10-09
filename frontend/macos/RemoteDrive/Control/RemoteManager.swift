@@ -52,7 +52,7 @@ actor RemoteManager {
   func restore() async {
     let registrations = entries.values.map(\.registration)
     for registration in registrations {
-      if registration.retiring == true { continue }
+      if registration.retiring == true || registration.suspended == true { continue }
       do {
         if let existing = entries[registration.domainID]?.mount { try await existing.engine.reconnect() }
         else { _ = try await mount(registration.domainID) }
@@ -70,7 +70,11 @@ actor RemoteManager {
       if entry.removing { throw POSIXError(.EBUSY) }
       if entry.registration.retiring == true {
         try await resumeRetirement(entry, registration: registration, credential: credential)
-      } else if entry.registration != registration { throw POSIXError(.EBUSY) }
+      } else {
+        var expected = registration
+        expected.suspended = entry.registration.suspended
+        if entry.registration != expected { throw POSIXError(.EBUSY) }
+      }
       if entry.starting != nil { _ = try await mount(id); return }
       if let current = entry.mount {
         if await current.engine.issue == nil { return }
@@ -84,7 +88,7 @@ actor RemoteManager {
       catch { entries.removeValue(forKey: id); throw error }
     }
     try FinderCredentialStore.save(credential, domainID: id)
-    _ = try await mount(id)
+    if entries[id]?.registration.suspended != true { _ = try await mount(id) }
   }
 
   private func resumeRetirement(_ entry: RemoteDriveEntry, registration: RemoteRegistration,
@@ -112,6 +116,32 @@ actor RemoteManager {
     catch { entry.registration = previous; throw error }
   }
 
+  func setMounted(accountID: String, driveID: Int, enabled: Bool) async throws {
+    try validateAccount(accountID)
+    guard let entry = entries[domainID(accountID, driveID)], !entry.removing,
+      entry.starting == nil, entry.registration.retiring != true else { throw POSIXError(.EBUSY) }
+    entry.removing = true
+    defer { entry.removing = false }
+    let previous = entry.registration
+    entry.registration.suspended = !enabled
+    do { try save() }
+    catch { entry.registration = previous; throw error }
+    do {
+      if enabled {
+        entry.removing = false
+        _ = try await mount(entry.registration.domainID)
+      } else {
+        try await unmount(entry)
+      }
+      entry.issue = nil
+      await publish()
+    } catch {
+      entry.issue = error.localizedDescription
+      await publish()
+      throw error
+    }
+  }
+
   func rename(accountID: String, driveID: Int, name: String) async throws {
     let registration = RemoteRegistration(accountID: accountID, driveID: driveID, name: name)
     try registration.validate()
@@ -127,7 +157,7 @@ actor RemoteManager {
     do { try save() }
     catch { entry.registration = previous; throw error }
     entry.removing = false
-    _ = try await mount(id)
+    if entry.registration.suspended != true { _ = try await mount(id) }
     await publish()
   }
 
@@ -138,6 +168,7 @@ actor RemoteManager {
       guard let entry = entries[domainID(accountID, driveID)] else { continue }
       result["registered"]!.append(driveID)
       if entry.registration.retiring != true, let mount = entry.mount, await mount.engine.issue == nil { result["enabled"]!.append(driveID) }
+      else if entry.registration.suspended == true { result["disabled"]!.append(driveID) }
       else { result["disconnected"]!.append(driveID) }
     }
     return result
@@ -285,6 +316,10 @@ actor RemoteManager {
     guard entry.registration.retiring != true else {
       throw NSError(domain: "GardenRemoteRemoval", code: Int(EBUSY), userInfo:
         [NSLocalizedDescriptionKey: "Complete the pending drive removal before opening it."])
+    }
+    guard entry.registration.suspended != true else {
+      throw NSError(domain: "GardenRemote", code: Int(ENODEV), userInfo:
+        [NSLocalizedDescriptionKey: "This drive is unmounted. Mount it in Settings > Drives to open files."])
     }
     if let mount = entry.mount { return mount }
     if let pending = entry.starting { return try await pending.value }

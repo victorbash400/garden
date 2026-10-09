@@ -25,7 +25,7 @@ class FinderSetupRow extends StatelessWidget {
         : controller.finderIssue != null
         ? 'Error'
         : status.disabled.isNotEmpty
-        ? 'Permission required'
+        ? '${status.enabled.length} mounted, ${status.disabled.length} unmounted'
         : status.disconnected.isNotEmpty
         ? 'Disconnected'
         : controller.gardens.isEmpty
@@ -47,13 +47,13 @@ class FinderSetupRow extends StatelessWidget {
               onPressed: controller.busy || controller.finderSyncing
                   ? null
                   : status.disabled.isNotEmpty
-                  ? controller.openFinderSettings
+                  ? () => controller.selectSettings(SettingsSection.drives)
                   : controller.finderIssue != null ||
                         status.disconnected.isNotEmpty
                   ? controller.checkConnections
                   : () => controller.selectSettings(SettingsSection.drives),
               label: status.disabled.isNotEmpty
-                  ? 'Enable…'
+                  ? 'Manage…'
                   : controller.finderIssue != null ||
                         status.disconnected.isNotEmpty
                   ? 'Reconnect'

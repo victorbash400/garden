@@ -6,7 +6,7 @@ import '../components/settings/settings_row.dart';
 import '../components/settings/settings_issue.dart';
 import '../components/sharing/drive_usage_group.dart';
 import '../components/sharing/drive_settings_actions.dart';
-import '../components/sharing/drive_picker.dart';
+import '../components/settings/drive_settings_row.dart';
 import '../components/sharing/drive_members_group.dart';
 import '../components/sharing/drive_invitations_group.dart';
 import '../components/sharing/invite_member_dialog.dart';
@@ -84,7 +84,9 @@ class _DrivesSettingsState extends State<DrivesSettings> {
       error = null;
     });
     try {
-      final result = await service.management(driveId);
+      final result = await service
+          .management(driveId)
+          .timeout(const Duration(seconds: 45));
       if (mounted && selected == driveId) setState(() => details = result);
     } catch (failure) {
       if (mounted && selected == driveId) {
@@ -157,22 +159,19 @@ class _DrivesSettingsState extends State<DrivesSettings> {
       children: [
         SettingsGroup(
           children: [
-            SettingsRow(
-              label: 'Drive',
-              value: DrivePicker(
-                selected: selected,
-                drives: widget.controller.gardens,
-                onChanged: busy
-                    ? null
-                    : (value) {
-                        setState(() {
-                          selected = value;
-                          details = null;
-                        });
-                        load();
-                      },
+            for (final info in widget.controller.gardens)
+              DriveSettingsRow(
+                controller: widget.controller,
+                drive: info,
+                selected: selected == info.id,
+                onSelect: () {
+                  setState(() {
+                    selected = info.id;
+                    details = null;
+                  });
+                  load();
+                },
               ),
-            ),
             if (drive != null)
               DriveSettingsActions(
                 name: drive.drive.name,
