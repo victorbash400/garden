@@ -219,6 +219,11 @@ actor RemoteEngine {
     return names.reversed().joined(separator: "/")
   }
 
+  func checkOpenAccess() async throws {
+    try await refreshPermission()
+    try requireRead()
+  }
+
   func setInvalidation(_ callback: @escaping @Sendable ([String]) -> Void,
     settled: @escaping @Sendable () async -> Void) {
     invalidate = callback

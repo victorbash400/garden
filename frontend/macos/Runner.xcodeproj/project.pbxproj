@@ -21,6 +21,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		B00300000000000000000002 /* GardenFileMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00200000000000000000002 /* GardenFileMenu.swift */; };
+		B00300000000000000000001 /* GardenFileApplications.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00200000000000000000001 /* GardenFileApplications.swift */; };
 		ED99315BC9EA446EA6A413C3 /* GardenCredentialLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC1B739510354105B5D414ED /* GardenCredentialLock.swift */; };
 		73EE694C6ACC4760AF6ADDAF /* GardenCredentialLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC1B739510354105B5D414ED /* GardenCredentialLock.swift */; };
 		7DFD5C7D523444F5AFB2506E /* GardenCredentialLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC1B739510354105B5D414ED /* GardenCredentialLock.swift */; };
@@ -256,6 +258,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		B00200000000000000000002 /* GardenFileMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GardenFileMenu.swift; path = Runner/GardenFileMenu.swift; sourceTree = "<group>"; };
+		B00200000000000000000001 /* GardenFileApplications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GardenFileApplications.swift; path = Runner/GardenFileApplications.swift; sourceTree = "<group>"; };
 		DC1B739510354105B5D414ED /* GardenCredentialLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinderShared/GardenCredentialLock.swift; sourceTree = "<group>"; };
 		A50000000000000000000011 /* GardenRelaunchReceipt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenRelaunchReceipt.swift; sourceTree = "<group>"; };
 		A50000000000000000000008 /* GardenMemory.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = GardenMemory.c; sourceTree = "<group>"; };
@@ -470,6 +474,8 @@
 				DF1A3B90C9289C040C23D814 /* GardenProviderError.swift */,
 				7467EC0833FF3CBDC8E543CC /* RemoteControl */,
 				5191359337A5F282F6B03B41 /* RemoteDrive */,
+				B00200000000000000000001 /* GardenFileApplications.swift */,
+				B00200000000000000000002 /* GardenFileMenu.swift */,
 				21CB7DD914B7CAE7939DB087 /* GardenFinderBridge.swift */,
 				264689F7573263A6A2BAE211 /* GardenFinderEvents.swift */,
 			);
@@ -953,6 +959,8 @@
 				8E6CD48B6019612F85E93BF2 /* GardenRemoteBridge.swift in Sources */,
 				A6C02D09FF0E45C4844D2CF1 /* GardenFilePreview.swift in Sources */,
 				A6C02D09FF0E45C4844D2CF3 /* GardenMediaPreview.swift in Sources */,
+				B00300000000000000000001 /* GardenFileApplications.swift in Sources */,
+				B00300000000000000000002 /* GardenFileMenu.swift in Sources */,
 				A8431B719E003BF184C01B80 /* GardenFinderBridge.swift in Sources */,
 				50E13B6CE830811A706F40AC /* GardenFinderEvents.swift in Sources */,
 			);

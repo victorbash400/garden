@@ -31,6 +31,7 @@ import Cocoa
     GardenCacheBridge.install(on: messenger)
     NativeSetupBridge.install(on: messenger)
     GardenFinderBridge.install(on: messenger)
+    GardenFileMenu.install(on: messenger, view: controller.view)
     FlutterMethodChannel(name: "garden/native_auth", binaryMessenger: messenger)
       .setMethodCallHandler { call, result in
         result(call.method == "configured" ? nativeAuthenticationConfigured() : FlutterMethodNotImplemented)

@@ -25,7 +25,17 @@ final class RemoteControlService: NSObject, NSXPCListenerDelegate, GardenRemoteC
         let request = try JSONDecoder().decode(GardenRemoteRequest.self, from: payload)
         let value = try await perform(method, request: request)
         reply(try JSONSerialization.data(withJSONObject: value, options: [.fragmentsAllowed]), nil)
-      } catch { reply(nil, error.localizedDescription) }
+      } catch {
+        let failure = error as NSError
+        let code: Int
+        if case GardenAPIError.unauthorized = error { code = 401 }
+        else if failure.domain == NSURLErrorDomain && failure.code == NSURLErrorTimedOut { code = 408 }
+        else if failure.domain == NSPOSIXErrorDomain && failure.code == Int(EACCES) { code = 403 }
+        else if failure.domain == NSPOSIXErrorDomain && failure.code == Int(ENODEV) { code = 503 }
+        else { code = 500 }
+        let detail = try? JSONSerialization.data(withJSONObject: ["code": code])
+        reply(detail, error.localizedDescription)
+      }
     }
   }
 

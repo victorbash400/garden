@@ -48,7 +48,8 @@ enum GardenRemoteBridge {
     }) as? GardenRemoteControlProtocol else { throw GardenAPIError.invalidResponse }
     service.request(method, payload: payload) { data, message in
       if let message {
-        completion.resolve(.failure(NSError(domain: "GardenRemote", code: 3,
+        let detail = data.flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Int] }
+        completion.resolve(.failure(NSError(domain: "GardenRemote", code: detail?["code"] ?? 3,
           userInfo: [NSLocalizedDescriptionKey: message])))
       } else if let data { completion.resolve(.success(data)) }
       else { completion.resolve(.failure(GardenAPIError.invalidResponse)) }
@@ -67,14 +68,33 @@ enum GardenRemoteBridge {
 
   static func open(_ request: GardenRemoteRequest) async throws -> String {
     guard let path = try await Self.request("location", request) as? String else { throw GardenAPIError.invalidResponse }
-    return try await withCheckedThrowingContinuation { continuation in
-      DispatchQueue.main.async {
-        NSWorkspace.shared.open(URL(fileURLWithPath: path), configuration: NSWorkspace.OpenConfiguration()) { application, error in
-          if let error { continuation.resume(throwing: error) }
-          else if let identifier = application?.bundleIdentifier { continuation.resume(returning: identifier) }
-          else { continuation.resume(throwing: POSIXError(.EIO)) }
-        }
+    return try await openPath(path, directory: request.nodeID == nil)
+  }
+
+  static func openPath(_ path: String, directory: Bool = false, application: URL? = nil) async throws -> String {
+    guard path.hasPrefix("/Volumes/Garden-") else { throw GardenAPIError.invalidResponse }
+    let completion = RemoteCompletion<String>()
+    let deadline = Task {
+      do { try await Task.sleep(for: .seconds(60)) }
+      catch { return }
+      completion.resolve(.failure(URLError(.timedOut)))
+    }
+    defer { deadline.cancel() }
+    DispatchQueue.main.async {
+      let url = URL(fileURLWithPath: path, isDirectory: directory)
+      let finished: (NSRunningApplication?, Error?) -> Void = { application, error in
+        if let error { completion.resolve(.failure(error)) }
+        else if let identifier = application?.bundleIdentifier { completion.resolve(.success(identifier)) }
+        else { completion.resolve(.failure(POSIXError(.EIO))) }
+      }
+      if let application {
+        NSWorkspace.shared.open([url], withApplicationAt: application,
+          configuration: NSWorkspace.OpenConfiguration(), completionHandler: finished)
+      } else {
+        NSWorkspace.shared.open(url, configuration: NSWorkspace.OpenConfiguration(), completionHandler: finished)
       }
     }
+    return try await withTaskCancellationHandler { try await completion.wait() }
+      onCancel: { completion.resolve(.failure(CancellationError())) }
   }
 }

@@ -233,8 +233,12 @@ actor RemoteManager {
   func location(accountID: String, driveID: Int, nodeID: Int?) async throws -> URL {
     try validateAccount(accountID)
     let mount = try await mount(domainID(accountID, driveID))
+    if nodeID != nil { try await mount.engine.checkOpenAccess() }
     let relative = try await mount.engine.path(nodeID)
-    return URL(fileURLWithPath: mountPath(accountID, driveID)).appendingPathComponent(relative)
+    // Never stat our own mount while holding this actor. Filesystem callbacks can
+    // await publish(), which needs the same actor before their syscall completes.
+    let root = URL(fileURLWithPath: mountPath(accountID, driveID), isDirectory: true)
+    return relative.isEmpty ? root : root.appendingPathComponent(relative, isDirectory: false)
   }
 
   func reconnect(accountID: String, driveID: Int) async throws {
