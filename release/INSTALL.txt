@@ -26,7 +26,10 @@ Garden setup
    General > Login Items & Extensions. Allow Garden background activity there.
    Follow macFUSE's own version and compatibility requirements.
 
-6. Create or join a drive, check connections, then open the drive in Finder.
+6. Create or join a drive and check connections. Settings > Drives lists each
+   drive with Mount and Unmount controls. In Finder, use Go > Computer
+   (Command-Shift-C) to see mounted Garden drives. In an Open, Import or Save
+   dialog, use Command-Shift-G and enter /Volumes.
    The account setup checklist shows whether the drive is connected.
 
 7. Account setup remains available in Settings > Account. To delete an account,

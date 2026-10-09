@@ -1,8 +1,6 @@
 *.md
 *.MD
 !/README.md
-!/description.md
-!/architecture.md
 .env
 .env.*
 **/passwords.yaml

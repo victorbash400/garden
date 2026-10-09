@@ -118,7 +118,7 @@ class TestFinder implements FinderMounts {
   @override
   final Set<int> mountedDriveIDs = {};
   Set<int> enabledIDs = {};
-  bool requiresPermission = false;
+  bool unmounted = false;
   int? openedID;
   int? openedNodeID;
   bool openedSettings = false;
@@ -139,8 +139,10 @@ class TestFinder implements FinderMounts {
     return FinderStatus(
       registered: ids.intersection(mountedDriveIDs),
       enabled: ids.intersection(enabledIDs),
-      disconnected: ids.intersection(mountedDriveIDs).difference(enabledIDs),
-      disabled: requiresPermission ? ids : {},
+      disconnected: unmounted
+          ? {}
+          : ids.intersection(mountedDriveIDs).difference(enabledIDs),
+      disabled: unmounted ? ids : {},
     );
   }
 
@@ -196,25 +198,29 @@ void main() {
     expect(controller.gardens.map((drive) => drive.id), [1]);
     expect(finder.mountedDriveIDs, {1});
     expect(find.byTooltip('Connection needs attention'), findsOneWidget);
-    finder.requiresPermission = true;
+    finder.unmounted = true;
     await controller.checkFinder();
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Connection needs attention'));
+    controller.navigate(GardenPage.settings);
+    controller.selectSettings(SettingsSection.connections);
     await tester.pumpAndSettle();
     expect(controller.settingsSection, SettingsSection.connections);
     expect(find.text('Garden service'), findsOneWidget);
     expect(find.text('Finder drives'), findsOneWidget);
-    expect(find.text('Permission required'), findsOneWidget);
+    expect(find.text('0 mounted, 1 unmounted'), findsOneWidget);
     expect(find.text('Projects'), findsNothing);
     expect(find.byType(Switch), findsNothing);
-    await tester.tap(find.text('Enable…'));
+    await tester.tap(find.text('Manage…'));
     await tester.pumpAndSettle();
-    expect(finder.openedSettings, isTrue);
-    finder.requiresPermission = false;
+    expect(controller.settingsSection, SettingsSection.drives);
+    expect(finder.openedSettings, isFalse);
+    controller.selectSettings(SettingsSection.connections);
+    await tester.pumpAndSettle();
+    finder.unmounted = false;
     finder.enabledIDs = {1};
     await tester.tap(find.text('Check connections'));
     await tester.pumpAndSettle();
-    expect(find.text('Permission required'), findsNothing);
+    expect(find.text('0 mounted, 1 unmounted'), findsNothing);
     expect(find.text('Enable…'), findsNothing);
     expect(controller.needsFinderAttention, isFalse);
     gateway.failList = true;

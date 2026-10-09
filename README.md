@@ -5,7 +5,7 @@
 [![Dart 3.13](https://img.shields.io/badge/Dart-3.13-0175C2?logo=dart&logoColor=white)](pubspec.yaml)
 [![Serverpod Cloud](https://img.shields.io/badge/Backend-Serverpod_Cloud-6C5CE7)](backend/scloud.yaml)
 [![AWS S3](https://img.shields.io/badge/File_storage-AWS_S3-569A31)](backend/lib/src/files/file_storage.dart)
-[![macOS preview](https://img.shields.io/badge/Download-macOS_preview-2D2D2B?logo=apple&logoColor=white)](https://github.com/victorbash400/garden/releases/tag/v0.1.0-preview.2)
+[![macOS preview](https://img.shields.io/badge/Download-macOS_preview-2D2D2B?logo=apple&logoColor=white)](https://github.com/victorbash400/garden/releases/tag/v0.1.0-preview.3)
 
 Creators, researchers and teams can work with datasets and file collections larger than the storage available on their computers. Downloading those files before opening them, or synchronizing a full folder locally, consumes disk space and delays access. Using several computers means maintaining more local copies or transferring the data again when you change devices.
 
@@ -28,8 +28,6 @@ The mounted Resolve workflow has been tested through importing MP4 media, cuttin
 A shared drive keeps the working files in one location while teammates use their own applications. Access is granted through an email-bound invitation that becomes a persisted Serverpod membership after acceptance. File-linked conversations keep discussion attached to the work. The invitation and update flows below show how Garden coordinates that access.
 
 ## Architecture
-
-See [architecture.md](architecture.md) for the complete system diagrams, Serverpod feature map and implementation flows.
 
 ```mermaid
 flowchart TD
@@ -175,13 +173,13 @@ This reduces unnecessary transfers, but applications that scan every byte can st
 
 ## Install the preview
 
-1. Download the [macOS DMG](https://github.com/victorbash400/garden/releases/tag/v0.1.0-preview.2) and move Garden to Applications.
+1. Download the [macOS DMG](https://github.com/victorbash400/garden/releases/tag/v0.1.0-preview.3) and move Garden to Applications.
 2. If macOS blocks the preview, follow [manual approval instructions](release/INSTALL.txt). It is not notarized.
 3. Create an account and enter the verification code delivered to your email.
 4. Follow the setup checklist. Finder drives require **macOS 15.4+** and [macFUSE](https://macfuse.io/), with its File System Extension and Garden background activity approved. Garden shows macFUSE installation and Finder connection status.
 5. Create a drive, import a file and open it from Finder. Save back to the mounted drive.
 
-The download connects to the hosted backend. Flutter, Xcode and a local server are not needed to use it. See [release validation](release/RELEASE.md) for the installed signup, mounted-save and logout checks. First-time extension approval on a second clean Mac remains unverified.
+The download connects to the hosted backend. Flutter, Xcode and a local server are not needed to use it. First-time extension approval on a second clean Mac remains unverified.
 
 ## Run from source
 
